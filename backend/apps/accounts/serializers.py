@@ -1,0 +1,239 @@
+from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+import re
+
+from .models import User, SystemMessage, AppVersion
+
+
+class UserRegisterSerializer(serializers.Serializer):
+    """سریالایزر ثبت‌نام کاربر"""
+    phone_number = serializers.CharField(max_length=15)
+    password = serializers.CharField(write_only=True, min_length=6)
+    first_name = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    email = serializers.EmailField(required=False, allow_blank=True)
+
+    def validate_phone_number(self, value):
+        # اعتبارسنجی شماره تلفن ایران
+        pattern = r'^09\d{9}$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError('شماره تلفن باید با 09 شروع شده و 11 رقم باشد')
+        return value
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
+        return value
+
+
+class VerifyCodeSerializer(serializers.Serializer):
+    """سریالایزر تایید کد"""
+    phone_number = serializers.CharField(max_length=15)
+    code = serializers.CharField(max_length=10)
+
+    def validate_phone_number(self, value):
+        pattern = r'^09\d{9}$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError('شماره تلفن نامعتبر است')
+        return value
+
+    def validate_code(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError('کد تایید باید عددی باشد')
+        return value
+
+
+class UserLoginSerializer(serializers.Serializer):
+    """سریالایزر ورود کاربر"""
+    phone_number = serializers.CharField(max_length=15)
+    password = serializers.CharField(write_only=True)
+
+    def validate_phone_number(self, value):
+        pattern = r'^09\d{9}$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError('شماره تلفن نامعتبر است')
+        return value
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """سریالایزر پروفایل کاربر برای نمایش"""
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'phone_number', 'first_name', 'last_name', 'full_name',
+            'email', 'is_verified', 'is_admin', 'is_active',
+            'created_at', 'last_login'
+        ]
+
+    def get_full_name(self, obj):
+        return obj.get_full_name()
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """سریالایزر به‌روزرسانی پروفایل کاربر"""
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+    def validate_email(self, value):
+        if value and User.objects.filter(email=value).exclude(id=self.instance.id).exists():
+            raise serializers.ValidationError('این ایمیل قبلاً ثبت شده است')
+        return value
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """سریالایزر کامل کاربر با اطلاعات اشتراک"""
+    full_name = serializers.SerializerMethodField()
+    subscription_status = serializers.SerializerMethodField()
+    remaining_trades = serializers.SerializerMethodField()
+    subscription_expiry = serializers.SerializerMethodField()
+    remaining_days = serializers.SerializerMethodField()
+    plan_name = serializers.SerializerMethodField()
+    plan_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'phone_number', 'first_name', 'last_name', 'full_name',
+            'email', 'is_verified', 'is_admin', 'is_active',
+            'created_at', 'last_login',
+            'subscription_status', 'remaining_trades',
+            'subscription_expiry', 'remaining_days',
+            'plan_name', 'plan_type'
+        ]
+
+    def get_full_name(self, obj):
+        return obj.get_full_name()
+
+    def get_subscription_status(self, obj):
+        return obj.has_active_subscription()
+
+    def get_remaining_trades(self, obj):
+        return obj.get_remaining_trades()
+
+    def get_subscription_expiry(self, obj):
+        expiry = obj.get_subscription_expiry()
+        return expiry.isoformat() if expiry else None
+
+    def get_remaining_days(self, obj):
+        expiry = obj.get_subscription_expiry()
+        if expiry:
+            diff = expiry - timezone.now()
+            return max(0, diff.days)
+        return 0
+
+    def get_plan_name(self, obj):
+        subscription = obj.get_active_subscription()
+        return subscription.plan.plan_name if subscription else None
+
+    def get_plan_type(self, obj):
+        subscription = obj.get_active_subscription()
+        return subscription.plan.plan_type if subscription else None
+
+
+class SubscriptionStatusSerializer(serializers.Serializer):
+    """سریالایزر وضعیت اشتراک"""
+    has_subscription = serializers.BooleanField()
+    plan_name = serializers.CharField(required=False, allow_null=True)
+    plan_type = serializers.CharField(required=False, allow_null=True)
+    start_date = serializers.DateTimeField(required=False, allow_null=True)
+    end_date = serializers.DateTimeField(required=False, allow_null=True)
+    remaining_days = serializers.IntegerField(required=False)
+    remaining_trades = serializers.IntegerField(required=False)
+    trades_limit = serializers.IntegerField(required=False)
+    trades_used = serializers.IntegerField(required=False)
+    is_trial = serializers.BooleanField(required=False)
+    expired = serializers.BooleanField(required=False)
+    message = serializers.CharField(required=False, allow_blank=True)
+
+
+class SystemMessageSerializer(serializers.ModelSerializer):
+    """سریالایزر پیام سیستم"""
+
+    class Meta:
+        model = SystemMessage
+        fields = ['id', 'message_key', 'title', 'message', 'is_active', 'start_date', 'end_date', 'created_at']
+
+
+class AppVersionSerializer(serializers.ModelSerializer):
+    """سریالایزر نسخه نرم‌افزار"""
+
+    class Meta:
+        model = AppVersion
+        fields = ['id', 'version_number', 'release_date', 'release_notes', 'is_current', 'created_at']
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """سریالایزر تغییر رمز عبور"""
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=6)
+    confirm_password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_old_password(self, value):
+        user = self.context.get('user')
+        if not user or not user.check_password(value):
+            raise serializers.ValidationError('رمز عبور فعلی صحیح نیست')
+        return value
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({'confirm_password': 'رمز عبور جدید و تایید آن مطابقت ندارند'})
+
+        try:
+            validate_password(data['new_password'])
+        except ValidationError as e:
+            raise serializers.ValidationError({'new_password': e.messages})
+
+        return data
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    """سریالایزر فراموشی رمز عبور"""
+    phone_number = serializers.CharField(max_length=15)
+
+    def validate_phone_number(self, value):
+        pattern = r'^09\d{9}$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError('شماره تلفن نامعتبر است')
+
+        if not User.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError('کاربری با این شماره تلفن یافت نشد')
+
+        return value
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """سریالایزر بازنشانی رمز عبور"""
+    phone_number = serializers.CharField(max_length=15)
+    code = serializers.CharField(max_length=10)
+    new_password = serializers.CharField(write_only=True, min_length=6)
+    confirm_password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_phone_number(self, value):
+        pattern = r'^09\d{9}$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError('شماره تلفن نامعتبر است')
+        return value
+
+    def validate_code(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError('کد تایید باید عددی باشد')
+        return value
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({'confirm_password': 'رمز عبور جدید و تایید آن مطابقت ندارند'})
+
+        try:
+            validate_password(data['new_password'])
+        except ValidationError as e:
+            raise serializers.ValidationError({'new_password': e.messages})
+
+        return data

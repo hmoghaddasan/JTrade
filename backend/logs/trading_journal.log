@@ -1,0 +1,966 @@
+INFO 2026-07-10 02:16:15,213 autoreload 21124 15628 Watching for file changes with StatReloader
+INFO 2026-07-10 02:17:48,035 autoreload 21124 15628 C:\Trade_Journal\backend\trading_journal\wsgi.py changed, reloading.
+INFO 2026-07-10 02:17:50,773 autoreload 2480 17044 Watching for file changes with StatReloader
+INFO 2026-07-10 02:18:38,288 autoreload 2480 17044 C:\Trade_Journal\backend\trading_journal\__init__.py changed, reloading.
+INFO 2026-07-10 02:18:40,957 autoreload 11296 4656 Watching for file changes with StatReloader
+INFO 2026-07-10 02:19:08,954 autoreload 11296 4656 C:\Trade_Journal\backend\trading_journal\urls.py changed, reloading.
+INFO 2026-07-10 02:19:12,305 autoreload 16904 4188 Watching for file changes with StatReloader
+INFO 2026-07-10 02:19:26,738 autoreload 16904 4188 C:\Trade_Journal\backend\manage.py changed, reloading.
+INFO 2026-07-10 02:19:30,173 autoreload 23896 16708 Watching for file changes with StatReloader
+INFO 2026-07-10 02:21:50,549 autoreload 23896 16708 C:\Trade_Journal\backend\trading_journal\settings.py changed, reloading.
+INFO 2026-07-10 02:21:53,275 autoreload 22672 14292 Watching for file changes with StatReloader
+INFO 2026-07-10 02:22:47,497 autoreload 20556 24116 Watching for file changes with StatReloader
+WARNING 2026-07-10 02:23:14,275 log 20556 21564 Not Found: /
+WARNING 2026-07-10 02:23:14,290 basehttp 20556 21564 "GET / HTTP/1.1" 404 3382
+WARNING 2026-07-10 02:23:14,980 log 20556 21564 Not Found: /favicon.ico
+WARNING 2026-07-10 02:23:14,995 basehttp 20556 21564 "GET /favicon.ico HTTP/1.1" 404 3433
+WARNING 2026-07-10 02:36:38,727 log 20556 20324 Not Found: /
+WARNING 2026-07-10 02:36:38,750 basehttp 20556 20324 "GET / HTTP/1.1" 404 3382
+WARNING 2026-07-10 02:36:39,455 log 20556 20324 Not Found: /favicon.ico
+WARNING 2026-07-10 02:36:39,459 basehttp 20556 20324 "GET /favicon.ico HTTP/1.1" 404 3433
+INFO 2026-07-10 02:37:31,540 basehttp 20556 20324 "GET /admin HTTP/1.1" 301 0
+INFO 2026-07-10 02:37:31,772 basehttp 20556 20324 "GET /admin/ HTTP/1.1" 302 0
+INFO 2026-07-10 02:37:31,880 basehttp 20556 20324 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 2405
+INFO 2026-07-10 02:37:32,584 basehttp 20556 20324 "GET /static/admin/css/base.css HTTP/1.1" 200 19513
+INFO 2026-07-10 02:37:32,617 basehttp 20556 20324 "GET /static/admin/css/responsive_rtl.css HTTP/1.1" 200 1741
+INFO 2026-07-10 02:37:32,779 basehttp 20556 21748 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2271
+INFO 2026-07-10 02:37:32,844 basehttp 20556 21748 "GET /static/admin/css/fonts.css HTTP/1.1" 200 423
+INFO 2026-07-10 02:37:32,859 basehttp 20556 12460 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 1360
+INFO 2026-07-10 02:37:32,877 basehttp 20556 10408 "GET /static/admin/css/login.css HTTP/1.1" 200 939
+INFO 2026-07-10 02:37:32,909 basehttp 20556 20452 "GET /static/admin/css/rtl.css HTTP/1.1" 200 3234
+INFO 2026-07-10 02:37:32,917 basehttp 20556 22704 "GET /static/admin/css/responsive.css HTTP/1.1" 200 18545
+INFO 2026-07-10 02:37:32,976 basehttp 20556 22704 "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 200 85876
+INFO 2026-07-10 02:37:32,987 basehttp 20556 20452 "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 200 85692
+WARNING 2026-07-10 02:37:33,031 log 20556 22704 Not Found: /favicon.ico
+WARNING 2026-07-10 02:37:33,035 basehttp 20556 22704 "GET /favicon.ico HTTP/1.1" 404 3433
+INFO 2026-07-10 02:38:01,907 basehttp 20556 22704 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+ERROR 2026-07-10 02:38:01,995 log 20556 22704 Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:38:02,005 basehttp 20556 22704 "GET /admin/ HTTP/1.1" 500 79287
+ERROR 2026-07-10 02:38:02,497 log 20556 22704 Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:38:02,508 basehttp 20556 22704 "GET /favicon.ico HTTP/1.1" 500 79040
+ERROR 2026-07-10 02:51:32,022 log 20556 17416 Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:51:32,030 basehttp 20556 17416 "GET /favicon.ico HTTP/1.1" 500 79584
+ERROR 2026-07-10 02:51:58,008 log 20556 528 Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:51:58,018 basehttp 20556 528 "GET / HTTP/1.1" 500 79063
+INFO 2026-07-10 02:52:03,539 basehttp 20556 528 "GET /admin HTTP/1.1" 301 0
+ERROR 2026-07-10 02:52:03,664 log 20556 528 Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:52:03,674 basehttp 20556 528 "GET /admin/ HTTP/1.1" 500 79111
+ERROR 2026-07-10 02:52:09,171 log 20556 528 Internal Server Error: /swagger/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:52:09,178 basehttp 20556 528 "GET /swagger/ HTTP/1.1" 500 79135
+ERROR 2026-07-10 02:52:12,109 log 20556 528 Internal Server Error: /redoc/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 76, in __call__
+    if request.user.is_authenticated and not request.user.is_admin:
+                                             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 247, in inner
+    return func(self._wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'is_admin'
+ERROR 2026-07-10 02:52:12,117 basehttp 20556 528 "GET /redoc/ HTTP/1.1" 500 79117
+INFO 2026-07-10 02:57:38,039 autoreload 20556 24116 C:\Trade_Journal\backend\apps\accounts\middleware.py changed, reloading.
+INFO 2026-07-10 02:57:45,440 autoreload 13008 4156 Watching for file changes with StatReloader
+INFO 2026-07-10 03:00:33,671 autoreload 13008 4156 C:\Trade_Journal\backend\trading_journal\settings.py changed, reloading.
+INFO 2026-07-10 03:00:37,353 autoreload 14004 7104 Watching for file changes with StatReloader
+INFO 2026-07-10 03:00:59,433 autoreload 14004 7104 C:\Trade_Journal\backend\apps\accounts\models.py changed, reloading.
+INFO 2026-07-10 03:01:02,610 autoreload 10672 19620 Watching for file changes with StatReloader
+INFO 2026-07-10 03:03:10,793 autoreload 15780 20452 Watching for file changes with StatReloader
+INFO 2026-07-10 03:09:10,874 autoreload 10796 14912 Watching for file changes with StatReloader
+ERROR 2026-07-10 03:09:26,860 log 10796 9428 Internal Server Error: /redoc/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 73, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 286, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'users.password' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 171, in _get_response
+    response = middleware_method(request, callback, callback_args, callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 32, in process_view
+    if hasattr(request, 'user') and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 246, in inner
+    self._setup()
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 382, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 23, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 11, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 184, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 431, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 262, in __len__
+    self._fetch_all()
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1324, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 51, in __iter__
+    results = compiler.execute_sql(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1175, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 98, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 66, in execute
+    return self._execute_with_wrappers(sql, params, many=False, executor=self._execute)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 75, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\utils.py", line 90, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 73, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 286, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'users.password' in 'field list'")
+ERROR 2026-07-10 03:09:26,995 basehttp 10796 9428 "GET /redoc/ HTTP/1.1" 500 202607
+ERROR 2026-07-10 03:09:33,258 log 10796 9428 Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 73, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 286, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'users.password' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 171, in _get_response
+    response = middleware_method(request, callback, callback_args, callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\accounts\middleware.py", line 32, in process_view
+    if hasattr(request, 'user') and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 246, in inner
+    self._setup()
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\utils\functional.py", line 382, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 23, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 11, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 184, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 431, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 262, in __len__
+    self._fetch_all()
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1324, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 51, in __iter__
+    results = compiler.execute_sql(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1175, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 98, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 66, in execute
+    return self._execute_with_wrappers(sql, params, many=False, executor=self._execute)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 75, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\utils.py", line 90, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 73, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 286, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'users.password' in 'field list'")
+ERROR 2026-07-10 03:09:33,288 basehttp 10796 9428 "GET /admin/ HTTP/1.1" 500 202549
+INFO 2026-07-10 09:08:54,471 autoreload 4668 21508 Watching for file changes with StatReloader
+INFO 2026-07-10 09:12:12,500 basehttp 4668 20308 "GET /admin/ HTTP/1.1" 302 0
+INFO 2026-07-10 09:12:12,635 basehttp 4668 20308 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 2112
+INFO 2026-07-10 09:12:13,175 basehttp 4668 5712 "GET /static/admin/css/login.css HTTP/1.1" 200 1233
+INFO 2026-07-10 09:12:13,280 basehttp 4668 21704 "GET /static/admin/css/rtl.css HTTP/1.1" 200 3808
+INFO 2026-07-10 09:12:13,325 basehttp 4668 20308 "GET /static/admin/css/base.css HTTP/1.1" 200 16378
+INFO 2026-07-10 09:12:13,340 basehttp 4668 17656 "GET /static/admin/css/responsive.css HTTP/1.1" 200 18052
+INFO 2026-07-10 09:12:13,370 basehttp 4668 21264 "GET /static/admin/css/responsive_rtl.css HTTP/1.1" 200 1921
+INFO 2026-07-10 09:12:13,385 basehttp 4668 17656 "GET /static/admin/css/fonts.css HTTP/1.1" 200 423
+WARNING 2026-07-10 09:12:13,430 log 4668 17656 Not Found: /favicon.ico
+WARNING 2026-07-10 09:12:13,430 basehttp 4668 17656 "GET /favicon.ico HTTP/1.1" 404 3295
+INFO 2026-07-10 09:12:13,490 basehttp 4668 21704 "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 200 85692
+INFO 2026-07-10 09:12:13,508 basehttp 4668 17656 "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 200 85876
+INFO 2026-07-10 09:12:30,969 basehttp 4668 17656 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2026-07-10 09:12:31,014 basehttp 4668 17656 "GET /admin/ HTTP/1.1" 200 10985
+INFO 2026-07-10 09:12:31,134 basehttp 4668 17656 "GET /static/admin/css/dashboard.css HTTP/1.1" 200 412
+INFO 2026-07-10 09:12:31,269 basehttp 4668 17656 "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 200 86184
+INFO 2026-07-10 09:12:31,284 basehttp 4668 21704 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2026-07-10 09:12:31,284 basehttp 4668 21264 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+INFO 2026-07-10 09:12:44,020 basehttp 4668 17656 "GET /admin/subscriptions/usersubscription/ HTTP/1.1" 200 5199
+INFO 2026-07-10 09:12:44,135 basehttp 4668 17656 "GET /static/admin/css/changelists.css HTTP/1.1" 200 6190
+INFO 2026-07-10 09:12:44,140 basehttp 4668 21704 "GET /admin/jsi18n/ HTTP/1.1" 200 11549
+INFO 2026-07-10 09:12:44,140 basehttp 4668 5712 "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 363
+INFO 2026-07-10 09:12:44,155 basehttp 4668 20308 "GET /static/admin/js/core.js HTTP/1.1" 200 5723
+INFO 2026-07-10 09:12:44,200 basehttp 4668 4744 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 6918
+INFO 2026-07-10 09:12:44,215 basehttp 4668 21264 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 287630
+INFO 2026-07-10 09:12:44,236 basehttp 4668 17656 "GET /static/admin/js/actions.js HTTP/1.1" 200 6766
+INFO 2026-07-10 09:12:44,246 basehttp 4668 5712 "GET /static/admin/js/urlify.js HTTP/1.1" 200 8941
+INFO 2026-07-10 09:12:44,276 basehttp 4668 21704 "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1530
+INFO 2026-07-10 09:12:44,306 basehttp 4668 20308 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 128820
+INFO 2026-07-10 09:12:44,321 basehttp 4668 21264 "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+INFO 2026-07-10 09:12:44,561 basehttp 4668 21264 "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+INFO 2026-07-10 09:12:54,787 basehttp 4668 21264 "GET /admin/ HTTP/1.1" 200 10985
+INFO 2026-07-10 09:13:04,090 basehttp 4668 21264 "GET /admin/subscriptions/discountcode/ HTTP/1.1" 200 4277
+INFO 2026-07-10 09:13:04,180 basehttp 4668 21264 "GET /admin/jsi18n/ HTTP/1.1" 200 11549
+INFO 2026-07-10 09:13:08,290 basehttp 4668 21264 "GET /admin/ HTTP/1.1" 200 10985
+INFO 2026-07-10 09:13:10,721 basehttp 4668 21264 "GET /admin/auth/group/ HTTP/1.1" 200 3844
+INFO 2026-07-10 09:13:10,826 basehttp 4668 21264 "GET /admin/jsi18n/ HTTP/1.1" 200 11549
+INFO 2026-07-10 09:13:13,186 basehttp 4668 21264 "GET /admin/ HTTP/1.1" 200 10985
+WARNING 2026-07-10 09:17:30,053 log 4668 8976 Not Found: /favicon.ico
+WARNING 2026-07-10 09:17:30,068 basehttp 4668 8976 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:17:37,626 log 4668 17264 Not Found: /
+WARNING 2026-07-10 09:17:37,638 basehttp 4668 17264 "GET / HTTP/1.1" 404 3244
+INFO 2026-07-10 09:18:05,310 basehttp 4668 17264 "GET /admin HTTP/1.1" 301 0
+INFO 2026-07-10 09:18:05,400 basehttp 4668 17264 "GET /admin/ HTTP/1.1" 200 10985
+INFO 2026-07-10 09:18:09,429 basehttp 4668 17264 "GET /swagger/ HTTP/1.1" 200 2168
+INFO 2026-07-10 09:18:09,519 basehttp 4668 17264 "GET /static/drf-yasg/style.css HTTP/1.1" 200 1187
+INFO 2026-07-10 09:18:09,579 basehttp 4668 9856 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui.css HTTP/1.1" 200 177183
+INFO 2026-07-10 09:18:09,594 basehttp 4668 17264 "GET /static/drf-yasg/swagger-ui-init.js HTTP/1.1" 200 15480
+INFO 2026-07-10 09:18:09,674 basehttp 4668 2308 "GET /static/drf-yasg/insQ.min.js HTTP/1.1" 200 2093
+INFO 2026-07-10 09:18:09,699 basehttp 4668 9584 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui-standalone-preset.js HTTP/1.1" 200 252451
+INFO 2026-07-10 09:18:09,774 basehttp 4668 19852 "GET /static/drf-yasg/immutable.min.js HTTP/1.1" 200 56904
+INFO 2026-07-10 09:18:09,849 basehttp 4668 22664 "GET /static/drf-yasg/swagger-ui-dist/swagger-ui-bundle.js HTTP/1.1" 200 1510271
+INFO 2026-07-10 09:18:10,584 basehttp 4668 22664 "GET /static/drf-yasg/swagger-ui-dist/favicon-32x32.png HTTP/1.1" 200 628
+INFO 2026-07-10 09:18:11,229 basehttp 4668 22664 "GET /swagger/?format=openapi HTTP/1.1" 200 77022
+INFO 2026-07-10 09:18:23,906 basehttp 4668 22664 "GET /redoc/ HTTP/1.1" 200 965
+INFO 2026-07-10 09:18:23,982 basehttp 4668 22664 "GET /static/drf-yasg/redoc-init.js HTTP/1.1" 200 2566
+INFO 2026-07-10 09:18:24,192 basehttp 4668 9584 "GET /static/drf-yasg/redoc/redoc.min.js HTTP/1.1" 200 1042511
+INFO 2026-07-10 09:18:24,777 basehttp 4668 9584 "GET /static/drf-yasg/redoc/redoc-logo.png HTTP/1.1" 200 4969
+INFO 2026-07-10 09:18:25,032 basehttp 4668 22664 "GET /redoc/?format=openapi HTTP/1.1" 200 77022
+WARNING 2026-07-10 09:30:53,189 log 4668 23316 Not Found: /
+WARNING 2026-07-10 09:30:53,205 basehttp 4668 23316 "GET / HTTP/1.1" 404 3244
+WARNING 2026-07-10 09:30:58,216 log 4668 23316 Not Found: /favicon.ico
+WARNING 2026-07-10 09:30:58,218 basehttp 4668 23316 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:30:58,367 log 4668 23316 Not Found: /favicon.ico
+WARNING 2026-07-10 09:30:58,369 basehttp 4668 23316 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:33:07,557 log 4668 23724 Not Found: /favicon.ico
+WARNING 2026-07-10 09:33:07,587 log 4668 18260 Not Found: /logo192.png
+WARNING 2026-07-10 09:33:07,587 basehttp 4668 23724 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:33:07,587 basehttp 4668 18260 "GET /logo192.png HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:45:52,792 log 4668 6388 Not Found: /favicon.ico
+WARNING 2026-07-10 09:45:52,792 basehttp 4668 6388 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:47:40,120 log 4668 7392 Not Found: /main.2d24c0f9f286fac1155f.hot-update.json
+WARNING 2026-07-10 09:47:40,127 basehttp 4668 7392 "GET /main.2d24c0f9f286fac1155f.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 09:47:40,155 log 4668 5824 Not Found: /main.2339ef3b7917414ec674.hot-update.json
+WARNING 2026-07-10 09:47:40,158 basehttp 4668 5824 "GET /main.2339ef3b7917414ec674.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 09:47:40,418 log 4668 8920 Not Found: /main.2339ef3b7917414ec674.hot-update.json
+WARNING 2026-07-10 09:47:40,573 basehttp 4668 8920 "GET /main.2339ef3b7917414ec674.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 09:47:41,588 log 4668 21532 Not Found: /favicon.ico
+WARNING 2026-07-10 09:47:41,591 basehttp 4668 21532 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:47:42,057 log 4668 10840 Not Found: /favicon.ico
+WARNING 2026-07-10 09:47:42,061 log 4668 20888 Not Found: /favicon.ico
+WARNING 2026-07-10 09:47:42,062 basehttp 4668 10840 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:47:42,063 basehttp 4668 20888 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:47:42,169 log 4668 11276 Not Found: /favicon.ico
+WARNING 2026-07-10 09:47:42,171 basehttp 4668 11276 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:47:51,444 log 4668 24244 Not Found: /favicon.ico
+WARNING 2026-07-10 09:47:51,444 basehttp 4668 24244 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:47:56,930 log 4668 8952 Not Found: /favicon.ico
+WARNING 2026-07-10 09:47:56,930 basehttp 4668 8952 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:48:31,595 log 4668 14532 Not Found: /favicon.ico
+WARNING 2026-07-10 09:48:31,595 basehttp 4668 14532 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:50:51,901 log 4668 12988 Not Found: /favicon.ico
+WARNING 2026-07-10 09:50:51,905 basehttp 4668 12988 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:56:42,857 log 4668 23604 Not Found: /favicon.ico
+WARNING 2026-07-10 09:56:42,857 basehttp 4668 23604 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 09:58:23,386 log 4668 23228 Not Found: /installHook.js.map
+WARNING 2026-07-10 09:58:23,416 basehttp 4668 23228 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 09:58:23,416 log 4668 23488 Not Found: /main.b797cbdcae0beb33f66b.hot-update.js.map
+WARNING 2026-07-10 09:58:23,416 basehttp 4668 23488 "GET /main.b797cbdcae0beb33f66b.hot-update.js.map HTTP/1.1" 404 3391
+WARNING 2026-07-10 10:01:00,602 log 4668 17116 Not Found: /main.9c69877c4320cb8ef31b.hot-update.json
+WARNING 2026-07-10 10:01:00,612 basehttp 4668 17116 "GET /main.9c69877c4320cb8ef31b.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:01:03,483 log 4668 23076 Not Found: /favicon.ico
+WARNING 2026-07-10 10:01:03,533 basehttp 4668 23076 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:01:04,083 log 4668 16748 Not Found: /favicon.ico
+WARNING 2026-07-10 10:01:04,083 basehttp 4668 16748 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:02:19,797 log 4668 21056 Not Found: /main.67fa17abc4ce11fa87e0.hot-update.json
+WARNING 2026-07-10 10:02:19,812 basehttp 4668 21056 "GET /main.67fa17abc4ce11fa87e0.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:02:19,857 log 4668 23232 Not Found: /main.67fa17abc4ce11fa87e0.hot-update.json
+WARNING 2026-07-10 10:02:19,872 basehttp 4668 23232 "GET /main.67fa17abc4ce11fa87e0.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:02:21,852 log 4668 18800 Not Found: /favicon.ico
+WARNING 2026-07-10 10:02:21,852 basehttp 4668 18800 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:02:22,662 log 4668 7512 Not Found: /favicon.ico
+WARNING 2026-07-10 10:02:22,662 basehttp 4668 7512 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:02:22,677 log 4668 2800 Not Found: /favicon.ico
+WARNING 2026-07-10 10:02:22,689 basehttp 4668 2800 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:02:28,940 log 4668 9744 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:02:28,955 basehttp 4668 9744 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:04:35,747 log 4668 13452 Not Found: /main.5fee1c9f1ee4ffe4e4c3.hot-update.json
+WARNING 2026-07-10 10:04:35,747 basehttp 4668 13452 "GET /main.5fee1c9f1ee4ffe4e4c3.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:04:35,912 log 4668 11764 Not Found: /main.5fee1c9f1ee4ffe4e4c3.hot-update.json
+WARNING 2026-07-10 10:04:35,912 basehttp 4668 11764 "GET /main.5fee1c9f1ee4ffe4e4c3.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:04:35,927 log 4668 14812 Not Found: /main.5fee1c9f1ee4ffe4e4c3.hot-update.json
+WARNING 2026-07-10 10:04:35,942 basehttp 4668 14812 "GET /main.5fee1c9f1ee4ffe4e4c3.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:04:37,488 log 4668 6508 Not Found: /favicon.ico
+WARNING 2026-07-10 10:04:37,503 log 4668 14124 Not Found: /favicon.ico
+WARNING 2026-07-10 10:04:37,503 basehttp 4668 6508 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:04:37,518 log 4668 23308 Not Found: /favicon.ico
+WARNING 2026-07-10 10:04:37,518 basehttp 4668 14124 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:04:37,518 basehttp 4668 23308 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:08:18,045 log 4668 12596 Not Found: /main.b683ed0e568079bdf5f6.hot-update.json
+WARNING 2026-07-10 10:08:18,045 basehttp 4668 12596 "GET /main.b683ed0e568079bdf5f6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:08:18,120 log 4668 24428 Not Found: /main.b683ed0e568079bdf5f6.hot-update.json
+WARNING 2026-07-10 10:08:18,127 log 4668 5440 Not Found: /main.b683ed0e568079bdf5f6.hot-update.json
+WARNING 2026-07-10 10:08:18,135 log 4668 19280 Not Found: /main.b683ed0e568079bdf5f6.hot-update.json
+WARNING 2026-07-10 10:08:18,150 basehttp 4668 24428 "GET /main.b683ed0e568079bdf5f6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:08:18,150 basehttp 4668 5440 "GET /main.b683ed0e568079bdf5f6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:08:18,150 basehttp 4668 19280 "GET /main.b683ed0e568079bdf5f6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:08:20,610 log 4668 19900 Not Found: /favicon.ico
+WARNING 2026-07-10 10:08:20,610 basehttp 4668 19900 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:08:20,745 log 4668 11292 Not Found: /favicon.ico
+WARNING 2026-07-10 10:08:20,760 basehttp 4668 11292 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:08:20,835 log 4668 20496 Not Found: /favicon.ico
+WARNING 2026-07-10 10:08:20,835 log 4668 14408 Not Found: /favicon.ico
+WARNING 2026-07-10 10:08:20,850 basehttp 4668 20496 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:08:20,850 basehttp 4668 14408 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:08:29,896 log 4668 24256 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:08:29,896 basehttp 4668 24256 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:08:34,392 log 4668 12820 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:08:34,392 basehttp 4668 12820 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:09:25,424 log 4668 18940 Not Found: /main.50cdb21e6fedece0fd2c.hot-update.json
+WARNING 2026-07-10 10:09:25,428 basehttp 4668 18940 "GET /main.50cdb21e6fedece0fd2c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:09:25,954 log 4668 9432 Not Found: /favicon.ico
+WARNING 2026-07-10 10:09:25,960 basehttp 4668 9432 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:09:26,701 log 4668 24384 Not Found: /favicon.ico
+WARNING 2026-07-10 10:09:26,703 basehttp 4668 24384 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:14:29,314 log 4668 3272 Not Found: /favicon.ico
+WARNING 2026-07-10 10:14:29,329 basehttp 4668 3272 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:19:41,924 log 4668 21008 Not Found: /favicon.ico
+WARNING 2026-07-10 10:19:41,924 basehttp 4668 21008 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:22:58,507 log 4668 7296 Not Found: /main.6c6cfac01b0cf2e30c22.hot-update.json
+WARNING 2026-07-10 10:22:58,522 basehttp 4668 7296 "GET /main.6c6cfac01b0cf2e30c22.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:22:58,732 log 4668 5280 Not Found: /main.6c6cfac01b0cf2e30c22.hot-update.json
+WARNING 2026-07-10 10:22:58,747 basehttp 4668 5280 "GET /main.6c6cfac01b0cf2e30c22.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:22:58,747 log 4668 5364 Not Found: /main.6c6cfac01b0cf2e30c22.hot-update.json
+WARNING 2026-07-10 10:22:58,762 log 4668 9856 Not Found: /main.6c6cfac01b0cf2e30c22.hot-update.json
+WARNING 2026-07-10 10:22:58,852 basehttp 4668 5364 "GET /main.6c6cfac01b0cf2e30c22.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:22:58,927 basehttp 4668 9856 "GET /main.6c6cfac01b0cf2e30c22.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:23:00,577 log 4668 8376 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:00,622 basehttp 4668 8376 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:00,892 log 4668 11904 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:00,907 log 4668 12040 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:00,907 log 4668 21452 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:00,922 basehttp 4668 11904 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:00,937 basehttp 4668 12040 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:00,967 basehttp 4668 21452 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:01,417 log 4668 15472 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:01,417 basehttp 4668 15472 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:16,282 log 4668 21424 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:23:16,286 basehttp 4668 21424 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:23:30,893 log 4668 5752 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:30,903 basehttp 4668 5752 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:40,204 log 4668 18428 Not Found: /favicon.ico
+WARNING 2026-07-10 10:23:40,204 basehttp 4668 18428 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:23:47,380 log 4668 2160 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:23:47,403 basehttp 4668 2160 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:24:01,849 log 4668 20528 Not Found: /favicon.ico
+WARNING 2026-07-10 10:24:01,849 basehttp 4668 20528 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:24:10,114 log 4668 2596 Not Found: /favicon.ico
+WARNING 2026-07-10 10:24:10,114 basehttp 4668 2596 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:27:32,683 log 4668 4200 Not Found: /main.9be03e995c1f540e71da.hot-update.json
+WARNING 2026-07-10 10:27:32,683 basehttp 4668 4200 "GET /main.9be03e995c1f540e71da.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:27:32,803 log 4668 6556 Not Found: /main.9be03e995c1f540e71da.hot-update.json
+WARNING 2026-07-10 10:27:32,803 log 4668 8432 Not Found: /main.9be03e995c1f540e71da.hot-update.json
+WARNING 2026-07-10 10:27:32,818 basehttp 4668 6556 "GET /main.9be03e995c1f540e71da.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:27:32,818 basehttp 4668 8432 "GET /main.9be03e995c1f540e71da.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:27:34,574 log 4668 4688 Not Found: /favicon.ico
+WARNING 2026-07-10 10:27:34,589 log 4668 18884 Not Found: /favicon.ico
+WARNING 2026-07-10 10:27:34,589 log 4668 24472 Not Found: /favicon.ico
+WARNING 2026-07-10 10:27:34,589 basehttp 4668 18884 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:27:34,589 basehttp 4668 4688 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:27:34,604 log 4668 3872 Not Found: /favicon.ico
+WARNING 2026-07-10 10:27:34,604 basehttp 4668 24472 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:27:34,619 basehttp 4668 3872 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:30:27,680 log 4668 2708 Not Found: /favicon.ico
+WARNING 2026-07-10 10:30:27,683 basehttp 4668 2708 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:30:36,281 log 4668 18504 Not Found: /main.57444cd01e996cfaf2ff.hot-update.json
+WARNING 2026-07-10 10:30:36,283 basehttp 4668 18504 "GET /main.57444cd01e996cfaf2ff.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:30:36,380 log 4668 17600 Not Found: /main.57444cd01e996cfaf2ff.hot-update.json
+WARNING 2026-07-10 10:30:36,382 basehttp 4668 17600 "GET /main.57444cd01e996cfaf2ff.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:30:37,280 log 4668 14808 Not Found: /favicon.ico
+WARNING 2026-07-10 10:30:37,287 basehttp 4668 14808 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:30:37,337 log 4668 8516 Not Found: /favicon.ico
+WARNING 2026-07-10 10:30:37,341 basehttp 4668 8516 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:36:03,764 log 4668 16556 Not Found: /main.f3fe460581164a47494c.hot-update.json
+WARNING 2026-07-10 10:36:03,787 basehttp 4668 16556 "GET /main.f3fe460581164a47494c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:36:03,969 log 4668 16632 Not Found: /main.f3fe460581164a47494c.hot-update.json
+WARNING 2026-07-10 10:36:03,973 basehttp 4668 16632 "GET /main.f3fe460581164a47494c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:36:04,090 log 4668 24140 Not Found: /main.f3fe460581164a47494c.hot-update.json
+WARNING 2026-07-10 10:36:04,172 basehttp 4668 24140 "GET /main.f3fe460581164a47494c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:36:05,772 log 4668 932 Not Found: /favicon.ico
+WARNING 2026-07-10 10:36:05,797 basehttp 4668 932 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:36:06,027 log 4668 604 Not Found: /favicon.ico
+WARNING 2026-07-10 10:36:06,032 log 4668 17880 Not Found: /favicon.ico
+WARNING 2026-07-10 10:36:06,035 basehttp 4668 604 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:36:06,063 basehttp 4668 17880 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:36:06,509 log 4668 17568 Not Found: /favicon.ico
+WARNING 2026-07-10 10:36:06,511 basehttp 4668 17568 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:36:54,465 log 4668 13816 Not Found: /favicon.ico
+WARNING 2026-07-10 10:36:54,467 basehttp 4668 13816 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:39:01,104 log 4668 18208 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:39:01,118 basehttp 4668 18208 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:39:19,164 log 4668 10812 Not Found: /installHook.js.map
+WARNING 2026-07-10 10:39:19,167 basehttp 4668 10812 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-10 10:41:32,268 log 4668 18880 Not Found: /favicon.ico
+WARNING 2026-07-10 10:41:32,272 basehttp 4668 18880 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:42:32,884 log 4668 13504 Not Found: /main.f080612e13e804dff06e.hot-update.json
+WARNING 2026-07-10 10:42:32,897 basehttp 4668 13504 "GET /main.f080612e13e804dff06e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:42:33,977 log 4668 11572 Not Found: /favicon.ico
+WARNING 2026-07-10 10:42:33,981 basehttp 4668 11572 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:42:34,078 log 4668 20628 Not Found: /favicon.ico
+WARNING 2026-07-10 10:42:34,081 basehttp 4668 20628 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:42:42,851 log 4668 22480 Not Found: /favicon.ico
+WARNING 2026-07-10 10:42:42,853 basehttp 4668 22480 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:42:44,829 log 4668 23044 Not Found: /favicon.ico
+WARNING 2026-07-10 10:42:44,840 basehttp 4668 23044 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:42:46,239 log 4668 776 Not Found: /favicon.ico
+WARNING 2026-07-10 10:42:46,242 basehttp 4668 776 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:44:32,523 log 4668 11696 Not Found: /main.552fffa71deb354a2ba6.hot-update.json
+WARNING 2026-07-10 10:44:32,527 basehttp 4668 11696 "GET /main.552fffa71deb354a2ba6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:44:32,631 log 4668 20560 Not Found: /main.552fffa71deb354a2ba6.hot-update.json
+WARNING 2026-07-10 10:44:32,639 basehttp 4668 20560 "GET /main.552fffa71deb354a2ba6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:44:33,839 log 4668 15284 Not Found: /favicon.ico
+WARNING 2026-07-10 10:44:33,849 basehttp 4668 15284 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:44:34,310 log 4668 17520 Not Found: /favicon.ico
+WARNING 2026-07-10 10:44:34,315 log 4668 22792 Not Found: /favicon.ico
+WARNING 2026-07-10 10:44:34,316 basehttp 4668 17520 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:44:34,318 basehttp 4668 22792 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:44:46,616 log 4668 20880 Not Found: /favicon.ico
+WARNING 2026-07-10 10:44:46,617 basehttp 4668 20880 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:47:20,451 log 4668 23376 Not Found: /main.01eb8a1074d8893b7720.hot-update.json
+WARNING 2026-07-10 10:47:20,465 basehttp 4668 23376 "GET /main.01eb8a1074d8893b7720.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:47:20,539 log 4668 7856 Not Found: /main.01eb8a1074d8893b7720.hot-update.json
+WARNING 2026-07-10 10:47:20,545 log 4668 16760 Not Found: /main.01eb8a1074d8893b7720.hot-update.json
+WARNING 2026-07-10 10:47:20,562 basehttp 4668 7856 "GET /main.01eb8a1074d8893b7720.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:47:20,587 basehttp 4668 16760 "GET /main.01eb8a1074d8893b7720.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 10:47:22,189 log 4668 6504 Not Found: /favicon.ico
+WARNING 2026-07-10 10:47:22,267 basehttp 4668 6504 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:47:22,611 log 4668 18364 Not Found: /favicon.ico
+WARNING 2026-07-10 10:47:22,626 basehttp 4668 18364 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:47:22,634 log 4668 8448 Not Found: /favicon.ico
+WARNING 2026-07-10 10:47:22,638 log 4668 17012 Not Found: /favicon.ico
+WARNING 2026-07-10 10:47:22,641 basehttp 4668 8448 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:47:22,643 basehttp 4668 17012 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:47:37,260 log 4668 2480 Not Found: /
+WARNING 2026-07-10 10:47:37,272 basehttp 4668 2480 "GET / HTTP/1.1" 404 3244
+WARNING 2026-07-10 10:47:44,313 log 4668 18644 Not Found: /favicon.ico
+WARNING 2026-07-10 10:47:44,316 basehttp 4668 18644 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 10:48:39,844 log 4668 19020 Not Found: /favicon.ico
+WARNING 2026-07-10 10:48:39,851 basehttp 4668 19020 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 12:53:51,140 log 4668 940 Not Found: /main.be7f4ec41125eeca9213.hot-update.json
+WARNING 2026-07-10 12:53:51,205 basehttp 4668 940 "GET /main.be7f4ec41125eeca9213.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 12:53:51,450 log 4668 17428 Not Found: /main.be7f4ec41125eeca9213.hot-update.json
+WARNING 2026-07-10 12:53:51,522 basehttp 4668 17428 "GET /main.be7f4ec41125eeca9213.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 12:53:52,882 log 4668 7368 Not Found: /favicon.ico
+WARNING 2026-07-10 12:53:52,926 basehttp 4668 7368 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 12:53:53,214 log 4668 11276 Not Found: /favicon.ico
+WARNING 2026-07-10 12:53:53,218 basehttp 4668 11276 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 12:53:53,455 log 4668 4648 Not Found: /favicon.ico
+WARNING 2026-07-10 12:53:53,468 basehttp 4668 4648 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:01:46,117 log 4668 20228 Not Found: /favicon.ico
+WARNING 2026-07-10 13:01:46,121 basehttp 4668 20228 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:04:00,826 log 4668 16460 Not Found: /main.2775bc02b54118a7f71e.hot-update.json
+WARNING 2026-07-10 13:04:00,829 basehttp 4668 16460 "GET /main.2775bc02b54118a7f71e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:04:01,658 log 4668 18728 Not Found: /favicon.ico
+WARNING 2026-07-10 13:04:01,662 basehttp 4668 18728 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:04:01,957 log 4668 21784 Not Found: /favicon.ico
+WARNING 2026-07-10 13:04:01,960 basehttp 4668 21784 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:04:27,423 log 4668 23412 Not Found: /main.c1b8d6557617f1f1ff12.hot-update.json
+WARNING 2026-07-10 13:04:27,430 basehttp 4668 23412 "GET /main.c1b8d6557617f1f1ff12.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:04:27,514 log 4668 21180 Not Found: /main.c1b8d6557617f1f1ff12.hot-update.json
+WARNING 2026-07-10 13:04:27,516 basehttp 4668 21180 "GET /main.c1b8d6557617f1f1ff12.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:04:28,832 log 4668 7412 Not Found: /favicon.ico
+WARNING 2026-07-10 13:04:28,835 basehttp 4668 7412 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:04:29,406 log 4668 19844 Not Found: /favicon.ico
+WARNING 2026-07-10 13:04:29,411 log 4668 17564 Not Found: /favicon.ico
+WARNING 2026-07-10 13:04:29,413 basehttp 4668 19844 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:04:29,420 basehttp 4668 17564 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:10:25,632 log 4668 24188 Not Found: /main.851d11f54ad61747c022.hot-update.json
+WARNING 2026-07-10 13:10:25,636 basehttp 4668 24188 "GET /main.851d11f54ad61747c022.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:10:25,853 log 4668 120 Not Found: /main.851d11f54ad61747c022.hot-update.json
+WARNING 2026-07-10 13:10:25,866 basehttp 4668 120 "GET /main.851d11f54ad61747c022.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:10:25,953 log 4668 20348 Not Found: /main.851d11f54ad61747c022.hot-update.json
+WARNING 2026-07-10 13:10:26,021 basehttp 4668 20348 "GET /main.851d11f54ad61747c022.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:10:27,614 log 4668 3244 Not Found: /favicon.ico
+WARNING 2026-07-10 13:10:27,620 basehttp 4668 3244 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:10:27,929 log 4668 23776 Not Found: /favicon.ico
+WARNING 2026-07-10 13:10:27,955 basehttp 4668 23776 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:10:28,346 log 4668 15008 Not Found: /favicon.ico
+WARNING 2026-07-10 13:10:28,351 log 4668 21968 Not Found: /favicon.ico
+WARNING 2026-07-10 13:10:28,352 basehttp 4668 15008 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:10:28,353 basehttp 4668 21968 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:12:09,980 log 4668 9712 Not Found: /main.b4c7501cda0eb959ad09.hot-update.json
+WARNING 2026-07-10 13:12:09,996 basehttp 4668 9712 "GET /main.b4c7501cda0eb959ad09.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:12:10,092 log 4668 18920 Not Found: /main.b4c7501cda0eb959ad09.hot-update.json
+WARNING 2026-07-10 13:12:10,126 basehttp 4668 18920 "GET /main.b4c7501cda0eb959ad09.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:12:10,173 log 4668 2816 Not Found: /main.b4c7501cda0eb959ad09.hot-update.json
+WARNING 2026-07-10 13:12:10,282 log 4668 7624 Not Found: /main.b4c7501cda0eb959ad09.hot-update.json
+WARNING 2026-07-10 13:12:10,306 basehttp 4668 2816 "GET /main.b4c7501cda0eb959ad09.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:12:10,416 basehttp 4668 7624 "GET /main.b4c7501cda0eb959ad09.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:12:11,721 log 4668 14636 Not Found: /favicon.ico
+WARNING 2026-07-10 13:12:11,725 basehttp 4668 14636 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:12:11,842 log 4668 11844 Not Found: /favicon.ico
+WARNING 2026-07-10 13:12:11,845 basehttp 4668 11844 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:12:13,143 log 4668 21124 Not Found: /favicon.ico
+WARNING 2026-07-10 13:12:13,151 basehttp 4668 21124 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:12:13,200 log 4668 24124 Not Found: /favicon.ico
+WARNING 2026-07-10 13:12:13,210 basehttp 4668 24124 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:12:13,270 log 4668 11696 Not Found: /favicon.ico
+WARNING 2026-07-10 13:12:13,274 basehttp 4668 11696 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:15:05,541 log 4668 5208 Not Found: /main.164286dcfa6ba9b4af30.hot-update.json
+WARNING 2026-07-10 13:15:05,583 basehttp 4668 5208 "GET /main.164286dcfa6ba9b4af30.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:15:05,729 log 4668 22024 Not Found: /main.164286dcfa6ba9b4af30.hot-update.json
+WARNING 2026-07-10 13:15:05,754 basehttp 4668 22024 "GET /main.164286dcfa6ba9b4af30.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:15:05,777 log 4668 2652 Not Found: /main.164286dcfa6ba9b4af30.hot-update.json
+WARNING 2026-07-10 13:15:05,793 log 4668 22936 Not Found: /main.164286dcfa6ba9b4af30.hot-update.json
+WARNING 2026-07-10 13:15:05,813 log 4668 5280 Not Found: /main.164286dcfa6ba9b4af30.hot-update.json
+WARNING 2026-07-10 13:15:05,817 basehttp 4668 2652 "GET /main.164286dcfa6ba9b4af30.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:15:05,828 basehttp 4668 22936 "GET /main.164286dcfa6ba9b4af30.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:15:05,829 basehttp 4668 5280 "GET /main.164286dcfa6ba9b4af30.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:15:08,303 log 4668 24432 Not Found: /favicon.ico
+WARNING 2026-07-10 13:15:08,329 basehttp 4668 24432 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:15:08,367 log 4668 17652 Not Found: /favicon.ico
+WARNING 2026-07-10 13:15:08,383 basehttp 4668 17652 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:15:08,432 log 4668 7092 Not Found: /favicon.ico
+WARNING 2026-07-10 13:15:08,445 basehttp 4668 7092 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:15:08,857 log 4668 22360 Not Found: /favicon.ico
+WARNING 2026-07-10 13:15:08,880 basehttp 4668 22360 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:15:09,249 log 4668 19976 Not Found: /favicon.ico
+WARNING 2026-07-10 13:15:09,253 basehttp 4668 19976 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:18:14,966 log 4668 11552 Not Found: /favicon.ico
+WARNING 2026-07-10 13:18:14,968 basehttp 4668 11552 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:26:06,985 log 4668 15696 Not Found: /main.34e97996a36cb9a990c4.hot-update.json
+WARNING 2026-07-10 13:26:07,036 basehttp 4668 15696 "GET /main.34e97996a36cb9a990c4.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:26:08,465 log 4668 7272 Not Found: /favicon.ico
+WARNING 2026-07-10 13:26:08,469 basehttp 4668 7272 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:26:08,768 log 4668 15648 Not Found: /favicon.ico
+WARNING 2026-07-10 13:26:08,771 basehttp 4668 15648 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:36:25,743 log 4668 22192 Not Found: /main.d069f958f96ab11aaac9.hot-update.json
+WARNING 2026-07-10 13:36:25,763 basehttp 4668 22192 "GET /main.d069f958f96ab11aaac9.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:36:27,413 log 4668 19156 Not Found: /favicon.ico
+WARNING 2026-07-10 13:36:27,428 basehttp 4668 19156 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:36:27,674 log 4668 22324 Not Found: /favicon.ico
+WARNING 2026-07-10 13:36:27,686 basehttp 4668 22324 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:43:19,112 log 4668 4980 Not Found: /main.ea7eae8f259f08d5325c.hot-update.json
+WARNING 2026-07-10 13:43:19,123 basehttp 4668 4980 "GET /main.ea7eae8f259f08d5325c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:43:19,290 log 4668 12064 Not Found: /main.ea7eae8f259f08d5325c.hot-update.json
+WARNING 2026-07-10 13:43:19,315 basehttp 4668 12064 "GET /main.ea7eae8f259f08d5325c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:43:21,337 log 4668 124 Not Found: /favicon.ico
+WARNING 2026-07-10 13:43:21,340 basehttp 4668 124 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:43:21,459 log 4668 19720 Not Found: /favicon.ico
+WARNING 2026-07-10 13:43:21,465 log 4668 8976 Not Found: /favicon.ico
+WARNING 2026-07-10 13:43:21,470 basehttp 4668 19720 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:43:21,473 basehttp 4668 8976 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:51:25,377 log 4668 13260 Not Found: /main.f284ef48370f0c633d8a.hot-update.json
+WARNING 2026-07-10 13:51:25,379 basehttp 4668 13260 "GET /main.f284ef48370f0c633d8a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:51:25,583 log 4668 14800 Not Found: /main.f284ef48370f0c633d8a.hot-update.json
+WARNING 2026-07-10 13:51:25,592 basehttp 4668 14800 "GET /main.f284ef48370f0c633d8a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:51:25,597 log 4668 14936 Not Found: /main.f284ef48370f0c633d8a.hot-update.json
+WARNING 2026-07-10 13:51:25,601 basehttp 4668 14936 "GET /main.f284ef48370f0c633d8a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:51:27,433 log 4668 22332 Not Found: /favicon.ico
+WARNING 2026-07-10 13:51:27,511 basehttp 4668 22332 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:51:27,787 log 4668 18028 Not Found: /favicon.ico
+WARNING 2026-07-10 13:51:27,798 log 4668 24160 Not Found: /favicon.ico
+WARNING 2026-07-10 13:51:27,807 basehttp 4668 18028 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:51:27,810 basehttp 4668 24160 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:51:28,197 log 4668 17000 Not Found: /favicon.ico
+WARNING 2026-07-10 13:51:28,200 basehttp 4668 17000 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:54:05,956 log 4668 17904 Not Found: /main.627fc7cbae206883da92.hot-update.json
+WARNING 2026-07-10 13:54:05,962 basehttp 4668 17904 "GET /main.627fc7cbae206883da92.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:54:06,099 log 4668 22388 Not Found: /main.627fc7cbae206883da92.hot-update.json
+WARNING 2026-07-10 13:54:06,103 log 4668 22508 Not Found: /main.627fc7cbae206883da92.hot-update.json
+WARNING 2026-07-10 13:54:06,110 basehttp 4668 22388 "GET /main.627fc7cbae206883da92.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:54:06,132 basehttp 4668 22508 "GET /main.627fc7cbae206883da92.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:54:06,160 log 4668 19244 Not Found: /main.627fc7cbae206883da92.hot-update.json
+WARNING 2026-07-10 13:54:06,197 basehttp 4668 19244 "GET /main.627fc7cbae206883da92.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 13:54:08,016 log 4668 18896 Not Found: /favicon.ico
+WARNING 2026-07-10 13:54:08,109 basehttp 4668 18896 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:54:08,496 log 4668 20284 Not Found: /favicon.ico
+WARNING 2026-07-10 13:54:08,514 log 4668 3808 Not Found: /favicon.ico
+WARNING 2026-07-10 13:54:08,518 basehttp 4668 20284 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:54:08,520 basehttp 4668 3808 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 13:54:08,537 log 4668 1088 Not Found: /favicon.ico
+WARNING 2026-07-10 13:54:08,542 basehttp 4668 1088 "GET /favicon.ico HTTP/1.1" 404 3295
+INFO 2026-07-10 14:00:49,070 autoreload 19848 16132 Watching for file changes with StatReloader
+WARNING 2026-07-10 14:01:11,630 log 19848 22204 Not Found: /main.32d5c4b8c781ece60ec7.hot-update.json
+WARNING 2026-07-10 14:01:11,639 basehttp 19848 22204 "GET /main.32d5c4b8c781ece60ec7.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:01:13,295 log 19848 13660 Not Found: /favicon.ico
+WARNING 2026-07-10 14:01:13,300 basehttp 19848 13660 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:01:13,329 log 19848 18964 Not Found: /favicon.ico
+WARNING 2026-07-10 14:01:13,340 basehttp 19848 18964 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:07:51,186 log 19848 17584 Not Found: /main.2842037e63567c6e94fb.hot-update.json
+WARNING 2026-07-10 14:07:51,193 basehttp 19848 17584 "GET /main.2842037e63567c6e94fb.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:07:51,361 log 19848 17680 Not Found: /main.2842037e63567c6e94fb.hot-update.json
+WARNING 2026-07-10 14:07:51,390 basehttp 19848 17680 "GET /main.2842037e63567c6e94fb.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:07:54,282 log 19848 18064 Not Found: /favicon.ico
+WARNING 2026-07-10 14:07:54,286 log 19848 18324 Not Found: /favicon.ico
+WARNING 2026-07-10 14:07:54,290 basehttp 19848 18064 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:07:54,293 basehttp 19848 18324 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:07:54,359 log 19848 12616 Not Found: /favicon.ico
+WARNING 2026-07-10 14:07:54,363 basehttp 19848 12616 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:22:19,056 log 19848 7768 Not Found: /favicon.ico
+WARNING 2026-07-10 14:22:19,059 basehttp 19848 7768 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:28:32,770 log 19848 19400 Not Found: /favicon.ico
+WARNING 2026-07-10 14:28:32,782 basehttp 19848 19400 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:29:45,669 log 19848 14496 Not Found: /main.4b656aafb0dd55a66fc8.hot-update.json
+WARNING 2026-07-10 14:29:45,676 basehttp 19848 14496 "GET /main.4b656aafb0dd55a66fc8.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:29:47,117 log 19848 14100 Not Found: /favicon.ico
+WARNING 2026-07-10 14:29:47,121 basehttp 19848 14100 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:29:47,540 log 19848 11556 Not Found: /favicon.ico
+WARNING 2026-07-10 14:29:47,544 basehttp 19848 11556 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:48:08,460 log 19848 22400 Not Found: /main.8db4dbdaa4e9476a6afa.hot-update.json
+WARNING 2026-07-10 14:48:08,470 basehttp 19848 22400 "GET /main.8db4dbdaa4e9476a6afa.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:48:08,707 log 19848 19732 Not Found: /main.8db4dbdaa4e9476a6afa.hot-update.json
+WARNING 2026-07-10 14:48:08,736 basehttp 19848 19732 "GET /main.8db4dbdaa4e9476a6afa.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:48:10,576 log 19848 21088 Not Found: /favicon.ico
+WARNING 2026-07-10 14:48:10,583 log 19848 13240 Not Found: /favicon.ico
+WARNING 2026-07-10 14:48:10,585 basehttp 19848 21088 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:48:10,588 basehttp 19848 13240 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:48:10,700 log 19848 20576 Not Found: /favicon.ico
+WARNING 2026-07-10 14:48:10,705 basehttp 19848 20576 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:58:02,687 log 19848 14520 Not Found: /main.a7e4e3cf09fe9761fa1d.hot-update.json
+WARNING 2026-07-10 14:58:02,699 basehttp 19848 14520 "GET /main.a7e4e3cf09fe9761fa1d.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:58:02,935 log 19848 13480 Not Found: /main.a7e4e3cf09fe9761fa1d.hot-update.json
+WARNING 2026-07-10 14:58:02,986 basehttp 19848 13480 "GET /main.a7e4e3cf09fe9761fa1d.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:58:03,000 log 19848 1160 Not Found: /main.a7e4e3cf09fe9761fa1d.hot-update.json
+WARNING 2026-07-10 14:58:03,267 basehttp 19848 1160 "GET /main.a7e4e3cf09fe9761fa1d.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 14:58:05,169 log 19848 3552 Not Found: /favicon.ico
+WARNING 2026-07-10 14:58:05,243 basehttp 19848 3552 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:58:05,416 log 19848 22216 Not Found: /favicon.ico
+WARNING 2026-07-10 14:58:05,426 basehttp 19848 22216 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:58:05,431 log 19848 4596 Not Found: /favicon.ico
+WARNING 2026-07-10 14:58:05,440 basehttp 19848 4596 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 14:58:05,893 log 19848 23188 Not Found: /favicon.ico
+WARNING 2026-07-10 14:58:05,895 basehttp 19848 23188 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 15:00:21,998 log 19848 2304 Not Found: /main.411e8634211461e8bcf6.hot-update.json
+WARNING 2026-07-10 15:00:22,016 basehttp 19848 2304 "GET /main.411e8634211461e8bcf6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 15:00:22,221 log 19848 20308 Not Found: /main.411e8634211461e8bcf6.hot-update.json
+WARNING 2026-07-10 15:00:22,283 basehttp 19848 20308 "GET /main.411e8634211461e8bcf6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 15:00:22,291 log 19848 12928 Not Found: /main.411e8634211461e8bcf6.hot-update.json
+WARNING 2026-07-10 15:00:22,356 log 19848 10452 Not Found: /main.411e8634211461e8bcf6.hot-update.json
+WARNING 2026-07-10 15:00:22,361 basehttp 19848 12928 "GET /main.411e8634211461e8bcf6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 15:00:22,441 basehttp 19848 10452 "GET /main.411e8634211461e8bcf6.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 15:00:23,329 log 19848 7048 Not Found: /favicon.ico
+WARNING 2026-07-10 15:00:23,333 basehttp 19848 7048 "GET /favicon.ico HTTP/1.1" 404 3295
+WARNING 2026-07-10 15:00:25,118 log 19848 18556 Not Found: /favicon.ico
+WARNING 2026-07-10 15:00:25,121 basehttp 19848 18556 "GET /favicon.ico HTTP/1.1" 404 3295
+INFO 2026-07-10 15:25:53,400 autoreload 8 7268 Watching for file changes with StatReloader
+WARNING 2026-07-10 15:40:13,001 log 8 8940 Not Found: /main.a28b526b3e7231261a9a.hot-update.json
+WARNING 2026-07-10 15:40:13,001 basehttp 8 8940 "GET /main.a28b526b3e7231261a9a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 18:52:16,077 log 8 18064 Not Found: /main.7ed6af38e6785d8085d9.hot-update.json
+WARNING 2026-07-10 18:52:16,077 basehttp 8 18064 "GET /main.7ed6af38e6785d8085d9.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 18:52:16,153 log 8 17004 Not Found: /main.7ed6af38e6785d8085d9.hot-update.json
+WARNING 2026-07-10 18:52:16,153 basehttp 8 17004 "GET /main.7ed6af38e6785d8085d9.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:01:51,428 log 8 13748 Not Found: /main.315d57717f8625723163.hot-update.json
+WARNING 2026-07-10 19:01:51,442 basehttp 8 13748 "GET /main.315d57717f8625723163.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:01:51,475 log 8 17724 Not Found: /main.315d57717f8625723163.hot-update.json
+WARNING 2026-07-10 19:01:51,479 log 8 4640 Not Found: /main.315d57717f8625723163.hot-update.json
+WARNING 2026-07-10 19:01:51,481 basehttp 8 17724 "GET /main.315d57717f8625723163.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:01:51,481 basehttp 8 4640 "GET /main.315d57717f8625723163.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:02:53,695 log 8 16836 Not Found: /main.6f1d10e4e5ed8d08206e.hot-update.json
+WARNING 2026-07-10 19:02:53,697 basehttp 8 16836 "GET /main.6f1d10e4e5ed8d08206e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:02:53,775 log 8 6424 Not Found: /main.6f1d10e4e5ed8d08206e.hot-update.json
+WARNING 2026-07-10 19:02:53,783 log 8 2212 Not Found: /main.6f1d10e4e5ed8d08206e.hot-update.json
+WARNING 2026-07-10 19:02:53,785 basehttp 8 6424 "GET /main.6f1d10e4e5ed8d08206e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:02:53,806 log 8 12140 Not Found: /main.6f1d10e4e5ed8d08206e.hot-update.json
+WARNING 2026-07-10 19:02:53,822 basehttp 8 2212 "GET /main.6f1d10e4e5ed8d08206e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-10 19:02:53,827 basehttp 8 12140 "GET /main.6f1d10e4e5ed8d08206e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 17:26:35,286 log 8 19668 Not Found: /main.570038d69ef97a77db5e.hot-update.json
+WARNING 2026-07-11 17:26:35,346 basehttp 8 19668 "GET /main.570038d69ef97a77db5e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 17:26:35,421 log 8 13980 Not Found: /main.570038d69ef97a77db5e.hot-update.json
+WARNING 2026-07-11 17:26:35,421 basehttp 8 13980 "GET /main.570038d69ef97a77db5e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 17:36:46,217 log 8 18768 Not Found: /main.a28f0930e53fec0e702a.hot-update.json
+WARNING 2026-07-11 17:36:46,217 basehttp 8 18768 "GET /main.a28f0930e53fec0e702a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 18:02:48,171 log 8 18236 Not Found: /main.87d3358518329971c1e5.hot-update.json
+WARNING 2026-07-11 18:02:48,171 basehttp 8 18236 "GET /main.87d3358518329971c1e5.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 18:02:48,215 log 8 3392 Not Found: /main.87d3358518329971c1e5.hot-update.json
+WARNING 2026-07-11 18:02:48,215 basehttp 8 3392 "GET /main.87d3358518329971c1e5.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 18:45:31,785 log 8 13988 Not Found: /main.6f839de84ae60c6f929a.hot-update.json
+WARNING 2026-07-11 18:45:31,846 basehttp 8 13988 "GET /main.6f839de84ae60c6f929a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 18:45:31,949 log 8 8124 Not Found: /main.6f839de84ae60c6f929a.hot-update.json
+WARNING 2026-07-11 18:45:31,954 log 8 10524 Not Found: /main.6f839de84ae60c6f929a.hot-update.json
+WARNING 2026-07-11 18:45:31,961 log 8 15364 Not Found: /main.6f839de84ae60c6f929a.hot-update.json
+WARNING 2026-07-11 18:45:31,965 basehttp 8 8124 "GET /main.6f839de84ae60c6f929a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 18:45:31,968 basehttp 8 10524 "GET /main.6f839de84ae60c6f929a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 18:45:32,000 basehttp 8 15364 "GET /main.6f839de84ae60c6f929a.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-11 19:02:45,553 log 8 17720 Not Found: /main.dd3ac17ca4156a79ecbc.hot-update.json
+WARNING 2026-07-11 19:02:45,614 basehttp 8 17720 "GET /main.dd3ac17ca4156a79ecbc.hot-update.json HTTP/1.1" 404 3385
+INFO 2026-07-12 17:00:16,698 autoreload 8 7268 C:\Trade_Journal\backend\apps\accounts\views.py changed, reloading.
+INFO 2026-07-12 17:00:34,489 autoreload 18964 3228 Watching for file changes with StatReloader
+INFO 2026-07-12 17:01:14,491 autoreload 18964 3228 C:\Trade_Journal\backend\apps\accounts\urls.py changed, reloading.
+INFO 2026-07-12 17:01:16,970 autoreload 12380 2096 Watching for file changes with StatReloader
+INFO 2026-07-12 17:01:43,668 autoreload 12380 2096 C:\Trade_Journal\backend\apps\accounts\urls.py changed, reloading.
+INFO 2026-07-12 17:01:46,498 autoreload 9756 21112 Watching for file changes with StatReloader
+INFO 2026-07-12 17:02:36,869 autoreload 4876 5596 Watching for file changes with StatReloader
+WARNING 2026-07-12 17:11:06,282 log 4876 10364 Not Found: /main.fb8db5e47b25e14e7be1.hot-update.json
+WARNING 2026-07-12 17:11:06,285 basehttp 4876 10364 "GET /main.fb8db5e47b25e14e7be1.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:11:06,337 log 4876 11620 Not Found: /main.fb8db5e47b25e14e7be1.hot-update.json
+WARNING 2026-07-12 17:11:06,345 basehttp 4876 11620 "GET /main.fb8db5e47b25e14e7be1.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:11:39,027 log 4876 2692 Not Found: /main.9cc271a627dae7c412a7.hot-update.json
+WARNING 2026-07-12 17:11:39,027 basehttp 4876 2692 "GET /main.9cc271a627dae7c412a7.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:11:39,072 log 4876 20776 Not Found: /main.9cc271a627dae7c412a7.hot-update.json
+WARNING 2026-07-12 17:11:39,087 log 4876 16480 Not Found: /main.9cc271a627dae7c412a7.hot-update.json
+WARNING 2026-07-12 17:11:39,103 basehttp 4876 20776 "GET /main.9cc271a627dae7c412a7.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:11:39,103 basehttp 4876 16480 "GET /main.9cc271a627dae7c412a7.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:12:00,865 sms 4876 12532 SMS is disabled. API key not set.
+INFO 2026-07-12 17:12:00,865 basehttp 4876 12532 "POST /api/auth/send-verification/ HTTP/1.1" 200 97
+WARNING 2026-07-12 17:12:23,986 sms 4876 16340 SMS is disabled. API key not set.
+INFO 2026-07-12 17:12:23,986 basehttp 4876 16340 "POST /api/auth/send-verification/ HTTP/1.1" 200 97
+WARNING 2026-07-12 17:12:32,549 log 4876 20288 Bad Request: /api/auth/verify-code/
+WARNING 2026-07-12 17:12:32,564 basehttp 4876 20288 "POST /api/auth/verify-code/ HTTP/1.1" 400 72
+WARNING 2026-07-12 17:17:31,459 log 4876 18088 Not Found: /main.eca9285cc5ecba2cf90e.hot-update.json
+WARNING 2026-07-12 17:17:31,489 basehttp 4876 18088 "GET /main.eca9285cc5ecba2cf90e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:17:31,564 log 4876 22264 Not Found: /main.eca9285cc5ecba2cf90e.hot-update.json
+WARNING 2026-07-12 17:17:31,579 log 4876 5688 Not Found: /main.eca9285cc5ecba2cf90e.hot-update.json
+WARNING 2026-07-12 17:17:31,594 basehttp 4876 22264 "GET /main.eca9285cc5ecba2cf90e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:17:31,609 log 4876 22364 Not Found: /main.eca9285cc5ecba2cf90e.hot-update.json
+WARNING 2026-07-12 17:17:31,624 basehttp 4876 5688 "GET /main.eca9285cc5ecba2cf90e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:17:31,634 basehttp 4876 22364 "GET /main.eca9285cc5ecba2cf90e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:26:32,338 log 4876 2196 Not Found: /main.16cc0345a0477d0d8bc3.hot-update.json
+WARNING 2026-07-12 17:26:32,338 basehttp 4876 2196 "GET /main.16cc0345a0477d0d8bc3.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:33:28,224 log 4876 20344 Not Found: /main.7d0f6d1f9b6f40a95e9e.hot-update.json
+WARNING 2026-07-12 17:33:28,224 basehttp 4876 20344 "GET /main.7d0f6d1f9b6f40a95e9e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-12 17:33:28,314 log 4876 17296 Not Found: /main.7d0f6d1f9b6f40a95e9e.hot-update.json
+WARNING 2026-07-12 17:33:28,314 basehttp 4876 17296 "GET /main.7d0f6d1f9b6f40a95e9e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-13 23:41:42,472 log 4876 22012 Not Found: /main.64428b5e0bfe26b188e1.hot-update.json
+WARNING 2026-07-13 23:41:42,472 basehttp 4876 22012 "GET /main.64428b5e0bfe26b188e1.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 00:04:47,287 log 4876 6580 Not Found: /main.23d644fe7c749adca0b1.hot-update.json
+WARNING 2026-07-14 00:04:47,291 basehttp 4876 6580 "GET /main.23d644fe7c749adca0b1.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 00:24:15,812 log 4876 9312 Not Found: /main.1dd2f048615712c20768.hot-update.json
+WARNING 2026-07-14 00:24:15,834 basehttp 4876 9312 "GET /main.1dd2f048615712c20768.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 00:24:15,992 log 4876 6648 Not Found: /main.1dd2f048615712c20768.hot-update.json
+WARNING 2026-07-14 00:24:16,006 basehttp 4876 6648 "GET /main.1dd2f048615712c20768.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 00:27:06,392 log 4876 21556 Not Found: /installHook.js.map
+WARNING 2026-07-14 00:27:06,392 basehttp 4876 21556 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 00:27:21,245 log 4876 15544 Not Found: /installHook.js.map
+WARNING 2026-07-14 00:27:21,245 basehttp 4876 15544 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 00:29:13,010 log 4876 18132 Not Found: /installHook.js.map
+WARNING 2026-07-14 00:29:13,010 basehttp 4876 18132 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 00:29:13,836 log 4876 21324 Not Found: /installHook.js.map
+WARNING 2026-07-14 00:29:13,836 basehttp 4876 21324 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 00:29:57,004 log 4876 19896 Not Found: /installHook.js.map
+WARNING 2026-07-14 00:29:57,004 basehttp 4876 19896 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 00:29:58,103 log 4876 20376 Not Found: /installHook.js.map
+WARNING 2026-07-14 00:29:58,148 basehttp 4876 20376 "GET /installHook.js.map HTTP/1.1" 404 3316
+INFO 2026-07-14 15:58:09,878 autoreload 13896 14224 Watching for file changes with StatReloader
+WARNING 2026-07-14 16:15:37,821 log 13896 18104 Not Found: /main.0bc5be6e7e9f073dee03.hot-update.json
+WARNING 2026-07-14 16:15:37,823 basehttp 13896 18104 "GET /main.0bc5be6e7e9f073dee03.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 16:15:45,859 log 13896 9476 Not Found: /installHook.js.map
+WARNING 2026-07-14 16:15:45,863 basehttp 13896 9476 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 16:16:31,749 log 13896 13756 Not Found: /installHook.js.map
+WARNING 2026-07-14 16:16:31,755 basehttp 13896 13756 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 16:19:44,586 log 13896 13352 Not Found: /installHook.js.map
+WARNING 2026-07-14 16:19:44,590 basehttp 13896 13352 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-14 16:29:48,434 log 13896 13748 Not Found: /main.f96dae85da1c9c4c3994.hot-update.json
+WARNING 2026-07-14 16:29:48,436 basehttp 13896 13748 "GET /main.f96dae85da1c9c4c3994.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 16:29:48,501 log 13896 15092 Not Found: /main.f96dae85da1c9c4c3994.hot-update.json
+WARNING 2026-07-14 16:29:48,504 basehttp 13896 15092 "GET /main.f96dae85da1c9c4c3994.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 16:35:50,234 log 13896 18408 Not Found: /main.9f932da462da7d40b09f.hot-update.json
+WARNING 2026-07-14 16:35:50,234 basehttp 13896 18408 "GET /main.9f932da462da7d40b09f.hot-update.json HTTP/1.1" 404 3385
+INFO 2026-07-14 23:17:25,183 autoreload 8528 10984 Watching for file changes with StatReloader
+WARNING 2026-07-14 23:17:55,768 log 8528 12668 Not Found: /main.f7169c07f4a16a50e610.hot-update.json
+WARNING 2026-07-14 23:17:55,771 basehttp 8528 12668 "GET /main.f7169c07f4a16a50e610.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 23:22:05,396 log 8528 1048 Not Found: /main.c3984d1d6804b2bf8243.hot-update.json
+WARNING 2026-07-14 23:22:05,396 basehttp 8528 1048 "GET /main.c3984d1d6804b2bf8243.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 23:22:05,437 log 8528 19040 Not Found: /main.c3984d1d6804b2bf8243.hot-update.json
+WARNING 2026-07-14 23:22:05,442 basehttp 8528 19040 "GET /main.c3984d1d6804b2bf8243.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 23:25:29,089 log 8528 15416 Not Found: /main.73fd6352815aea5feab0.hot-update.json
+WARNING 2026-07-14 23:25:29,092 basehttp 8528 15416 "GET /main.73fd6352815aea5feab0.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 23:39:46,577 log 8528 2688 Not Found: /main.85b1d932bbe50b926a90.hot-update.json
+WARNING 2026-07-14 23:39:46,582 basehttp 8528 2688 "GET /main.85b1d932bbe50b926a90.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 23:39:46,916 log 8528 1840 Not Found: /main.85b1d932bbe50b926a90.hot-update.json
+WARNING 2026-07-14 23:39:46,961 basehttp 8528 1840 "GET /main.85b1d932bbe50b926a90.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-14 23:45:17,179 log 8528 4732 Not Found: /main.ef9c4dc8e05009807487.hot-update.json
+WARNING 2026-07-14 23:45:17,185 basehttp 8528 4732 "GET /main.ef9c4dc8e05009807487.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:10:31,177 log 8528 9600 Not Found: /main.e3f8bf83f201422b56ba.hot-update.json
+WARNING 2026-07-15 16:10:31,183 basehttp 8528 9600 "GET /main.e3f8bf83f201422b56ba.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:10:31,263 log 8528 18940 Not Found: /main.e3f8bf83f201422b56ba.hot-update.json
+WARNING 2026-07-15 16:10:31,270 basehttp 8528 18940 "GET /main.e3f8bf83f201422b56ba.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:15:34,540 log 8528 3924 Not Found: /main.1b0c6f52fa76b5b9705c.hot-update.json
+WARNING 2026-07-15 16:15:34,544 basehttp 8528 3924 "GET /main.1b0c6f52fa76b5b9705c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:15:34,594 log 8528 752 Not Found: /main.1b0c6f52fa76b5b9705c.hot-update.json
+WARNING 2026-07-15 16:15:34,600 log 8528 3368 Not Found: /main.1b0c6f52fa76b5b9705c.hot-update.json
+WARNING 2026-07-15 16:15:34,676 basehttp 8528 752 "GET /main.1b0c6f52fa76b5b9705c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:15:34,683 basehttp 8528 3368 "GET /main.1b0c6f52fa76b5b9705c.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:20:33,873 log 8528 13448 Not Found: /main.59e12281565d9042a94e.hot-update.json
+WARNING 2026-07-15 16:20:33,881 basehttp 8528 13448 "GET /main.59e12281565d9042a94e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:20:33,950 log 8528 4136 Not Found: /main.59e12281565d9042a94e.hot-update.json
+WARNING 2026-07-15 16:20:33,952 log 8528 1460 Not Found: /main.59e12281565d9042a94e.hot-update.json
+WARNING 2026-07-15 16:20:33,959 log 8528 14896 Not Found: /main.59e12281565d9042a94e.hot-update.json
+WARNING 2026-07-15 16:20:33,961 basehttp 8528 1460 "GET /main.59e12281565d9042a94e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:20:33,961 basehttp 8528 4136 "GET /main.59e12281565d9042a94e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:20:33,965 basehttp 8528 14896 "GET /main.59e12281565d9042a94e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:38:31,712 log 8528 18668 Not Found: /main.20e2f4734023905aaa95.hot-update.json
+WARNING 2026-07-15 16:38:31,715 basehttp 8528 18668 "GET /main.20e2f4734023905aaa95.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:38:31,771 log 8528 11068 Not Found: /main.20e2f4734023905aaa95.hot-update.json
+WARNING 2026-07-15 16:38:31,776 log 8528 9300 Not Found: /main.20e2f4734023905aaa95.hot-update.json
+WARNING 2026-07-15 16:38:31,781 basehttp 8528 11068 "GET /main.20e2f4734023905aaa95.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:38:31,785 basehttp 8528 9300 "GET /main.20e2f4734023905aaa95.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:38:31,790 log 8528 2436 Not Found: /main.20e2f4734023905aaa95.hot-update.json
+WARNING 2026-07-15 16:38:31,799 log 8528 10492 Not Found: /main.20e2f4734023905aaa95.hot-update.json
+WARNING 2026-07-15 16:38:31,801 basehttp 8528 2436 "GET /main.20e2f4734023905aaa95.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:38:31,804 basehttp 8528 10492 "GET /main.20e2f4734023905aaa95.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:39:25,808 log 8528 17648 Not Found: /installHook.js.map
+WARNING 2026-07-15 16:39:25,808 basehttp 8528 17648 "GET /installHook.js.map HTTP/1.1" 404 3316
+WARNING 2026-07-15 16:41:44,294 log 8528 19024 Not Found: /main.bab6136c0b117d4bdde5.hot-update.json
+WARNING 2026-07-15 16:41:44,299 basehttp 8528 19024 "GET /main.bab6136c0b117d4bdde5.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:43:27,109 log 8528 14772 Not Found: /main.58fcaf92035652bc5f7d.hot-update.json
+WARNING 2026-07-15 16:43:27,112 basehttp 8528 14772 "GET /main.58fcaf92035652bc5f7d.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:43:27,162 log 8528 14804 Not Found: /main.58fcaf92035652bc5f7d.hot-update.json
+WARNING 2026-07-15 16:43:27,167 basehttp 8528 14804 "GET /main.58fcaf92035652bc5f7d.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:45:42,093 log 8528 13688 Not Found: /main.1d24465ae1679905b12e.hot-update.json
+WARNING 2026-07-15 16:45:42,106 basehttp 8528 13688 "GET /main.1d24465ae1679905b12e.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:50:31,486 log 8528 2364 Not Found: /main.599abadc1260f006d82b.hot-update.json
+WARNING 2026-07-15 16:50:31,488 basehttp 8528 2364 "GET /main.599abadc1260f006d82b.hot-update.json HTTP/1.1" 404 3385
+WARNING 2026-07-15 16:52:36,623 log 8528 5792 Not Found: /main.599abadc1260f006d82b.hot-update.json
+WARNING 2026-07-15 16:52:36,623 basehttp 8528 5792 "GET /main.599abadc1260f006d82b.hot-update.json HTTP/1.1" 404 3385
+INFO 2026-07-17 17:49:26,029 autoreload 17744 16948 Watching for file changes with StatReloader

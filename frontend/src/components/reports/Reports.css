@@ -1,0 +1,454 @@
+/* frontend/src/components/reports/Reports.css */
+
+.reports-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  min-height: 80vh;
+  transition: all 0.3s ease;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.reports-header h2 {
+  color: var(--text-primary);
+  font-size: 24px;
+  margin: 0;
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background: var(--border-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: var(--text-muted);
+  color: white;
+}
+
+/* ============================================
+   Tabs
+   ============================================ */
+.reports-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--gradient-start);
+  color: white;
+}
+
+.dark-theme .tab-btn.active {
+  background: #0d47a1;
+}
+
+/* ============================================
+   Report Sections
+   ============================================ */
+.report-section {
+  animation: fadeIn 0.3s ease;
+}
+
+.report-section h3 {
+  color: var(--text-primary);
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.stat-label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stat-number {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.stat-number.success {
+  color: #2e7d32;
+}
+
+.dark-theme .stat-number.success {
+  color: #4caf50;
+}
+
+.stat-number.danger {
+  color: #c62828;
+}
+
+.dark-theme .stat-number.danger {
+  color: #ef5350;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+.table-container {
+  overflow-x: auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.report-table thead {
+  background: var(--gradient-start);
+  color: white;
+}
+
+.dark-theme .report-table thead {
+  background: #0d47a1;
+}
+
+.report-table th {
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.report-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.report-table tr:hover td {
+  background: var(--bg-primary);
+}
+
+.report-table .positive {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.dark-theme .report-table .positive {
+  color: #4caf50;
+}
+
+.report-table .negative {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.dark-theme .report-table .negative {
+  color: #ef5350;
+}
+
+/* ============================================
+   Status Badges
+   ============================================ */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.dark-theme .status-badge.success {
+  background: #1b3a1b;
+  color: #4caf50;
+}
+
+.status-badge.danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark-theme .status-badge.danger {
+  background: #3a1a1a;
+  color: #ef5350;
+}
+
+.impact-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.impact-badge.high {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark-theme .impact-badge.high {
+  background: #3a1a1a;
+  color: #ef5350;
+}
+
+.impact-badge.medium {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.dark-theme .impact-badge.medium {
+  background: #3a2a1a;
+  color: #ff8a65;
+}
+
+.impact-badge.low {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.dark-theme .impact-badge.low {
+  background: #1b3a1b;
+  color: #4caf50;
+}
+
+/* ============================================
+   Psychology
+   ============================================ */
+.psychology-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.psychology-card {
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.psychology-card h4 {
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.psychology-item {
+  margin-bottom: 16px;
+}
+
+.emotion-label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.emotion-bar {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.emotion-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.emotion-stats {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .reports-container {
+    padding: 12px;
+    margin: 0 8px;
+  }
+
+  .reports-tabs {
+    gap: 4px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-item {
+    padding: 16px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .reports-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .report-table {
+    font-size: 12px;
+  }
+
+  .report-table th,
+  .report-table td {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    flex: 0 0 calc(50% - 4px);
+  }
+}
+
+/* جایگزین کردن بخش quick-stats-report با quick-stats-row */
+
+/* ============================================
+   Quick Stats - در یک سطر
+   ============================================ */
+.quick-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 8px 16px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.quick-stat-item .stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.quick-stat-item .stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.quick-stat-item .stat-value.success {
+  color: #2e7d32;
+}
+
+.dark-theme .quick-stat-item .stat-value.success {
+  color: #4caf50;
+}
+
+.quick-stat-item .stat-value.danger {
+  color: #c62828;
+}
+
+.dark-theme .quick-stat-item .stat-value.danger {
+  color: #ef5350;
+}
+
+/* ============================================
+   Print Styles - مخفی کردن آمار سریع در چاپ
+   ============================================ */
+@media print {
+  .quick-stats-row {
+    display: none !important;
+  }
+}

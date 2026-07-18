@@ -1,0 +1,544 @@
+/* frontend/src/components/TradePrintView.css */
+
+.trade-print-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+  direction: rtl;
+  color: #2c3e50;
+}
+
+/* ============================================
+   Loading & Error
+   ============================================ */
+.print-loading,
+.print-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 24px;
+  color: #666;
+  background: #f5f5f5;
+}
+
+.print-error {
+  color: #c62828;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  border-radius: 12px 12px 0 0;
+  color: white;
+  margin-bottom: 0;
+}
+
+.header-logo h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.header-logo p {
+  font-size: 14px;
+  opacity: 0.8;
+  margin: 4px 0 0 0;
+}
+
+.header-meta {
+  text-align: left;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.meta-item {
+  margin: 2px 0;
+}
+
+.meta-label {
+  font-weight: 300;
+  opacity: 0.7;
+}
+
+.meta-value {
+  font-weight: 600;
+}
+
+/* ============================================
+   Trade Title Card
+   ============================================ */
+.trade-title-card {
+  background: #f8f9fa;
+  border: 2px solid #e8eaf6;
+  border-radius: 0 0 12px 12px;
+  padding: 20px 30px;
+  margin-bottom: 24px;
+}
+
+.trade-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.trade-symbol-large {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a237e;
+}
+
+.trade-type-badge {
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.trade-type-badge.buy {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.trade-type-badge.sell {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.trade-date-large {
+  font-size: 16px;
+  color: #666;
+  margin-right: auto;
+}
+
+.trade-summary-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid #e8eaf6;
+}
+
+.summary-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #e8eaf6;
+  font-size: 13px;
+}
+
+.chip-label {
+  color: #888;
+}
+
+.chip-value {
+  font-weight: 700;
+}
+
+.chip-value.positive {
+  color: #2e7d32;
+}
+
+.chip-value.negative {
+  color: #c62828;
+}
+
+.chip-value.quality-high {
+  color: #2e7d32;
+}
+
+.chip-value.quality-medium {
+  color: #f57f17;
+}
+
+.chip-value.quality-low {
+  color: #c62828;
+}
+
+/* ============================================
+   Print Sections
+   ============================================ */
+.print-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #f5f5f5;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.section-header .section-icon {
+  font-size: 20px;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0;
+}
+
+.section-body {
+  padding: 16px 20px;
+}
+
+/* ============================================
+   Grid Layouts
+   ============================================ */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px 24px;
+}
+
+/* ============================================
+   Field Items
+   ============================================ */
+.field-item {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.field-item:last-child {
+  border-bottom: none;
+}
+
+.field-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.field-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.field-value.positive {
+  color: #2e7d32;
+}
+
+.field-value.negative {
+  color: #c62828;
+}
+
+.field-value.checked {
+  color: #2e7d32;
+}
+
+.field-value.unchecked {
+  color: #c62828;
+}
+
+.field-value.quality-high {
+  color: #2e7d32;
+}
+
+.field-value.quality-medium {
+  color: #f57f17;
+}
+
+.field-value.quality-low {
+  color: #c62828;
+}
+
+.field-value.sleep-خوب {
+  color: #2e7d32;
+}
+
+.field-value.sleep-متوسط {
+  color: #f57f17;
+}
+
+.field-value.sleep-بد {
+  color: #c62828;
+}
+
+.field-value.bias-Bullish {
+  color: #2e7d32;
+}
+
+.field-value.bias-Bearish {
+  color: #c62828;
+}
+
+.field-value.bias-Neutral {
+  color: #f57f17;
+}
+
+/* ============================================
+   Timeframes
+   ============================================ */
+.timeframes-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeframe-badge {
+  padding: 4px 14px;
+  border-radius: 6px;
+  background: #e3f2fd;
+  color: #0d47a1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ============================================
+   Emotions
+   ============================================ */
+.emotions-container {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.emotion-badge {
+  padding: 2px 12px;
+  border-radius: 12px;
+  background: #fce4ec;
+  color: #c62828;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ============================================
+   Checklist
+   ============================================ */
+.checklist-section .section-body {
+  padding: 16px 20px;
+}
+
+.checklist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.checklist-status {
+  font-size: 18px;
+  font-weight: 700;
+  width: 24px;
+  text-align: center;
+}
+
+.checklist-status.done {
+  color: #2e7d32;
+}
+
+.checklist-status.pending {
+  color: #bbb;
+}
+
+.checklist-label {
+  font-size: 13px;
+  color: #2c3e50;
+}
+
+.checklist-extra {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.checklist-extra .field-label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.checklist-extra .field-value {
+  font-weight: 400;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.print-footer {
+  text-align: center;
+  padding: 16px 20px;
+  margin-top: 16px;
+  border-top: 2px solid #e0e0e0;
+  font-size: 12px;
+  color: #999;
+}
+
+.footer-separator {
+  margin: 0 8px;
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+    margin: 0;
+  }
+
+  .trade-print-container {
+    padding: 15px;
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+  .print-header {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .trade-type-badge,
+  .summary-chip,
+  .timeframe-badge,
+  .emotion-badge,
+  .checklist-status {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border-color: #ccc;
+  }
+
+  .section-header {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .field-item {
+    border-bottom-color: #eee;
+  }
+
+  .grid-2,
+  .grid-3 {
+    page-break-inside: avoid;
+  }
+
+  .checklist-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .trade-print-container {
+    padding: 16px;
+  }
+
+  .print-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .header-meta {
+    text-align: center;
+  }
+
+  .trade-title-row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .trade-date-large {
+    margin-right: 0;
+  }
+
+  .trade-summary-row {
+    justify-content: center;
+  }
+
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trade-symbol-large {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trade-print-container {
+    padding: 10px;
+  }
+
+  .section-body {
+    padding: 12px 14px;
+  }
+
+  .summary-chip {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .field-value {
+    font-size: 13px;
+  }
+
+  .trade-symbol-large {
+    font-size: 18px;
+  }
+
+  .header-logo h1 {
+    font-size: 18px;
+  }
+
+  .checklist-grid {
+    grid-template-columns: 1fr;
+  }
+}
