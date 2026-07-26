@@ -29,25 +29,26 @@ def health_check(request):
         'message': 'Server is running'
     })
 
+# backend/trading_journal/urls.py
+
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
-    # Health Check
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('apps.accounts.urls')),
+    path('api/trading/', include('apps.trading.urls')),
+    path('api/subscription/', include('apps.subscriptions.urls')),
+    path('api/messages/', include('apps.messaging.urls')),
+    path('api/admin/', include('apps.admin_panel.urls')),
+    path('api/system/', include('apps.accounts.system_urls')),
     path('health/', health_check, name='health_check'),
 
     # Admin
-    path('admin/', admin.site.urls),
-
-    # API Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # API Routes
-    path('api/auth/', include('apps.accounts.urls')),
-    path('api/subscription/', include('apps.subscriptions.urls')),
-    path('api/trading/', include('apps.trading.urls')),
-    path('api/messages/', include('apps.messaging.urls')),
-    path('api/admin/', include('apps.admin_panel.urls')),
-    path('api/system/', include('apps.accounts.system_urls')),
 ]
 
 if settings.DEBUG:

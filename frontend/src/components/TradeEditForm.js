@@ -1,18 +1,20 @@
 // frontend/src/components/TradeEditForm.js
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import RealApiService from '../services/realApiService';
 import './TradeForm.css';
 
 const TradeEditForm = () => {
+  const { id } = useParams();
   const { isDark } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [tradeData, setTradeData] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [originalTradeId, setOriginalTradeId] = useState(null);
   const [errors, setErrors] = useState([]);
 
   const symbols = [
@@ -48,7 +50,6 @@ const TradeEditForm = () => {
       'SGP30','BRA50','RUS50','SAU30','UAE20','TUR30'].includes(s)),
     'کالاها': symbols.filter(s => ['XAUUSD','XAGUSD','USOIL','UKOIL','XPDUSD','XPTUSD',
       'XCUUSD','XALUSD','XZNUSD','XNIUSD','XPBUSD','XSNUSD',
-      'XCOUSD','XSUUSD','XPLUSD','XRHUSD','XRUUSD','XSIUSD',
       'CORN','WHEAT','SOYBN','COFFEE','SUGAR','COTTON',
       'COCOA','ORANGE','LUMBER','LEANHOG','LIVECATTLE','FEEDERCATTLE'].includes(s)),
     'کریپتو': symbols.filter(s => ['BTCUSD','ETHUSD','USDTUSD','BNBUSD','SOLUSD','ADAUSD',
@@ -61,41 +62,47 @@ const TradeEditForm = () => {
       'QNTUSD','EGLDUSD','KASUSD','TIAUSD','JUPUSD','ONDOUSD'].includes(s))
   };
 
+  // ============================================
+  // بارگذاری داده‌ها از بک‌اند
+  // ============================================
   useEffect(() => {
-    const savedCategories = localStorage.getItem('categories');
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories));
-    } else {
-      setCategories([
-        { id: 1, name: 'همه تریدها', icon: '📊' },
-        { id: 2, name: 'فارکس', icon: '💱' },
-        { id: 3, name: 'کریپتو', icon: '₿' },
-        { id: 4, name: 'شاخص‌ها', icon: '📈' },
-        { id: 5, name: 'کالاها', icon: '🏆' },
-      ]);
-    }
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const response = await RealApiService.getTrade(id);
+        setTradeData(response.data);
 
-    const tradeId = localStorage.getItem('editTradeId');
-    if (!tradeId) {
-      navigate('/');
-      return;
-    }
-
-    setOriginalTradeId(parseInt(tradeId));
-
-    const savedTrades = localStorage.getItem('trades');
-    if (savedTrades) {
-      const trades = JSON.parse(savedTrades);
-      const trade = trades.find(t => t.id === parseInt(tradeId));
-      if (trade) {
-        setTradeData(trade);
-      } else {
-        navigate('/');
+        const savedCategories = localStorage.getItem('categories');
+        if (savedCategories) {
+          setCategories(JSON.parse(savedCategories));
+        } else {
+          setCategories([
+            { id: 1, name: 'همه تریدها', icon: '📊' },
+            { id: 2, name: 'فارکس', icon: '💱' },
+            { id: 3, name: 'کریپتو', icon: '₿' },
+            { id: 4, name: 'شاخص‌ها', icon: '📈' },
+            { id: 5, name: 'کالاها', icon: '🏆' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error loading trade:', error);
+        alert('❌ خطا در دریافت اطلاعات ترید');
+        navigate('/trades');
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
-  }, [navigate]);
+    };
 
+    if (id) {
+      loadData();
+    } else {
+      navigate('/trades');
+    }
+  }, [id, navigate]);
+
+  // ============================================
+  // تغییرات فرم
+  // ============================================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
@@ -106,55 +113,69 @@ const TradeEditForm = () => {
     setErrors(prev => prev.filter(err => !err.includes(name)));
   };
 
+  // ============================================
+  // اعتبارسنجی
+  // ============================================
   const validateForm = () => {
     const validationErrors = [];
     if (!tradeData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
     if (!tradeData.trade_date) validationErrors.push('لطفاً تاریخ معامله را وارد کنید');
     if (!tradeData.trade_type) validationErrors.push('لطفاً نوع ترید را انتخاب کنید');
     if (!tradeData.category_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
-    if (!tradeData.entry_price || parseFloat(tradeData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید (مقدار باید بزرگتر از صفر باشد)');
-    if (!tradeData.close_price || parseFloat(tradeData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید (مقدار باید بزرگتر از صفر باشد)');
+    if (!tradeData.entry_price || parseFloat(tradeData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید');
+    if (!tradeData.close_price || parseFloat(tradeData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید');
     if (tradeData.profit && isNaN(parseFloat(tradeData.profit))) validationErrors.push('مقدار سود/زیان باید عدد باشد');
     if (tradeData.execution_quality_score) {
       const score = parseInt(tradeData.execution_quality_score);
       if (isNaN(score) || score < 1 || score > 10) validationErrors.push('امتیاز کیفیت اجرا باید بین ۱ تا ۱۰ باشد');
     }
     if (tradeData.risk_reward_ratio && parseFloat(tradeData.risk_reward_ratio) <= 0) validationErrors.push('نسبت ریسک به ریوارد باید بزرگتر از صفر باشد');
-    if (tradeData.risk_percent) {
-      const percent = parseFloat(tradeData.risk_percent);
-      if (isNaN(percent) || percent < 0 || percent > 100) validationErrors.push('درصد ریسک باید بین ۰ تا ۱۰۰ باشد');
-    }
-    if (tradeData.stop_loss && parseFloat(tradeData.stop_loss) <= 0) validationErrors.push('حد ضرر باید بزرگتر از صفر باشد');
-    if (tradeData.take_profit_1 && parseFloat(tradeData.take_profit_1) <= 0) validationErrors.push('حد سود اول باید بزرگتر از صفر باشد');
-    if (tradeData.take_profit_2 && parseFloat(tradeData.take_profit_2) <= 0) validationErrors.push('حد سود دوم باید بزرگتر از صفر باشد');
-    if (tradeData.take_profit_3 && parseFloat(tradeData.take_profit_3) <= 0) validationErrors.push('حد سود سوم باید بزرگتر از صفر باشد');
     setErrors(validationErrors);
     return validationErrors.length === 0;
   };
 
-  const handleSubmit = (e) => {
+  // ============================================
+  // ذخیره تغییرات
+  // ============================================
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
       alert('❌ لطفاً خطاهای زیر را اصلاح کنید:\n\n' + errors.map((e, i) => `${i+1}. ${e}`).join('\n'));
       return;
     }
-    const date = new Date(tradeData.trade_date);
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    tradeData.day_of_week = days[date.getDay()];
-    tradeData.month = date.getMonth() + 1;
-    const savedTrades = localStorage.getItem('trades');
-    if (savedTrades) {
-      const trades = JSON.parse(savedTrades);
-      const index = trades.findIndex(t => t.id === originalTradeId);
-      if (index !== -1) {
-        trades[index] = { ...tradeData, id: originalTradeId };
-        localStorage.setItem('trades', JSON.stringify(trades));
+
+    setSaving(true);
+    try {
+      const date = new Date(tradeData.trade_date);
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      tradeData.day_of_week = days[date.getDay()];
+      tradeData.month = date.getMonth() + 1;
+
+      await RealApiService.updateTrade(id, tradeData);
+
+      const savedTrades = localStorage.getItem('trades');
+      if (savedTrades) {
+        const trades = JSON.parse(savedTrades);
+        const index = trades.findIndex(t => t.id === parseInt(id));
+        if (index !== -1) {
+          trades[index] = { ...tradeData, id: parseInt(id) };
+          localStorage.setItem('trades', JSON.stringify(trades));
+        }
       }
+
+      alert('✅ ترید با موفقیت ویرایش شد!');
+      navigate('/trades');
+    } catch (error) {
+      console.error('Error updating trade:', error);
+      alert('❌ خطا در ذخیره تغییرات');
+    } finally {
+      setSaving(false);
     }
-    alert('✅ ترید با موفقیت ویرایش شد!');
-    navigate('/');
   };
 
+  // ============================================
+  // Navigation
+  // ============================================
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 8));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
@@ -436,7 +457,7 @@ const TradeEditForm = () => {
   );
 
   // ============================================
-  // تابع رندر بر اساس مرحله فعلی
+  // رندر بر اساس مرحله
   // ============================================
   const renderStep = () => {
     switch(currentStep) {
@@ -464,7 +485,7 @@ const TradeEditForm = () => {
     <div className={`trade-form-container ${isDark ? 'dark' : 'light'}`}>
       <div className="trade-form-header">
         <h2>✏️ ویرایش ترید</h2>
-        <button className="btn-back" onClick={() => navigate('/')}>↩️ بازگشت</button>
+        <button className="btn-back" onClick={() => navigate('/trades')}>↩️ بازگشت</button>
       </div>
 
       {errors.length > 0 && (
@@ -490,18 +511,14 @@ const TradeEditForm = () => {
 
         <div className="form-actions">
           {currentStep > 1 && (
-            <button type="button" className="btn-prev" onClick={prevStep}>
-              ← قبلی
-            </button>
+            <button type="button" className="btn-prev" onClick={prevStep} disabled={saving}>← قبلی</button>
           )}
           {currentStep < 8 && (
-            <button type="button" className="btn-next" onClick={nextStep}>
-              بعدی →
-            </button>
+            <button type="button" className="btn-next" onClick={nextStep} disabled={saving}>بعدی →</button>
           )}
           {currentStep === 8 && (
-            <button type="submit" className="btn-submit">
-              💾 ذخیره تغییرات
+            <button type="submit" className="btn-submit" disabled={saving}>
+              {saving ? '⏳ در حال ذخیره...' : '💾 ذخیره تغییرات'}
             </button>
           )}
         </div>

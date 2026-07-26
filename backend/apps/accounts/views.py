@@ -1,6 +1,10 @@
+# backend/apps/accounts/views.py
+
+from django.conf import settings
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.contrib.auth import authenticate
@@ -23,29 +27,19 @@ from .serializers import (
     AppVersionSerializer,
     ChangePasswordSerializer,
     ForgotPasswordSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer,
+    PhoneNumberSerializer,
 )
 from .permissions import IsAdminUser, IsVerifiedUser
-
-logger = logging.getLogger(__name__)
-
-# apps/accounts/views.py
-
-import random
-from django.utils import timezone
-from django.db import transaction
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .models import User
-from .serializers import UserSerializer
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription
 from apps.subscriptions.sms import send_verification_sms
 
+logger = logging.getLogger(__name__)
 
+
+# ============================================
+# ارسال کد تایید (مرحله اول)
+# ============================================
 class SendVerificationCodeView(APIView):
     """ارسال کد تایید به شماره تلفن"""
     permission_classes = [AllowAny]
@@ -79,24 +73,41 @@ class SendVerificationCodeView(APIView):
             user.is_verified = False
             user.save()
 
-        # ارسال پیامک
-        try:
-            send_verification_sms(phone_number, verification_code)
-        except Exception as e:
-            # در محیط تست، کد را در پاسخ برمی‌گردانیم
-            if request.META.get('DEBUG', False):
-                return Response({
-                    'message': 'کد تایید ایجاد شد (حالت تست)',
-                    'test_code': verification_code,
-                    'phone_number': phone_number
-                }, status=status.HTTP_200_OK)
+        # ارسال پیامک از طریق قاصدک
+        sms_enabled = getattr(settings, 'SMS_ENABLED', False) and getattr(settings, 'SMS_API_KEY', '')
+        sms_result = None
 
+        if sms_enabled:
+            try:
+                sms_result = send_verification_sms(phone_number, verification_code)
+                logger.info(f"SMS sent to {phone_number}: {sms_result}")
+
+                if sms_result and sms_result.get('status') == 'success':
+                    print("✅ پیامک با موفقیت ارسال شد")
+                else:
+                    print(f"⚠️ خطا در ارسال پیامک: {sms_result}")
+            except Exception as e:
+                logger.error(f"Error sending SMS: {str(e)}")
+                print(f"❌ خطا در ارسال پیامک: {str(e)}")
+
+        # نمایش کد در کنسول برای دیباگ
+        print("=" * 60)
+        print(f"📱 کد تایید برای شماره {phone_number}:")
+        print(f"🔑 {verification_code}")
+        print(f"⏱️ این کد تا ۲ دقیقه اعتبار دارد")
+        print("=" * 60)
+
+        # همیشه پیام موفقیت برگردان (حتی اگر پیامک ارسال نشد)
         return Response({
             'message': 'کد تایید به شماره شما ارسال شد',
-            'phone_number': phone_number
+            'phone_number': phone_number,
+            'test_code': verification_code
         }, status=status.HTTP_200_OK)
 
 
+# ============================================
+# تایید کد (مرحله دوم)
+# ============================================
 class VerifyCodeView(APIView):
     """تایید کد ارسال شده"""
     permission_classes = [AllowAny]
@@ -133,18 +144,30 @@ class VerifyCodeView(APIView):
         # تولید توکن
         refresh = RefreshToken.for_user(user)
 
-        # بررسی اینکه کاربر جدید است یا وجود دارد
         is_new_user = not user.first_name and not user.last_name
+
+        logger.info(f"User verified: {phone_number}")
 
         return Response({
             'access': str(refresh.access_token),
             'refresh': str(refresh),
-            'user': UserSerializer(user).data,
+            'user': {
+                'id': user.id,
+                'phone_number': user.phone_number,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'is_verified': user.is_verified,
+                'is_admin': user.is_admin,
+            },
             'is_new_user': is_new_user,
             'message': 'شماره تلفن با موفقیت تایید شد'
         })
 
 
+# ============================================
+# تکمیل ثبت نام
+# ============================================
 class RegisterUserView(APIView):
     """تکمیل ثبت نام کاربر جدید"""
     permission_classes = [AllowAny]
@@ -171,14 +194,12 @@ class RegisterUserView(APIView):
         try:
             user = User.objects.get(phone_number=phone_number)
 
-            # بررسی اینکه کاربر تایید شده باشد
             if not user.is_verified:
                 return Response(
                     {'error': 'شماره تلفن تایید نشده است'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # به‌روزرسانی اطلاعات
             user.first_name = first_name
             user.last_name = last_name
             if email:
@@ -186,7 +207,7 @@ class RegisterUserView(APIView):
             user.save()
 
             # ایجاد اشتراک آزمایشی
-            trial_days = 7
+            trial_days = SystemSetting.get_setting('trial_days', 7)
             trial_plan = SubscriptionPlan.objects.filter(
                 plan_type='professional',
                 duration_days=trial_days,
@@ -194,18 +215,25 @@ class RegisterUserView(APIView):
             ).first()
 
             if trial_plan:
-                UserSubscription.objects.create(
+                existing_trial = UserSubscription.objects.filter(
                     user=user,
-                    plan=trial_plan,
-                    start_date=timezone.now(),
-                    end_date=timezone.now() + timezone.timedelta(days=trial_days),
-                    is_active=True,
-                    trades_used=0,
-                    trades_limit=trial_plan.monthly_trades_limit,
                     is_trial=True,
-                    payment_status='paid',
-                    amount_paid=0
-                )
+                    is_active=True
+                ).exists()
+
+                if not existing_trial:
+                    UserSubscription.objects.create(
+                        user=user,
+                        plan=trial_plan,
+                        start_date=timezone.now(),
+                        end_date=timezone.now() + timezone.timedelta(days=trial_days),
+                        is_active=True,
+                        trades_used=0,
+                        trades_limit=trial_plan.monthly_trades_limit,
+                        is_trial=True,
+                        payment_status='paid',
+                        amount_paid=0
+                    )
 
             # تولید توکن
             refresh = RefreshToken.for_user(user)
@@ -213,7 +241,15 @@ class RegisterUserView(APIView):
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
-                'user': UserSerializer(user).data,
+                'user': {
+                    'id': user.id,
+                    'phone_number': user.phone_number,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_verified': user.is_verified,
+                    'is_admin': user.is_admin,
+                },
                 'message': 'ثبت نام با موفقیت تکمیل شد'
             })
 
@@ -224,154 +260,12 @@ class RegisterUserView(APIView):
             )
 
 
-        
-class RegisterView(APIView):
-    """ثبت نام کاربر جدید"""
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        serializer = UserRegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            phone_number = serializer.validated_data['phone_number']
-
-            # بررسی وجود کاربر
-            if User.objects.filter(phone_number=phone_number).exists():
-                return Response(
-                    {'error': 'این شماره تلفن قبلاً ثبت شده است'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # ایجاد کد تایید
-            verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-            expiry = timezone.now() + timezone.timedelta(minutes=5)
-
-            # ذخیره موقت کاربر
-            user = User.objects.create_user(
-                phone_number=phone_number,
-                password=serializer.validated_data.get('password'),
-                first_name=serializer.validated_data.get('first_name', ''),
-                last_name=serializer.validated_data.get('last_name', ''),
-                email=serializer.validated_data.get('email', ''),
-                verification_code=verification_code,
-                verification_expiry=expiry
-            )
-
-            # ارسال پیامک
-            sms_enabled = SystemSetting.get_setting('enable_sms', True)
-            if sms_enabled:
-                try:
-                    from ..subscriptions.sms import send_verification_sms
-                    send_verification_sms(phone_number, verification_code)
-                except Exception as e:
-                    logger.error(f"Error sending SMS: {str(e)}")
-                    # در محیط تست، کد را در پاسخ برمی‌گردانیم
-                    if SystemSetting.get_setting('debug_mode', False):
-                        return Response({
-                            'message': 'کد تایید ایجاد شد (حالت تست)',
-                            'phone_number': phone_number,
-                            'test_code': verification_code
-                        }, status=status.HTTP_201_CREATED)
-            else:
-                logger.info(f"Verification code for {phone_number}: {verification_code}")
-                # اگر پیامک غیرفعال است، کد را برمی‌گردانیم
-                return Response({
-                    'message': 'کد تایید ایجاد شد (ارسال پیامک غیرفعال)',
-                    'phone_number': phone_number,
-                    'test_code': verification_code
-                }, status=status.HTTP_201_CREATED)
-
-            return Response({
-                'message': 'کد تایید به شماره شما ارسال شد',
-                'phone_number': phone_number
-            }, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class VerifyCodeView(APIView):
-    """تایید کد ارسال شده"""
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        serializer = VerifyCodeSerializer(data=request.data)
-        if serializer.is_valid():
-            phone_number = serializer.validated_data['phone_number']
-            code = serializer.validated_data['code']
-
-            try:
-                user = User.objects.get(
-                    phone_number=phone_number,
-                    verification_code=code,
-                    verification_expiry__gt=timezone.now()
-                )
-
-                # تایید کاربر
-                user.is_verified = True
-                user.verification_code = None
-                user.verification_expiry = None
-                user.save()
-
-                # ایجاد اشتراک آزمایشی
-                from ..subscriptions.models import SubscriptionPlan, UserSubscription
-
-                trial_days = SystemSetting.get_setting('trial_days', 7)
-                trial_plan = SubscriptionPlan.objects.filter(
-                    plan_type='professional',
-                    duration_days=trial_days,
-                    is_active=True
-                ).first()
-
-                if trial_plan:
-                    # بررسی اینکه کاربر قبلاً اشتراک آزمایشی نداشته باشد
-                    existing_trial = UserSubscription.objects.filter(
-                        user=user,
-                        is_trial=True,
-                        is_active=True
-                    ).exists()
-
-                    if not existing_trial:
-                        subscription = UserSubscription.objects.create(
-                            user=user,
-                            plan=trial_plan,
-                            start_date=timezone.now(),
-                            end_date=timezone.now() + timezone.timedelta(days=trial_days),
-                            is_active=True,
-                            trades_used=0,
-                            trades_limit=trial_plan.monthly_trades_limit,
-                            is_trial=True,
-                            payment_status='paid',
-                            amount_paid=0
-                        )
-
-                # تولید توکن
-                refresh = RefreshToken.for_user(user)
-                access_token = str(refresh.access_token)
-
-                # ذخیره توکن برای مدیریت تک‌جلسه‌ای
-                user.login_token = access_token
-                user.login_token_expiry = timezone.now() + timezone.timedelta(hours=24)
-                user.last_login = timezone.now()
-                user.save()
-
-                return Response({
-                    'access': access_token,
-                    'refresh': str(refresh),
-                    'user': UserSerializer(user).data,
-                    'message': 'ثبت نام با موفقیت انجام شد'
-                })
-
-            except User.DoesNotExist:
-                return Response(
-                    {'error': 'کد تایید نامعتبر یا منقضی شده است'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+# ============================================
+# ورود کاربر
+# ============================================
 class LoginView(APIView):
     """ورود کاربر"""
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -394,11 +288,9 @@ class LoginView(APIView):
                         status=status.HTTP_403_FORBIDDEN
                     )
 
-                # ایجاد توکن جدید و باطل کردن جلسات قبلی
                 refresh = RefreshToken.for_user(user)
                 access_token = str(refresh.access_token)
 
-                # ذخیره توکن برای مدیریت تک‌جلسه‌ای
                 user.login_token = access_token
                 user.login_token_expiry = timezone.now() + timezone.timedelta(hours=24)
                 user.last_login = timezone.now()
@@ -418,9 +310,12 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ============================================
+# خروج کاربر
+# ============================================
 class LogoutView(APIView):
     """خروج کاربر"""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:
@@ -429,7 +324,6 @@ class LogoutView(APIView):
                 token = RefreshToken(refresh_token)
                 token.blacklist()
 
-            # پاک کردن توکن ورود
             if request.user.is_authenticated:
                 request.user.login_token = None
                 request.user.login_token_expiry = None
@@ -443,14 +337,20 @@ class LogoutView(APIView):
             )
 
 
+# ============================================
+# Refresh Token
+# ============================================
 class TokenRefreshView(TokenRefreshView):
     """Refresh token"""
     pass
 
 
+# ============================================
+# پروفایل کاربر
+# ============================================
 class ProfileView(APIView):
     """مشاهده پروفایل کاربر"""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
@@ -459,7 +359,7 @@ class ProfileView(APIView):
 
 class ProfileUpdateView(APIView):
     """ویرایش پروفایل کاربر"""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         serializer = UserProfileUpdateSerializer(
@@ -476,9 +376,12 @@ class ProfileUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ============================================
+# تغییر رمز عبور
+# ============================================
 class ChangePasswordView(APIView):
     """تغییر رمز عبور"""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = ChangePasswordSerializer(
@@ -489,7 +392,6 @@ class ChangePasswordView(APIView):
             request.user.set_password(serializer.validated_data['new_password'])
             request.user.save()
 
-            # باطل کردن تمام توکن‌ها
             try:
                 refresh_token = request.data.get('refresh')
                 if refresh_token:
@@ -504,9 +406,12 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ============================================
+# فراموشی رمز عبور
+# ============================================
 class ForgotPasswordView(APIView):
     """فراموشی رمز عبور - ارسال کد"""
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -516,7 +421,6 @@ class ForgotPasswordView(APIView):
             try:
                 user = User.objects.get(phone_number=phone_number)
 
-                # ایجاد کد جدید
                 verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
                 expiry = timezone.now() + timezone.timedelta(minutes=5)
 
@@ -524,11 +428,9 @@ class ForgotPasswordView(APIView):
                 user.verification_expiry = expiry
                 user.save()
 
-                # ارسال پیامک
                 sms_enabled = SystemSetting.get_setting('enable_sms', True)
                 if sms_enabled:
                     try:
-                        from ..subscriptions.sms import send_verification_sms
                         send_verification_sms(phone_number, verification_code)
                     except Exception as e:
                         logger.error(f"Error sending SMS: {str(e)}")
@@ -556,9 +458,12 @@ class ForgotPasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ============================================
+# بازنشانی رمز عبور
+# ============================================
 class ResetPasswordView(APIView):
     """بازنشانی رمز عبور"""
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -594,45 +499,83 @@ class ResetPasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ============================================
+# وضعیت اشتراک
+# ============================================
 class SubscriptionStatusView(APIView):
     """دریافت وضعیت اشتراک کاربر"""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        subscription = request.user.get_active_subscription()
+        user = request.user
 
-        if subscription:
+        # اگر کاربر ادمین است
+        if user.is_admin:
             return Response({
                 'has_subscription': True,
-                'plan_name': subscription.plan.plan_name,
-                'plan_type': subscription.plan.plan_type,
-                'start_date': subscription.start_date,
-                'end_date': subscription.end_date,
-                'remaining_days': subscription.get_remaining_days(),
-                'remaining_trades': request.user.get_remaining_trades(),
-                'trades_limit': subscription.trades_limit,
-                'trades_used': subscription.trades_used,
-                'is_trial': subscription.is_trial,
-                'expired': False
+                'is_active': True,
+                'is_expired': False,
+                'is_near_expiry': False,
+                'remaining_days': 36500,
+                'remaining_trades': 99999,
+                'plan_name': 'ادمین',
+                'plan_type': 'admin',
+                'start_date': timezone.now(),
+                'end_date': timezone.now() + timezone.timedelta(days=36500),
+                'trades_limit': 99999,
+                'trades_used': 0,
+                'is_trial': False,
+                'payment_status': 'paid',
+                'is_admin': True,
+                'message': 'کاربر ادمین - دسترسی نامحدود'
             })
-        else:
-            # بررسی اشتراک منقضی شده
-            expired = request.user.user_subscriptions.filter(
-                is_active=True,
-                end_date__lte=timezone.now()
-            ).order_by('-end_date').first()
 
+        subscription = UserSubscription.objects.filter(
+            user=user,
+            is_active=True
+        ).first()
+
+        if not subscription:
             return Response({
                 'has_subscription': False,
-                'expired': expired is not None,
-                'message': 'اشتراک فعالی ندارید',
-                'expired_date': expired.end_date if expired else None
+                'is_active': False,
+                'message': 'هیچ اشتراک فعالی یافت نشد'
             })
 
+        remaining_days = subscription.get_remaining_days()
+        remaining_trades = subscription.get_remaining_trades()
 
+        is_expired = subscription.end_date < timezone.now()
+        is_active = subscription.is_active and not is_expired
+
+        warning_days = 3
+        is_near_expiry = remaining_days <= warning_days and remaining_days > 0
+
+        return Response({
+            'has_subscription': True,
+            'is_active': is_active,
+            'is_expired': is_expired,
+            'is_near_expiry': is_near_expiry,
+            'remaining_days': remaining_days,
+            'remaining_trades': remaining_trades,
+            'plan_name': subscription.plan.plan_name,
+            'plan_type': subscription.plan.plan_type,
+            'start_date': subscription.start_date,
+            'end_date': subscription.end_date,
+            'trades_limit': subscription.trades_limit,
+            'trades_used': subscription.trades_used,
+            'is_trial': subscription.is_trial,
+            'payment_status': subscription.payment_status,
+            'is_admin': False
+        })
+
+
+# ============================================
+# بررسی اشتراک برای ترید
+# ============================================
 class SubscriptionCheckView(APIView):
     """بررسی وضعیت اشتراک برای مسیریابی"""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         has_subscription = request.user.has_active_subscription()
@@ -648,9 +591,12 @@ class SubscriptionCheckView(APIView):
         })
 
 
+# ============================================
+# پیام‌های سیستم
+# ============================================
 class SystemMessagesView(APIView):
     """دریافت پیام‌های فعال سیستم"""
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         messages = SystemMessage.get_active_messages()
@@ -658,9 +604,12 @@ class SystemMessagesView(APIView):
         return Response(serializer.data)
 
 
+# ============================================
+# نسخه‌های نرم‌افزار
+# ============================================
 class AppVersionsView(APIView):
     """دریافت تاریخچه نسخه‌های نرم‌افزار"""
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         versions = AppVersion.get_recent_versions(15)
@@ -670,7 +619,7 @@ class AppVersionsView(APIView):
 
 class CurrentAppVersionView(APIView):
     """دریافت نسخه فعلی نرم‌افزار"""
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         version = AppVersion.get_current_version()
@@ -678,26 +627,29 @@ class CurrentAppVersionView(APIView):
             serializer = AppVersionSerializer(version)
             return Response(serializer.data)
         return Response({
-            'version': '1.0.0',
+            'version_number': '1.0.0',
             'release_date': timezone.now(),
             'release_notes': 'نسخه اولیه',
             'is_current': True
         })
 
 
+# ============================================
+# تنظیمات سیستم (فقط ادمین)
+# ============================================
 class SystemSettingsView(APIView):
     """دریافت و ویرایش تنظیمات سیستم (فقط برای ادمین)"""
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        settings = SystemSetting.objects.all()
+        settings_list = SystemSetting.objects.all()
         data = [{
             'key': s.setting_key,
             'value': s.setting_value,
             'type': s.setting_type,
             'description': s.description,
             'is_editable': s.is_editable
-        } for s in settings]
+        } for s in settings_list]
         return Response(data)
 
     def put(self, request):

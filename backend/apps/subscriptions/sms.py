@@ -1,8 +1,10 @@
-# sms.py
+# backend/apps/subscriptions/sms.py
+
+from django.conf import settings
 import requests
 import json
-from django.conf import settings
 import logging
+from django.utils import timezone
 from .models import SMSLog
 
 logger = logging.getLogger(__name__)
@@ -12,133 +14,191 @@ class GhasedakSMS:
     """سرویس پیامک قاصدک"""
 
     def __init__(self):
-        self.api_key = settings.SMS_API_KEY
-        self.sender = settings.SMS_SENDER
-        self.base_url = 'https://api.ghasedak.me/v2/'
+        self.api_key = getattr(settings, 'SMS_API_KEY', '')
+        self.sender = getattr(settings, 'SMS_SENDER_NUMBER', '')
+        self.otp_template = getattr(settings, 'SMS_OTP_TEMPLATE', 'verifycode')
+        self.base_url = 'https://gateway.ghasedak.me/rest/api/v1/WebService/'
 
-    def send_sms(self, phone_number, message):
-        """ارسال پیامک"""
+    def _send_request(self, endpoint, method='POST', data=None, params=None):
+        """ارسال درخواست به وب سرویس قاصدک"""
+        if not self.api_key:
+            logger.warning("SMS is disabled. API key not set.")
+            return {'status': 'disabled', 'message': 'SMS service is disabled'}
+
+        url = f"{self.base_url}{endpoint}"
+        headers = {
+            'ApiKey': self.api_key,
+            'Content-Type': 'application/json'
+        }
+
         try:
-            # اگر پیامک غیرفعال است
-            if not settings.SMS_API_KEY:
-                logger.warning("SMS is disabled. API key not set.")
-                return {'status': 'disabled', 'message': 'SMS service is disabled'}
+            if method.upper() == 'GET':
+                response = requests.get(url, headers=headers, params=params, timeout=10)
+            else:
+                response = requests.post(url, headers=headers, json=data, timeout=10)
 
-            # ذخیره در لاگ
-            sms_log = SMSLog.objects.create(
-                phone_number=phone_number,
-                message=message,
-                status='pending'
-            )
-
-            # ارسال پیامک
-            url = f"{self.base_url}send/simple"
-            data = {
-                'receptor': phone_number,
-                'message': message,
-                'sender': self.sender
-            }
-
-            response = requests.post(
-                url,
-                data=data,
-                headers={
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'apikey': self.api_key
-                }
-            )
-
+            response.raise_for_status()
             result = response.json()
 
-            if result.get('result', {}).get('code') == 200:
-                sms_log.status = 'success'
-                sms_log.response = json.dumps(result)
-                sms_log.save()
-                return {'status': 'success', 'data': result}
+            if result.get('IsSuccess'):
+                return {'status': 'success', 'data': result.get('Data')}
             else:
-                sms_log.status = 'failed'
-                sms_log.response = json.dumps(result)
-                sms_log.save()
-                logger.error(f"SMS error: {result}")
-                return {'status': 'failed', 'error': result}
+                error_msg = result.get('Message', 'خطا در ارسال پیامک')
+                logger.error(f"SMS error: {error_msg}")
+                return {'status': 'failed', 'error': error_msg, 'data': result}
 
-        except Exception as e:
-            logger.error(f"SMS exception: {str(e)}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"SMS request exception: {str(e)}")
             return {'status': 'error', 'error': str(e)}
 
     def send_verification_code(self, phone_number, code):
         """ارسال کد تایید"""
-        message = f"""
-        کد تایید شما: {code}
+        phone_number = self._clean_phone_number(phone_number)
 
-        این کد تا ۵ دقیقه اعتبار دارد.
+        sms_log = SMSLog.objects.create(
+            phone_number=phone_number,
+            message=f"کد تایید: {code}",
+            status='pending'
+        )
 
-        ژورنال حرفه‌ای ترید
-        """
-        return self.send_sms(phone_number, message)
+        try:
+            data = {
+                'receptors': [
+                    {
+                        'mobile': phone_number,
+                        'clientReferenceId': str(sms_log.id)
+                    }
+                ],
+                'templateName': self.otp_template,
+                'param1': code,
+                'udh': False,
+                'isVoice': False
+            }
+
+            logger.info(f"Sending SMS to {phone_number} with template {self.otp_template}")
+
+            result = self._send_request('SendOtpWithParams', 'POST', data)
+
+            if result.get('status') == 'success':
+                sms_log.status = 'success'
+                sms_log.response = json.dumps(result)
+                sms_log.save()
+                logger.info(f"SMS sent successfully to {phone_number}")
+                return {'status': 'success', 'data': result.get('data')}
+            else:
+                sms_log.status = 'failed'
+                sms_log.response = json.dumps(result)
+                sms_log.save()
+                return result
+
+        except Exception as e:
+            logger.error(f"Send verification SMS exception: {str(e)}")
+            sms_log.status = 'failed'
+            sms_log.response = str(e)
+            sms_log.save()
+            return {'status': 'error', 'error': str(e)}
+
+    def send_single_sms(self, phone_number, message, client_reference_id=None):
+        """ارسال پیامک تکی"""
+        phone_number = self._clean_phone_number(phone_number)
+
+        sms_log = SMSLog.objects.create(
+            phone_number=phone_number,
+            message=message,
+            status='pending'
+        )
+
+        try:
+            data = {
+                'receptor': phone_number,
+                'message': message,
+                'lineNumber': self.sender,
+                'clientReferenceId': client_reference_id or str(sms_log.id),
+                'udh': False
+            }
+
+            result = self._send_request('SendSingleSMS', 'POST', data)
+
+            if result.get('status') == 'success':
+                sms_log.status = 'success'
+                sms_log.response = json.dumps(result)
+                sms_log.save()
+            else:
+                sms_log.status = 'failed'
+                sms_log.response = json.dumps(result)
+                sms_log.save()
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Send single SMS exception: {str(e)}")
+            sms_log.status = 'failed'
+            sms_log.response = str(e)
+            sms_log.save()
+            return {'status': 'error', 'error': str(e)}
 
     def send_purchase_confirmation(self, phone_number, plan_name, end_date):
-        """ارسال تایید خرید"""
-        message = f"""
-        خرید شما با موفقیت انجام شد.
+        """ارسال تایید خرید اشتراک"""
+        message = (
+            f"✅ خرید اشتراک با موفقیت انجام شد\n"
+            f"📊 پلن: {plan_name}\n"
+            f"📅 تاریخ انقضا: {end_date.strftime('%Y/%m/%d')}\n\n"
+            f"با تشکر از اعتماد شما\n"
+            f"ژورنال حرفه‌ای ترید"
+        )
+        return self.send_single_sms(phone_number, message)
 
-        پلن: {plan_name}
-        تاریخ انقضا: {end_date.strftime('%Y/%m/%d')}
+    def send_admin_notification(self, message):
+        """ارسال پیام به ادمین"""
+        admin_phone = getattr(settings, 'ADMIN_PHONE_NUMBER', '')
+        if admin_phone:
+            return self.send_single_sms(admin_phone, message, client_reference_id='admin_notification')
+        return {'status': 'error', 'error': 'Admin phone number not set'}
 
-        با تشکر از اعتماد شما
-        ژورنال حرفه‌ای ترید
-        """
-        return self.send_sms(phone_number, message)
+    def send_daily_report(self, total_amount, total_count):
+        """ارسال گزارش روزانه به ادمین"""
+        admin_phone = getattr(settings, 'ADMIN_PHONE_NUMBER', '')
+        if admin_phone:
+            message = (
+                f"📊 گزارش فروش روزانه\n"
+                f"━━━━━━━━━━━━━━━\n"
+                f"💰 مجموع فروش: {total_amount:,.0f} تومان\n"
+                f"📦 تعداد تراکنش‌ها: {total_count}\n"
+                f"📅 تاریخ: {timezone.now().strftime('%Y/%m/%d')}\n"
+                f"━━━━━━━━━━━━━━━\n"
+                f"ژورنال حرفه‌ای ترید"
+            )
+            return self.send_single_sms(admin_phone, message, client_reference_id='daily_report')
+        return {'status': 'error', 'error': 'Admin phone number not set'}
 
-    def send_welcome_sms(self, phone_number, name=''):
-        """ارسال پیام خوش‌آمدگویی"""
-        message = f"""
-        {name} عزیز، به ژورنال حرفه‌ای ترید خوش آمدید.
-
-        شما میتوانید از امکانات پیشرفته این نرم‌افزار برای ثبت و تحلیل تریدهای خود استفاده کنید.
-
-        موفق باشید.
-        """
-        return self.send_sms(phone_number, message)
-
-    def send_admin_notification(self, phone_number, user_info, plan_name, amount):
-        """ارسال پیام به ادمین برای خرید جدید"""
-        message = f"""
-        خرید جدید در سیستم:
-
-        کاربر: {user_info}
-        پلن: {plan_name}
-        مبلغ: {amount:,.0f} تومان
-
-        تاریخ: {__import__('django.utils.timezone').now().strftime('%Y/%m/%d %H:%M')}
-        """
-        return self.send_sms(phone_number, message)
+    def _clean_phone_number(self, phone_number):
+        """پاکسازی شماره تلفن"""
+        cleaned = ''.join(filter(str.isdigit, phone_number))
+        if cleaned.startswith('0') and len(cleaned) == 11:
+            return cleaned
+        if cleaned.startswith('98'):
+            return '0' + cleaned[2:]
+        return cleaned
 
 
+# ============================================
 # توابع کمکی
+# ============================================
 def send_verification_sms(phone_number, code):
-    """ارسال کد تایید"""
     sms = GhasedakSMS()
     return sms.send_verification_code(phone_number, code)
 
 
 def send_purchase_confirmation(phone_number, plan_name, end_date):
-    """ارسال تایید خرید"""
     sms = GhasedakSMS()
     return sms.send_purchase_confirmation(phone_number, plan_name, end_date)
 
 
-def send_welcome_sms(phone_number, name=''):
-    """ارسال پیام خوش‌آمدگویی"""
+def send_admin_notification(message):
     sms = GhasedakSMS()
-    return sms.send_welcome_sms(phone_number, name)
+    return sms.send_admin_notification(message)
 
 
-def send_admin_purchase_notification(user, plan, amount):
-    """ارسال پیام به ادمین"""
+def send_daily_report(total_amount, total_count):
     sms = GhasedakSMS()
-    admin_phone = settings.ADMIN_PHONE_NUMBER if hasattr(settings, 'ADMIN_PHONE_NUMBER') else ''
-    if admin_phone:
-        user_info = f"{user.get_full_name()} ({user.phone_number})"
-        return sms.send_admin_notification(admin_phone, user_info, plan.plan_name, amount)
-    return {'status': 'error', 'error': 'Admin phone number not set'}
+    return sms.send_daily_report(total_amount, total_count)

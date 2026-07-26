@@ -11,9 +11,6 @@
   transition: all 0.3s ease;
 }
 
-/* ============================================
-   Header
-   ============================================ */
 .profile-header {
   display: flex;
   justify-content: space-between;
@@ -46,18 +43,12 @@
   color: white;
 }
 
-/* ============================================
-   Content
-   ============================================ */
 .profile-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-/* ============================================
-   Cards
-   ============================================ */
 .profile-card {
   background: var(--card-bg);
   padding: 24px;
@@ -108,9 +99,6 @@
   color: white;
 }
 
-/* ============================================
-   Form
-   ============================================ */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -182,9 +170,6 @@
   cursor: not-allowed;
 }
 
-/* ============================================
-   Messages
-   ============================================ */
 .message {
   padding: 12px 16px;
   border-radius: 8px;
@@ -197,24 +182,11 @@
   color: #2e7d32;
 }
 
-.dark-theme .message.success {
-  background: #1b3a1b;
-  color: #4caf50;
-}
-
 .message.error {
   background: #ffebee;
   color: #c62828;
 }
 
-.dark-theme .message.error {
-  background: #3a1a1a;
-  color: #ef5350;
-}
-
-/* ============================================
-   Subscription Info
-   ============================================ */
 .subscription-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -246,24 +218,12 @@
   color: #f57f17;
 }
 
-.dark-theme .sub-value.premium {
-  color: #ffb300;
-}
-
 .sub-value.trial {
   color: #0d47a1;
 }
 
-.dark-theme .sub-value.trial {
-  color: #42a5f5;
-}
-
 .sub-value.danger {
   color: #c62828;
-}
-
-.dark-theme .sub-value.danger {
-  color: #ef5350;
 }
 
 .expiry-badge {
@@ -275,19 +235,9 @@
   color: #c62828;
 }
 
-.dark-theme .expiry-badge {
-  background: #3a1a1a;
-  color: #ef5350;
-}
-
 .expiry-badge.warning {
   background: #fff3e0;
   color: #e65100;
-}
-
-.dark-theme .expiry-badge.warning {
-  background: #3a2a1a;
-  color: #ff8a65;
 }
 
 .btn-renew {
@@ -314,9 +264,6 @@
   cursor: not-allowed;
 }
 
-/* ============================================
-   Quick Stats
-   ============================================ */
 .quick-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -358,21 +305,10 @@
   color: #2e7d32;
 }
 
-.dark-theme .quick-stats .stat-value.success {
-  color: #4caf50;
-}
-
 .quick-stats .stat-value.danger {
   color: #c62828;
 }
 
-.dark-theme .quick-stats .stat-value.danger {
-  color: #ef5350;
-}
-
-/* ============================================
-   Version Info
-   ============================================ */
 .version-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -435,10 +371,6 @@
   color: white;
 }
 
-.dark-theme .versions-table thead {
-  background: #0d47a1;
-}
-
 .versions-table th {
   padding: 8px 12px;
   text-align: right;
@@ -454,17 +386,6 @@
   background: #e8f5e9;
 }
 
-.dark-theme .versions-table tr.current-version {
-  background: #1b3a1b;
-}
-
-.versions-table tr.current-version td {
-  color: var(--text-primary);
-}
-
-/* ============================================
-   Contact Info
-   ============================================ */
 .contact-info p {
   color: var(--text-secondary);
   font-size: 14px;
@@ -478,11 +399,6 @@
   border-radius: 8px;
   border-right: 4px solid #f57f17;
   font-size: 13px !important;
-}
-
-.dark-theme .contact-note {
-  background: #3a2a1a;
-  border-right-color: #ffb300;
 }
 
 .contact-buttons {
@@ -529,14 +445,10 @@
   box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
 }
 
-/* ============================================
-   Responsive
-   ============================================ */
 @media (max-width: 992px) {
   .profile-content {
     grid-template-columns: 1fr;
   }
-
   .profile-card:first-child {
     grid-column: 1;
   }
@@ -546,36 +458,24 @@
   .profile-container {
     padding: 12px;
   }
-
   .profile-header {
     flex-direction: column;
     gap: 12px;
   }
-
   .form-row {
     grid-template-columns: 1fr;
   }
-
   .subscription-info {
     grid-template-columns: 1fr;
   }
-
   .quick-stats {
     grid-template-columns: 1fr;
   }
-
-  .quick-stats .stat-item {
-    padding: 8px 12px;
-  }
-
   .contact-buttons {
     flex-direction: column;
   }
-
   .btn-contact,
   .btn-messages {
     width: 100%;
   }
 }
-
-@media

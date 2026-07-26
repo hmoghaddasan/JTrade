@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import { registerUser } from '../../services/mockAuthService';
 import { useAuth } from '../../contexts/AuthContext';
 import './auth.css';
 
@@ -15,8 +13,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { isDark } = useTheme();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,25 +51,18 @@ const Register = () => {
     }
 
     try {
-      const response = await registerUser({
+      const result = await register({
         phone_number: phoneNumber,
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         email: formData.email.trim()
       });
 
-      if (response.success) {
-        if (response.access && response.refresh) {
-          localStorage.setItem('accessToken', response.access);
-          localStorage.setItem('refreshToken', response.refresh);
-        }
-
-        login(response.user, response.access, response.refresh);
-
+      if (result.success) {
         localStorage.removeItem('tempPhoneNumber');
         navigate('/');
       } else {
-        setError(response.error || 'خطا در ثبت نام');
+        setError(result.error || 'خطا در ثبت نام');
       }
     } catch (error) {
       setError('خطا در ارتباط با سرور');
@@ -143,12 +133,9 @@ const Register = () => {
             <span className="field-hint">ایمیل اختیاری است</span>
           </div>
 
-          {/* ✅ کلید تکمیل ثبت نام وسط‌چین */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-              {loading ? 'در حال ثبت نام...' : '✅ تکمیل ثبت نام'}
-            </button>
-          </div>
+          <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
+            {loading ? 'در حال ثبت نام...' : '✅ تکمیل ثبت نام'}
+          </button>
         </form>
 
         <div className="auth-footer">

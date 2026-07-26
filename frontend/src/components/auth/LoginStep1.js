@@ -1,115 +1,74 @@
 // frontend/src/components/auth/LoginStep1.js
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import { sendVerificationCode } from '../../services/mockAuthService';
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import './auth.css';
 
-const LoginStep1 = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+const LoginStep1 = ({ onCodeSent }) => {
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [testCode, setTestCode] = useState('');
-  const { isDark } = useTheme();
-  const navigate = useNavigate();
+  const { sendCode } = useAuth();
+  const inputRef = useRef(null);
 
-  const validatePhone = (phone) => {
-    const pattern = /^09\d{9}$/;
-    return pattern.test(phone);
-  };
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setTestCode('');
     setLoading(true);
 
-    if (!phoneNumber) {
-      setError('لطفاً شماره تلفن خود را وارد کنید');
+    const cleanedPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanedPhone.length < 11) {
+      setError('شماره تلفن معتبر وارد کنید (حداقل ۱۱ رقم)');
       setLoading(false);
       return;
     }
 
-    if (!validatePhone(phoneNumber)) {
-      setError('شماره تلفن باید با 09 شروع شده و 11 رقم باشد');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await sendVerificationCode(phoneNumber);
-
-      if (response.success) {
-        localStorage.setItem('tempPhoneNumber', phoneNumber);
-
-        if (response.testCode) {
-          setTestCode(response.testCode);
-        }
-
-        navigate('/verify', { state: { phoneNumber, testCode: response.testCode } });
-      } else {
-        setError(response.error || 'خطا در ارسال کد تایید');
+    const result = await sendCode(cleanedPhone);
+    if (result.success) {
+      if (onCodeSent) {
+        onCodeSent();
       }
-    } catch (error) {
-      setError('خطا در ارتباط با سرور');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(result.error || 'خطا در ارسال کد تایید');
     }
+    setLoading(false);
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-box">
+    <div className="auth-container">
+      <div className="auth-card">
         <div className="auth-header">
           <h1>📊 ژورنال حرفه‌ای ترید</h1>
-          <p>برای ورود یا ثبت نام، شماره تلفن همراه خود را وارد کنید</p>
+          <h2>🚀 ورود به حساب کاربری</h2>
+          <p>شماره تلفن خود را وارد کنید تا کد تایید برای شما ارسال شود</p>
         </div>
 
-        {error && <div className="auth-error">{error}</div>}
-
-        {testCode && (
-          <div className="auth-success" style={{
-            background: '#e8f5e9',
-            color: '#2e7d32',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            fontSize: '14px',
-            textAlign: 'center'
-          }}>
-            🔑 کد تایید (تست): <strong>{testCode}</strong>
-            <br />
-            <span style={{ fontSize: '12px' }}>این کد در کنسول مرورگر نیز نمایش داده می‌شود</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>شماره تلفن همراه</label>
+            <label>📱 شماره تلفن</label>
             <input
+              ref={inputRef}
               type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-              placeholder="مثلاً 09123456789"
-              maxLength="11"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+              placeholder="09120000001"
               disabled={loading}
-              className="phone-input"
+              className={`phone-input-ltr ${error ? 'has-error' : ''}`}
+              maxLength="11"
             />
-            <span className="field-hint">شماره تلفن را با فرمت 09123456789 وارد کنید</span>
           </div>
 
-          {/* ✅ کلید ورود/ثبت نام وسط‌چین */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-              {loading ? 'در حال ارسال...' : 'ورود / ثبت نام'}
-            </button>
-          </div>
+          {error && <div className="error-message">⚠️ {error}</div>}
+
+          <button type="submit" disabled={loading} className="btn-primary">
+            {loading ? '⏳ در حال ارسال...' : '📲 ارسال کد تایید'}
+          </button>
         </form>
-
-        <div className="auth-footer">
-          <p>با ورود، شرایط و قوانین را می‌پذیرید</p>
-        </div>
       </div>
     </div>
   );

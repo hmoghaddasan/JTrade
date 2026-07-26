@@ -1,214 +1,191 @@
 // frontend/src/components/auth/VerifyCode.js
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { verifyCode, resendVerificationCode } from '../../services/mockAuthService';
 import './auth.css';
 
-const VerifyCode = () => {
-  const [code, setCode] = useState('');
+const VerifyCode = ({ onVerifySuccess, onBack }) => {
+  const [code, setCode] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(120);
-  const [canResend, setCanResend] = useState(false);
-  const [testCode, setTestCode] = useState('');
-  const { isDark } = useTheme();
-  const { login } = useAuth();  // ✅ استفاده از login از AuthContext
+  const [timeLeft, setTimeLeft] = useState(60);
+  const { verifyCode, phoneNumber, sendCode } = useAuth();
+  const inputRefs = useRef([]);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const phoneNumber = location.state?.phoneNumber || localStorage.getItem('tempPhoneNumber') || '';
-  const testCodeFromState = location.state?.testCode || '';
 
   useEffect(() => {
-    if (testCodeFromState) {
-      setTestCode(testCodeFromState);
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
     }
-  }, [testCodeFromState]);
+  }, []);
 
   useEffect(() => {
     if (timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else {
-      setCanResend(true);
     }
   }, [timeLeft]);
 
-  const isCodeComplete = code.length === 6;
+  const handleChange = (index, value) => {
+    if (value && !/^[0-9]$/.test(value)) return;
+    const newCode = [...code];
+    newCode[index] = value || '';
+    setCode(newCode);
+    if (value && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+    if (error) setError('');
+  };
 
-  // frontend/src/components/auth/VerifyCode.js - بخش handleVerify
-
-const handleVerify = async () => {
-  setError('');
-  setSuccess('');
-  setLoading(true);
-
-  try {
-    const response = await verifyCode(phoneNumber, code);
-
-    if (response.success) {
-      // ✅ ذخیره توکن‌ها
-      if (response.access && response.refresh) {
-        localStorage.setItem('accessToken', response.access);
-        localStorage.setItem('refreshToken', response.refresh);
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (code.every(digit => digit !== '')) {
+        handleSubmit(e);
       }
+    }
+  };
 
-      // ✅ اگر کاربر جدید است، به صفحه ثبت نام برود
-      if (response.is_new_user) {
-        // ذخیره شماره تلفن برای صفحه ثبت نام
-        localStorage.setItem('tempPhoneNumber', phoneNumber);
-        navigate('/register', { state: { phoneNumber, userData: response.user } });
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain').trim();
+    if (!/^\d+$/.test(pastedData)) return;
+    const digits = pastedData.slice(0, 6).split('');
+    const newCode = [...code];
+    digits.forEach((digit, index) => {
+      if (index < 6) {
+        newCode[index] = digit;
+      }
+    });
+    setCode(newCode);
+    const lastFilledIndex = Math.min(digits.length - 1, 5);
+    if (inputRefs.current[lastFilledIndex + 1]) {
+      inputRefs.current[lastFilledIndex + 1].focus();
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const fullCode = code.join('');
+    if (fullCode.length < 6) {
+      setError('لطفاً کد ۶ رقمی را کامل وارد کنید');
+      setLoading(false);
+      return;
+    }
+
+    const result = await verifyCode(fullCode);
+    if (result.success) {
+      if (onVerifySuccess) {
+        onVerifySuccess();
       } else {
-        // ✅ کاربر موجود - ورود به سیستم
-        login(response.user, response.access, response.refresh);
-        localStorage.removeItem('tempPhoneNumber');
-        navigate('/');
+        navigate('/dashboard', { replace: true });
       }
     } else {
-      setError(response.error || 'کد تایید نامعتبر است');
-    }
-  } catch (error) {
-    setError('خطا در ارتباط با سرور');
-  } finally {
-    setLoading(false);
-  }
-};
-  const handleResend = async () => {
-    setError('');
-    setSuccess('');
-    setLoading(true);
-    setCanResend(false);
-    setTimeLeft(120);
-
-    try {
-      const response = await resendVerificationCode(phoneNumber);
-
-      if (response.success) {
-        setSuccess('📨 کد جدید ارسال شد');
-        if (response.testCode) {
-          setTestCode(response.testCode);
-        }
-      } else {
-        setError(response.error || 'خطا در ارسال مجدد کد');
-        setCanResend(true);
+      setError(result.error || 'کد تایید نامعتبر است');
+      setCode(['', '', '', '', '', '']);
+      if (inputRefs.current[0]) {
+        inputRefs.current[0].focus();
       }
-    } catch (error) {
-      setError('خطا در ارتباط با سرور');
-      setCanResend(true);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  const handleResendCode = async () => {
+    if (timeLeft > 0 || loading) return;
+    setLoading(true);
+    setError('');
+    const result = await sendCode(phoneNumber);
+    if (result.success) {
+      setTimeLeft(60);
+      setCode(['', '', '', '', '', '']);
+      if (inputRefs.current[0]) {
+        inputRefs.current[0].focus();
+      }
+    } else {
+      setError(result.error || 'خطا در ارسال مجدد کد');
+    }
+    setLoading(false);
   };
+
+  const formatPhone = (phone) => {
+    if (!phone || phone.length !== 11) return phone;
+    return `۰۹۱۲ ${phone.slice(4, 7)} ${phone.slice(7, 9)} ${phone.slice(9, 11)}`;
+  };
+
+  if (!phoneNumber) {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/login', { replace: true });
+    }
+    return null;
+  }
 
   return (
-    <div className="auth-page">
-      <div className="auth-box verify-box">
+    <div className="auth-container">
+      <div className="auth-card">
         <div className="auth-header">
-          <h1>📱 تایید شماره تلفن</h1>
-          <p>
-            کد ۶ رقمی ارسال شده به شماره
-            <strong> {phoneNumber}</strong> را وارد کنید
+          <h2>🔐 تایید کد</h2>
+          <p className="phone-display">
+            کد تایید به شماره
+            <strong className="phone-number-ltr">
+              {formatPhone(phoneNumber)}
+            </strong>
+            ارسال شد
           </p>
         </div>
 
-        {error && <div className="auth-error">{error}</div>}
-        {success && <div className="auth-success" style={{
-          background: '#e8f5e9',
-          color: '#2e7d32',
-          padding: '12px',
-          borderRadius: '8px',
-          marginBottom: '16px',
-          fontSize: '14px',
-          textAlign: 'center'
-        }}>{success}</div>}
-
-        {testCode && (
-          <div className="auth-test-code" style={{
-            background: '#fff3e0',
-            color: '#e65100',
-            padding: '10px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            fontSize: '14px',
-            textAlign: 'center',
-            border: '1px dashed #f57f17'
-          }}>
-            🔑 کد تایید (تست): <strong style={{ fontSize: '20px', letterSpacing: '4px' }}>{testCode}</strong>
-            <br />
-            <span style={{ fontSize: '12px' }}>این کد را در باکس بالا وارد کنید</span>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="code-inputs-container">
+            <div className="code-inputs code-inputs-ltr">
+              {code.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength="1"
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  disabled={loading}
+                  className={`code-input code-input-ltr ${digit ? 'filled' : ''} ${error ? 'has-error' : ''}`}
+                />
+              ))}
+            </div>
           </div>
-        )}
 
-        <div className="code-input-container">
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="کد ۶ رقمی"
-            maxLength="6"
-            className="code-input"
-            autoFocus
-          />
-          <div className="code-dots">
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-              <span
-                key={index}
-                className={`code-dot ${code[index] ? 'filled' : ''}`}
-              >
-                {code[index] || ''}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="verify-actions">
-          <button
-            className="btn-verify"
-            onClick={handleVerify}
-            disabled={!isCodeComplete || loading}
-          >
-            {loading ? 'در حال تایید...' : '✅ تایید'}
-          </button>
-        </div>
-
-        <div className="timer-section">
-          <div className="timer">
-            <span className="timer-icon">⏱️</span>
-            <span className={`timer-text ${timeLeft < 30 ? 'danger' : ''}`}>
-              {formatTime(timeLeft)}
-            </span>
-          </div>
+          {error && <div className="error-message">⚠️ {error}</div>}
 
           <button
-            className={`btn-resend ${canResend ? 'active' : 'disabled'}`}
-            onClick={handleResend}
-            disabled={!canResend || loading}
+            type="submit"
+            disabled={loading || code.some(d => d === '')}
+            className="btn-primary"
           >
-            {canResend ? '📨 ارسال مجدد کد' : `ارسال مجدد پس از ${formatTime(timeLeft)}`}
+            {loading ? '⏳ در حال بررسی...' : '✅ تایید کد'}
           </button>
-        </div>
 
-        <div className="back-link">
-          <Link to="/login" className="btn-back-link">
-            ↩️ تغییر شماره تلفن
-          </Link>
-        </div>
+          <div className="resend-section">
+            {timeLeft > 0 ? (
+              <span>⏳ ارسال مجدد کد در {timeLeft} ثانیه</span>
+            ) : (
+              <button type="button" onClick={handleResendCode} disabled={loading} className="btn-link">
+                📨 ارسال مجدد کد
+              </button>
+            )}
+          </div>
 
-        <div className="auth-footer">
-          <p>کد تایید به شماره شما ارسال شد. در صورت عدم دریافت، روی ارسال مجدد کلیک کنید.</p>
-        </div>
+          <button type="button" onClick={onBack} disabled={loading} className="btn-secondary">
+            ↩️ بازگشت
+          </button>
+        </form>
       </div>
     </div>
   );

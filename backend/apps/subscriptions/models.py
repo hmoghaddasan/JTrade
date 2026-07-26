@@ -3,6 +3,25 @@ from django.utils import timezone
 from django.conf import settings
 
 
+# backend/apps/subscriptions/models.py
+
+class SMSLog(models.Model):
+    """لاگ پیامک‌ها"""
+    phone_number = models.CharField('شماره تلفن', max_length=15)
+    message = models.TextField('متن پیام')
+    status = models.CharField('وضعیت', max_length=20, default='pending')
+    response = models.TextField('پاسخ', blank=True)
+    created_at = models.DateTimeField('تاریخ ارسال', default=timezone.now)
+
+    class Meta:
+        verbose_name = 'لاگ پیامک'
+        verbose_name_plural = 'لاگ‌های پیامک'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.phone_number} - {self.created_at}"
+
+
 class SubscriptionPlan(models.Model):
     """پلن اشتراک"""
     PLAN_TYPES = [

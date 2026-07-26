@@ -1,9 +1,10 @@
-# apps/accounts/models.py
+# backend/apps/accounts/models.py
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 import json
+from types import SimpleNamespace
 
 
 class UserManager(BaseUserManager):
@@ -20,7 +21,6 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, phone_number, password=None, **extra_fields):
-        # فیلدهای اجباری برای سوپر یوزر
         extra_fields.setdefault('is_admin', True)
         extra_fields.setdefault('is_verified', True)
         extra_fields.setdefault('is_active', True)
@@ -36,20 +36,16 @@ class User(AbstractBaseUser):
     last_name = models.CharField('نام خانوادگی', max_length=50, blank=True)
     email = models.EmailField('ایمیل', max_length=100, blank=True)
 
-    # فیلدهای وضعیت
     is_active = models.BooleanField('فعال', default=True)
     is_admin = models.BooleanField('مدیر', default=False)
     is_verified = models.BooleanField('تایید شده', default=False)
 
-    # فیلدهای تایید
     verification_code = models.CharField('کد تایید', max_length=10, blank=True, null=True)
     verification_expiry = models.DateTimeField('انقضای کد تایید', blank=True, null=True)
 
-    # فیلدهای توکن
     login_token = models.CharField('توکن ورود', max_length=255, blank=True, null=True)
     login_token_expiry = models.DateTimeField('انقضای توکن ورود', blank=True, null=True)
 
-    # فیلدهای زمانی
     created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
     updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
     last_login = models.DateTimeField('آخرین ورود', blank=True, null=True)
@@ -73,7 +69,6 @@ class User(AbstractBaseUser):
 
     @property
     def is_staff(self):
-        """برای سازگاری با Django Admin"""
         return self.is_admin
 
     def has_perm(self, perm, obj=None):
@@ -84,7 +79,34 @@ class User(AbstractBaseUser):
 
     def get_active_subscription(self):
         """دریافت اشتراک فعال کاربر"""
-        from apps.subscriptions.models import UserSubscription
+        from apps.subscriptions.models import SubscriptionPlan
+
+        # اگر کاربر ادمین است، یک اشتراک نامحدود مجازی ایجاد کن
+        if self.is_admin:
+            virtual_plan = SimpleNamespace(
+                plan_name='ادمین',
+                plan_type='admin',
+                duration_days=36500,
+                monthly_trades_limit=99999,
+                is_active=True
+            )
+
+            virtual_subscription = SimpleNamespace(
+                plan=virtual_plan,
+                start_date=timezone.now(),
+                end_date=timezone.now() + timezone.timedelta(days=36500),
+                is_active=True,
+                trades_used=0,
+                trades_limit=99999,
+                is_trial=False,
+                payment_status='paid',
+                amount_paid=0,
+                get_remaining_days=lambda: 36500,
+                get_remaining_trades=lambda: 99999,
+                can_trade=lambda: True
+            )
+            return virtual_subscription
+
         return self.user_subscriptions.filter(
             is_active=True,
             end_date__gt=timezone.now()
@@ -92,10 +114,14 @@ class User(AbstractBaseUser):
 
     def has_active_subscription(self):
         """بررسی وجود اشتراک فعال"""
+        if self.is_admin:
+            return True
         return self.get_active_subscription() is not None
 
     def get_remaining_trades(self):
         """دریافت تعداد ترید باقیمانده"""
+        if self.is_admin:
+            return 99999
         subscription = self.get_active_subscription()
         if not subscription:
             return 0
@@ -103,6 +129,8 @@ class User(AbstractBaseUser):
 
     def can_trade(self):
         """بررسی امکان انجام ترید جدید"""
+        if self.is_admin:
+            return True
         subscription = self.get_active_subscription()
         if not subscription:
             return False
@@ -110,6 +138,8 @@ class User(AbstractBaseUser):
 
     def get_subscription_expiry(self):
         """دریافت تاریخ انقضای اشتراک"""
+        if self.is_admin:
+            return timezone.now() + timezone.timedelta(days=36500)
         subscription = self.get_active_subscription()
         if not subscription:
             return None
@@ -117,7 +147,6 @@ class User(AbstractBaseUser):
 
 
 class SystemSetting(models.Model):
-    """تنظیمات سیستم"""
     setting_key = models.CharField('کلید تنظیم', max_length=100, unique=True)
     setting_value = models.TextField('مقدار تنظیم', blank=True, null=True)
     setting_type = models.CharField('نوع تنظیم', max_length=20, default='string')
@@ -137,7 +166,6 @@ class SystemSetting(models.Model):
 
     @classmethod
     def get_setting(cls, key, default=None):
-        """دریافت مقدار یک تنظیم با مدیریت نوع"""
         try:
             setting = cls.objects.get(setting_key=key)
             value = setting.setting_value
@@ -172,7 +200,6 @@ class SystemSetting(models.Model):
 
     @classmethod
     def set_setting(cls, key, value, setting_type='string', description='', is_editable=True):
-        """تنظیم مقدار یک تنظیم"""
         setting, created = cls.objects.get_or_create(
             setting_key=key,
             defaults={
@@ -194,7 +221,6 @@ class SystemSetting(models.Model):
 
 
 class SystemMessage(models.Model):
-    """پیام‌های سیستم"""
     message_key = models.CharField('کلید پیام', max_length=100, blank=True)
     title = models.CharField('عنوان', max_length=200)
     message = models.TextField('متن پیام')
@@ -215,7 +241,6 @@ class SystemMessage(models.Model):
 
     @classmethod
     def get_active_messages(cls):
-        """دریافت پیام‌های فعال سیستم"""
         now = timezone.now()
         return cls.objects.filter(
             is_active=True
@@ -227,7 +252,6 @@ class SystemMessage(models.Model):
 
 
 class AppVersion(models.Model):
-    """نسخه‌های نرم‌افزار"""
     version_number = models.CharField('شماره نسخه', max_length=20)
     release_date = models.DateTimeField('تاریخ انتشار')
     release_notes = models.TextField('یادداشت‌های انتشار')
@@ -246,17 +270,14 @@ class AppVersion(models.Model):
 
     @classmethod
     def get_current_version(cls):
-        """دریافت نسخه جاری"""
         return cls.objects.filter(is_current=True).first()
 
     @classmethod
     def get_recent_versions(cls, limit=15):
-        """دریافت آخرین نسخه‌ها"""
         return cls.objects.all().order_by('-release_date')[:limit]
 
 
 class UserLoginLog(models.Model):
-    """لاگ ورود کاربران"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -285,7 +306,6 @@ class UserLoginLog(models.Model):
         return f"{self.user.phone_number} - {self.login_time}"
 
     def calculate_session_duration(self):
-        """محاسبه مدت زمان جلسه"""
         if self.logout_time and self.login_time:
             delta = self.logout_time - self.login_time
             self.session_duration = int(delta.total_seconds())
@@ -294,7 +314,6 @@ class UserLoginLog(models.Model):
 
 
 class UserActivityLog(models.Model):
-    """لاگ فعالیت‌های کاربران"""
     ACTION_TYPES = [
         ('login', 'ورود'),
         ('logout', 'خروج'),

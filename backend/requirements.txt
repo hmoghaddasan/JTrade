@@ -1,16 +1,25 @@
-Django==3.0.14
+# Django و هسته
+Django==4.2.7
 djangorestframework==3.14.0
-djangorestframework-simplejwt==5.3.1
-django-cors-headers==3.14.0
-django-filter==23.2
-django-redis==5.3.0
-mysqlclient==2.2.8
-celery==5.3.1
-django-celery-beat==2.6.0
+djangorestframework-simplejwt==5.3.0
+django-cors-headers==4.3.0
+django-filter==23.5
 drf-yasg==1.21.7
+
+# دیتابیس (MySQL 8)
+mysqlclient==2.2.0
+
+# کش و Queue
+django-redis==5.4.0
+redis==5.0.1
+celery==5.3.6
+django-celery-beat==2.5.0
+
+# ابزارها
 python-decouple==3.8
 requests==2.31.0
-pillow==10.0.0
-reportlab==4.0.4
-openpyxl==3.1.2
-python-dateutil==2.8.2
+Pillow==10.1.0
+
+# نصب وابستگی‌ها
+setuptools==68.2.2
+wheel==0.41.2

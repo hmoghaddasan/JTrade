@@ -1,3 +1,5 @@
+# backend/apps/accounts/system_urls.py
+
 from django.urls import path
 from . import views
 

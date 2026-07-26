@@ -1,0 +1,260 @@
+/* اضافه کردن به انتهای فایل Profile.css */
+
+/* ============================================
+   Modal Plans
+   ============================================ */
+.modal-plans {
+  max-width: 800px !important;
+  padding: 32px !important;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.modal-header h3 {
+  color: var(--text-primary);
+  font-size: 22px;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+/* Duration Tabs */
+.plan-duration-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.duration-tab {
+  padding: 8px 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.duration-tab:hover {
+  border-color: var(--gradient-start);
+  color: var(--gradient-start);
+}
+
+.duration-tab.active {
+  background: var(--gradient-start);
+  color: white;
+  border-color: var(--gradient-start);
+}
+
+/* Plans Grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.plan-card {
+  padding: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+}
+
+.plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.plan-card.selected {
+  border-color: var(--gradient-start);
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+}
+
+.plan-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.plan-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gradient-start);
+  margin-bottom: 12px;
+}
+
+.plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.plan-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.plan-selected-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--gradient-start);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Discount Section */
+.discount-section {
+  margin-bottom: 16px;
+}
+
+.btn-discount-toggle {
+  background: none;
+  border: none;
+  color: var(--gradient-start);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.btn-discount-toggle:hover {
+  text-decoration: underline;
+}
+
+.discount-input-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.discount-input-group input {
+  flex: 1;
+  padding: 8px 14px;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+}
+
+.discount-input-group input:focus {
+  border-color: var(--input-focus);
+  outline: none;
+}
+
+.btn-apply-discount {
+  padding: 8px 20px;
+  background: var(--gradient-start);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.btn-apply-discount:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
+}
+
+/* Tax Info */
+.tax-info {
+  text-align: center;
+  padding: 12px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.tax-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.btn-payment {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  width: 100%;
+}
+
+.btn-payment:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.btn-payment:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-plans {
+    padding: 20px !important;
+    max-width: 95% !important;
+  }
+
+  .plan-duration-tabs {
+    justify-content: center;
+  }
+
+  .duration-tab {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+}

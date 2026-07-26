@@ -1,36 +1,25 @@
 // frontend/src/components/ProtectedRoute.js
-
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading, subscriptionExpired } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        fontSize: '18px',
-        color: '#666'
-      }}>
-        ⏳ در حال بارگذاری...
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>در حال بارگذاری...</p>
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (subscriptionExpired) {
-    return <Navigate to="/subscription/renew" />;
-  }
-
-  return children || <Outlet />;
+  return children;
 };
 
 export default ProtectedRoute;

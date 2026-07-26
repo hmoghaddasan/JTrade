@@ -1,3 +1,5 @@
+# backend/apps/accounts/serializers.py
+
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -7,8 +9,17 @@ import re
 from .models import User, SystemMessage, AppVersion
 
 
+class PhoneNumberSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+
+    def validate_phone_number(self, value):
+        pattern = r'^09\d{9}$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError('شماره تلفن باید با 09 شروع شده و 11 رقم باشد')
+        return value
+
+
 class UserRegisterSerializer(serializers.Serializer):
-    """سریالایزر ثبت‌نام کاربر"""
     phone_number = serializers.CharField(max_length=15)
     password = serializers.CharField(write_only=True, min_length=6)
     first_name = serializers.CharField(max_length=50, required=False, allow_blank=True)
@@ -16,7 +27,6 @@ class UserRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
 
     def validate_phone_number(self, value):
-        # اعتبارسنجی شماره تلفن ایران
         pattern = r'^09\d{9}$'
         if not re.match(pattern, value):
             raise serializers.ValidationError('شماره تلفن باید با 09 شروع شده و 11 رقم باشد')
@@ -31,7 +41,6 @@ class UserRegisterSerializer(serializers.Serializer):
 
 
 class VerifyCodeSerializer(serializers.Serializer):
-    """سریالایزر تایید کد"""
     phone_number = serializers.CharField(max_length=15)
     code = serializers.CharField(max_length=10)
 
@@ -48,7 +57,6 @@ class VerifyCodeSerializer(serializers.Serializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    """سریالایزر ورود کاربر"""
     phone_number = serializers.CharField(max_length=15)
     password = serializers.CharField(write_only=True)
 
@@ -60,7 +68,6 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """سریالایزر پروفایل کاربر برای نمایش"""
     full_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -76,8 +83,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    """سریالایزر به‌روزرسانی پروفایل کاربر"""
-
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
@@ -89,7 +94,6 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """سریالایزر کامل کاربر با اطلاعات اشتراک"""
     full_name = serializers.SerializerMethodField()
     subscription_status = serializers.SerializerMethodField()
     remaining_trades = serializers.SerializerMethodField()
@@ -97,6 +101,7 @@ class UserSerializer(serializers.ModelSerializer):
     remaining_days = serializers.SerializerMethodField()
     plan_name = serializers.SerializerMethodField()
     plan_type = serializers.SerializerMethodField()
+    is_admin = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -130,16 +135,19 @@ class UserSerializer(serializers.ModelSerializer):
         return 0
 
     def get_plan_name(self, obj):
+        if obj.is_admin:
+            return 'ادمین'
         subscription = obj.get_active_subscription()
         return subscription.plan.plan_name if subscription else None
 
     def get_plan_type(self, obj):
+        if obj.is_admin:
+            return 'admin'
         subscription = obj.get_active_subscription()
         return subscription.plan.plan_type if subscription else None
 
 
 class SubscriptionStatusSerializer(serializers.Serializer):
-    """سریالایزر وضعیت اشتراک"""
     has_subscription = serializers.BooleanField()
     plan_name = serializers.CharField(required=False, allow_null=True)
     plan_type = serializers.CharField(required=False, allow_null=True)
@@ -151,27 +159,23 @@ class SubscriptionStatusSerializer(serializers.Serializer):
     trades_used = serializers.IntegerField(required=False)
     is_trial = serializers.BooleanField(required=False)
     expired = serializers.BooleanField(required=False)
+    is_admin = serializers.BooleanField(required=False)
     message = serializers.CharField(required=False, allow_blank=True)
 
 
 class SystemMessageSerializer(serializers.ModelSerializer):
-    """سریالایزر پیام سیستم"""
-
     class Meta:
         model = SystemMessage
         fields = ['id', 'message_key', 'title', 'message', 'is_active', 'start_date', 'end_date', 'created_at']
 
 
 class AppVersionSerializer(serializers.ModelSerializer):
-    """سریالایزر نسخه نرم‌افزار"""
-
     class Meta:
         model = AppVersion
         fields = ['id', 'version_number', 'release_date', 'release_notes', 'is_current', 'created_at']
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    """سریالایزر تغییر رمز عبور"""
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, min_length=6)
     confirm_password = serializers.CharField(write_only=True, min_length=6)
@@ -195,7 +199,6 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
-    """سریالایزر فراموشی رمز عبور"""
     phone_number = serializers.CharField(max_length=15)
 
     def validate_phone_number(self, value):
@@ -210,7 +213,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
 
 class ResetPasswordSerializer(serializers.Serializer):
-    """سریالایزر بازنشانی رمز عبور"""
     phone_number = serializers.CharField(max_length=15)
     code = serializers.CharField(max_length=10)
     new_password = serializers.CharField(write_only=True, min_length=6)

@@ -4,26 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import RealApiService from '../services/realApiService';
 import './Profile.css';
-
-// لیست نسخه‌های نرم‌افزار (نمونه)
-const APP_VERSIONS = [
-  { version: '1.4.1', date: '۱۴۰۳/۱۰/۰۱', notes: 'آخرین به‌روزرسانی و بهبودهای نهایی' },
-  { version: '1.4.0', date: '۱۴۰۳/۰۹/۱۵', notes: 'به‌روزرسانی کامل پنل ادمین' },
-  { version: '1.3.2', date: '۱۴۰۳/۰۹/۰۱', notes: 'افزودن قابلیت پاسخگویی به پیام‌های کاربران' },
-  { version: '1.3.1', date: '۱۴۰۳/۰۸/۱۵', notes: 'بهبود سرعت بارگذاری و تجربه کاربری' },
-  { version: '1.3.0', date: '۱۴۰۳/۰۸/۰۱', notes: 'افزودن سیستم تخفیف و کدهای تخفیف' },
-  { version: '1.2.2', date: '۱۴۰۳/۰۷/۱۵', notes: 'بهبود گزارشات مالی و نمودارها' },
-  { version: '1.2.1', date: '۱۴۰۳/۰۷/۰۱', notes: 'رفع مشکلات امنیتی و بهبود احراز هویت' },
-  { version: '1.2.0', date: '۱۴۰۳/۰۶/۱۵', notes: 'افزودن سیستم پیام‌رسانی کاربران' },
-  { version: '1.1.2', date: '۱۴۰۳/۰۶/۰۱', notes: 'افزودن قابلیت چاپ و خروجی PDF' },
-  { version: '1.1.1', date: '۱۴۰۳/۰۵/۱۵', notes: 'بهبود عملکرد و بهینه‌سازی دیتابیس' },
-  { version: '1.1.0', date: '۱۴۰۳/۰۵/۰۱', notes: 'افزودن گزارشات پیشرفته و نمودارها' },
-  { version: '1.0.3', date: '۱۴۰۳/۰۴/۱۵', notes: 'بهبود رابط کاربری و افزودن تم شب' },
-  { version: '1.0.2', date: '۱۴۰۳/۰۴/۰۱', notes: 'افزودن قابلیت دسته‌بندی تریدها' },
-  { version: '1.0.1', date: '۱۴۰۳/۰۳/۲۰', notes: 'رفع باگ‌های اولیه و بهبود سرعت' },
-  { version: '1.0.0', date: '۱۴۰۳/۰۳/۱۵', notes: 'نسخه اولیه نرم‌افزار ژورنال ترید' },
-];
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
@@ -41,6 +23,8 @@ const Profile = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showVersions, setShowVersions] = useState(false);
   const [trades, setTrades] = useState([]);
+  const [appVersions, setAppVersions] = useState([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
   const [subscription, setSubscription] = useState({
     plan: 'حرفه‌ای',
     remainingDays: 25,
@@ -52,7 +36,6 @@ const Profile = () => {
     isExpired: false
   });
 
-  // بارگذاری اطلاعات کاربر و تریدها
   useEffect(() => {
     if (user) {
       setFormData({
@@ -73,11 +56,89 @@ const Profile = () => {
       }));
     }
 
-    // بررسی انقضای اشتراک
-    checkSubscriptionExpiry();
+    const fetchSubscription = async () => {
+      try {
+        const response = await RealApiService.getUserSubscription();
+        if (response.data) {
+          const subData = response.data;
+
+          // اگر کاربر ادمین است
+          if (subData.is_admin) {
+            setSubscription(prev => ({
+              ...prev,
+              plan: 'ادمین (نامحدود)',
+              remainingDays: '♾️',
+              remainingTrades: '♾️',
+              startDate: '—',
+              endDate: '♾️ بدون محدودیت',
+              isActive: true,
+              isExpired: false
+            }));
+            return;
+          }
+
+          const endDate = new Date(subData.end_date);
+          const now = new Date();
+          const remainingDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+
+          setSubscription(prev => ({
+            ...prev,
+            plan: subData.plan_name || 'حرفه‌ای',
+            remainingDays: remainingDays > 0 ? remainingDays : 0,
+            remainingTrades: (subData.trades_limit || 0) - (subData.trades_used || 0),
+            startDate: new Date(subData.start_date).toLocaleDateString('fa-IR'),
+            endDate: new Date(subData.end_date).toLocaleDateString('fa-IR'),
+            isActive: subData.is_active,
+            isExpired: remainingDays <= 0
+          }));
+        }
+      } catch (error) {
+        console.log('No active subscription from backend, checking localStorage');
+        checkSubscriptionExpiry();
+      }
+    };
+
+    fetchSubscription();
+    fetchAppVersions();
   }, [user]);
 
-  // تابع بررسی انقضای اشتراک
+  const fetchAppVersions = async () => {
+    setVersionsLoading(true);
+    try {
+      const response = await RealApiService.getAppVersions();
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setAppVersions(response.data);
+      } else {
+        setAppVersions(getFallbackVersions());
+      }
+    } catch (error) {
+      console.error('❌ Error fetching app versions:', error);
+      setAppVersions(getFallbackVersions());
+    } finally {
+      setVersionsLoading(false);
+    }
+  };
+
+  const getFallbackVersions = () => {
+    return [
+      { version_number: '1.4.1', release_date: '2024-10-01T00:00:00Z', release_notes: 'آخرین به‌روزرسانی و بهبودهای نهایی', is_current: true },
+      { version_number: '1.4.0', release_date: '2024-09-15T00:00:00Z', release_notes: 'به‌روزرسانی کامل پنل ادمین', is_current: false },
+      { version_number: '1.3.2', release_date: '2024-09-01T00:00:00Z', release_notes: 'افزودن قابلیت پاسخگویی به پیام‌های کاربران', is_current: false },
+      { version_number: '1.3.1', release_date: '2024-08-15T00:00:00Z', release_notes: 'بهبود سرعت بارگذاری و تجربه کاربری', is_current: false },
+      { version_number: '1.3.0', release_date: '2024-08-01T00:00:00Z', release_notes: 'افزودن سیستم تخفیف و کدهای تخفیف', is_current: false },
+      { version_number: '1.2.2', release_date: '2024-07-15T00:00:00Z', release_notes: 'بهبود گزارشات مالی و نمودارها', is_current: false },
+      { version_number: '1.2.1', release_date: '2024-07-01T00:00:00Z', release_notes: 'رفع مشکلات امنیتی و بهبود احراز هویت', is_current: false },
+      { version_number: '1.2.0', release_date: '2024-06-15T00:00:00Z', release_notes: 'افزودن سیستم پیام‌رسانی کاربران', is_current: false },
+      { version_number: '1.1.2', release_date: '2024-06-01T00:00:00Z', release_notes: 'افزودن قابلیت چاپ و خروجی PDF', is_current: false },
+      { version_number: '1.1.1', release_date: '2024-05-15T00:00:00Z', release_notes: 'بهبود عملکرد و بهینه‌سازی دیتابیس', is_current: false },
+      { version_number: '1.1.0', release_date: '2024-05-01T00:00:00Z', release_notes: 'افزودن گزارشات پیشرفته و نمودارها', is_current: false },
+      { version_number: '1.0.3', release_date: '2024-04-15T00:00:00Z', release_notes: 'بهبود رابط کاربری و افزودن تم شب', is_current: false },
+      { version_number: '1.0.2', release_date: '2024-04-01T00:00:00Z', release_notes: 'افزودن قابلیت دسته‌بندی تریدها', is_current: false },
+      { version_number: '1.0.1', release_date: '2024-03-20T00:00:00Z', release_notes: 'رفع باگ‌های اولیه و بهبود سرعت', is_current: false },
+      { version_number: '1.0.0', release_date: '2024-03-15T00:00:00Z', release_notes: 'نسخه اولیه نرم‌افزار ژورنال ترید', is_current: false },
+    ];
+  };
+
   const checkSubscriptionExpiry = () => {
     const savedSubscription = localStorage.getItem('subscription');
     if (savedSubscription) {
@@ -109,14 +170,12 @@ const Profile = () => {
         endDate: new Date(subData.endDate).toLocaleDateString('fa-IR')
       }));
 
-      // اگر کمتر از 3 روز باقی مانده، اخطار نمایش بده
       if (diffDays <= 3 && diffDays > 0) {
         setTimeout(() => {
           alert(`⚠️ توجه: ${diffDays} روز تا پایان اشتراک شما باقی مانده است. لطفاً هرچه سریعتر تمدید کنید.`);
         }, 1000);
       }
     } else {
-      // اگر اشتراک در localStorage نبود، یک اشتراک آزمایشی ایجاد کن
       const trialEndDate = new Date();
       trialEndDate.setDate(trialEndDate.getDate() + 7);
 
@@ -144,47 +203,16 @@ const Profile = () => {
     }
   };
 
-  // تابع تمدید اشتراک
   const handleRenewSubscription = () => {
-    setLoading(true);
+    navigate('/subscription/renew');
+  };
 
-    try {
-      const currentSub = JSON.parse(localStorage.getItem('subscription') || '{}');
-
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 30);
-
-      const updatedSubscription = {
-        plan: currentSub?.plan || 'حرفه‌ای',
-        remainingDays: 30,
-        remainingTrades: 50,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        isActive: true,
-        isExpired: false,
-        lastRenewed: new Date().toISOString()
-      };
-
-      localStorage.setItem('subscription', JSON.stringify(updatedSubscription));
-
-      setSubscription({
-        plan: updatedSubscription.plan,
-        remainingDays: 30,
-        remainingTrades: 50,
-        totalTrades: trades.length,
-        startDate: startDate.toLocaleDateString('fa-IR'),
-        endDate: endDate.toLocaleDateString('fa-IR'),
-        isActive: true,
-        isExpired: false
-      });
-
-      alert('✅ اشتراک شما با موفقیت تمدید شد! اعتبار جدید تا تاریخ ' + endDate.toLocaleDateString('fa-IR'));
-    } catch (error) {
-      console.error('Error renewing subscription:', error);
-      alert('❌ خطا در تمدید اشتراک. لطفاً دوباره تلاش کنید.');
-    } finally {
-      setLoading(false);
+  const handleLogout = () => {
+    if (window.confirm('آیا از خروج از سیستم اطمینان دارید؟')) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('subscription');
+      window.location.href = '/login';
     }
   };
 
@@ -198,7 +226,11 @@ const Profile = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await RealApiService.updateProfile({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email
+      });
 
       const updatedUser = {
         ...user,
@@ -221,13 +253,13 @@ const Profile = () => {
       setMessage({ type: 'success', text: '✅ اطلاعات با موفقیت به‌روزرسانی شد' });
       setEditMode(false);
     } catch (error) {
+      console.error('Error updating profile:', error);
       setMessage({ type: 'error', text: '❌ خطا در به‌روزرسانی اطلاعات' });
     } finally {
       setLoading(false);
     }
   };
 
-  // محاسبه آمار سریع
   const totalTrades = trades.length;
   const winningTrades = trades.filter(t => t.profit > 0).length;
   const losingTrades = trades.filter(t => t.profit < 0).length;
@@ -343,78 +375,16 @@ const Profile = () => {
           </div>
 
           <div className="quick-stats">
-            <div className="stat-item">
-              <span className="stat-icon">📈</span>
-              <div>
-                <span className="stat-label">کل تریدها</span>
-                <span className="stat-value">{totalTrades}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">✅</span>
-              <div>
-                <span className="stat-label">تریدهای برنده</span>
-                <span className="stat-value success">{winningTrades}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">❌</span>
-              <div>
-                <span className="stat-label">تریدهای بازنده</span>
-                <span className="stat-value danger">{losingTrades}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">📊</span>
-              <div>
-                <span className="stat-label">نرخ برد</span>
-                <span className="stat-value">{winRate}%</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">💰</span>
-              <div>
-                <span className="stat-label">سود کل</span>
-                <span className={`stat-value ${totalProfit >= 0 ? 'success' : 'danger'}`}>
-                  ${totalProfit}
-                </span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">📏</span>
-              <div>
-                <span className="stat-label">میانگین سود</span>
-                <span className="stat-value">${avgProfit}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">🏆</span>
-              <div>
-                <span className="stat-label">بهترین ترید</span>
-                <span className="stat-value success">+${bestTrade}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">📉</span>
-              <div>
-                <span className="stat-label">بدترین ترید</span>
-                <span className="stat-value danger">${worstTrade}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">📅</span>
-              <div>
-                <span className="stat-label">تریدهای امروز</span>
-                <span className="stat-value">{todayTrades}</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">📆</span>
-              <div>
-                <span className="stat-label">تریدهای این هفته</span>
-                <span className="stat-value">{thisWeekTrades}</span>
-              </div>
-            </div>
+            <div className="stat-item"><span className="stat-icon">📈</span><div><span className="stat-label">کل تریدها</span><span className="stat-value">{totalTrades}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">✅</span><div><span className="stat-label">تریدهای برنده</span><span className="stat-value success">{winningTrades}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">❌</span><div><span className="stat-label">تریدهای بازنده</span><span className="stat-value danger">{losingTrades}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">📊</span><div><span className="stat-label">نرخ برد</span><span className="stat-value">{winRate}%</span></div></div>
+            <div className="stat-item"><span className="stat-icon">💰</span><div><span className="stat-label">سود کل</span><span className={`stat-value ${totalProfit >= 0 ? 'success' : 'danger'}`}>${totalProfit}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">📏</span><div><span className="stat-label">میانگین سود</span><span className="stat-value">${avgProfit}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">🏆</span><div><span className="stat-label">بهترین ترید</span><span className="stat-value success">+${bestTrade}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">📉</span><div><span className="stat-label">بدترین ترید</span><span className="stat-value danger">${worstTrade}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">📅</span><div><span className="stat-label">تریدهای امروز</span><span className="stat-value">{todayTrades}</span></div></div>
+            <div className="stat-item"><span className="stat-icon">📆</span><div><span className="stat-label">تریدهای این هفته</span><span className="stat-value">{thisWeekTrades}</span></div></div>
           </div>
         </div>
 
@@ -422,10 +392,15 @@ const Profile = () => {
         <div className="profile-card">
           <div className="card-header">
             <h3>📊 اطلاعات اشتراک</h3>
-            {subscription.isExpired && (
+            {user?.is_admin && (
+              <span className="expiry-badge admin-badge" style={{ background: '#1a237e', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                👑 مدیر
+              </span>
+            )}
+            {!user?.is_admin && subscription.isExpired && (
               <span className="expiry-badge">⏰ منقضی شده</span>
             )}
-            {!subscription.isExpired && subscription.remainingDays <= 3 && (
+            {!user?.is_admin && !subscription.isExpired && subscription.remainingDays <= 3 && (
               <span className="expiry-badge warning">⚠️ در حال اتمام</span>
             )}
           </div>
@@ -433,28 +408,30 @@ const Profile = () => {
           <div className="subscription-info">
             <div className="sub-item">
               <span className="sub-label">نوع پلن</span>
-              <span className={`sub-value ${subscription.plan === 'حرفه‌ای' ? 'premium' : 'trial'}`}>
-                {subscription.plan}
+              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.plan === 'حرفه‌ای' ? 'premium' : 'trial'}`}>
+                {user?.is_admin ? '👑 ادمین (نامحدود)' : subscription.plan}
               </span>
             </div>
             <div className="sub-item">
               <span className="sub-label">روزهای باقیمانده</span>
-              <span className={`sub-value ${subscription.remainingDays < 3 ? 'danger' : ''}`}>
-                {subscription.remainingDays} روز
+              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.remainingDays < 3 ? 'danger' : ''}`}>
+                {user?.is_admin ? '♾️ نامحدود' : `${subscription.remainingDays} روز`}
               </span>
             </div>
             <div className="sub-item">
               <span className="sub-label">تریدهای باقیمانده</span>
-              <span className="sub-value">{subscription.remainingTrades} عدد</span>
+              <span className="sub-value">
+                {user?.is_admin ? '♾️ نامحدود' : `${subscription.remainingTrades} عدد`}
+              </span>
             </div>
             <div className="sub-item">
               <span className="sub-label">تاریخ شروع</span>
-              <span className="sub-value">{subscription.startDate}</span>
+              <span className="sub-value">{user?.is_admin ? '—' : subscription.startDate}</span>
             </div>
             <div className="sub-item">
               <span className="sub-label">تاریخ پایان</span>
-              <span className={`sub-value ${subscription.isExpired ? 'danger' : ''}`}>
-                {subscription.endDate}
+              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isExpired ? 'danger' : ''}`}>
+                {user?.is_admin ? '♾️ بدون محدودیت' : subscription.endDate}
               </span>
             </div>
           </div>
@@ -464,8 +441,33 @@ const Profile = () => {
             onClick={handleRenewSubscription}
             disabled={loading}
           >
-            {loading ? '⏳ در حال تمدید...' : '🔄 تمدید اشتراک (۳۰ روز)'}
+            {loading ? '⏳ در حال تمدید...' : '🔄 تمدید اشتراک'}
           </button>
+
+          {!user?.is_admin && subscription.isExpired && (
+            <button
+              className="btn-logout"
+              onClick={handleLogout}
+              style={{
+                marginTop: '10px',
+                width: '100%',
+                padding: '12px',
+                background: '#c62828',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                fontFamily: 'inherit'
+              }}
+              onMouseEnter={(e) => { e.target.style.background = '#b71c1c'; e.target.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.target.style.background = '#c62828'; e.target.style.transform = 'translateY(0)'; }}
+            >
+              🚪 خروج از سیستم
+            </button>
+          )}
         </div>
 
         {/* نسخه نرم‌افزار و تغییرات */}
@@ -477,11 +479,17 @@ const Profile = () => {
           <div className="version-info">
             <div className="version-item">
               <span className="version-label">نسخه فعلی</span>
-              <span className="version-value">v1.4.1</span>
+              <span className="version-value">
+                {appVersions.find(v => v.is_current)?.version_number || '1.4.1'}
+              </span>
             </div>
             <div className="version-item">
               <span className="version-label">تاریخ انتشار</span>
-              <span className="version-value">۱۴۰۳/۱۰/۰۱</span>
+              <span className="version-value">
+                {appVersions.find(v => v.is_current)?.release_date
+                  ? new Date(appVersions.find(v => v.is_current).release_date).toLocaleDateString('fa-IR')
+                  : '۱۴۰۳/۱۰/۰۱'}
+              </span>
             </div>
           </div>
 
@@ -491,24 +499,24 @@ const Profile = () => {
 
           {showVersions && (
             <div className="versions-list">
-              <table className="versions-table">
-                <thead>
-                  <tr>
-                    <th>نسخه</th>
-                    <th>تاریخ</th>
-                    <th>تغییرات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {APP_VERSIONS.map((item, index) => (
-                    <tr key={index} className={item.version === '1.4.1' ? 'current-version' : ''}>
-                      <td><strong>v{item.version}</strong></td>
-                      <td>{item.date}</td>
-                      <td>{item.notes}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {versionsLoading ? (
+                <div className="loading-spinner">⏳ در حال بارگذاری...</div>
+              ) : appVersions.length > 0 ? (
+                <table className="versions-table">
+                  <thead><tr><th>نسخه</th><th>تاریخ</th><th>تغییرات</th></tr></thead>
+                  <tbody>
+                    {appVersions.map((item, index) => (
+                      <tr key={index} className={item.is_current ? 'current-version' : ''}>
+                        <td><strong>v{item.version_number}</strong></td>
+                        <td>{item.release_date_persian || new Date(item.release_date).toLocaleDateString('fa-IR')}</td>
+                        <td>{item.release_notes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="empty-state">هیچ نسخه‌ای یافت نشد</div>
+              )}
             </div>
           )}
         </div>
@@ -518,18 +526,12 @@ const Profile = () => {
           <div className="card-header">
             <h3>📞 تماس با ما</h3>
           </div>
-
           <div className="contact-info">
             <p>در صورت داشتن هرگونه سؤال، مشکل یا پیشنهاد، می‌توانید از طریق فرم زیر با ما در ارتباط باشید.</p>
             <p className="contact-note">📌 همکاران ما پس از دریافت پیام شما، در اسرع وقت بررسی کرده و در صورت نیاز با شما تماس خواهند گرفت.</p>
-
             <div className="contact-buttons">
-              <button className="btn-contact" onClick={() => navigate('/messages/new')}>
-                ✉️ ارسال پیام جدید
-              </button>
-              <button className="btn-messages" onClick={() => navigate('/messages')}>
-                📬 مشاهده پیام‌ها
-              </button>
+              <button className="btn-contact" onClick={() => navigate('/messages/new')}>✉️ ارسال پیام جدید</button>
+              <button className="btn-messages" onClick={() => navigate('/messages')}>📬 مشاهده پیام‌ها</button>
             </div>
           </div>
         </div>

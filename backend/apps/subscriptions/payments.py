@@ -1,8 +1,10 @@
+# backend/apps/subscriptions/payments.py
+
 import requests
 import json
-from django.conf import settings
-from django.urls import reverse
 import logging
+from django.conf import settings
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +18,8 @@ class ZarinpalPayment:
         self.callback_url = settings.ZARINPAL_CALLBACK_URL
 
         if self.sandbox:
-            self.request_url = 'https://sandbox.zarinpal.com/pg/rest/WebGate/PaymentRequest.json'
-            self.verify_url = 'https://sandbox.zarinpal.com/pg/rest/WebGate/PaymentVerification.json'
+            self.request_url = 'https://sandbox.zarinpal.com/pg/v4/payment/request.json'
+            self.verify_url = 'https://sandbox.zarinpal.com/pg/v4/payment/verify.json'
             self.gateway_url = 'https://sandbox.zarinpal.com/pg/StartPay/'
         else:
             self.request_url = 'https://api.zarinpal.com/pg/v4/payment/request.json'
@@ -25,13 +27,13 @@ class ZarinpalPayment:
             self.gateway_url = 'https://www.zarinpal.com/pg/StartPay/'
 
     def create_payment(self, amount, description, user, subscription):
-        """ایجاد درخواست پرداخت"""
         try:
             data = {
                 'merchant_id': self.merchant_id,
                 'amount': int(amount),
                 'description': description,
-                'callback_url': self.callback_url,
+                # ✅ این خط باید subscription_id را به callback_url اضافه کند
+                'callback_url': f"{self.callback_url}?subscription_id={subscription.id}",
                 'metadata': {
                     'mobile': user.phone_number,
                     'email': user.email or '',
@@ -40,13 +42,32 @@ class ZarinpalPayment:
                 }
             }
 
+            logger.info(f"Creating payment request: {data}")
+
             response = requests.post(
                 self.request_url,
                 json=data,
-                headers={'Content-Type': 'application/json'}
+                headers={'Content-Type': 'application/json'},
+                timeout=30
             )
 
-            result = response.json()
+            if response.status_code != 200:
+                logger.error(f"Zarinpal HTTP error: {response.status_code} - {response.text[:200]}")
+                return {
+                    'status': False,
+                    'message': f'خطا در ارتباط با درگاه پرداخت (کد {response.status_code})'
+                }
+
+            try:
+                result = response.json()
+            except json.JSONDecodeError as e:
+                logger.error(f"Zarinpal JSON decode error: {str(e)} - Response: {response.text[:200]}")
+                return {
+                    'status': False,
+                    'message': 'پاسخ نامعتبر از درگاه پرداخت'
+                }
+
+            logger.info(f"Zarinpal response: {result}")
 
             if result.get('data', {}).get('code') == 100:
                 authority = result['data']['authority']
@@ -65,6 +86,18 @@ class ZarinpalPayment:
                     'message': error_message
                 }
 
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Zarinpal connection error: {str(e)}")
+            return {
+                'status': False,
+                'message': 'خطا در اتصال به درگاه پرداخت. لطفاً اتصال اینترنت را بررسی کنید.'
+            }
+        except requests.exceptions.Timeout as e:
+            logger.error(f"Zarinpal timeout error: {str(e)}")
+            return {
+                'status': False,
+                'message': 'زمان اتصال به درگاه پرداخت به پایان رسید. لطفاً دوباره تلاش کنید.'
+            }
         except Exception as e:
             logger.error(f"Zarinpal payment exception: {str(e)}")
             return {
@@ -81,13 +114,32 @@ class ZarinpalPayment:
                 'amount': int(amount)
             }
 
+            logger.info(f"Verifying payment: {data}")
+
             response = requests.post(
                 self.verify_url,
                 json=data,
-                headers={'Content-Type': 'application/json'}
+                headers={'Content-Type': 'application/json'},
+                timeout=30
             )
 
-            result = response.json()
+            if response.status_code != 200:
+                logger.error(f"Zarinpal verify HTTP error: {response.status_code} - {response.text[:200]}")
+                return {
+                    'status': False,
+                    'message': f'خطا در تایید پرداخت (کد {response.status_code})'
+                }
+
+            try:
+                result = response.json()
+            except json.JSONDecodeError as e:
+                logger.error(f"Zarinpal verify JSON decode error: {str(e)}")
+                return {
+                    'status': False,
+                    'message': 'پاسخ نامعتبر از درگاه پرداخت'
+                }
+
+            logger.info(f"Zarinpal verify response: {result}")
 
             if result.get('data', {}).get('code') == 100:
                 ref_id = result['data']['ref_id']
@@ -116,18 +168,14 @@ class PaymentManager:
 
     @staticmethod
     def get_payment_gateway():
-        """دریافت درگاه پرداخت فعال"""
-        # در آینده می‌توان درگاه‌های دیگر را اضافه کرد
         return ZarinpalPayment()
 
     @staticmethod
     def create_payment(amount, description, user, subscription):
-        """ایجاد پرداخت"""
         gateway = PaymentManager.get_payment_gateway()
         return gateway.create_payment(amount, description, user, subscription)
 
     @staticmethod
     def verify_payment(authority, amount):
-        """تایید پرداخت"""
         gateway = PaymentManager.get_payment_gateway()
         return gateway.verify_payment(authority, amount)

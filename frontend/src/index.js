@@ -7,7 +7,7 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>  // ✅ این را کامنت کنید
     <App />
-  </React.StrictMode>
+  // </React.StrictMode>
 );

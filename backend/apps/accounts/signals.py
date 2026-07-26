@@ -1,4 +1,4 @@
-# apps/accounts/signals.py
+# backend/apps/accounts/signals.py
 
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 
 @receiver(pre_save, sender=User)
 def user_pre_save(sender, instance, **kwargs):
-    """قبل از ذخیره کاربر"""
-    # اگر رمز عبور تغییر کرده، کد تایید را غیرفعال می‌کنیم
     if instance.pk:
         try:
             old_user = User.objects.get(pk=instance.pk)
@@ -30,7 +28,6 @@ def user_pre_save(sender, instance, **kwargs):
         except User.DoesNotExist:
             pass
 
-    # اگر شماره تلفن تغییر کرده، تایید را غیرفعال می‌کنیم
     if instance.pk:
         try:
             old_user = User.objects.get(pk=instance.pk)
@@ -42,14 +39,11 @@ def user_pre_save(sender, instance, **kwargs):
 
 @receiver(post_save, sender=User)
 def user_post_save(sender, instance, created, **kwargs):
-    """بعد از ذخیره کاربر"""
     if created:
         logger.info(f"User created: {instance.phone_number}")
 
-        # بررسی فعال بودن ارسال پیامک
         sms_enabled = SystemSetting.get_setting('enable_sms', True)
         if sms_enabled:
-            # ارسال پیامک خوش‌آمدگویی
             try:
                 from apps.subscriptions.sms import send_welcome_sms
                 send_welcome_sms(instance.phone_number, instance.first_name)
@@ -61,11 +55,9 @@ def user_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=UserLoginLog)
 def user_login_log_post_save(sender, instance, created, **kwargs):
-    """بعد از ثبت لاگ ورود"""
     if created:
         logger.info(f"User login: {instance.user.phone_number} from {instance.ip_address}")
 
-        # اگر ورود موفق بود، لاگ فعالیت نیز ثبت می‌شود
         if instance.is_successful:
             try:
                 UserActivityLog.objects.create(
@@ -81,14 +73,12 @@ def user_login_log_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=UserActivityLog)
 def user_activity_log_post_save(sender, instance, created, **kwargs):
-    """بعد از ثبت لاگ فعالیت"""
     if created:
         logger.info(f"User activity: {instance.user.phone_number} - {instance.action_type}")
 
 
 @receiver(post_save, sender=SystemSetting)
 def system_setting_post_save(sender, instance, created, **kwargs):
-    """بعد از تغییر تنظیمات سیستم"""
     if not created:
         logger.info(f"System setting updated: {instance.setting_key} = {instance.setting_value}")
     else:
@@ -97,7 +87,6 @@ def system_setting_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=SystemMessage)
 def system_message_post_save(sender, instance, created, **kwargs):
-    """بعد از ایجاد/ویرایش پیام سیستم"""
     if created:
         logger.info(f"System message created: {instance.title}")
     else:
@@ -106,27 +95,21 @@ def system_message_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=AppVersion)
 def app_version_post_save(sender, instance, created, **kwargs):
-    """بعد از ایجاد نسخه جدید"""
     if created:
         logger.info(f"New app version: {instance.version_number}")
 
-        # اگر نسخه جدید جاری است، نسخه‌های قبلی را غیرجاری کن
         if instance.is_current:
             AppVersion.objects.filter(is_current=True).exclude(id=instance.id).update(is_current=False)
 
 
 @receiver(post_delete, sender=User)
 def user_post_delete(sender, instance, **kwargs):
-    """بعد از حذف کاربر"""
     logger.info(f"User deleted: {instance.phone_number}")
 
 
-# ============ Signal برای ایجاد تنظیمات پیش‌فرض ============
 @receiver(post_save, sender=User)
 def create_default_settings(sender, instance, created, **kwargs):
-    """ایجاد تنظیمات پیش‌فرض برای کاربر جدید"""
     if created and instance.is_admin:
-        # ایجاد تنظیمات پیش‌فرض اگر وجود ندارند
         default_settings = {
             'app_name': {'value': 'ژورنال حرفه‌ای ترید', 'type': 'string', 'description': 'نام برنامه'},
             'app_version': {'value': '1.0.0', 'type': 'string', 'description': 'نسخه فعلی برنامه'},
@@ -141,8 +124,7 @@ def create_default_settings(sender, instance, created, **kwargs):
             'site_address': {'value': 'تهران، خیابان ولیعصر، پلاک ۱۲۳', 'type': 'text', 'description': 'آدرس سایت'},
             'logo_path': {'value': '/static/images/logo.png', 'type': 'string', 'description': 'مسیر لوگو'},
             'favicon_path': {'value': '/static/images/favicon.ico', 'type': 'string', 'description': 'مسیر آیکون'},
-            'bg_image_path': {'value': '/static/images/background.jpg', 'type': 'string',
-                              'description': 'مسیر تصویر پس‌زمینه'},
+            'bg_image_path': {'value': '/static/images/background.jpg', 'type': 'string', 'description': 'مسیر تصویر پس‌زمینه'},
             'footer_text': {'value': 'تمامی حقوق محفوظ است.', 'type': 'string', 'description': 'متن فوتر'},
         }
 
@@ -161,12 +143,9 @@ def create_default_settings(sender, instance, created, **kwargs):
                 logger.error(f"Error creating default setting {key}: {str(e)}")
 
 
-# ============ Signal برای ثبت لاگ خروج کاربر ============
 def log_user_logout(user, request=None):
-    """ثبت لاگ خروج کاربر (این تابع از views صدا زده می‌شود)"""
     if user and user.is_authenticated:
         try:
-            # پیدا کردن آخرین لاگ ورود
             last_login = UserLoginLog.objects.filter(
                 user=user,
                 is_successful=True,
@@ -177,7 +156,6 @@ def log_user_logout(user, request=None):
                 last_login.logout_time = timezone.now()
                 last_login.calculate_session_duration()
 
-            # ثبت لاگ فعالیت
             UserActivityLog.objects.create(
                 user=user,
                 action_type='logout',
