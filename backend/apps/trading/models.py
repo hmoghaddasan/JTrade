@@ -1,4 +1,5 @@
-# models.py
+# backend/apps/trading/models.py
+
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
@@ -32,7 +33,11 @@ class CurrencyPair(models.Model):
 
 
 class TradeGroup(models.Model):
-    """گروه‌های ترید (دسته‌بندی)"""
+    """گروه‌های ترید (دسته‌بندی) - اصلاح شده با فیلدهای جدید"""
+
+    # ============================================
+    # فیلدهای اصلی
+    # ============================================
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -40,23 +45,56 @@ class TradeGroup(models.Model):
         verbose_name='کاربر'
     )
     group_name = models.CharField('نام گروه', max_length=100)
+    icon = models.CharField('آیکون', max_length=10, default='📁')
     description = models.TextField('توضیحات', blank=True)
+
+    # ============================================
+    # فیلدهای وضعیت
+    # ============================================
     is_active = models.BooleanField('فعال', default=True)
+    is_default = models.BooleanField('پیش‌فرض', default=False)
+
+    # ============================================
+    # فیلدهای سیستمی
+    # ============================================
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_groups',
+        verbose_name='ایجاد کننده'
+    )
+    order_index = models.IntegerField('ترتیب نمایش', default=0)
     created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
     updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
 
     class Meta:
         verbose_name = 'گروه ترید'
         verbose_name_plural = 'گروه‌های ترید'
-        ordering = ['group_name']
-        unique_together = ['user', 'group_name']
+        ordering = ['order_index', 'group_name']
+        unique_together = [['user', 'group_name']]
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['user', 'is_default']),
+        ]
 
     def __str__(self):
         return f"{self.user.phone_number} - {self.group_name}"
 
+    def save(self, *args, **kwargs):
+        # اگر این گروه پیش‌فرض است، سایر گروه‌های پیش‌فرض کاربر را غیرفعال کن
+        if self.is_default:
+            TradeGroup.objects.filter(
+                user=self.user,
+                is_default=True
+            ).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
+
 
 class Trade(models.Model):
-    """مدل اصلی ترید"""
+    """مدل اصلی ترید - اصلاح شده با group_id اجباری"""
+
     TRADE_TYPES = [
         ('Buy', 'خرید'),
         ('Sell', 'فروش'),
@@ -103,7 +141,9 @@ class Trade(models.Model):
         ('خوب', 'خوب'),
     ]
 
-    # ارتباط با کاربر و گروه
+    # ============================================
+    # ارتباط با کاربر و گروه (group_id اجباری)
+    # ============================================
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -112,26 +152,30 @@ class Trade(models.Model):
     )
     group = models.ForeignKey(
         TradeGroup,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.PROTECT,  # جلوگیری از حذف گروهی که ترید دارد
         related_name='trades',
         verbose_name='گروه'
     )
 
+    # ============================================
     # شناسه و تاریخ
+    # ============================================
     trade_date = models.DateField('تاریخ معامله')
     day_of_week = models.CharField('روز هفته', max_length=20, blank=True)
     month = models.IntegerField('ماه میلادی', null=True, blank=True)
     time_ny = models.TimeField('ساعت به وقت نیویورک', null=True, blank=True)
 
+    # ============================================
     # جلسه و نماد
+    # ============================================
     symbol = models.CharField('نماد', max_length=20)
     trade_type = models.CharField('نوع ترید', max_length=10, choices=TRADE_TYPES)
     session_type = models.CharField('نوع جلسه', max_length=20, choices=SESSION_TYPES, blank=True, null=True)
     weekly_profile_note = models.TextField('یادداشت پروفایل هفتگی', blank=True)
 
+    # ============================================
     # وضعیت روحی و ذهنی
+    # ============================================
     sleep_quality = models.CharField('کیفیت خواب', max_length=10, choices=SLEEP_QUALITY, blank=True, null=True)
     food_status = models.BooleanField('تغذیه مناسب', default=False)
     focus = models.BooleanField('تمرکز', default=False)
@@ -149,11 +193,15 @@ class Trade(models.Model):
     contentment = models.BooleanField('قناعت', default=False)
     dominant_feeling = models.CharField('احساس غالب', max_length=50, blank=True)
 
+    # ============================================
     # برنامه و بایاس روزانه
+    # ============================================
     bias = models.CharField('بایاس', max_length=10, choices=BIAS_TYPES, blank=True, null=True)
     strategy_type = models.CharField('نوع استراتژی', max_length=10, choices=STRATEGY_TYPES, blank=True, null=True)
 
+    # ============================================
     # تایم‌فریم‌ها
+    # ============================================
     timeframe_d = models.BooleanField('D1', default=False)
     timeframe_h4 = models.BooleanField('H4', default=False)
     timeframe_h1 = models.BooleanField('H1', default=False)
@@ -161,6 +209,9 @@ class Trade(models.Model):
     timeframe_m5 = models.BooleanField('M5', default=False)
     timeframe_m1 = models.BooleanField('M1', default=False)
 
+    # ============================================
+    # مدل ورودی و چک‌لیست
+    # ============================================
     retirement_model = models.CharField('مدل ورودی', max_length=100, blank=True)
     weekly_news_printed = models.BooleanField('اخبار هفتگی چاپ شد', default=False)
     zero_hour_identified = models.BooleanField('ساعت صفر مشخص شد', default=False)
@@ -172,7 +223,9 @@ class Trade(models.Model):
     bond_dxy_support = models.BooleanField('حمایت BOND/DXY', default=False)
     checklist_extra = models.TextField('توضیحات تکمیلی چک‌لیست', blank=True)
 
+    # ============================================
     # جزئیات اجرا
+    # ============================================
     entry_price = models.DecimalField('قیمت ورود', max_digits=15, decimal_places=5, null=True, blank=True)
     stop_loss = models.DecimalField('حد ضرر', max_digits=15, decimal_places=5, null=True, blank=True)
     take_profit_1 = models.DecimalField('حد سود ۱', max_digits=15, decimal_places=5, null=True, blank=True)
@@ -183,12 +236,16 @@ class Trade(models.Model):
     risk_reward_ratio = models.DecimalField('نسبت ریسک به ریوارد', max_digits=5, decimal_places=2, null=True,
                                             blank=True)
 
+    # ============================================
     # نتیجه
+    # ============================================
     close_price = models.DecimalField('قیمت بسته شدن', max_digits=15, decimal_places=5, null=True, blank=True)
     tp_sl_hit = models.CharField('حد خورده شده', max_length=20, blank=True)
     profit = models.DecimalField('سود/زیان', max_digits=15, decimal_places=2, null=True, blank=True)
 
+    # ============================================
     # احساسات حین و پس از معامله
+    # ============================================
     pre_trade_stress = models.CharField('استرس قبل معامله', max_length=10, choices=STRESS_LEVELS, blank=True, null=True)
     entry_emotion_control = models.CharField('کنترل هیجان هنگام ورود', max_length=10, choices=EMOTION_CONTROL,
                                              blank=True, null=True)
@@ -201,7 +258,9 @@ class Trade(models.Model):
     over_trade = models.BooleanField('اورترید', default=False)
     emotion_after_losses = models.TextField('کنترل احساسات پس از ضرر', blank=True)
 
+    # ============================================
     # بازبینی و اشتباهات
+    # ============================================
     mistake_code = models.CharField('کد اشتباه', max_length=50, blank=True)
     mistake_weight = models.DecimalField('وزن اشتباه', max_digits=3, decimal_places=2, null=True, blank=True)
     post_trade_scan = models.BooleanField('اسکن پس از معامله', default=False)
@@ -210,7 +269,22 @@ class Trade(models.Model):
     mistakes_recorded = models.BooleanField('اشتباهات ثبت شد', default=False)
     execution_quality_score = models.IntegerField('امتیاز کیفیت اجرا', null=True, blank=True)
 
+    # ============================================
+    # فیلدهای ICT
+    # ============================================
+    fvg = models.CharField('FVG', max_length=50, blank=True, null=True)
+    order_block = models.CharField('Order Block', max_length=50, blank=True, null=True)
+    bos = models.CharField('BOS', max_length=50, blank=True, null=True)
+    choch = models.CharField('CHOCH', max_length=50, blank=True, null=True)
+    mss = models.CharField('MSS', max_length=50, blank=True, null=True)
+    liquidity_sweep = models.CharField('Liquidity Sweep', max_length=50, blank=True, null=True)
+    poi = models.CharField('POI', max_length=50, blank=True, null=True)
+    demand_zone = models.CharField('Demand Zone', max_length=50, blank=True, null=True)
+    supply_zone = models.CharField('Supply Zone', max_length=50, blank=True, null=True)
+
+    # ============================================
     # فیلدهای سیستمی
+    # ============================================
     is_deleted = models.BooleanField('حذف شده', default=False)
     created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
     updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
@@ -223,6 +297,7 @@ class Trade(models.Model):
             models.Index(fields=['user', 'trade_date']),
             models.Index(fields=['symbol']),
             models.Index(fields=['group']),
+            models.Index(fields=['user', 'group', 'is_deleted']),
         ]
 
     def __str__(self):
@@ -256,6 +331,19 @@ class Trade(models.Model):
         if self.patience: emotions.append('صبر')
         if self.contentment: emotions.append('قناعت')
         return emotions
+
+    def get_checklist_items(self):
+        """دریافت لیست آیتم‌های چک‌لیست رعایت شده"""
+        items = []
+        if self.smt_confirmed: items.append('SMT تایید شد')
+        if self.key_levels_reviewed: items.append('سطوح کلیدی بررسی شد')
+        if self.bond_dxy_support: items.append('حمایت BOND/DXY')
+        if self.weekly_news_printed: items.append('اخبار هفتگی چاپ شد')
+        if self.zero_hour_identified: items.append('ساعت صفر مشخص شد')
+        if self.asian_range_identified: items.append('رنج آسیا مشخص شد')
+        if self.london_range_identified: items.append('رنج لندن مشخص شد')
+        if self.judas_lo_identified: items.append('Judas LO مشخص شد')
+        return items
 
 
 class TradeAnalytics(models.Model):

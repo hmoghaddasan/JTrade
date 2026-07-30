@@ -34,12 +34,13 @@ const FeelingsHeatmapReport = ({ dateRange, selectedCategory, isDark, trades }) 
     { key: 'contentment', label: 'قناعت' }
   ];
 
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const data = emotions.map(emotion => {
     const emotionTrades = trades.filter(t => t[emotion.key] === true);
     const count = emotionTrades.length;
-    const winning = emotionTrades.filter(t => t.profit > 0).length;
+    const winning = emotionTrades.filter(t => parseFloat(t.profit) > 0).length;
     const winRate = count > 0 ? (winning / count * 100).toFixed(1) : 0;
-    const avgProfit = count > 0 ? (emotionTrades.reduce((sum, t) => sum + (t.profit || 0), 0) / count) : 0;
+    const avgProfit = count > 0 ? (emotionTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0) / count) : 0;
     return { ...emotion, count, winRate, avgProfit };
   });
 
@@ -60,7 +61,7 @@ const FeelingsHeatmapReport = ({ dateRange, selectedCategory, isDark, trades }) 
             className={`heatmap-item ${item.count > 0 ? 'active' : 'inactive'}`}
             style={{
               background: item.count > 0 ?
-                `hsl(${item.winRate * 1.2}, 70%, ${40 + (item.count / maxCount) * 40}%)` :
+                `hsl(${parseFloat(item.winRate) * 1.2}, 70%, ${40 + (item.count / maxCount) * 40}%)` :
                 '#e0e0e0',
               transform: item.count > 0 ? `scale(${0.7 + (item.count / maxCount) * 0.3})` : 'scale(0.7)',
               opacity: item.count > 0 ? 1 : 0.4

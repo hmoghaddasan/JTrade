@@ -1,144 +1,121 @@
-# serializers.py
+# backend/apps/trading/serializers.py
+
 from rest_framework import serializers
-from django.utils import timezone
-from .models import CurrencyPair, TradeGroup, Trade, TradeAnalytics
+from .models import CurrencyPair, TradeGroup, Trade
 
 
+# ============================================
+# سریالایزر جفت ارزها
+# ============================================
 class CurrencyPairSerializer(serializers.ModelSerializer):
-    """سریالایزر جفت ارز"""
+    """سریالایزر برای جفت ارزها"""
 
     class Meta:
         model = CurrencyPair
-        fields = ['id', 'symbol', 'base_currency', 'quote_currency', 'pair_type', 'description', 'is_active']
+        fields = [
+            'id', 'symbol', 'base_currency', 'quote_currency',
+            'pair_type', 'description', 'is_active',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
+# ============================================
+# سریالایزر گروه‌های ترید
+# ============================================
 class TradeGroupSerializer(serializers.ModelSerializer):
-    """سریالایزر گروه ترید"""
+    """سریالایزر برای گروه‌های ترید - با user_id و trade_count"""
+
     trade_count = serializers.SerializerMethodField()
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    user_phone = serializers.CharField(source='user.phone_number', read_only=True)
 
     class Meta:
         model = TradeGroup
-        fields = ['id', 'group_name', 'description', 'is_active', 'trade_count', 'created_at']
+        fields = [
+            'id',
+            'group_name',
+            'icon',
+            'description',
+            'user',
+            'user_id',  # ✅ اضافه شد - برای فیلتر کردن در فرانت‌اند
+            'user_phone',  # ✅ اضافه شد - برای نمایش در صورت نیاز
+            'is_active',
+            'is_default',
+            'created_by',
+            'order_index',
+            'created_at',
+            'updated_at',
+            'trade_count'
+        ]
+        read_only_fields = ['id', 'user', 'created_by', 'created_at', 'updated_at']
 
     def get_trade_count(self, obj):
+        """دریافت تعداد تریدهای این گروه"""
         return obj.trades.filter(is_deleted=False).count()
 
 
+# ============================================
+# سریالایزر تریدها
+# ============================================
 class TradeListSerializer(serializers.ModelSerializer):
-    """سریالایزر لیست تریدها (خلاصه)"""
-    group_name = serializers.SerializerMethodField()
-    profit_display = serializers.SerializerMethodField()
-    timeframes_used = serializers.SerializerMethodField()
+    """سریالایزر برای لیست تریدها"""
+
+    group_name = serializers.CharField(source='group.group_name', read_only=True, default=None)
+    group_icon = serializers.CharField(source='group.icon', read_only=True, default=None)
 
     class Meta:
         model = Trade
         fields = [
-            'id', 'trade_date', 'day_of_week', 'symbol', 'trade_type',
-            'entry_price', 'close_price', 'profit', 'profit_display',
-            'tp_sl_hit', 'group', 'group_name', 'timeframes_used',
-            'execution_quality_score', 'created_at'
+            'id', 'trade_date', 'symbol', 'trade_type',
+            'entry_price', 'close_price', 'profit',
+            'group', 'group_name', 'group_icon',
+            'created_at'
         ]
-
-    def get_group_name(self, obj):
-        return obj.group.group_name if obj.group else 'بدون گروه'
-
-    def get_profit_display(self, obj):
-        if obj.profit is not None:
-            return f"{obj.profit:+,.2f}"
-        return '-'
-
-    def get_timeframes_used(self, obj):
-        return obj.get_timeframes_used()
 
 
 class TradeDetailSerializer(serializers.ModelSerializer):
-    """سریالایزر جزئیات کامل ترید"""
-    group_name = serializers.SerializerMethodField()
-    timeframes_used = serializers.SerializerMethodField()
+    """سریالایزر برای جزئیات ترید"""
+
+    group_name = serializers.CharField(source='group.group_name', read_only=True, default=None)
+    group_icon = serializers.CharField(source='group.icon', read_only=True, default=None)
+    timeframes = serializers.SerializerMethodField()
     emotions = serializers.SerializerMethodField()
-    profit_display = serializers.SerializerMethodField()
-    risk_reward_display = serializers.SerializerMethodField()
+    checklist_items = serializers.SerializerMethodField()
 
     class Meta:
         model = Trade
         fields = '__all__'
 
-    def get_group_name(self, obj):
-        return obj.group.group_name if obj.group else 'بدون گروه'
-
-    def get_timeframes_used(self, obj):
+    def get_timeframes(self, obj):
         return obj.get_timeframes_used()
 
     def get_emotions(self, obj):
         return obj.get_emotions()
 
-    def get_profit_display(self, obj):
-        if obj.profit is not None:
-            return f"{obj.profit:+,.2f}"
-        return '-'
-
-    def get_risk_reward_display(self, obj):
-        if obj.risk_reward_ratio is not None:
-            return f"1:{obj.risk_reward_ratio:.2f}"
-        return '-'
+    def get_checklist_items(self, obj):
+        return obj.get_checklist_items()
 
 
 class TradeCreateSerializer(serializers.ModelSerializer):
-    """سریالایزر ایجاد ترید جدید"""
+    """سریالایزر برای ایجاد ترید"""
 
     class Meta:
         model = Trade
         fields = '__all__'
-        read_only_fields = ['user', 'day_of_week', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'day_of_week', 'month']
 
-    def validate(self, data):
-        # اعتبارسنجی تاریخ
-        if 'trade_date' in data and data['trade_date'] > timezone.now().date():
-            raise serializers.ValidationError('تاریخ معامله نمی‌تواند در آینده باشد')
-
-        # اعتبارسنجی قیمت‌ها
-        if data.get('entry_price') and data.get('stop_loss'):
-            if data['trade_type'] == 'Buy' and data['entry_price'] >= data['stop_loss']:
-                raise serializers.ValidationError('برای ترید Buy، قیمت ورود باید کمتر از حد ضرر باشد')
-            if data['trade_type'] == 'Sell' and data['entry_price'] <= data['stop_loss']:
-                raise serializers.ValidationError('برای ترید Sell، قیمت ورود باید بیشتر از حد ضرر باشد')
-
-        # اعتبارسنجی ریسک
-        if data.get('risk_percent') and data['risk_percent'] > 100:
-            raise serializers.ValidationError('درصد ریسک نمی‌تواند بیشتر از ۱۰۰ باشد')
-
-        return data
-
-    def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
-        # محاسبه روز هفته
-        if 'trade_date' in validated_data:
-            validated_data['day_of_week'] = validated_data['trade_date'].strftime('%A')
-            validated_data['month'] = validated_data['trade_date'].month
-        return super().create(validated_data)
+    def validate_group(self, value):
+        """اعتبارسنجی گروه"""
+        if not value:
+            raise serializers.ValidationError("انتخاب دسته‌بندی اجباری است")
+        return value
 
 
 class TradeUpdateSerializer(serializers.ModelSerializer):
-    """سریالایزر به‌روزرسانی ترید"""
+    """سریالایزر برای ویرایش ترید"""
 
     class Meta:
         model = Trade
         fields = '__all__'
-        read_only_fields = ['user', 'day_of_week', 'created_at', 'updated_at']
-
-    def update(self, instance, validated_data):
-        # به‌روزرسانی روز هفته در صورت تغییر تاریخ
-        if 'trade_date' in validated_data:
-            validated_data['day_of_week'] = validated_data['trade_date'].strftime('%A')
-            validated_data['month'] = validated_data['trade_date'].month
-        return super().update(instance, validated_data)
-
-
-class TradeAnalyticsSerializer(serializers.ModelSerializer):
-    """سریالایزر تحلیل ترید"""
-    trade_details = TradeDetailSerializer(source='trade', read_only=True)
-
-    class Meta:
-        model = TradeAnalytics
-        fields = '__all__'
-        read_only_fields = ['created_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']

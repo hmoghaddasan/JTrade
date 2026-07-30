@@ -21,20 +21,22 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const reactionTypes = ['محتاطانه', 'شتابزده', 'آرام', 'هیجانی'];
   const emotionTypes = ['کنترل شده', 'عصبی', 'مصمم', 'ناامید'];
 
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const reactionData = reactionTypes.map(reaction => {
     const reactionTrades = trades.filter(t => t.reaction_to_profit === reaction);
     const count = reactionTrades.length;
-    const profit = reactionTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
-    const winning = reactionTrades.filter(t => t.profit > 0).length;
+    const profit = reactionTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+    const winning = reactionTrades.filter(t => parseFloat(t.profit) > 0).length;
     const avgProfit = count > 0 ? profit / count : 0;
     const winRate = count > 0 ? (winning / count * 100).toFixed(1) : 0;
     return { reaction, count, profit, avgProfit, winRate };
   });
 
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const emotionData = emotionTypes.map(emotion => {
     const emotionTrades = trades.filter(t => t.emotion_after_losses === emotion);
     const count = emotionTrades.length;
-    const nextProfit = emotionTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+    const nextProfit = emotionTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
     const avgNextProfit = count > 0 ? nextProfit / count : 0;
     return { emotion, count, nextProfit, avgNextProfit };
   });

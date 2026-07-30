@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import RealApiService from '../services/realApiService';
+import { useAuth } from '../contexts/AuthContext';
 import './TradeForm.css';
 
 const TradeForm = () => {
+  const { user } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -47,9 +50,8 @@ const TradeForm = () => {
       'SGP30','BRA50','RUS50','SAU30','UAE20','TUR30'].includes(s)),
     'کالاها': symbols.filter(s => ['XAUUSD','XAGUSD','USOIL','UKOIL','XPDUSD','XPTUSD',
       'XCUUSD','XALUSD','XZNUSD','XNIUSD','XPBUSD','XSNUSD',
-      'XCOUSD','XSUUSD','XPLUSD','XRHUSD','XRUUSD','XSIUSD',
       'CORN','WHEAT','SOYBN','COFFEE','SUGAR','COTTON',
-      'COCOA','ORANGE','LUMBER','LEANHOG','LIVECATTLE','FEEDERCATTLE'].includes(s)),
+      'COCOA','ORANGE','LUMBER'].includes(s)),
     'کریپتو': symbols.filter(s => ['BTCUSD','ETHUSD','USDTUSD','BNBUSD','SOLUSD','ADAUSD',
       'XRPUSD','DOTUSD','DOGEUSD','AVAXUSD','MATICUSD','LINKUSD',
       'UNIUSD','ATOMUSD','LTCUSD','BCHUSD','NEARUSD','FILUSD',
@@ -69,7 +71,7 @@ const TradeForm = () => {
     trade_type: 'Buy',
     session_type: 'High Pro',
     weekly_profile_note: '',
-    category_id: '',
+    group_id: '', // دسته‌بندی
     sleep_quality: 'خوب',
     food_status: false,
     focus: false,
@@ -142,20 +144,25 @@ const TradeForm = () => {
     supply_zone: '',
   });
 
+  // ============================================
+  // دریافت دسته‌بندی‌های کاربر از دیتابیس
+  // ============================================
   useEffect(() => {
-    const savedCategories = localStorage.getItem('categories');
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories));
-    } else {
-      setCategories([
-        { id: 1, name: 'همه تریدها', icon: '📊' },
-        { id: 2, name: 'فارکس', icon: '💱' },
-        { id: 3, name: 'کریپتو', icon: '₿' },
-        { id: 4, name: 'شاخص‌ها', icon: '📈' },
-        { id: 5, name: 'کالاها', icon: '🏆' },
-      ]);
-    }
-  }, []);
+    const loadCategories = async () => {
+      try {
+        const response = await RealApiService.getTradeGroups();
+        const groupsData = response.data.results || response.data || [];
+        // فیلتر دسته‌بندی‌های کاربر جاری
+        const userGroups = groupsData.filter(g => g.user_id === user?.id);
+        setCategories(userGroups);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      }
+    };
+
+    loadCategories();
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -172,9 +179,9 @@ const TradeForm = () => {
     if (!formData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
     if (!formData.trade_date) validationErrors.push('لطفاً تاریخ معامله را وارد کنید');
     if (!formData.trade_type) validationErrors.push('لطفاً نوع ترید را انتخاب کنید');
-    if (!formData.category_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
-    if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید (مقدار باید بزرگتر از صفر باشد)');
-    if (!formData.close_price || parseFloat(formData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید (مقدار باید بزرگتر از صفر باشد)');
+    if (!formData.group_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
+    if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید');
+    if (!formData.close_price || parseFloat(formData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید');
     if (formData.profit && isNaN(parseFloat(formData.profit))) validationErrors.push('مقدار سود/زیان باید عدد باشد');
     if (formData.execution_quality_score) {
       const score = parseInt(formData.execution_quality_score);
@@ -185,10 +192,6 @@ const TradeForm = () => {
       const percent = parseFloat(formData.risk_percent);
       if (isNaN(percent) || percent < 0 || percent > 100) validationErrors.push('درصد ریسک باید بین ۰ تا ۱۰۰ باشد');
     }
-    if (formData.stop_loss && parseFloat(formData.stop_loss) <= 0) validationErrors.push('حد ضرر باید بزرگتر از صفر باشد');
-    if (formData.take_profit_1 && parseFloat(formData.take_profit_1) <= 0) validationErrors.push('حد سود اول باید بزرگتر از صفر باشد');
-    if (formData.take_profit_2 && parseFloat(formData.take_profit_2) <= 0) validationErrors.push('حد سود دوم باید بزرگتر از صفر باشد');
-    if (formData.take_profit_3 && parseFloat(formData.take_profit_3) <= 0) validationErrors.push('حد سود سوم باید بزرگتر از صفر باشد');
     setErrors(validationErrors);
     return validationErrors.length === 0;
   };
@@ -201,44 +204,29 @@ const TradeForm = () => {
       setLoading(false);
       return;
     }
+
     const date = new Date(formData.trade_date);
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     formData.day_of_week = days[date.getDay()];
     formData.month = date.getMonth() + 1;
-    const savedTrades = localStorage.getItem('trades');
-    let trades = savedTrades ? JSON.parse(savedTrades) : [];
-    const newTrade = { ...formData, id: trades.length + 1, created_at: new Date().toISOString() };
-    trades.push(newTrade);
-    localStorage.setItem('trades', JSON.stringify(trades));
-    setLoading(false);
-    alert('✅ ترید با موفقیت ثبت شد!');
-    navigate('/');
+
+    try {
+      await RealApiService.createTrade(formData);
+      setLoading(false);
+      alert('✅ ترید با موفقیت ثبت شد!');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error creating trade:', error);
+      alert('❌ خطا در ثبت ترید');
+      setLoading(false);
+    }
   };
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 8));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   // ============================================
-  // Step 1: شناسه و تاریخ
-  // ============================================
-  const renderStep1 = () => (
-    <div className="form-step">
-      <h3>📅 شناسه و تاریخ</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>تاریخ معامله</label>
-          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} />
-        </div>
-      </div>
-    </div>
-  );
-
-  // ============================================
-  // Step 2: جلسه و نماد
+  // Step 2: جلسه و نماد (با انتخاب دسته‌بندی اجباری)
   // ============================================
   const renderStep2 = () => (
     <div className="form-step">
@@ -270,11 +258,23 @@ const TradeForm = () => {
           </select>
         </div>
         <div className="form-group">
-          <label>دسته‌بندی</label>
-          <select name="category_id" value={formData.category_id} onChange={handleChange} required>
+          <label>دسته‌بندی <span className="required">*</span></label>
+          <select
+            name="group_id"
+            value={formData.group_id}
+            onChange={handleChange}
+            required
+          >
             <option value="">انتخاب دسته‌بندی</option>
-            {categories.filter(c => c.id !== 1).map(cat => <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>)}
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>
+                {cat.icon || '📁'} {cat.group_name}
+              </option>
+            ))}
           </select>
+          {!formData.group_id && (
+            <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>
+          )}
         </div>
       </div>
       <div className="form-group">
@@ -285,8 +285,24 @@ const TradeForm = () => {
   );
 
   // ============================================
-  // Step 3: وضعیت روحی و ذهنی
+  // سایر استپ‌ها (همانند نسخه قبل)
   // ============================================
+  const renderStep1 = () => (
+    <div className="form-step">
+      <h3>📅 شناسه و تاریخ</h3>
+      <div className="form-row">
+        <div className="form-group">
+          <label>تاریخ معامله</label>
+          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label>ساعت به وقت نیویورک</label>
+          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} />
+        </div>
+      </div>
+    </div>
+  );
+
   const renderStep3 = () => {
     const emotions = [
       { key: 'focus', label: 'تمرکز' }, { key: 'calm', label: 'آرامش' }, { key: 'excited', label: 'هیجان' },
@@ -329,9 +345,6 @@ const TradeForm = () => {
     );
   };
 
-  // ============================================
-  // Step 4: برنامه و بایاس
-  // ============================================
   const renderStep4 = () => {
     const timeframes = [
       { key: 'timeframe_d', label: 'D1' }, { key: 'timeframe_h4', label: 'H4' },
@@ -399,9 +412,6 @@ const TradeForm = () => {
     );
   };
 
-  // ============================================
-  // Step 5: جزئیات اجرا
-  // ============================================
   const renderStep5 = () => (
     <div className="form-step">
       <h3>💰 جزئیات اجرای معامله</h3>
@@ -422,9 +432,6 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 6: نتیجه معامله
-  // ============================================
   const renderStep6 = () => (
     <div className="form-step">
       <h3>📊 نتیجه معامله</h3>
@@ -436,9 +443,6 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 7: احساسات و بازبینی
-  // ============================================
   const renderStep7 = () => (
     <div className="form-step">
       <h3>🔄 احساسات و بازبینی</h3>
@@ -469,9 +473,6 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 8: تحلیل ICT
-  // ============================================
   const renderICTStep = () => (
     <div className="form-step">
       <h3>📊 تحلیل ICT</h3>
@@ -513,7 +514,7 @@ const TradeForm = () => {
     <div className={`trade-form-container ${isDark ? 'dark' : 'light'}`}>
       <div className="trade-form-header">
         <h2>📝 ثبت ترید جدید</h2>
-        <button className="btn-back" onClick={() => navigate('/')}>↩️ بازگشت</button>
+        <button className="btn-back" onClick={() => navigate('/dashboard')}>↩️ بازگشت</button>
       </div>
 
       {errors.length > 0 && (
@@ -553,7 +554,8 @@ const TradeForm = () => {
               {loading ? 'در حال ثبت...' : '✅ ثبت ترید'}
             </button>
           )}
-        </div>      </form>
+        </div>
+      </form>
     </div>
   );
 };

@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
 import './Profile.css';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const { isDark } = useTheme();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -26,16 +28,19 @@ const Profile = () => {
   const [appVersions, setAppVersions] = useState([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [subscription, setSubscription] = useState({
-    plan: 'حرفه‌ای',
-    remainingDays: 25,
-    remainingTrades: 45,
+    plan: 'آزمایشی',
+    remainingDays: 7,
+    remainingTrades: 50,
     totalTrades: 0,
-    startDate: '۱۴۰۳/۰۱/۰۱',
-    endDate: '۱۴۰۳/۰۲/۰۱',
+    startDate: '',
+    endDate: '',
     isActive: true,
     isExpired: false
   });
 
+  // ============================================
+  // بارگذاری داده‌ها از سرور
+  // ============================================
   useEffect(() => {
     if (user) {
       setFormData({
@@ -46,34 +51,41 @@ const Profile = () => {
       });
     }
 
-    const savedTrades = localStorage.getItem('trades');
-    if (savedTrades) {
-      const parsedTrades = JSON.parse(savedTrades);
-      setTrades(parsedTrades);
-      setSubscription(prev => ({
-        ...prev,
-        totalTrades: parsedTrades.length
-      }));
-    }
+    // ✅ دریافت تریدها از سرور
+    const fetchTrades = async () => {
+      try {
+        const response = await RealApiService.getTrades();
+        const tradesData = response.data.results || response.data || [];
+        setTrades(tradesData);
+        setSubscription(prev => ({
+          ...prev,
+          totalTrades: tradesData.length
+        }));
+      } catch (error) {
+        console.error('Error fetching trades from server:', error);
+      }
+    };
 
+    // ✅ دریافت اشتراک از سرور
     const fetchSubscription = async () => {
       try {
         const response = await RealApiService.getUserSubscription();
-        if (response.data) {
-          const subData = response.data;
+        const subData = response.data;
+        console.log('📊 Subscription from server:', subData);
 
+        if (subData && subData.id) {
           // اگر کاربر ادمین است
           if (subData.is_admin) {
-            setSubscription(prev => ({
-              ...prev,
+            setSubscription({
               plan: 'ادمین (نامحدود)',
               remainingDays: '♾️',
               remainingTrades: '♾️',
               startDate: '—',
               endDate: '♾️ بدون محدودیت',
               isActive: true,
-              isExpired: false
-            }));
+              isExpired: false,
+              totalTrades: trades.length
+            });
             return;
           }
 
@@ -81,27 +93,42 @@ const Profile = () => {
           const now = new Date();
           const remainingDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
 
-          setSubscription(prev => ({
-            ...prev,
+          setSubscription({
             plan: subData.plan_name || 'حرفه‌ای',
             remainingDays: remainingDays > 0 ? remainingDays : 0,
             remainingTrades: (subData.trades_limit || 0) - (subData.trades_used || 0),
             startDate: new Date(subData.start_date).toLocaleDateString('fa-IR'),
             endDate: new Date(subData.end_date).toLocaleDateString('fa-IR'),
             isActive: subData.is_active,
-            isExpired: remainingDays <= 0
+            isExpired: remainingDays <= 0,
+            totalTrades: trades.length
+          });
+        } else {
+          // کاربر اشتراک ندارد
+          console.log('ℹ️ کاربر اشتراک فعال ندارد');
+          setSubscription(prev => ({
+            ...prev,
+            plan: 'بدون اشتراک',
+            remainingDays: 0,
+            remainingTrades: 0,
+            isActive: false,
+            isExpired: true
           }));
         }
       } catch (error) {
-        console.log('No active subscription from backend, checking localStorage');
-        checkSubscriptionExpiry();
+        console.error('Error fetching subscription from server:', error);
+        // در صورت خطا، وضعیت پیش‌فرض را نگه می‌داریم
       }
     };
 
+    fetchTrades();
     fetchSubscription();
     fetchAppVersions();
   }, [user]);
 
+  // ============================================
+  // دریافت نسخه‌ها از سرور
+  // ============================================
   const fetchAppVersions = async () => {
     setVersionsLoading(true);
     try {
@@ -139,87 +166,33 @@ const Profile = () => {
     ];
   };
 
-  const checkSubscriptionExpiry = () => {
-    const savedSubscription = localStorage.getItem('subscription');
-    if (savedSubscription) {
-      const subData = JSON.parse(savedSubscription);
-      const expiryDate = new Date(subData.endDate);
-      const now = new Date();
-
-      if (expiryDate < now) {
-        setSubscription(prev => ({
-          ...prev,
-          isActive: false,
-          isExpired: true,
-          remainingDays: 0
-        }));
-        return;
-      }
-
-      const diffTime = expiryDate - now;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      setSubscription(prev => ({
-        ...prev,
-        remainingDays: diffDays,
-        isActive: true,
-        isExpired: false,
-        plan: subData.plan || 'حرفه‌ای',
-        remainingTrades: subData.remainingTrades || 45,
-        startDate: new Date(subData.startDate).toLocaleDateString('fa-IR'),
-        endDate: new Date(subData.endDate).toLocaleDateString('fa-IR')
-      }));
-
-      if (diffDays <= 3 && diffDays > 0) {
-        setTimeout(() => {
-          alert(`⚠️ توجه: ${diffDays} روز تا پایان اشتراک شما باقی مانده است. لطفاً هرچه سریعتر تمدید کنید.`);
-        }, 1000);
-      }
-    } else {
-      const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + 7);
-
-      const newSubscription = {
-        plan: 'آزمایشی',
-        remainingDays: 7,
-        remainingTrades: 50,
-        startDate: new Date().toISOString(),
-        endDate: trialEndDate.toISOString(),
-        isActive: true,
-        isExpired: false
-      };
-
-      localStorage.setItem('subscription', JSON.stringify(newSubscription));
-      setSubscription({
-        plan: 'آزمایشی',
-        remainingDays: 7,
-        remainingTrades: 50,
-        totalTrades: trades.length,
-        startDate: new Date().toLocaleDateString('fa-IR'),
-        endDate: trialEndDate.toLocaleDateString('fa-IR'),
-        isActive: true,
-        isExpired: false
-      });
-    }
-  };
-
+  // ============================================
+  // تمدید اشتراک
+  // ============================================
   const handleRenewSubscription = () => {
     navigate('/subscription/renew');
   };
 
+  // ============================================
+  // خروج از سیستم
+  // ============================================
   const handleLogout = () => {
     if (window.confirm('آیا از خروج از سیستم اطمینان دارید؟')) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('subscription');
-      window.location.href = '/login';
+      logout();
+      navigate('/login');
     }
   };
 
+  // ============================================
+  // تغییرات فرم
+  // ============================================
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // ============================================
+  // ذخیره تغییرات پروفایل
+  // ============================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -243,13 +216,6 @@ const Profile = () => {
         updateUser(updatedUser);
       }
 
-      localStorage.setItem('userData', JSON.stringify({
-        phone: formData.phone,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email
-      }));
-
       setMessage({ type: 'success', text: '✅ اطلاعات با موفقیت به‌روزرسانی شد' });
       setEditMode(false);
     } catch (error) {
@@ -260,14 +226,17 @@ const Profile = () => {
     }
   };
 
+  // ============================================
+  // محاسبه آمار
+  // ============================================
   const totalTrades = trades.length;
-  const winningTrades = trades.filter(t => t.profit > 0).length;
-  const losingTrades = trades.filter(t => t.profit < 0).length;
-  const totalProfit = trades.reduce((sum, t) => sum + (t.profit || 0), 0);
+  const winningTrades = trades.filter(t => parseFloat(t.profit) > 0).length;
+  const losingTrades = trades.filter(t => parseFloat(t.profit) < 0).length;
+  const totalProfit = trades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
   const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(1) : 0;
   const avgProfit = totalTrades > 0 ? (totalProfit / totalTrades).toFixed(2) : 0;
-  const bestTrade = trades.length > 0 ? Math.max(...trades.map(t => t.profit || 0)) : 0;
-  const worstTrade = trades.length > 0 ? Math.min(...trades.map(t => t.profit || 0)) : 0;
+  const bestTrade = trades.length > 0 ? Math.max(...trades.map(t => parseFloat(t.profit) || 0)) : 0;
+  const worstTrade = trades.length > 0 ? Math.min(...trades.map(t => parseFloat(t.profit) || 0)) : 0;
   const todayTrades = trades.filter(t => t.trade_date === new Date().toISOString().split('T')[0]).length;
   const thisWeekTrades = trades.filter(t => {
     const today = new Date();
@@ -280,7 +249,7 @@ const Profile = () => {
     <div className={`profile-container ${isDark ? 'dark' : 'light'}`}>
       <div className="profile-header">
         <h2>👤 پروفایل کاربری</h2>
-        <button className="btn-back" onClick={() => navigate('/')}>
+        <button className="btn-back" onClick={() => navigate('/dashboard')}>
           ↩️ بازگشت به داشبورد
         </button>
       </div>
@@ -388,7 +357,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* اطلاعات اشتراک */}
+        {/* اطلاعات اشتراک - ✅ از سرور */}
         <div className="profile-card">
           <div className="card-header">
             <h3>📊 اطلاعات اشتراک</h3>
@@ -400,7 +369,7 @@ const Profile = () => {
             {!user?.is_admin && subscription.isExpired && (
               <span className="expiry-badge">⏰ منقضی شده</span>
             )}
-            {!user?.is_admin && !subscription.isExpired && subscription.remainingDays <= 3 && (
+            {!user?.is_admin && !subscription.isExpired && subscription.remainingDays <= 3 && subscription.remainingDays !== '♾️' && (
               <span className="expiry-badge warning">⚠️ در حال اتمام</span>
             )}
           </div>
@@ -408,30 +377,30 @@ const Profile = () => {
           <div className="subscription-info">
             <div className="sub-item">
               <span className="sub-label">نوع پلن</span>
-              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.plan === 'حرفه‌ای' ? 'premium' : 'trial'}`}>
+              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.plan === 'حرفه‌ای' ? 'premium' : subscription.plan === 'بدون اشتراک' ? 'danger' : 'trial'}`}>
                 {user?.is_admin ? '👑 ادمین (نامحدود)' : subscription.plan}
               </span>
             </div>
             <div className="sub-item">
               <span className="sub-label">روزهای باقیمانده</span>
-              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.remainingDays < 3 ? 'danger' : ''}`}>
-                {user?.is_admin ? '♾️ نامحدود' : `${subscription.remainingDays} روز`}
+              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.remainingDays === '♾️' ? 'admin' : subscription.remainingDays < 3 && subscription.remainingDays !== '♾️' ? 'danger' : ''}`}>
+                {user?.is_admin ? '♾️ نامحدود' : subscription.remainingDays === '♾️' ? '♾️' : `${subscription.remainingDays} روز`}
               </span>
             </div>
             <div className="sub-item">
               <span className="sub-label">تریدهای باقیمانده</span>
               <span className="sub-value">
-                {user?.is_admin ? '♾️ نامحدود' : `${subscription.remainingTrades} عدد`}
+                {user?.is_admin ? '♾️ نامحدود' : subscription.remainingTrades === '♾️' ? '♾️' : `${subscription.remainingTrades} عدد`}
               </span>
             </div>
             <div className="sub-item">
               <span className="sub-label">تاریخ شروع</span>
-              <span className="sub-value">{user?.is_admin ? '—' : subscription.startDate}</span>
+              <span className="sub-value">{user?.is_admin ? '—' : subscription.startDate || '-'}</span>
             </div>
             <div className="sub-item">
               <span className="sub-label">تاریخ پایان</span>
               <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isExpired ? 'danger' : ''}`}>
-                {user?.is_admin ? '♾️ بدون محدودیت' : subscription.endDate}
+                {user?.is_admin ? '♾️ بدون محدودیت' : subscription.endDate || '-'}
               </span>
             </div>
           </div>

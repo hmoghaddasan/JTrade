@@ -1,145 +1,269 @@
 // frontend/src/components/auth/Register.js
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import RealApiService from '../../services/realApiService';
 import './auth.css';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { login } = useAuth();
+  const { showToast } = useToast();
 
-  const phoneNumber = location.state?.phoneNumber || localStorage.getItem('tempPhoneNumber') || '';
+  const [phone, setPhone] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [code, setCode] = useState('');
+  const [verificationId, setVerificationId] = useState(null);
 
-  useEffect(() => {
-    if (!phoneNumber) {
-      navigate('/login');
+  // ============================================
+  // دسته‌بندی‌های پیش‌فرض
+  // ============================================
+  const DEFAULT_GROUPS = [
+    { name: '📊 فارکس', icon: '💱', is_default: true },
+    { name: '₿ کریپتو', icon: '₿', is_default: false },
+    { name: '📈 شاخص‌ها', icon: '📈', is_default: false },
+    { name: '🏆 کالاها', icon: '🏆', is_default: false },
+    { name: '📁 شخصی', icon: '📁', is_default: false },
+  ];
+
+  // ============================================
+  // ایجاد دسته‌بندی‌های پیش‌فرض برای کاربر جدید
+  // ============================================
+  const createDefaultGroups = async (userId) => {
+    try {
+      // ابتدا بررسی می‌کنیم آیا کاربر دسته‌بندی دارد یا خیر
+      const existingGroups = await RealApiService.getTradeGroups();
+      const userGroups = existingGroups.data.results || existingGroups.data || [];
+      const hasGroups = userGroups.some(g => g.user_id === userId);
+
+      if (!hasGroups) {
+        const promises = DEFAULT_GROUPS.map((group, index) => {
+          return RealApiService.createTradeGroup({
+            group_name: group.name,
+            icon: group.icon,
+            user_id: userId,
+            is_active: true,
+            is_default: group.is_default,
+            created_by: userId,
+            order_index: index
+          });
+        });
+
+        await Promise.all(promises);
+        console.log('✅ دسته‌بندی‌های پیش‌فرض با موفقیت ایجاد شدند');
+        return true;
+      }
+
+      console.log('ℹ️ کاربر قبلاً دسته‌بندی دارد');
+      return false;
+    } catch (error) {
+      console.error('❌ خطا در ایجاد دسته‌بندی‌های پیش‌فرض:', error);
+      return false;
     }
-  }, [phoneNumber, navigate]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  // ============================================
+  // مرحله ۱: ارسال کد تایید
+  // ============================================
+  const handleSendCode = async (e) => {
     e.preventDefault();
-    setError('');
+
+    if (phone.length < 11) {
+      showToast('شماره تلفن باید ۱۱ رقم باشد', 'error');
+      return;
+    }
+
     setLoading(true);
-
-    if (!formData.first_name.trim()) {
-      setError('نام الزامی است');
-      setLoading(false);
-      return;
-    }
-    if (!formData.last_name.trim()) {
-      setError('نام خانوادگی الزامی است');
-      setLoading(false);
-      return;
-    }
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError('ایمیل معتبر نیست');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const result = await register({
-        phone_number: phoneNumber,
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
-        email: formData.email.trim()
-      });
+      const response = await RealApiService.sendVerificationCode(phone);
+      setVerificationId(response.data.verification_id || response.data.id);
+      showToast('کد تایید با موفقیت ارسال شد', 'success');
+      setStep(2);
+    } catch (error) {
+      console.error('Error sending verification code:', error);
+      showToast('خطا در ارسال کد تایید', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      if (result.success) {
-        localStorage.removeItem('tempPhoneNumber');
-        navigate('/');
+  // ============================================
+  // مرحله ۲: تایید کد و ثبت‌نام
+  // ============================================
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+
+    if (code.length < 4) {
+      showToast('کد تایید را وارد کنید', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // ۱- تایید کد
+      const verifyResponse = await RealApiService.verifyCode(phone, code);
+
+      if (!verifyResponse.data.success) {
+        showToast('کد تایید نامعتبر است', 'error');
+        setLoading(false);
+        return;
+      }
+
+      // ۲- ثبت‌نام کاربر
+      const registerData = {
+        phone_number: phone,
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        verification_id: verificationId,
+        code: code
+      };
+
+      const registerResponse = await RealApiService.register(registerData);
+
+      if (registerResponse.data.success) {
+        // ۳- ایجاد دسته‌بندی‌های پیش‌فرض برای کاربر جدید
+        const userId = registerResponse.data.user_id || registerResponse.data.user?.id || registerResponse.data.id;
+        await createDefaultGroups(userId);
+
+        // ۴- ذخیره توکن و اطلاعات کاربر
+        const userData = {
+          ...registerResponse.data.user,
+          id: userId
+        };
+
+        login(userData, registerResponse.data.token);
+
+        showToast('🎉 ثبت‌نام با موفقیت انجام شد!', 'success');
+
+        // ۵- انتقال به داشبورد
+        navigate('/dashboard');
       } else {
-        setError(result.error || 'خطا در ثبت نام');
+        showToast(registerResponse.data.message || 'خطا در ثبت‌نام', 'error');
       }
     } catch (error) {
-      setError('خطا در ارتباط با سرور');
+      console.error('Error during registration:', error);
+      showToast('خطا در فرآیند ثبت‌نام', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-box">
+    <div className="auth-container">
+      <div className="auth-card">
         <div className="auth-header">
-          <h1>📝 تکمیل ثبت نام</h1>
-          <p>برای تکمیل ثبت نام، اطلاعات زیر را وارد کنید</p>
+          <h2>📝 ثبت‌نام</h2>
+          <p>ثبت‌نام در ژورنال حرفه‌ای ترید</p>
         </div>
 
-        {error && <div className="auth-error">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>شماره تلفن همراه</label>
-            <input
-              type="tel"
-              value={phoneNumber}
-              disabled
-              className="disabled-input phone-display"
-            />
-            <span className="field-hint">شماره تلفن تایید شده و قابل تغییر نیست</span>
-          </div>
-
-          <div className="form-row">
+        {step === 1 ? (
+          <form onSubmit={handleSendCode} className="auth-form">
             <div className="form-group">
-              <label>نام *</label>
+              <label>شماره تلفن</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹"
+                className="auth-input"
+                disabled={loading}
+                required
+              />
+              <span className="field-hint">شماره تلفن خود را با کد کشور وارد کنید</span>
+            </div>
+
+            <div className="form-group">
+              <label>نام</label>
               <input
                 type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 placeholder="نام خود را وارد کنید"
+                className="auth-input"
                 disabled={loading}
-                required
               />
             </div>
+
             <div className="form-group">
-              <label>نام خانوادگی *</label>
+              <label>نام خانوادگی</label>
               <input
                 type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 placeholder="نام خانوادگی خود را وارد کنید"
+                className="auth-input"
                 disabled={loading}
-                required
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label>ایمیل</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="example@email.com"
-              disabled={loading}
-            />
-            <span className="field-hint">ایمیل اختیاری است</span>
-          </div>
+            <div className="form-group">
+              <label>ایمیل (اختیاری)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="example@email.com"
+                className="auth-input"
+                disabled={loading}
+              />
+            </div>
 
-          <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'در حال ثبت نام...' : '✅ تکمیل ثبت نام'}
-          </button>
-        </form>
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? '⏳ در حال ارسال...' : '📨 ارسال کد تایید'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyCode} className="auth-form">
+            <div className="form-group">
+              <label>کد تایید</label>
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="کد ۴ رقمی را وارد کنید"
+                className="auth-input"
+                disabled={loading}
+                maxLength={6}
+                required
+              />
+              <span className="field-hint">
+                کد تایید به شماره {phone} ارسال شد
+              </span>
+            </div>
+
+            <div className="auth-actions">
+              <button
+                type="button"
+                className="auth-btn-secondary"
+                onClick={() => {
+                  setStep(1);
+                  setCode('');
+                }}
+                disabled={loading}
+              >
+                ↩️ بازگشت
+              </button>
+              <button type="submit" className="auth-btn" disabled={loading}>
+                {loading ? '⏳ در حال تایید...' : '✅ تایید و ثبت‌نام'}
+              </button>
+            </div>
+          </form>
+        )}
 
         <div className="auth-footer">
-          <p>با ثبت نام، روزهای رایگان شما شروع می‌شود 🎁</p>
+          <p>
+            قبلاً ثبت‌نام کرده‌اید؟{' '}
+            <span className="auth-link" onClick={() => navigate('/login')}>
+              ورود
+            </span>
+          </p>
         </div>
       </div>
     </div>

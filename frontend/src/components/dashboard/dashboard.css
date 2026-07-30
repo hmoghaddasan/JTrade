@@ -209,3 +209,23 @@
     font-size: 24px;
   }
 }
+/* frontend/src/components/dashboard/Dashboard.css */
+
+/* ============================================
+   استایل‌های اضافی برای تقویم
+   ============================================ */
+.dashboard-new .pnl-calendar-container {
+  margin: 0 24px 12px 24px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-new .pnl-calendar-container {
+    margin: 0 12px 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-new .pnl-calendar-container {
+    margin: 0 8px 6px 8px;
+  }
+}

@@ -1,0 +1,741 @@
+/* frontend/src/components/dashboard/PnLCalendar.css */
+
+.pnl-calendar-container {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 24px 12px 24px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* ============================================
+   حالت فشرده (Compact)
+   ============================================ */
+.pnl-calendar-container.compact {
+  padding: 8px 12px;
+}
+
+.pnl-calendar-container.compact .calendar-title h3 {
+  font-size: 14px;
+}
+
+.pnl-calendar-container.compact .calendar-month-year {
+  font-size: 12px;
+  padding: 1px 10px;
+}
+
+.pnl-calendar-container.compact .nav-btn {
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.pnl-calendar-container.compact .nav-btn.today-btn {
+  font-size: 11px;
+  padding: 2px 12px;
+}
+
+/* ============================================
+   هدر تقویم
+   ============================================ */
+.pnl-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-title h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-primary, #1a237e);
+  font-weight: 600;
+}
+
+.calendar-month-year {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  background: var(--bg-secondary, #f5f5f5);
+  padding: 2px 12px;
+  border-radius: 12px;
+}
+
+.calendar-nav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.nav-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 6px;
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.nav-btn:hover {
+  background: var(--bg-hover, #f0f0f0);
+  border-color: var(--primary-color, #1a237e);
+}
+
+.nav-btn.today-btn {
+  background: var(--primary-color, #1a237e);
+  color: white;
+  border-color: var(--primary-color, #1a237e);
+  font-size: 12px;
+  padding: 4px 14px;
+}
+
+.nav-btn.today-btn:hover {
+  background: var(--primary-dark, #0d47a1);
+}
+
+/* ============================================
+   آمار ماه
+   ============================================ */
+.calendar-stats {
+  display: flex;
+  gap: 20px;
+  padding: 6px 0 10px 0;
+  border-bottom: 1px solid var(--border-color, #eee);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.calendar-stats.compact-stats {
+  gap: 12px;
+  padding: 4px 0 6px 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted, #888);
+}
+
+.stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.stat-value.positive {
+  color: #2e7d32;
+}
+
+.stat-value.negative {
+  color: #c62828;
+}
+
+.stat-change {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted, #888);
+}
+
+.win-count {
+  color: #2e7d32;
+}
+
+.loss-count {
+  color: #c62828;
+}
+
+.separator {
+  color: var(--text-muted, #888);
+  margin: 0 4px;
+}
+
+/* ============================================
+   گرید تقویم
+   ============================================ */
+.calendar-grid {
+  width: 100%;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-bottom: 3px;
+}
+
+.weekday-cell {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #666);
+  padding: 3px 0;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+/* ============================================
+   سلول‌های روز
+   ============================================ */
+.calendar-day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: 13px;
+  border: 2px solid transparent;
+  min-height: 38px;
+}
+
+.calendar-day-cell.compact-cell {
+  border-radius: 4px;
+  font-size: 11px;
+  min-height: 28px;
+}
+
+.calendar-day-cell.has-date {
+  cursor: pointer;
+}
+
+.calendar-day-cell.has-date:hover {
+  transform: scale(1.08);
+  border-color: var(--primary-color, #1a237e);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.calendar-day-cell.today {
+  border-color: #1a237e;
+  box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.3);
+}
+
+.calendar-day-cell.selected {
+  border-color: #1a237e;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.3);
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+/* ============================================
+   روزهای خارج از ماه (خاکستری بسیار کم رنگ)
+   ============================================ */
+.calendar-day-cell.empty {
+  background-color: #fafafa !important;
+  border-color: #f0f0f0 !important;
+  color: #e0e0e0;
+  cursor: default !important;
+}
+
+.calendar-day-cell.empty .day-number {
+  color: #e0e0e0;
+}
+
+.calendar-day-cell.empty:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================
+   روزهای بدون ترید (سفید با حاشیه نارنجی)
+   ============================================ */
+.calendar-day-cell.no-data {
+  background-color: #ffffff !important;
+  border-color: #ffb74d !important;
+  color: #5d4037;
+}
+
+.calendar-day-cell.no-data.has-date:hover {
+  transform: scale(1.05);
+  border-color: #e65100 !important;
+  box-shadow: 0 2px 8px rgba(230, 81, 0, 0.3);
+}
+
+.calendar-day-cell.no-data.selected {
+  border-color: #e65100 !important;
+  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.3);
+}
+
+/* ============================================
+   روزهای دارای ترید
+   ============================================ */
+.calendar-day-cell.positive {
+  border-color: #a5d6a7 !important;
+}
+
+.calendar-day-cell.negative {
+  border-color: #ef9a9a !important;
+}
+
+.calendar-day-cell.zero {
+  border-color: #fff9c4 !important;
+}
+
+.day-number {
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  font-size: 12px;
+}
+
+.compact-cell .day-number {
+  font-size: 10px;
+}
+
+.calendar-day-cell .day-profit-indicator {
+  font-size: 7px;
+  margin-top: 1px;
+  opacity: 0.7;
+}
+
+.compact-cell .day-profit-indicator {
+  font-size: 6px;
+}
+
+.day-profit-indicator.up {
+  color: #2e7d32;
+}
+
+.day-profit-indicator.down {
+  color: #c62828;
+}
+
+.day-profit-indicator.zero {
+  color: #f57f17;
+}
+
+/* ============================================
+   Legend - راهنمای رنگ (دایره)
+   ============================================ */
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color, #eee);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend-items {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+/* دایره‌های راهنما */
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.legend-dot.positive-dot {
+  background: #4caf50;
+  border-color: #388e3c;
+}
+
+.legend-dot.zero-dot {
+  background: #fff9c4;
+  border-color: #f9a825;
+}
+
+.legend-dot.negative-dot {
+  background: #ef5350;
+  border-color: #c62828;
+}
+
+.legend-dot.no-data-dot {
+  background: #ffffff;
+  border: 2px solid #ffb74d;
+}
+
+.legend-label {
+  font-size: 12px;
+  color: var(--text-secondary, #555);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ============================================
+   Tooltip
+   ============================================ */
+.calendar-tooltip {
+  position: fixed;
+  background: var(--card-bg, #ffffff);
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color, #e0e0e0);
+  min-width: 140px;
+  max-width: 220px;
+  z-index: 1000;
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 1.6;
+  transition: opacity 0.15s ease;
+}
+
+.calendar-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--card-bg, #ffffff);
+}
+
+.tooltip-date {
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  border-bottom: 1px solid var(--border-color, #eee);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.tooltip-profit {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tooltip-profit .positive {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.tooltip-profit .negative {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.tooltip-trades {
+  color: var(--text-secondary, #666);
+  font-size: 11px;
+}
+
+.tooltip-details {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+}
+
+.tooltip-trade {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.tooltip-more {
+  color: var(--text-muted, #999);
+  font-size: 10px;
+  font-style: italic;
+}
+
+/* ============================================
+   تاریک (Dark Mode)
+   ============================================ */
+[data-theme='dark'] .pnl-calendar-container {
+  background: var(--dark-card-bg, #1e1e1e);
+  border-color: var(--dark-border-color, #333);
+}
+
+[data-theme='dark'] .calendar-title h3 {
+  color: #fff;
+}
+
+[data-theme='dark'] .calendar-month-year {
+  background: #2a2a2a;
+  color: #aaa;
+}
+
+[data-theme='dark'] .nav-btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #aaa;
+}
+
+[data-theme='dark'] .nav-btn:hover {
+  background: #333;
+}
+
+[data-theme='dark'] .calendar-stats {
+  border-color: #333;
+}
+
+[data-theme='dark'] .day-number {
+  color: #eee;
+}
+
+[data-theme='dark'] .calendar-tooltip {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+[data-theme='dark'] .calendar-tooltip::after {
+  border-top-color: #2a2a2a;
+}
+
+[data-theme='dark'] .tooltip-date {
+  color: #eee;
+  border-color: #444;
+}
+
+[data-theme='dark'] .weekday-cell {
+  color: #aaa;
+}
+
+[data-theme='dark'] .calendar-day-cell.empty {
+  background-color: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+  color: #444;
+}
+
+[data-theme='dark'] .calendar-day-cell.empty .day-number {
+  color: #444;
+}
+
+[data-theme='dark'] .calendar-day-cell.no-data {
+  background-color: #1e1e1e !important;
+  border-color: #ff8a65 !important;
+  color: #ccc;
+}
+
+[data-theme='dark'] .legend-dot.no-data-dot {
+  background: #1e1e1e;
+  border: 2px solid #ff8a65;
+}
+
+/* ============================================
+   واکنش‌گرا (Responsive)
+   ============================================ */
+@media (max-width: 1200px) {
+  .pnl-calendar-container.compact .calendar-day-cell {
+    min-height: 32px;
+  }
+
+  .pnl-calendar-container.compact .day-number {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 992px) {
+  .pnl-calendar-container {
+    padding: 10px 12px;
+    margin: 0 16px 10px 16px;
+  }
+
+  .pnl-calendar-container.compact .calendar-day-cell {
+    min-height: 36px;
+  }
+
+  .pnl-calendar-container.compact .day-number {
+    font-size: 12px;
+  }
+
+  .calendar-day-cell {
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .calendar-stats {
+    gap: 14px;
+  }
+
+  .calendar-legend {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-items {
+    justify-content: center;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pnl-calendar-container {
+    padding: 8px 10px;
+    margin: 0 8px 8px 8px;
+  }
+
+  .pnl-calendar-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .calendar-title {
+    justify-content: center;
+  }
+
+  .calendar-nav {
+    justify-content: center;
+  }
+
+  .calendar-day-cell {
+    min-height: 32px;
+    font-size: 11px;
+    border-radius: 4px;
+  }
+
+  .day-number {
+    font-size: 11px;
+  }
+
+  .calendar-stats {
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .stat-item {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .calendar-tooltip {
+    min-width: 110px;
+    max-width: 160px;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  .weekday-cell {
+    font-size: 10px;
+  }
+
+  .legend-items {
+    gap: 10px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .legend-label {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pnl-calendar-container {
+    padding: 6px 6px;
+    margin: 0 4px 6px 4px;
+  }
+
+  .pnl-calendar-container.compact .calendar-day-cell {
+    min-height: 28px;
+  }
+
+  .calendar-day-cell {
+    min-height: 28px;
+    font-size: 10px;
+    border-radius: 3px;
+  }
+
+  .day-number {
+    font-size: 10px;
+  }
+
+  .calendar-day-cell .day-profit-indicator {
+    font-size: 5px;
+  }
+
+  .calendar-weekdays .weekday-cell {
+    font-size: 9px;
+  }
+
+  .calendar-title h3 {
+    font-size: 13px;
+  }
+
+  .calendar-month-year {
+    font-size: 11px;
+    padding: 1px 8px;
+  }
+
+  .nav-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+
+  .calendar-stats {
+    gap: 6px;
+  }
+
+  .stat-value {
+    font-size: 11px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  .pnl-calendar-container.compact .nav-btn.today-btn {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .legend-items {
+    gap: 6px;
+  }
+
+  .legend-item {
+    font-size: 10px;
+    gap: 3px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .legend-label {
+    font-size: 10px;
+  }
+}

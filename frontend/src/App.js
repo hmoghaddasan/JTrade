@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ToastProvider } from './contexts/ToastContext';
 import SubscriptionRenewal from './components/auth/SubscriptionRenewal';
 import PaymentVerify from './components/PaymentVerify';
 import RealApiService from './services/realApiService';
@@ -35,9 +36,11 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <ToastProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );
@@ -45,7 +48,7 @@ function App() {
 
 function AppRoutes() {
   const { isAuthenticated, loading } = useAuth();
-  const [authStep, setAuthStep] = useState('login');
+  const [showVerify, setShowVerify] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const hasRedirected = useRef(false);
@@ -54,7 +57,7 @@ function AppRoutes() {
   const [isSubscriptionExpiryChecked, setIsSubscriptionExpiryChecked] = useState(false);
 
   // ============================================
-  // ✅ فقط زمانی هدایت کن که در صفحات لاگین یا ثبت‌نام هستیم
+  // هدایت کاربر به داشبورد اگر احراز هویت شده
   // ============================================
   useEffect(() => {
     const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -74,7 +77,7 @@ function AppRoutes() {
   }, [isAuthenticated, loading, navigate, location.pathname]);
 
   // ============================================
-  // بررسی انقضای اشتراک
+  // ✅ بررسی انقضای اشتراک - کاملاً از سرور
   // ============================================
   useEffect(() => {
     if (isAuthenticated && !loading && !expiryChecked.current) {
@@ -82,10 +85,12 @@ function AppRoutes() {
 
       const checkSubscription = async () => {
         try {
+          // ✅ دریافت وضعیت اشتراک از سرور
           const response = await RealApiService.getSubscriptionStatus();
           const status = response.data;
+          console.log('📊 Subscription status from server:', status);
 
-          if (status.has_subscription) {
+          if (status && status.has_subscription) {
             if (status.is_expired) {
               setIsSubscriptionExpired(true);
               if (location.pathname !== '/profile' && location.pathname !== '/subscription/renew') {
@@ -100,50 +105,16 @@ function AppRoutes() {
               }, 1000);
             }
           } else {
-            const savedSubscription = localStorage.getItem('subscription');
-            if (savedSubscription) {
-              const subData = JSON.parse(savedSubscription);
-              const endDate = new Date(subData.endDate);
-              const now = new Date();
-
-              if (endDate < now) {
-                setIsSubscriptionExpired(true);
-                if (location.pathname !== '/profile' && location.pathname !== '/subscription/renew') {
-                  navigate('/profile');
-                }
-                setTimeout(() => {
-                  alert('⏰ دوره آزمایشی شما به پایان رسیده است. لطفاً برای ادامه استفاده، اشتراک تهیه کنید.');
-                }, 500);
-              }
-            } else {
-              const trialEndDate = new Date();
-              trialEndDate.setDate(trialEndDate.getDate() + 7);
-              const newSubscription = {
-                plan: 'آزمایشی',
-                remainingDays: 7,
-                remainingTrades: 50,
-                startDate: new Date().toISOString(),
-                endDate: trialEndDate.toISOString(),
-                isActive: true,
-                isExpired: false
-              };
-              localStorage.setItem('subscription', JSON.stringify(newSubscription));
+            // کاربر اشتراک فعال ندارد
+            console.log('ℹ️ کاربر اشتراک فعال ندارد');
+            // فقط در صورتی که در صفحه اشتراک نیستیم
+            if (location.pathname !== '/subscription/renew' && location.pathname !== '/profile') {
+              // نیازی به هدایت نیست، کاربر می‌تواند از داشبورد استفاده کند
             }
           }
         } catch (error) {
-          console.error('Error checking subscription:', error);
-          const savedSubscription = localStorage.getItem('subscription');
-          if (savedSubscription) {
-            const subData = JSON.parse(savedSubscription);
-            const endDate = new Date(subData.endDate);
-            const now = new Date();
-            if (endDate < now) {
-              setIsSubscriptionExpired(true);
-              if (location.pathname !== '/profile' && location.pathname !== '/subscription/renew') {
-                navigate('/profile');
-              }
-            }
-          }
+          console.error('❌ Error checking subscription from server:', error);
+          // در صورت خطا، چیزی نمایش ندهیم و اجازه دهیم کاربر ادامه دهد
         } finally {
           setIsSubscriptionExpiryChecked(true);
         }
@@ -174,25 +145,29 @@ function AppRoutes() {
     );
   }
 
+  // ============================================
+  // توابع کنترل مرحله احراز هویت
+  // ============================================
   const handleCodeSent = () => {
     console.log('📱 Moving to verify step');
-    setAuthStep('verify');
+    setShowVerify(true);
   };
 
-  const handleVerifySuccess = () => {
-    console.log('✅ Verification successful');
-    setAuthStep('login');
-    hasRedirected.current = false;
-    navigate('/dashboard', { replace: true });
-  };
+const handleVerifySuccess = () => {
+  console.log('✅ Verification successful');
+  setShowVerify(false);
+  hasRedirected.current = false;
+  // استفاده از navigate با replace برای جلوگیری از بازگشت
+  navigate('/dashboard', { replace: true });
+};
 
   const handleBackToLogin = () => {
     console.log('↩️ Back to login');
-    setAuthStep('login');
+    setShowVerify(false);
   };
 
   // ============================================
-  // مسیرهای احراز هویت شده
+  // اگر کاربر احراز هویت شده - نمایش صفحات داخلی
   // ============================================
   if (isAuthenticated) {
     return (
@@ -215,24 +190,25 @@ function AppRoutes() {
   }
 
   // ============================================
-  // مسیرهای احراز هویت نشده
+  // کاربر احراز هویت نشده - نمایش صفحات لاگین
   // ============================================
   return (
     <Routes>
       <Route
         path="/login"
         element={
-          authStep === 'login' ? (
-            <LoginStep1 onCodeSent={handleCodeSent} />
-          ) : (
+          showVerify ? (
             <VerifyCode
               onVerifySuccess={handleVerifySuccess}
               onBack={handleBackToLogin}
             />
+          ) : (
+            <LoginStep1 onCodeSent={handleCodeSent} />
           )
         }
       />
       <Route path="/register" element={<Register />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

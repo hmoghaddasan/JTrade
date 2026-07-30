@@ -18,25 +18,27 @@ const SleepNutritionReport = ({ dateRange, selectedCategory, isDark, trades }) =
     );
   }
 
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const sleepData = [
     { quality: 'خوب', trades: trades.filter(t => t.sleep_quality === 'خوب') },
     { quality: 'متوسط', trades: trades.filter(t => t.sleep_quality === 'متوسط') },
     { quality: 'بد', trades: trades.filter(t => t.sleep_quality === 'بد') }
   ].map(item => {
     const count = item.trades.length;
-    const profit = item.trades.reduce((sum, t) => sum + (t.profit || 0), 0);
-    const winning = item.trades.filter(t => t.profit > 0).length;
+    const profit = item.trades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+    const winning = item.trades.filter(t => parseFloat(t.profit) > 0).length;
     const winRate = count > 0 ? (winning / count * 100).toFixed(1) : 0;
     return { ...item, count, profit, winning, winRate };
   });
 
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const nutritionData = [
     { status: 'مناسب', trades: trades.filter(t => t.food_status === true) },
     { status: 'نامناسب', trades: trades.filter(t => t.food_status === false) }
   ].map(item => {
     const count = item.trades.length;
-    const profit = item.trades.reduce((sum, t) => sum + (t.profit || 0), 0);
-    const winning = item.trades.filter(t => t.profit > 0).length;
+    const profit = item.trades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+    const winning = item.trades.filter(t => parseFloat(t.profit) > 0).length;
     const winRate = count > 0 ? (winning / count * 100).toFixed(1) : 0;
     return { ...item, count, profit, winning, winRate };
   });

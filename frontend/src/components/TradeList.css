@@ -12,7 +12,7 @@
 }
 
 /* ============================================
-   Header
+   Header - اصلاح شده
    ============================================ */
 .tradelist-header {
   display: flex;
@@ -21,25 +21,32 @@
   margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 2px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .tradelist-header h2 {
   color: var(--text-primary);
   font-size: 22px;
   margin: 0;
+  flex-shrink: 0;
 }
 
+/* ✅ هدر اکشن‌ها - دکمه‌ها در یک ردیف */
 .header-actions {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.btn-primary {
-  padding: 8px 18px;
-  background: linear-gradient(135deg, #1a237e, #0d47a1);
-  color: white;
+/* ============================================
+   دکمه‌های هدر - استایل یکسان
+   ============================================ */
+.header-actions .btn-print-list,
+.header-actions .btn-excel-list,
+.header-actions .btn-secondary {
+  padding: 6px 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -47,74 +54,50 @@
   font-weight: 600;
   transition: all 0.3s ease;
   font-family: inherit;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  min-width: 70px;
+  white-space: nowrap;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
-}
-
-.btn-print {
-  padding: 8px 18px;
+/* دکمه چاپ */
+.header-actions .btn-print-list {
   background: #1a237e;
   color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
-.btn-print:hover {
+.header-actions .btn-print-list:hover {
+  background: #0d47a1;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
 }
 
-.btn-excel {
-  padding: 8px 18px;
+/* دکمه اکسل */
+.header-actions .btn-excel-list {
   background: #2e7d32;
   color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
-.btn-excel:hover {
+.header-actions .btn-excel-list:hover {
+  background: #1b5e20;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
 }
 
-.btn-secondary {
-  padding: 8px 18px;
+/* دکمه بازگشت */
+.header-actions .btn-secondary {
   background: var(--border-color);
   color: var(--text-secondary);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  font-family: inherit;
 }
 
-.btn-secondary:hover {
+.header-actions .btn-secondary:hover {
   background: var(--text-muted);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ============================================
@@ -215,10 +198,16 @@
   font-size: 13px;
   transition: all 0.3s ease;
   font-family: inherit;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-clear:hover {
   background: #b71c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.4);
 }
 
 /* ============================================
@@ -396,7 +385,6 @@
   flex-wrap: wrap;
 }
 
-.btn-print-row,
 .btn-view,
 .btn-edit,
 .btn-delete {
@@ -407,11 +395,6 @@
   font-size: 14px;
   transition: all 0.3s ease;
   background: transparent;
-}
-
-.btn-print-row:hover {
-  background: #e3f2fd;
-  transform: scale(1.1);
 }
 
 .btn-view:hover {
@@ -448,6 +431,66 @@
 
 .dark-theme .negative {
   color: #ef5350;
+}
+
+/* ============================================
+   Pagination
+   ============================================ */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.pagination .btn-secondary {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: var(--border-color);
+  color: var(--text-secondary);
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination .btn-secondary:hover:not(:disabled) {
+  background: var(--text-muted);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pagination .btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.page-info {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.items-per-page {
+  padding: 6px 10px;
+  border: 2px solid var(--input-border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  height: 34px;
 }
 
 /* ============================================
@@ -582,6 +625,8 @@
 .btn-cancel:hover {
   background: var(--text-muted);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .btn-confirm-delete {
@@ -600,6 +645,7 @@
 .btn-confirm-delete:hover {
   background: #b71c1c;
   transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.4);
 }
 
 .dark-theme .modal-content {
@@ -646,13 +692,13 @@
    Print Styles
    ============================================ */
 @media print {
-  .tradelist-header .header-actions .btn-primary,
-  .tradelist-header .header-actions .btn-print,
-  .tradelist-header .header-actions .btn-excel,
+  .tradelist-header .header-actions .btn-print-list,
+  .tradelist-header .header-actions .btn-excel-list,
   .tradelist-header .header-actions .btn-secondary,
   .filters-bar,
   .stats-bar,
-  .action-buttons {
+  .action-buttons,
+  .pagination {
     display: none !important;
   }
 
@@ -703,16 +749,30 @@
 @media (max-width: 768px) {
   .tradelist-header {
     flex-direction: column;
-    gap: 10px;
+    align-items: stretch;
+    gap: 8px;
   }
 
+  .tradelist-header h2 {
+    text-align: center;
+    font-size: 18px;
+  }
+
+  /* ✅ در موبایل دکمه‌ها در یک ردیف و با عرض مناسب */
   .header-actions {
     width: 100%;
-    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
   }
 
-  .header-actions button {
-    width: 100%;
+  .header-actions .btn-print-list,
+  .header-actions .btn-excel-list,
+  .header-actions .btn-secondary {
+    font-size: 12px;
+    padding: 4px 10px;
+    height: 32px;
+    min-width: 60px;
+    flex: 0 1 auto;
   }
 
   .stats-bar {
@@ -739,16 +799,34 @@
     gap: 3px;
   }
 
-  .btn-print-row,
   .btn-view,
   .btn-edit,
   .btn-delete {
     padding: 3px 6px;
     font-size: 12px;
   }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
 @media (max-width: 480px) {
+  /* ✅ در موبایل بسیار کوچک، دکمه‌ها به صورت ستونی */
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-actions .btn-print-list,
+  .header-actions .btn-excel-list,
+  .header-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    min-width: unset;
+  }
+
   .stats-bar {
     grid-template-columns: 1fr 1fr;
   }

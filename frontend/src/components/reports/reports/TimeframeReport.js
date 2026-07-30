@@ -1,15 +1,15 @@
-// frontend/src/components/reports/reports/TimeframeReport.js
+// frontend/src/components/reports/reports/WeeklyPerformanceReport.js
 
 import React from 'react';
 
-const TimeframeReport = ({ dateRange, selectedCategory, isDark, trades }) => {
+const WeeklyPerformanceReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
     return (
       <div className="report-content-inner">
         <div className="report-description">
           <h5>📖 درباره این گزارش</h5>
-          <p>این گزارش بهترین ترکیب تایم‌فریم‌ها را برای شما شناسایی می‌کند. هر ترید ممکن است از ترکیب متفاوتی از تایم‌فریم‌ها استفاده کرده باشد و این گزارش به شما کمک می‌کند مؤثرترین ترکیب را پیدا کنید.</p>
-          <p className="formula-text"><strong>فرمول محاسبه:</strong> برای هر ترکیب تایم‌فریم، تعداد ترید، سود کل، نرخ برد و میانگین سود محاسبه شده و ترکیب‌ها بر اساس سود مرتب می‌شوند.</p>
+          <p>این گزارش کارایی شما را در روزهای مختلف هفته نشان می‌دهد. با تحلیل این داده‌ها می‌توانید متوجه شوید کدام روزهای هفته برای شما سودآورتر هستند و برنامه‌ریزی بهتری داشته باشید.</p>
+          <p className="formula-text"><strong>فرمول محاسبه:</strong> سود روز = مجموع سود/زیان تمام تریدهای آن روز | نرخ برد روز = (تعداد تریدهای برنده در آن روز / کل تریدهای آن روز) × ۱۰۰</p>
         </div>
         <div className="empty-state">
           <p>هیچ تریدی با فیلترهای انتخاب شده یافت نشد</p>
@@ -18,57 +18,49 @@ const TimeframeReport = ({ dateRange, selectedCategory, isDark, trades }) => {
     );
   }
 
-  const timeframeKeys = [
-    { key: 'timeframe_d', label: 'D1' },
-    { key: 'timeframe_h4', label: 'H4' },
-    { key: 'timeframe_h1', label: 'H1' },
-    { key: 'timeframe_m15', label: 'M15' },
-    { key: 'timeframe_m5', label: 'M5' },
-    { key: 'timeframe_m1', label: 'M1' }
-  ];
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const dayNamesFa = {
+    'Monday': 'دوشنبه',
+    'Tuesday': 'سه‌شنبه',
+    'Wednesday': 'چهارشنبه',
+    'Thursday': 'پنج‌شنبه',
+    'Friday': 'جمعه',
+    'Saturday': 'شنبه',
+    'Sunday': 'یک‌شنبه'
+  };
 
-  const combinations = {};
-  trades.forEach(trade => {
-    const used = timeframeKeys.filter(tf => trade[tf.key] === true);
-    const key = used.length > 0 ? used.map(tf => tf.label).join('+') : 'No TF';
-
-    if (!combinations[key]) {
-      combinations[key] = { combination: key, count: 0, totalProfit: 0, winning: 0 };
-    }
-    combinations[key].count += 1;
-    combinations[key].totalProfit += trade.profit || 0;
-    if (trade.profit > 0) {
-      combinations[key].winning += 1;
-    }
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
+  const data = days.map(day => {
+    const dayTrades = trades.filter(t => t.day_of_week === day);
+    const count = dayTrades.length;
+    const winning = dayTrades.filter(t => parseFloat(t.profit) > 0).length;
+    const profit = dayTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+    const winRate = count > 0 ? (winning / count * 100).toFixed(1) : 0;
+    return { day, dayFa: dayNamesFa[day] || day, count, winning, profit, winRate };
   });
 
-  const reportData = Object.values(combinations).map(item => ({
-    ...item,
-    winRate: item.count > 0 ? (item.winning / item.count * 100).toFixed(1) : 0,
-    avgProfit: item.count > 0 ? (item.totalProfit / item.count) : 0
-  }));
-
-  reportData.sort((a, b) => b.totalProfit - a.totalProfit);
+  const bestDay = [...data].sort((a, b) => b.profit - a.profit)[0];
+  const worstDay = [...data].sort((a, b) => a.profit - b.profit)[0];
 
   return (
     <div className="report-content-inner">
       <div className="report-description">
         <h5>📖 درباره این گزارش</h5>
-        <p>این گزارش بهترین ترکیب تایم‌فریم‌ها را برای شما شناسایی می‌کند. هر ترید ممکن است از ترکیب متفاوتی از تایم‌فریم‌ها استفاده کرده باشد و این گزارش به شما کمک می‌کند مؤثرترین ترکیب را پیدا کنید.</p>
-        <p className="formula-text"><strong>فرمول محاسبه:</strong> برای هر ترکیب تایم‌فریم، تعداد ترید، سود کل، نرخ برد و میانگین سود محاسبه شده و ترکیب‌ها بر اساس سود مرتب می‌شوند.</p>
+        <p>این گزارش کارایی شما را در روزهای مختلف هفته نشان می‌دهد. با تحلیل این داده‌ها می‌توانید متوجه شوید کدام روزهای هفته برای شما سودآورتر هستند و برنامه‌ریزی بهتری داشته باشید.</p>
+        <p className="formula-text"><strong>فرمول محاسبه:</strong> سود روز = مجموع سود/زیان تمام تریدهای آن روز | نرخ برد روز = (تعداد تریدهای برنده در آن روز / کل تریدهای آن روز) × ۱۰۰</p>
       </div>
 
       <div className="report-summary">
         <div className="summary-item">
-          <span className="summary-label">بهترین ترکیب</span>
+          <span className="summary-label">بهترین روز</span>
           <span className="summary-value success">
-            {reportData.length > 0 ? reportData[0].combination : '-'}
+            {bestDay?.dayFa} (+${bestDay?.profit || 0})
           </span>
         </div>
         <div className="summary-item">
-          <span className="summary-label">بیشترین نرخ برد</span>
-          <span className="summary-value">
-            {reportData.length > 0 ? reportData.reduce((best, current) => parseFloat(current.winRate) > parseFloat(best.winRate) ? current : best, reportData[0]).winRate : 0}%
+          <span className="summary-label">بدترین روز</span>
+          <span className="summary-value danger">
+            {worstDay?.dayFa} (${worstDay?.profit || 0})
           </span>
         </div>
       </div>
@@ -76,27 +68,23 @@ const TimeframeReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       <table className="report-table">
         <thead>
           <tr>
-            <th>ترکیب تایم‌فریم</th>
+            <th>روز هفته</th>
             <th>تعداد ترید</th>
-            <th>سود کل</th>
+            <th>برنده</th>
+            <th>سود/زیان</th>
             <th>نرخ برد</th>
-            <th>رتبه</th>
           </tr>
         </thead>
         <tbody>
-          {reportData.map((item, index) => (
+          {data.map((item, index) => (
             <tr key={index}>
-              <td><span className="timeframe-combo">{item.combination}</span></td>
+              <td>{item.dayFa}</td>
               <td>{item.count}</td>
-              <td className={item.totalProfit >= 0 ? 'positive' : 'negative'}>
-                ${item.totalProfit}
+              <td>{item.winning}</td>
+              <td className={item.profit >= 0 ? 'positive' : 'negative'}>
+                ${item.profit}
               </td>
               <td>{item.winRate}%</td>
-              <td>
-                <span className={`rank-badge ${index < 2 ? 'gold' : index < 4 ? 'silver' : 'bronze'}`}>
-                  #{index + 1}
-                </span>
-              </td>
             </tr>
           ))}
         </tbody>
@@ -105,4 +93,4 @@ const TimeframeReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   );
 };
 
-export default TimeframeReport;
+export default WeeklyPerformanceReport;

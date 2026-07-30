@@ -1,11 +1,13 @@
 // frontend/src/components/Dashboard.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
 import SystemMessages from './SystemMessages';
+import PnLCalendar from './dashboard/PnLCalendar';
 import './Dashboard.css';
 
 // لیست ۵۰ آیکون برای دسته‌بندی‌ها
@@ -20,14 +22,17 @@ const GROUP_ICONS = [
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [trades, setTrades] = useState([]);
   const [selectedTrade, setSelectedTrade] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
@@ -36,74 +41,125 @@ const Dashboard = () => {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   // ============================================
-  // بارگذاری داده‌ها از بک‌اند
+  // State برای نمایش بیشتر
+  // ============================================
+  const [showAllTrades, setShowAllTrades] = useState(false);
+  const [showAllGroups, setShowAllGroups] = useState(false);
+  const DISPLAY_LIMIT = 15;
+
+  // ============================================
+  // بارگذاری داده‌ها از دیتابیس
   // ============================================
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-      try {
-        const response = await RealApiService.getTrades({ ordering: '-created_at' });
-        const tradesData = response.data.results || response.data || [];
-        setTrades(tradesData);
+      if (!user) return;
 
-        const allCategory = { id: 1, name: 'همه تریدها', icon: '📊' };
-        const categoryMap = new Map();
-        tradesData.forEach(trade => {
-          const symbol = trade.symbol || 'نامشخص';
-          if (!categoryMap.has(symbol)) {
-            const randomIcon = GROUP_ICONS[Math.floor(Math.random() * GROUP_ICONS.length)];
-            categoryMap.set(symbol, {
-              id: categoryMap.size + 2,
-              name: symbol,
-              icon: randomIcon
-            });
-          }
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log('📁 Loading data for user:', user.id);
+
+        // ۱- دریافت دسته‌بندی‌ها
+        const groupsResponse = await RealApiService.getTradeGroups();
+        let groupsData = groupsResponse.data.results || groupsResponse.data || [];
+        console.log('📁 All groups:', groupsData);
+
+        const userGroups = groupsData.filter(g => g.user_id === user.id);
+        console.log('📁 User groups:', userGroups);
+
+        // ۲- ساخت لیست دسته‌بندی‌ها
+        const allCategory = {
+          id: 0,
+          name: 'همه دسته‌بندی‌ها',
+          icon: '📊',
+          is_default: true,
+          is_active: true
+        };
+
+        const categoriesData = [
+          allCategory,
+          ...userGroups.map(g => ({
+            id: g.id,
+            name: g.group_name,
+            icon: g.icon || '📁',
+            is_active: g.is_active,
+            is_default: g.is_default,
+            description: g.description || ''
+          }))
+        ];
+
+        console.log('📁 Final categories:', categoriesData);
+        setCategories(categoriesData);
+
+        // ۳- دریافت تریدها
+        const tradesResponse = await RealApiService.getTrades();
+        const tradesData = tradesResponse.data.results || tradesResponse.data || [];
+        console.log('📊 Trades loaded:', tradesData.length);
+
+        tradesData.forEach(t => {
+          console.log(`📊 Trade ${t.id}: ${t.symbol} -> group: ${t.group || t.group_id}`);
         });
 
-        const dynamicCategories = [allCategory, ...Array.from(categoryMap.values())];
-        setCategories(dynamicCategories);
+        setTrades(tradesData);
 
-        if (dynamicCategories.length > 0) {
-          setSelectedCategory(dynamicCategories[0]);
+        // ۴- انتخاب اولین دسته‌بندی
+        if (categoriesData.length > 0) {
+          setSelectedCategory(categoriesData[0]);
         }
+
         if (tradesData.length > 0) {
           setSelectedTrade(tradesData[0]);
         }
 
-        localStorage.setItem('categories', JSON.stringify(dynamicCategories));
-        localStorage.setItem('trades', JSON.stringify(tradesData));
-
       } catch (error) {
-        console.error('Error loading data:', error);
-        const savedTrades = localStorage.getItem('trades');
-        const savedCategories = localStorage.getItem('categories');
-        if (savedTrades && savedCategories) {
-          setTrades(JSON.parse(savedTrades));
-          setCategories(JSON.parse(savedCategories));
-          if (JSON.parse(savedCategories).length > 0) {
-            setSelectedCategory(JSON.parse(savedCategories)[0]);
-          }
-          if (JSON.parse(savedTrades).length > 0) {
-            setSelectedTrade(JSON.parse(savedTrades)[0]);
-          }
-        }
+        console.error('❌ Error loading data:', error);
+        setError('خطا در بارگذاری داده‌ها');
+        showToast('خطا در بارگذاری داده‌ها', 'error');
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [user, showToast]);
 
   // ============================================
-  // محاسبه تعداد تریدها
+  // محاسبه تعداد تریدهای هر دسته‌بندی
   // ============================================
   const getTradeCount = (categoryId) => {
-    if (categoryId === 1) return trades.length;
-    const category = categories.find(c => c.id === categoryId);
-    if (!category) return 0;
-    return trades.filter(t => (t.symbol || 'نامشخص') === category.name).length;
+    if (categoryId === 0) return trades.length;
+    return trades.filter(t => t.group === categoryId || t.group_id === categoryId).length;
   };
+
+  // ============================================
+  // فیلتر تریدها بر اساس دسته‌بندی انتخاب شده
+  // ============================================
+  const filteredTrades = useMemo(() => {
+    if (!trades || trades.length === 0) return [];
+
+    if (selectedCategory?.id === 0) {
+      return trades;
+    }
+
+    return trades.filter(t => {
+      const tradeGroupId = t.group || t.group_id;
+      return tradeGroupId === selectedCategory?.id;
+    });
+  }, [trades, selectedCategory]);
+
+  // ============================================
+  // نمایش داده‌های محدود شده
+  // ============================================
+  const displayedTrades = useMemo(() => {
+    if (showAllTrades) return filteredTrades;
+    return filteredTrades.slice(0, DISPLAY_LIMIT);
+  }, [filteredTrades, showAllTrades]);
+
+  const displayedGroups = useMemo(() => {
+    if (showAllGroups) return categories;
+    return categories.slice(0, DISPLAY_LIMIT);
+  }, [categories, showAllGroups]);
 
   // ============================================
   // انتخاب دسته‌بندی
@@ -112,6 +168,10 @@ const Dashboard = () => {
     if (selectedCategory?.id !== category.id) {
       setSelectedCategory(category);
       setSelectedTrade(null);
+      setSelectedDate(null);
+      // بازنشانی نمایش بیشتر
+      setShowAllTrades(false);
+      console.log('📁 Selected category:', category);
     }
   };
 
@@ -123,10 +183,26 @@ const Dashboard = () => {
   };
 
   // ============================================
+  // کلیک روی روز تقویم
+  // ============================================
+  const handleCalendarDayClick = (date) => {
+    setSelectedDate(date);
+    const dayTrades = trades.filter(t => t.trade_date === date);
+    if (dayTrades.length > 0) {
+      setSelectedTrade(dayTrades[0]);
+      showToast(`✅ ${dayTrades.length} ترید در این روز یافت شد`, 'info');
+    } else {
+      showToast('📭 هیچ تریدی در این روز وجود ندارد', 'info');
+    }
+  };
+
+  // ============================================
   // ویرایش ترید
   // ============================================
   const handleEditTrade = () => {
     if (selectedTrade) {
+      localStorage.setItem('editTradeId', selectedTrade.id.toString());
+      localStorage.setItem('returnToDashboard', 'true');
       navigate(`/trades/edit/${selectedTrade.id}`);
     }
   };
@@ -144,77 +220,99 @@ const Dashboard = () => {
         await RealApiService.deleteTrade(selectedTrade.id);
         const updatedTrades = trades.filter(t => t.id !== selectedTrade.id);
         setTrades(updatedTrades);
-        localStorage.setItem('trades', JSON.stringify(updatedTrades));
-
-        const remainingTrades = updatedTrades.filter(t =>
-          t.category_id === selectedCategory.id || selectedCategory.id === 1
-        );
-        if (remainingTrades.length > 0) {
-          setSelectedTrade(remainingTrades[0]);
-        } else {
-          setSelectedTrade(null);
-        }
         setShowDeleteModal(false);
+        setSelectedTrade(updatedTrades.length > 0 ? updatedTrades[0] : null);
+        showToast('✅ ترید با موفقیت حذف شد', 'success');
       } catch (error) {
         console.error('Error deleting trade:', error);
-        alert('خطا در حذف ترید');
+        showToast('❌ خطا در حذف ترید', 'error');
       }
     }
   };
 
   // ============================================
-  // ایجاد دسته‌بندی
+  // ایجاد دسته‌بندی جدید
   // ============================================
   const handleAddCategory = () => {
     setShowCategoryModal(true);
   };
 
-  const handleCreateCategory = () => {
+  const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) {
-      alert('لطفاً نام دسته‌بندی را وارد کنید');
+      showToast('لطفاً نام دسته‌بندی را وارد کنید', 'warning');
       return;
     }
+
     if (categories.some(c => c.name === newCategoryName.trim())) {
-      alert('این نام قبلاً استفاده شده است');
+      showToast('این نام قبلاً استفاده شده است', 'warning');
       return;
     }
 
-    const newCategory = {
-      id: categories.length + 1,
-      name: newCategoryName.trim(),
-      icon: newCategoryIcon
-    };
+    try {
+      const newGroup = {
+        group_name: newCategoryName.trim(),
+        icon: newCategoryIcon,
+        user_id: user.id,
+        is_active: true,
+        is_default: false,
+        created_by: user.id,
+        order_index: categories.length
+      };
 
-    const updatedCategories = [...categories, newCategory];
-    setCategories(updatedCategories);
-    localStorage.setItem('categories', JSON.stringify(updatedCategories));
-    setShowCategoryModal(false);
-    setNewCategoryName('');
-    setNewCategoryIcon('📁');
+      const response = await RealApiService.createTradeGroup(newGroup);
+      const savedGroup = response.data;
+
+      const newCategory = {
+        id: savedGroup.id,
+        name: savedGroup.group_name,
+        icon: savedGroup.icon || newCategoryIcon,
+        is_active: true,
+        is_default: false
+      };
+
+      const updatedCategories = [categories[0], newCategory, ...categories.slice(1)];
+      setCategories(updatedCategories);
+      setSelectedCategory(newCategory);
+      setShowCategoryModal(false);
+      setNewCategoryName('');
+      setNewCategoryIcon('📁');
+      showToast('✅ دسته‌بندی با موفقیت ایجاد شد', 'success');
+    } catch (error) {
+      console.error('Error creating group:', error);
+      showToast('❌ خطا در ایجاد دسته‌بندی', 'error');
+    }
   };
 
   // ============================================
   // حذف دسته‌بندی
   // ============================================
-  const handleDeleteCategory = () => {
+  const handleDeleteCategory = async () => {
     if (!categoryToDelete) return;
 
-    const categoryTrades = trades.filter(t => (t.symbol || 'نامشخص') === categoryToDelete.name);
+    const categoryTrades = trades.filter(t => t.group === categoryToDelete.id || t.group_id === categoryToDelete.id);
     if (categoryTrades.length > 0) {
-      alert(`⚠️ این دسته‌بندی دارای ${categoryTrades.length} ترید است. ابتدا تریدهای آن را حذف کنید.`);
+      showToast(`⚠️ این دسته‌بندی دارای ${categoryTrades.length} ترید است. ابتدا تریدهای آن را حذف کنید.`, 'warning');
       setShowDeleteCategoryModal(false);
       setCategoryToDelete(null);
       return;
     }
 
-    const updatedCategories = categories.filter(c => c.id !== categoryToDelete.id);
-    setCategories(updatedCategories);
-    localStorage.setItem('categories', JSON.stringify(updatedCategories));
-    if (updatedCategories.length > 0) {
-      setSelectedCategory(updatedCategories[0]);
+    try {
+      await RealApiService.deleteTradeGroup(categoryToDelete.id);
+
+      const updatedCategories = categories.filter(c => c.id !== categoryToDelete.id);
+      setCategories(updatedCategories);
+
+      if (updatedCategories.length > 0) {
+        setSelectedCategory(updatedCategories[0]);
+      }
+      setShowDeleteCategoryModal(false);
+      setCategoryToDelete(null);
+      showToast('✅ دسته‌بندی با موفقیت حذف شد', 'success');
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      showToast('❌ خطا در حذف دسته‌بندی', 'error');
     }
-    setShowDeleteCategoryModal(false);
-    setCategoryToDelete(null);
   };
 
   // ============================================
@@ -222,7 +320,7 @@ const Dashboard = () => {
   // ============================================
   const handlePrintTrade = () => {
     if (!selectedTrade) {
-      alert('لطفاً یک ترید را انتخاب کنید');
+      showToast('لطفاً یک ترید را انتخاب کنید', 'warning');
       return;
     }
     window.print();
@@ -230,7 +328,7 @@ const Dashboard = () => {
 
   const handleExportTradeExcel = () => {
     if (!selectedTrade) {
-      alert('لطفاً یک ترید را انتخاب کنید');
+      showToast('لطفاً یک ترید را انتخاب کنید', 'warning');
       return;
     }
 
@@ -255,9 +353,11 @@ const Dashboard = () => {
     ];
 
     let csvContent = BOM + headers.join(',') + '\n';
+    const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.name || 'بدون دسته‌بندی';
+
     const row = [
       trade.trade_date, trade.symbol, trade.trade_type === 'Buy' ? 'خرید' : 'فروش',
-      categories.find(c => c.id === trade.category_id)?.name || '-',
+      categoryName,
       trade.session_type || '', trade.time_ny || '', trade.day_of_week || '', trade.bias || '',
       trade.strategy_type || '', trade.retirement_model || '', trade.timeframes?.join('، ') || '',
       trade.sleep_quality || '', trade.food_status ? 'بله' : 'خیر', trade.emotions?.join('، ') || '',
@@ -310,13 +410,26 @@ const Dashboard = () => {
   ];
 
   // ============================================
-  // لودینگ
+  // لودینگ و خطا
   // ============================================
   if (loading) {
     return (
       <div className="dashboard-loading">
         <div className="loading-spinner">⏳</div>
         <p>در حال بارگذاری...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-error">
+        <div className="error-icon">❌</div>
+        <h3>خطا در بارگذاری</h3>
+        <p>{error}</p>
+        <button className="btn-retry" onClick={() => window.location.reload()}>
+          تلاش مجدد
+        </button>
       </div>
     );
   }
@@ -361,7 +474,7 @@ const Dashboard = () => {
 
       {/* ===== سه ستون اصلی ===== */}
       <div className="three-column-layout">
-        {/* ستون ۱: دسته‌بندی‌ها */}
+        {/* ===== ستون ۱: دسته‌بندی‌ها ===== */}
         <div className="col-groups">
           <div className="col-header">
             <h3>📁 دسته‌بندی‌ها</h3>
@@ -370,11 +483,11 @@ const Dashboard = () => {
               <button
                 className="btn-delete-group"
                 onClick={() => {
-                  if (selectedCategory && selectedCategory.id !== 1) {
+                  if (selectedCategory && selectedCategory.id !== 0) {
                     setCategoryToDelete(selectedCategory);
                     setShowDeleteCategoryModal(true);
                   } else {
-                    alert('دسته‌بندی "همه تریدها" قابل حذف نیست');
+                    showToast('دسته‌بندی "همه دسته‌بندی‌ها" قابل حذف نیست', 'warning');
                   }
                 }}
                 title="حذف دسته‌بندی"
@@ -382,7 +495,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="groups-list">
-            {categories.map(category => (
+            {displayedGroups.map(category => (
               <div
                 key={category.id}
                 className={`group-item ${selectedCategory?.id === category.id ? 'active' : ''}`}
@@ -391,57 +504,82 @@ const Dashboard = () => {
                 <span className="group-icon">{category.icon}</span>
                 <span className="group-name">{category.name}</span>
                 <span className="group-count">{getTradeCount(category.id)}</span>
+                {category.is_default && category.id !== 0 && (
+                  <span className="group-status default">پیش‌فرض</span>
+                )}
+                {!category.is_active && (
+                  <span className="group-status inactive">غیرفعال</span>
+                )}
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* ستون ۲: لیست تریدها */}
-        <div className="col-trades">
-          <div className="col-header">
-            <h3>📈 تریدها</h3>
-            <span className="trade-count">
-              {trades.filter(t => {
-                if (selectedCategory?.id === 1) return true;
-                return (t.symbol || 'نامشخص') === selectedCategory?.name;
-              }).length} عدد
-            </span>
-          </div>
-          <div className="trades-list">
-            {trades.filter(t => {
-              if (selectedCategory?.id === 1) return true;
-              return (t.symbol || 'نامشخص') === selectedCategory?.name;
-            }).length === 0 ? (
-              <div className="empty-trades"><p>هیچ تریدی در این دسته‌بندی وجود ندارد</p></div>
-            ) : (
-              trades.filter(t => {
-                if (selectedCategory?.id === 1) return true;
-                return (t.symbol || 'نامشخص') === selectedCategory?.name;
-              }).map(trade => (
-                <div
-                  key={trade.id}
-                  className={`trade-item ${selectedTrade?.id === trade.id ? 'active' : ''}`}
-                  onClick={() => handleTradeSelect(trade)}
-                >
-                  <div className="trade-item-header">
-                    <span className="trade-symbol">{trade.symbol || 'نامشخص'}</span>
-                    <span className={`trade-type ${trade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>
-                      {trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}
-                    </span>
-                  </div>
-                  <div className="trade-item-info">
-                    <span className="trade-date">{trade.trade_date || new Date(trade.created_at).toLocaleDateString('fa-IR')}</span>
-                    <span className={`trade-profit ${trade.profit >= 0 ? 'positive' : 'negative'}`}>
-                      {trade.profit >= 0 ? '+' : ''}{trade.profit || 0}$
-                    </span>
-                  </div>
-                </div>
-              ))
+            {categories.length > DISPLAY_LIMIT && (
+              <button
+                className="show-more-btn"
+                onClick={() => setShowAllGroups(!showAllGroups)}
+              >
+                {showAllGroups ? '🔽 نمایش کمتر' : `🔼 نمایش ${categories.length - DISPLAY_LIMIT} دسته‌بندی بیشتر`}
+              </button>
             )}
           </div>
         </div>
 
-        {/* ستون ۳: جزئیات ترید */}
+        {/* ===== ستون ۲: لیست تریدها ===== */}
+        <div className="col-trades">
+          <div className="col-header">
+            <h3>📈 تریدها</h3>
+            <span className="trade-count">
+              {filteredTrades.length} عدد
+            </span>
+          </div>
+          <div className="trades-list">
+            {displayedTrades.length === 0 ? (
+              <div className="empty-trades">
+                <p>هیچ تریدی در این دسته‌بندی وجود ندارد</p>
+                {selectedCategory?.id !== 0 && (
+                  <button
+                    className="btn-add-trade"
+                    onClick={() => navigate('/trades/new')}
+                  >
+                    ➕ ثبت ترید جدید
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {displayedTrades.map(trade => (
+                  <div
+                    key={trade.id}
+                    className={`trade-item ${selectedTrade?.id === trade.id ? 'active' : ''}`}
+                    onClick={() => handleTradeSelect(trade)}
+                  >
+                    <div className="trade-item-header">
+                      <span className="trade-symbol">{trade.symbol || 'نامشخص'}</span>
+                      <span className={`trade-type ${trade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>
+                        {trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}
+                      </span>
+                    </div>
+                    <div className="trade-item-info">
+                      <span className="trade-date">{trade.trade_date || new Date(trade.created_at).toLocaleDateString('fa-IR')}</span>
+                      <span className={`trade-profit ${parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}`}>
+                        {parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {filteredTrades.length > DISPLAY_LIMIT && (
+                  <button
+                    className="show-more-btn"
+                    onClick={() => setShowAllTrades(!showAllTrades)}
+                  >
+                    {showAllTrades ? '🔽 نمایش کمتر' : `🔼 نمایش ${filteredTrades.length - DISPLAY_LIMIT} ترید بیشتر`}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* ===== ستون ۳: جزئیات ترید ===== */}
         <div className="col-details">
           {selectedTrade ? (
             <>
@@ -486,12 +624,14 @@ const Dashboard = () => {
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">دسته‌بندی</span>
-                      <span className="detail-value">{categories.find(c => c.name === selectedTrade.symbol)?.name || selectedTrade.symbol || '-'}</span>
+                      <span className="detail-value">
+                        {categories.find(c => c.id === (selectedTrade.group || selectedTrade.group_id))?.name || 'بدون دسته‌بندی'}
+                      </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">سود/زیان</span>
-                      <span className={`detail-value ${selectedTrade.profit >= 0 ? 'profit' : 'loss'}`}>
-                        {selectedTrade.profit >= 0 ? '+' : ''}{selectedTrade.profit || 0}$
+                      <span className={`detail-value ${parseFloat(selectedTrade.profit) >= 0 ? 'profit' : 'loss'}`}>
+                        {parseFloat(selectedTrade.profit) >= 0 ? '+' : ''}{parseFloat(selectedTrade.profit) || 0}$
                       </span>
                     </div>
                     <div className="detail-row">
@@ -794,6 +934,14 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* ===== تقویم رنگی P&L ===== */}
+      <PnLCalendar
+        trades={trades}
+        onDayClick={handleCalendarDayClick}
+        selectedDate={selectedDate}
+        compact={true}
+      />
+
       {/* ===== کارت‌های آمار ===== */}
       <div className="stats-cards">
         <div className="stat-card">
@@ -826,7 +974,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ===== مودال حذف ترید ===== */}
+      {/* ===== مودال‌ها ===== */}
       {showDeleteModal && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -842,7 +990,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* ===== مودال ایجاد دسته‌بندی ===== */}
       {showCategoryModal && (
         <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -851,12 +998,24 @@ const Dashboard = () => {
             <div className="modal-form">
               <div className="form-group">
                 <label>نام دسته‌بندی</label>
-                <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="نام دسته‌بندی را وارد کنید" className="modal-input" />
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="نام دسته‌بندی را وارد کنید"
+                  className="modal-input"
+                />
               </div>
               <div className="form-group">
                 <label>آیکون</label>
-                <select value={newCategoryIcon} onChange={(e) => setNewCategoryIcon(e.target.value)} className="modal-select">
-                  {GROUP_ICONS.map((icon, index) => (<option key={index} value={icon}>{icon}</option>))}
+                <select
+                  value={newCategoryIcon}
+                  onChange={(e) => setNewCategoryIcon(e.target.value)}
+                  className="modal-select"
+                >
+                  {GROUP_ICONS.map((icon, index) => (
+                    <option key={index} value={icon}>{icon}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -868,13 +1027,13 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* ===== مودال حذف دسته‌بندی ===== */}
       {showDeleteCategoryModal && categoryToDelete && (
         <div className="modal-overlay" onClick={() => setShowDeleteCategoryModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon">🗑️</div>
             <h3>حذف دسته‌بندی</h3>
             <p>آیا از حذف دسته‌بندی <strong>{categoryToDelete.name}</strong> اطمینان دارید؟</p>
+            <p className="modal-warning">این عمل غیرقابل بازگشت است!</p>
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>انصراف</button>
               <button className="btn-confirm-delete" onClick={handleDeleteCategory}>حذف دسته‌بندی</button>

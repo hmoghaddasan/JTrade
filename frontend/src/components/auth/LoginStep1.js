@@ -1,13 +1,18 @@
 // frontend/src/components/auth/LoginStep1.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import RealApiService from '../../services/realApiService';
 import './auth.css';
 
 const LoginStep1 = ({ onCodeSent }) => {
+  const { setPhoneNumber } = useAuth();  // ✅ دریافت setPhoneNumber
+  const { showToast } = useToast();
+
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { sendCode } = useAuth();
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -28,15 +33,28 @@ const LoginStep1 = ({ onCodeSent }) => {
       return;
     }
 
-    const result = await sendCode(cleanedPhone);
-    if (result.success) {
+    try {
+      console.log('📤 Sending code to:', cleanedPhone);
+      const response = await RealApiService.sendVerificationCode(cleanedPhone);
+      console.log('📤 Response:', response.data);
+
+      // ✅ ذخیره شماره تلفن در AuthContext
+      setPhoneNumber(cleanedPhone);
+
+      showToast('کد تایید با موفقیت ارسال شد', 'success');
+
       if (onCodeSent) {
+        console.log('📱 Calling onCodeSent');
         onCodeSent();
       }
-    } else {
-      setError(result.error || 'خطا در ارسال کد تایید');
+
+    } catch (error) {
+      console.error('❌ Error sending verification code:', error);
+      setError(error.response?.data?.message || 'خطا در ارسال کد تایید');
+      showToast('خطا در ارسال کد تایید', 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -69,6 +87,15 @@ const LoginStep1 = ({ onCodeSent }) => {
             {loading ? '⏳ در حال ارسال...' : '📲 ارسال کد تایید'}
           </button>
         </form>
+
+        <div className="auth-footer">
+          <p>
+            ثبت‌نام نکرده‌اید؟{' '}
+            <span className="auth-link" onClick={() => window.location.href = '/register'}>
+              ثبت‌نام
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );

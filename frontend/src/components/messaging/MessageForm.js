@@ -2,117 +2,131 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import RealApiService from '../../services/realApiService';
 import './Messaging.css';
 
 const MessageForm = () => {
-  const { isDark } = useTheme();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    subject: '',
-    message: ''
-  });
+
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // ============================================
+  // ارسال پیام
+  // ============================================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError('');
+
+    if (!subject.trim()) {
+      setError('لطفاً موضوع پیام را وارد کنید');
+      return;
+    }
+
+    if (!message.trim()) {
+      setError('لطفاً متن پیام را وارد کنید');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const data = {
+        subject: subject.trim(),
+        message: message.trim(),
+      };
+
+      // ✅ اصلاح مسیر - استفاده از /messages/create/
+      const response = await RealApiService.sendMessage(data);
+      console.log('📤 Message sent:', response.data);
+
+      showToast('✅ پیام با موفقیت ارسال شد', 'success');
+
+      setTimeout(() => {
+        navigate('/messages');
+      }, 500);
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'خطا در ارسال پیام';
+      setError(errorMsg);
+      showToast('❌ ' + errorMsg, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    if (!formData.subject.trim()) {
-      setError('لطفاً موضوع پیام را وارد کنید');
-      setLoading(false);
-      return;
-    }
-    if (!formData.message.trim()) {
-      setError('لطفاً متن پیام را وارد کنید');
-      setLoading(false);
-      return;
-    }
-
-    // ذخیره در localStorage (mock)
-    const savedMessages = localStorage.getItem('userMessages');
-    const messages = savedMessages ? JSON.parse(savedMessages) : [];
-
-    const newMessage = {
-      id: Date.now(),
-      user: user?.phone_number,
-      subject: formData.subject.trim(),
-      message: formData.message.trim(),
-      date: new Date().toISOString(),
-      isRead: false,
-      isReplied: false,
-      reply: null,
-      replyDate: null
-    };
-
-    messages.push(newMessage);
-    localStorage.setItem('userMessages', JSON.stringify(messages));
-
-    setLoading(false);
-    alert('✅ پیام شما با موفقیت ارسال شد. همکاران ما در اسرع وقت پاسخ خواهند داد.');
+  // ============================================
+  // انصراف
+  // ============================================
+  const handleCancel = () => {
     navigate('/messages');
   };
 
   return (
-    <div className={`messaging-container ${isDark ? 'dark' : 'light'}`}>
+    <div className="messaging-container">
       <div className="messaging-header">
         <h2>✉️ ارسال پیام جدید</h2>
-        <button className="btn-secondary" onClick={() => navigate('/messages')}>
+        <button className="btn-secondary" onClick={handleCancel}>
           ↩️ بازگشت
         </button>
       </div>
 
       <div className="message-form-container">
-        <div className="form-info">
-          <p>📌 لطفاً سؤال یا مشکل خود را به صورت کامل توضیح دهید.</p>
-          <p>همکاران ما پس از دریافت پیام شما، در اسرع وقت بررسی کرده و در صورت نیاز با شما تماس خواهند گرفت.</p>
-        </div>
-
-        {error && <div className="form-error">{error}</div>}
-
         <form onSubmit={handleSubmit} className="message-form">
           <div className="form-group">
-            <label>موضوع *</label>
+            <label>موضوع <span className="required">*</span></label>
             <input
               type="text"
-              name="subject"
-              value={formData.subject}
-              onChange={handleChange}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               placeholder="موضوع پیام را وارد کنید"
               disabled={loading}
-              required
+              className={error ? 'has-error' : ''}
+              maxLength={200}
             />
           </div>
 
           <div className="form-group">
-            <label>متن پیام *</label>
+            <label>متن پیام <span className="required">*</span></label>
             <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              placeholder="پیام خود را به صورت کامل بنویسید..."
-              rows="6"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="متن پیام خود را بنویسید..."
               disabled={loading}
-              required
+              className={error ? 'has-error' : ''}
+              rows="8"
             />
           </div>
 
+          {error && <div className="error-message">⚠️ {error}</div>}
+
           <div className="form-actions">
-            <button type="button" className="btn-cancel" onClick={() => navigate('/messages')}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleCancel}
+              disabled={loading}
+            >
               انصراف
             </button>
-            <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'در حال ارسال...' : '📨 ارسال پیام'}
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? '⏳ در حال ارسال...' : '📨 ارسال پیام'}
             </button>
+          </div>
+
+          <div className="form-info">
+            <p>💡 پیام شما برای تیم پشتیبانی ارسال خواهد شد. پاسخ در اسرع وقت به شما اطلاع داده می‌شود.</p>
           </div>
         </form>
       </div>

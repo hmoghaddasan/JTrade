@@ -26,21 +26,22 @@ const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades })
     { min: 1, max: 2, label: '۱-۲' }
   ];
 
+  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const data = ranges.map(range => {
     const rangeTrades = trades.filter(t => {
-      const score = t.execution_quality_score || 0;
+      const score = parseFloat(t.execution_quality_score) || 0;
       return score >= range.min && score <= range.max;
     });
     const count = rangeTrades.length;
-    const profit = rangeTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
-    const winning = rangeTrades.filter(t => t.profit > 0).length;
+    const profit = rangeTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+    const winning = rangeTrades.filter(t => parseFloat(t.profit) > 0).length;
     const avgProfit = count > 0 ? profit / count : 0;
     const winRate = count > 0 ? (winning / count * 100).toFixed(1) : 0;
     return { ...range, count, profit, avgProfit, winRate };
   });
 
   const totalTrades = data.reduce((sum, item) => sum + item.count, 0);
-  const avgQuality = trades.reduce((sum, t) => sum + (t.execution_quality_score || 0), 0) / trades.length;
+  const avgQuality = trades.reduce((sum, t) => sum + (parseFloat(t.execution_quality_score) || 0), 0) / trades.length;
 
   return (
     <div className="report-content-inner">
@@ -87,8 +88,8 @@ const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades })
               </td>
               <td>{item.winRate}%</td>
               <td>
-                <span className={`status-badge ${item.winRate >= 60 ? 'success' : 'danger'}`}>
-                  {item.winRate >= 60 ? '✅ خوب' : '❌ ضعیف'}
+                <span className={`status-badge ${parseFloat(item.winRate) >= 60 ? 'success' : 'danger'}`}>
+                  {parseFloat(item.winRate) >= 60 ? '✅ خوب' : '❌ ضعیف'}
                 </span>
               </td>
             </tr>

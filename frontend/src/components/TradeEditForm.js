@@ -3,13 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
 import './TradeForm.css';
 
 const TradeEditForm = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const { isDark } = useTheme();
+  const { showToast } = useToast();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -17,6 +22,7 @@ const TradeEditForm = () => {
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState([]);
 
+  // لیست کامل نمادها
   const symbols = [
     'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'USDCHF', 'NZDUSD',
     'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY', 'CADJPY', 'CHFJPY', 'NZDJPY',
@@ -51,7 +57,7 @@ const TradeEditForm = () => {
     'کالاها': symbols.filter(s => ['XAUUSD','XAGUSD','USOIL','UKOIL','XPDUSD','XPTUSD',
       'XCUUSD','XALUSD','XZNUSD','XNIUSD','XPBUSD','XSNUSD',
       'CORN','WHEAT','SOYBN','COFFEE','SUGAR','COTTON',
-      'COCOA','ORANGE','LUMBER','LEANHOG','LIVECATTLE','FEEDERCATTLE'].includes(s)),
+      'COCOA','ORANGE','LUMBER'].includes(s)),
     'کریپتو': symbols.filter(s => ['BTCUSD','ETHUSD','USDTUSD','BNBUSD','SOLUSD','ADAUSD',
       'XRPUSD','DOTUSD','DOGEUSD','AVAXUSD','MATICUSD','LINKUSD',
       'UNIUSD','ATOMUSD','LTCUSD','BCHUSD','NEARUSD','FILUSD',
@@ -63,30 +69,50 @@ const TradeEditForm = () => {
   };
 
   // ============================================
-  // بارگذاری داده‌ها از بک‌اند
+  // دریافت دسته‌بندی‌های کاربر از دیتابیس
   // ============================================
   useEffect(() => {
-    const loadData = async () => {
+    const loadCategories = async () => {
+      try {
+        const response = await RealApiService.getTradeGroups();
+        const groupsData = response.data.results || response.data || [];
+        const userGroups = groupsData.filter(g => g.user_id === user?.id);
+        setCategories(userGroups);
+        console.log('📁 Categories loaded:', userGroups);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      }
+    };
+
+    loadCategories();
+  }, [user]);
+
+  // ============================================
+  // بارگذاری داده‌های ترید
+  // ============================================
+  useEffect(() => {
+    const loadTrade = async () => {
       setLoading(true);
       try {
         const response = await RealApiService.getTrade(id);
-        setTradeData(response.data);
+        console.log('📊 Trade loaded:', response.data);
 
-        const savedCategories = localStorage.getItem('categories');
-        if (savedCategories) {
-          setCategories(JSON.parse(savedCategories));
-        } else {
-          setCategories([
-            { id: 1, name: 'همه تریدها', icon: '📊' },
-            { id: 2, name: 'فارکس', icon: '💱' },
-            { id: 3, name: 'کریپتو', icon: '₿' },
-            { id: 4, name: 'شاخص‌ها', icon: '📈' },
-            { id: 5, name: 'کالاها', icon: '🏆' },
-          ]);
+        // ✅ اطمینان از اینکه group_id به درستی تنظیم شده است
+        const trade = response.data;
+
+        // اگر group_id وجود ندارد اما group وجود دارد، از group استفاده کن
+        if (!trade.group_id && trade.group) {
+          trade.group_id = trade.group;
         }
+
+        setTradeData(trade);
+        console.log('📊 Trade group_id:', trade.group_id);
+        console.log('📊 Trade group:', trade.group);
+
       } catch (error) {
         console.error('Error loading trade:', error);
-        alert('❌ خطا در دریافت اطلاعات ترید');
+        showToast('❌ خطا در دریافت اطلاعات ترید', 'error');
         navigate('/trades');
       } finally {
         setLoading(false);
@@ -94,11 +120,11 @@ const TradeEditForm = () => {
     };
 
     if (id) {
-      loadData();
+      loadTrade();
     } else {
       navigate('/trades');
     }
-  }, [id, navigate]);
+  }, [id, navigate, showToast]);
 
   // ============================================
   // تغییرات فرم
@@ -107,6 +133,9 @@ const TradeEditForm = () => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
       setTradeData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+    } else if (name === 'group_id') {
+      console.log('📁 Group selected:', value);
+      setTradeData(prev => ({ ...prev, [name]: parseInt(value) || value }));
     } else {
       setTradeData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
@@ -121,7 +150,7 @@ const TradeEditForm = () => {
     if (!tradeData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
     if (!tradeData.trade_date) validationErrors.push('لطفاً تاریخ معامله را وارد کنید');
     if (!tradeData.trade_type) validationErrors.push('لطفاً نوع ترید را انتخاب کنید');
-    if (!tradeData.category_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
+    if (!tradeData.group_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
     if (!tradeData.entry_price || parseFloat(tradeData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید');
     if (!tradeData.close_price || parseFloat(tradeData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید');
     if (tradeData.profit && isNaN(parseFloat(tradeData.profit))) validationErrors.push('مقدار سود/زیان باید عدد باشد');
@@ -151,55 +180,51 @@ const TradeEditForm = () => {
       tradeData.day_of_week = days[date.getDay()];
       tradeData.month = date.getMonth() + 1;
 
-      await RealApiService.updateTrade(id, tradeData);
+      // اطمینان از اینکه group_id عدد است
+      const submitData = {
+        ...tradeData,
+        group_id: parseInt(tradeData.group_id)
+      };
 
-      const savedTrades = localStorage.getItem('trades');
-      if (savedTrades) {
-        const trades = JSON.parse(savedTrades);
-        const index = trades.findIndex(t => t.id === parseInt(id));
-        if (index !== -1) {
-          trades[index] = { ...tradeData, id: parseInt(id) };
-          localStorage.setItem('trades', JSON.stringify(trades));
-        }
+      console.log('📤 Submitting trade data:', submitData);
+      await RealApiService.updateTrade(id, submitData);
+
+      showToast('✅ ترید با موفقیت ویرایش شد!', 'success');
+
+      const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
+
+      if (fromDashboard) {
+        localStorage.removeItem('returnToDashboard');
+        navigate('/dashboard');
+      } else {
+        navigate('/trades');
       }
-
-      alert('✅ ترید با موفقیت ویرایش شد!');
-      navigate('/trades');
     } catch (error) {
       console.error('Error updating trade:', error);
-      alert('❌ خطا در ذخیره تغییرات');
+      showToast('❌ خطا در ذخیره تغییرات', 'error');
     } finally {
       setSaving(false);
     }
   };
 
   // ============================================
-  // Navigation
+  // بازگشت به صفحه مناسب
   // ============================================
+  const handleBack = () => {
+    const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
+    if (fromDashboard) {
+      localStorage.removeItem('returnToDashboard');
+      navigate('/dashboard');
+    } else {
+      navigate('/trades');
+    }
+  };
+
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 8));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   // ============================================
-  // Step 1: شناسه و تاریخ
-  // ============================================
-  const renderStep1 = () => (
-    <div className="form-step">
-      <h3>📅 شناسه و تاریخ</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>تاریخ معامله</label>
-          <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={tradeData.time_ny || ''} onChange={handleChange} />
-        </div>
-      </div>
-    </div>
-  );
-
-  // ============================================
-  // Step 2: جلسه و نماد
+  // Step 2: جلسه و نماد (با انتخاب دسته‌بندی)
   // ============================================
   const renderStep2 = () => (
     <div className="form-step">
@@ -231,16 +256,47 @@ const TradeEditForm = () => {
           </select>
         </div>
         <div className="form-group">
-          <label>دسته‌بندی</label>
-          <select name="category_id" value={tradeData.category_id || ''} onChange={handleChange} required>
+          <label>دسته‌بندی <span className="required">*</span></label>
+          <select
+            name="group_id"
+            value={tradeData.group_id || ''}
+            onChange={handleChange}
+            required
+          >
             <option value="">انتخاب دسته‌بندی</option>
-            {categories.filter(c => c.id !== 1).map(cat => <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>)}
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>
+                {cat.icon || '📁'} {cat.group_name}
+              </option>
+            ))}
           </select>
+          {!tradeData.group_id && (
+            <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>
+          )}
         </div>
       </div>
       <div className="form-group">
         <label>یادداشت پروفایل هفتگی</label>
         <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
+      </div>
+    </div>
+  );
+
+  // ============================================
+  // Step 1: شناسه و تاریخ
+  // ============================================
+  const renderStep1 = () => (
+    <div className="form-step">
+      <h3>📅 شناسه و تاریخ</h3>
+      <div className="form-row">
+        <div className="form-group">
+          <label>تاریخ معامله</label>
+          <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label>ساعت به وقت نیویورک</label>
+          <input type="time" name="time_ny" value={tradeData.time_ny || ''} onChange={handleChange} />
+        </div>
       </div>
     </div>
   );
@@ -485,7 +541,7 @@ const TradeEditForm = () => {
     <div className={`trade-form-container ${isDark ? 'dark' : 'light'}`}>
       <div className="trade-form-header">
         <h2>✏️ ویرایش ترید</h2>
-        <button className="btn-back" onClick={() => navigate('/trades')}>↩️ بازگشت</button>
+        <button className="btn-back" onClick={handleBack}>↩️ بازگشت</button>
       </div>
 
       {errors.length > 0 && (

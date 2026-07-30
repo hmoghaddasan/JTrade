@@ -1,4 +1,5 @@
 // frontend/src/contexts/AuthContext.js
+
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import RealApiService from '../services/realApiService';
 
@@ -14,50 +15,52 @@ export const AuthProvider = ({ children }) => {
   // ============================================
   // بررسی توکن - فقط یک بار
   // ============================================
- // frontend/src/contexts/AuthContext.js (قسمت useEffect)
-
-useEffect(() => {
-  if (initialized.current) {
-    console.log('⏭️ Auth already initialized, skipping');
-    return;
-  }
-
-  const checkAuth = async () => {
-    console.log('🔍 Checking auth for the first time...');
-    const token = localStorage.getItem('accessToken');
-    console.log('🔍 Token exists:', !!token);
-
-    if (!token) {
-      setLoading(false);
-      setIsAuthenticated(false);
-      initialized.current = true;
+  useEffect(() => {
+    if (initialized.current) {
+      console.log('⏭️ Auth already initialized, skipping');
       return;
     }
 
-    try {
-      const response = await RealApiService.getProfile();
-      console.log('✅ User profile loaded:', response.data);
+    const checkAuth = async () => {
+      console.log('🔍 Checking auth for the first time...');
+      const token = localStorage.getItem('accessToken');
+      console.log('🔍 Token exists:', !!token);
 
-      if (response.data) {
-        setUser(response.data);
-        setIsAuthenticated(true);
-      }
-    } catch (error) {
-      console.error('❌ Error loading user profile:', error);
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setUser(null);
+      if (!token) {
+        setLoading(false);
         setIsAuthenticated(false);
+        initialized.current = true;
+        return;
       }
-    } finally {
-      setLoading(false);
-      initialized.current = true;
-    }
-  };
 
-  checkAuth();
-}, []);
+      try {
+        // ✅ استفاده از getProfile
+        const response = await RealApiService.getProfile();
+        console.log('✅ User profile loaded:', response.data);
+
+        if (response.data) {
+          setUser(response.data);
+          setIsAuthenticated(true);
+          setPhoneNumber(response.data.phone_number || '');
+        }
+      } catch (error) {
+        console.error('❌ Error loading user profile:', error);
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
+          setIsAuthenticated(false);
+          setPhoneNumber('');
+        }
+      } finally {
+        setLoading(false);
+        initialized.current = true;
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   // ============================================
   // sendCode
   // ============================================
@@ -73,7 +76,7 @@ useEffect(() => {
         };
       }
 
-      const response = await RealApiService.sendCode(cleanedPhone);
+      const response = await RealApiService.sendVerificationCode(cleanedPhone);
       console.log('📤 Send code response:', response.data);
 
       const data = response.data;
@@ -106,41 +109,52 @@ useEffect(() => {
   }, []);
 
   // ============================================
-  // verifyCode
+  // verifyCode - اصلاح شده
   // ============================================
   const verifyCode = useCallback(async (code) => {
     setLoading(true);
     try {
+      console.log('📝 phoneNumber in verifyCode:', phoneNumber);
+
       if (!phoneNumber) {
-        return { success: false, error: 'شماره تلفن یافت نشد' };
+        console.error('❌ phoneNumber is empty!');
+        return { success: false, error: 'شماره تلفن یافت نشد. لطفاً دوباره تلاش کنید.' };
       }
 
+      console.log('📝 Verifying code for:', phoneNumber);
       const response = await RealApiService.verifyCode(phoneNumber, code);
       console.log('📝 Verify response:', response.data);
 
       const data = response.data;
 
-      if (data.success === true && data.access) {
-        const { access, refresh, user } = data;
+      // ✅ بررسی انواع پاسخ‌ها
+      if (data.access && data.refresh) {
+        // ذخیره توکن‌ها
+        localStorage.setItem('accessToken', data.access);
+        localStorage.setItem('refreshToken', data.refresh);
 
-        localStorage.setItem('accessToken', access);
-        localStorage.setItem('refreshToken', refresh);
-
-        setUser(user);
+        // ذخیره اطلاعات کاربر
+        const userData = data.user || data;
+        setUser(userData);
         setIsAuthenticated(true);
+        setPhoneNumber(userData.phone_number || phoneNumber);
 
         console.log('✅ User authenticated, tokens stored');
+        console.log('🔑 Access token saved:', data.access.substring(0, 20) + '...');
+
         return { success: true };
       }
 
-      if (data.access) {
-        const { access, refresh, user } = data;
+      if (data.success === true && data.access) {
+        localStorage.setItem('accessToken', data.access);
+        if (data.refresh) {
+          localStorage.setItem('refreshToken', data.refresh);
+        }
 
-        localStorage.setItem('accessToken', access);
-        localStorage.setItem('refreshToken', refresh);
-
-        setUser(user);
+        const userData = data.user || data;
+        setUser(userData);
         setIsAuthenticated(true);
+        setPhoneNumber(userData.phone_number || phoneNumber);
 
         console.log('✅ User authenticated, tokens stored');
         return { success: true };
@@ -181,14 +195,29 @@ useEffect(() => {
     }
   }, []);
 
+  // ============================================
+  // به‌روزرسانی کاربر
+  // ============================================
+  const updateUser = useCallback((userData) => {
+    setUser(userData);
+    if (userData?.phone_number) {
+      setPhoneNumber(userData.phone_number);
+    }
+  }, []);
+
+  // ============================================
+  // مقدار Context
+  // ============================================
   const value = {
     user,
     loading,
     phoneNumber,
+    setPhoneNumber,
     isAuthenticated,
     sendCode,
     verifyCode,
     logout,
+    updateUser,
     getFullName: () => {
       if (!user) return '';
       return `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.phone_number;
@@ -202,6 +231,9 @@ useEffect(() => {
   );
 };
 
+// ============================================
+// Hook استفاده از Auth
+// ============================================
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

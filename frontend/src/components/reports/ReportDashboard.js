@@ -1,16 +1,17 @@
 // frontend/src/components/reports/ReportDashboard.js
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useToast } from '../../contexts/ToastContext';
+import RealApiService from '../../services/realApiService';
 import './ReportDashboard.css';
 
-// کامپوننت‌های گزارشات
+// ایمپورت گزارش‌ها
 import PnLReport from './reports/PnLReport';
 import RiskRewardReport from './reports/RiskRewardReport';
 import WeeklyPerformanceReport from './reports/WeeklyPerformanceReport';
 import ChecklistReport from './reports/ChecklistReport';
-import RiskManagementReport from './reports/RiskManagementReport';
 import SleepNutritionReport from './reports/SleepNutritionReport';
 import FeelingsHeatmapReport from './reports/FeelingsHeatmapReport';
 import ReactionReport from './reports/ReactionReport';
@@ -18,196 +19,314 @@ import MistakesFrequencyReport from './reports/MistakesFrequencyReport';
 import ExecutionQualityReport from './reports/ExecutionQualityReport';
 import BiasReport from './reports/BiasReport';
 import TimeframeReport from './reports/TimeframeReport';
+import RiskManagementReport from './reports/RiskManagementReport';
 
 const ReportDashboard = () => {
+  const { user } = useAuth();
   const { isDark } = useTheme();
-  const navigate = useNavigate();
-  const [activeReport, setActiveReport] = useState('pnl');
+  const { showToast } = useToast();
+  const reportContentRef = useRef(null);
+
+  const [trades, setTrades] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: ''
   });
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [categories, setCategories] = useState([]);
-  const [trades, setTrades] = useState([]);
-  const printRef = useRef();
+  const [selectedReport, setSelectedReport] = useState('pnl');
 
-  // بارگذاری داده‌ها
+  // ============================================
+  // بارگذاری داده‌ها از دیتابیس
+  // ============================================
   useEffect(() => {
-    const savedTrades = localStorage.getItem('trades');
-    const savedCategories = localStorage.getItem('categories');
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const groupsResponse = await RealApiService.getTradeGroups();
+        let groupsData = groupsResponse.data.results || groupsResponse.data || [];
 
-    if (savedTrades) {
-      setTrades(JSON.parse(savedTrades));
-    }
+        const userGroups = groupsData.filter(g => g.user_id === user?.id);
 
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories));
-    } else {
-      setCategories([{ id: 1, name: 'همه تریدها', icon: '📊' }]);
-    }
-  }, []);
+        const allCategory = { id: 0, name: 'همه دسته‌بندی‌ها', icon: '📊' };
+        setCategories([allCategory, ...userGroups.map(g => ({
+          id: g.id,
+          name: g.group_name,
+          icon: g.icon || '📁'
+        }))]);
 
-  // گزارشات موجود
-  const reports = [
-    { id: 'pnl', title: '📊 عملکرد مالی (PnL) بر اساس نمادها', category: 'مالی' },
-    { id: 'riskReward', title: '📈 تأثیر نسبت ریسک به ریوارد (R:R) بر سود نهایی', category: 'مالی' },
-    { id: 'weekly', title: '📅 کارایی روزهای هفته (بهترین و بدترین روز)', category: 'مالی' },
-    { id: 'checklist', title: '✅ پایبندی به چک‌لیست', category: 'انضباط' },
-    { id: 'riskManagement', title: '🛡️ تخطی از مدیریت سرمایه', category: 'انضباط' },
-    { id: 'sleepNutrition', title: '😴 تأثیر کیفیت خواب و تغذیه بر عملکرد', category: 'روانشناسی' },
-    { id: 'feelings', title: '🔥 نقشه حرارتی احساسات غالب', category: 'روانشناسی' },
-    { id: 'reaction', title: '🎭 واکنش به سود و ضرر (رفتار پس از نتیجه)', category: 'روانشناسی' },
-    { id: 'mistakes', title: '📋 جدول فراوانی اشتباهات', category: 'تحلیل اشتباهات' },
-    { id: 'executionQuality', title: '⭐ کیفیت اجرا در برابر نتیجه', category: 'تحلیل اشتباهات' },
-    { id: 'bias', title: '🎯 عملکرد بر اساس جهت بازار (Bias)', category: 'بایاس و تایم‌فریم' },
-    { id: 'timeframe', title: '⏰ بهترین ترکیب تایم‌فریم', category: 'بایاس و تایم‌فریم' }
-  ];
+        const tradesResponse = await RealApiService.getTrades();
+        const tradesData = tradesResponse.data.results || tradesResponse.data || [];
+        setTrades(tradesData);
 
-  // فیلتر کردن تریدها بر اساس تاریخ و دسته‌بندی
-  const getFilteredTrades = () => {
-    let filtered = trades;
+        if (categories.length > 0) {
+          setSelectedCategory(categories[0]);
+        }
 
-    if (dateRange.startDate) {
-      filtered = filtered.filter(t => t.trade_date >= dateRange.startDate);
-    }
-    if (dateRange.endDate) {
-      filtered = filtered.filter(t => t.trade_date <= dateRange.endDate);
-    }
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(t => t.category_id === parseInt(selectedCategory));
-    }
-
-    return filtered;
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleExportPDF = () => {
-    alert('📄 در حال تولید PDF... (در نسخه نهایی، این قابلیت با jsPDF پیاده‌سازی خواهد شد)');
-  };
-
-  const renderReport = () => {
-    const filteredTrades = getFilteredTrades();
-    const props = {
-      dateRange,
-      selectedCategory,
-      isDark,
-      trades: filteredTrades
+      } catch (error) {
+        console.error('Error loading data:', error);
+        showToast('خطا در بارگذاری داده‌ها', 'error');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    switch(activeReport) {
-      case 'pnl': return <PnLReport {...props} />;
-      case 'riskReward': return <RiskRewardReport {...props} />;
-      case 'weekly': return <WeeklyPerformanceReport {...props} />;
-      case 'checklist': return <ChecklistReport {...props} />;
-      case 'riskManagement': return <RiskManagementReport {...props} />;
-      case 'sleepNutrition': return <SleepNutritionReport {...props} />;
-      case 'feelings': return <FeelingsHeatmapReport {...props} />;
-      case 'reaction': return <ReactionReport {...props} />;
-      case 'mistakes': return <MistakesFrequencyReport {...props} />;
-      case 'executionQuality': return <ExecutionQualityReport {...props} />;
-      case 'bias': return <BiasReport {...props} />;
-      case 'timeframe': return <TimeframeReport {...props} />;
-      default: return <PnLReport {...props} />;
+    loadData();
+  }, [user, showToast]);
+
+  // ============================================
+  // فیلتر تریدها
+  // ============================================
+  const filteredTrades = useMemo(() => {
+    let result = [...trades];
+
+    if (selectedCategory && selectedCategory.id !== 0) {
+      result = result.filter(t =>
+        t.group === selectedCategory.id ||
+        t.group_id === selectedCategory.id
+      );
     }
+
+    if (dateRange.startDate) {
+      result = result.filter(t => t.trade_date >= dateRange.startDate);
+    }
+
+    if (dateRange.endDate) {
+      result = result.filter(t => t.trade_date <= dateRange.endDate);
+    }
+
+    return result;
+  }, [trades, selectedCategory, dateRange]);
+
+  // ============================================
+  // لیست گزارش‌ها با نام فارسی و انگلیسی
+  // ============================================
+  const reports = [
+    { id: 'pnl', label: '📊 P&L', labelEn: 'Profit & Loss', component: PnLReport },
+    { id: 'risk_reward', label: '📈 نسبت R:R', labelEn: 'Risk/Reward Ratio', component: RiskRewardReport },
+    { id: 'weekly', label: '📅 عملکرد هفتگی', labelEn: 'Weekly Performance', component: WeeklyPerformanceReport },
+    { id: 'checklist', label: '✅ چک‌لیست', labelEn: 'Checklist Adherence', component: ChecklistReport },
+    { id: 'sleep_nutrition', label: '😴 خواب و تغذیه', labelEn: 'Sleep & Nutrition', component: SleepNutritionReport },
+    { id: 'feelings', label: '🧠 نقشه احساسات', labelEn: 'Feelings Heatmap', component: FeelingsHeatmapReport },
+    { id: 'reaction', label: '🎭 واکنش‌ها', labelEn: 'Reactions', component: ReactionReport },
+    { id: 'mistakes', label: '❌ اشتباهات', labelEn: 'Mistakes Frequency', component: MistakesFrequencyReport },
+    { id: 'execution', label: '🎯 کیفیت اجرا', labelEn: 'Execution Quality', component: ExecutionQualityReport },
+    { id: 'bias', label: '📉 بایاس', labelEn: 'Bias Analysis', component: BiasReport },
+    { id: 'timeframe', label: '⏰ تایم‌فریم', labelEn: 'Timeframe Analysis', component: TimeframeReport },
+    { id: 'risk_management', label: '🛡️ مدیریت ریسک', labelEn: 'Risk Management', component: RiskManagementReport },
+  ];
+
+  // ============================================
+  // ✅ تابع چاپ
+  // ============================================
+  const handlePrint = () => {
+    const printContent = reportContentRef.current;
+    if (!printContent) {
+      showToast('محتوایی برای چاپ وجود ندارد', 'warning');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      showToast('لطفاً pop-up را فعال کنید', 'warning');
+      return;
+    }
+
+    const currentReport = reports.find(r => r.id === selectedReport);
+    const title = currentReport ? `${currentReport.label} - ${currentReport.labelEn}` : 'گزارش تحلیل';
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl" lang="fa">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+        <style>
+          /* استایل‌های پایه برای چاپ */
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+            padding: 30px;
+            background: #ffffff;
+            color: #1a1a2e;
+            direction: rtl;
+            line-height: 1.6;
+          }
+          .print-header {
+            text-align: center;
+            padding: 20px 0 16px 0;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1a237e;
+          }
+          .print-header h1 {
+            font-size: 24px;
+            color: #1a237e;
+            margin: 0;
+          }
+          .print-header .sub-title {
+            color: #555;
+            font-size: 14px;
+            margin-top: 4px;
+          }
+          .print-header .print-date {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+          }
+          .print-content {
+            padding: 0 10px;
+          }
+          .print-footer {
+            text-align: center;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 20px;
+            color: #999;
+            font-size: 12px;
+          }
+          @media print {
+            body { padding: 15px; }
+            .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-header">
+          <h1>📊 ژورنال حرفه‌ای ترید</h1>
+          <div class="sub-title">${title}</div>
+          <div class="print-date">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')} - ساعت: ${new Date().toLocaleTimeString('fa-IR')}</div>
+        </div>
+        <div class="print-content">
+          ${printContent.innerHTML}
+        </div>
+        <div class="print-footer">
+          ژورنال حرفه‌ای ترید - تمامی حقوق محفوظ است
+        </div>
+        <script>
+          window.onload = function() { 
+            setTimeout(function() { window.print(); }, 500);
+          }
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
+
+  // ============================================
+  // رندر گزارش انتخاب شده
+  // ============================================
+  const renderReport = () => {
+    const report = reports.find(r => r.id === selectedReport);
+    if (!report) return null;
+
+    const ReportComponent = report.component;
+    return (
+      <div ref={reportContentRef} className="report-print-content">
+        <ReportComponent
+          trades={filteredTrades}
+          dateRange={dateRange}
+          selectedCategory={selectedCategory}
+          isDark={isDark}
+        />
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="report-dashboard-loading">
+        <div className="loading-spinner">⏳</div>
+        <p>در حال بارگذاری گزارشات...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`report-dashboard ${isDark ? 'dark' : 'light'}`}>
-      {/* Header */}
       <div className="report-header">
         <h2>📊 تحلیل تریدها</h2>
         <div className="header-actions">
-          <button className="btn-print" onClick={handlePrint}>
-            🖨️ چاپ
+          <button className="btn-print-report" onClick={handlePrint}>
+            🖨️ چاپ گزارش
           </button>
-          <button className="btn-pdf" onClick={handleExportPDF}>
-            📄 PDF
-          </button>
-          <button className="btn-back" onClick={() => navigate('/')}>
+          <button className="btn-back" onClick={() => window.history.back()}>
             ↩️ بازگشت
           </button>
         </div>
       </div>
-
-      {/* Filters */}
-      <div className="filters-bar">
-        <div className="filter-group">
-          <label>از تاریخ</label>
-          <input
-            type="date"
-            value={dateRange.startDate}
-            onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-          />
-        </div>
-        <div className="filter-group">
-          <label>تا تاریخ</label>
-          <input
-            type="date"
-            value={dateRange.endDate}
-            onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-          />
-        </div>
+      <div className="report-controls">
         <div className="filter-group">
           <label>دسته‌بندی</label>
           <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            value={selectedCategory?.id || 0}
+            onChange={(e) => {
+              const category = categories.find(c => c.id === parseInt(e.target.value));
+              setSelectedCategory(category || categories[0]);
+            }}
           >
-            <option value="all">همه دسته‌بندی‌ها</option>
-            {categories.filter(c => c.id !== 1).map(cat => (
+            {categories.map(cat => (
               <option key={cat.id} value={cat.id}>
                 {cat.icon} {cat.name}
               </option>
             ))}
           </select>
         </div>
+
+        <div className="filter-group">
+          <label>از تاریخ</label>
+          <input
+            type="date"
+            value={dateRange.startDate}
+            onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+          />
+        </div>
+
+        <div className="filter-group">
+          <label>تا تاریخ</label>
+          <input
+            type="date"
+            value={dateRange.endDate}
+            onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+          />
+        </div>
+
+        <button
+          className="btn-clear-filters"
+          onClick={() => {
+            setDateRange({ startDate: '', endDate: '' });
+            setSelectedCategory(categories[0]);
+          }}
+        >
+          🗑️ پاک کردن فیلترها
+        </button>
       </div>
 
-      {/* Report Navigation */}
-      <div className="report-nav">
-        <div className="report-categories">
-          {['مالی', 'انضباط', 'روانشناسی', 'تحلیل اشتباهات', 'بایاس و تایم‌فریم'].map(category => (
-            <div key={category} className="category-section">
-              <h4 className="category-title">{category}</h4>
-              <div className="category-reports">
-                {reports
-                  .filter(r => r.category === category)
-                  .map(report => (
-                    <button
-                      key={report.id}
-                      className={`report-btn ${activeReport === report.id ? 'active' : ''}`}
-                      onClick={() => setActiveReport(report.id)}
-                    >
-                      {report.title}
-                    </button>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* ============================================
+          تب‌های گزارشات با نام انگلیسی در پرانتز
+          ============================================ */}
+      <div className="report-tabs">
+        {reports.map(report => (
+          <button
+            key={report.id}
+            className={`report-tab ${selectedReport === report.id ? 'active' : ''}`}
+            onClick={() => setSelectedReport(report.id)}
+            title={report.labelEn}
+          >
+            {report.label}
+            <span className="report-tab-en">({report.labelEn})</span>
+          </button>
+        ))}
       </div>
 
-      {/* Report Content */}
-      <div className="report-content" ref={printRef}>
-        <div className="report-wrapper">
-          <div className="report-title-section">
-            <h1>📊 ژورنال حرفه‌ای ترید</h1>
-            <h3>{reports.find(r => r.id === activeReport)?.title}</h3>
-            <div className="report-meta">
-              <span>تاریخ: {new Date().toLocaleDateString('fa-IR')}</span>
-              <span>کاربر: علی محمدی</span>
-              {dateRange.startDate && dateRange.endDate && (
-                <span>بازه: {dateRange.startDate} تا {dateRange.endDate}</span>
-              )}
-            </div>
-          </div>
-          {renderReport()}
-        </div>
+      <div className="report-content">
+        {renderReport()}
       </div>
     </div>
   );

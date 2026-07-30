@@ -9,7 +9,16 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
         <div className="report-description">
           <h5>📖 درباره این گزارش</h5>
           <p>این گزارش عملکرد مالی شما را بر اساس هر نماد معاملاتی نمایش می‌دهد. با استفاده از این گزارش می‌توانید ببینید کدام نمادها بیشترین سود و کدام‌یک بیشترین ضرر را برای شما داشته‌اند.</p>
-          <p className="formula-text"><strong>فرمول محاسبه:</strong> سود کل = مجموع سود/زیان تمام تریدهای آن نماد | نرخ برد = (تعداد تریدهای برنده / کل تریدها) × ۱۰۰</p>
+          <div className="formula-box">
+            <p className="formula-text"><strong>📐 فرمول محاسبه:</strong></p>
+            <ul className="formula-list">
+              <li><strong>سود کل نماد:</strong> مجموع سود/زیان تمام تریدهای آن نماد</li>
+              <li><strong>نرخ برد:</strong> (تعداد تریدهای برنده / کل تریدهای آن نماد) × ۱۰۰</li>
+              <li><strong>میانگین سود:</strong> سود کل / تعداد تریدهای آن نماد</li>
+              <li><strong>نسبت سود به ضرر:</strong> سود کل / مجموع ضررهای آن نماد</li>
+            </ul>
+          </div>
+          <p className="interpretation-text"><strong>💡 نحوه تفسیر:</strong> نمادهایی با سود بالا و نرخ برد مناسب، گزینه‌های بهتری برای معامله هستند. نمادهایی با ضرر بالا ممکن است نیاز به تغییر استراتژی یا اجتناب داشته باشند.</p>
         </div>
         <div className="empty-state">
           <p>هیچ تریدی با فیلترهای انتخاب شده یافت نشد</p>
@@ -22,11 +31,14 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const data = symbols.map(symbol => {
     const symbolTrades = trades.filter(t => t.symbol === symbol);
     const total = symbolTrades.length;
-    const winning = symbolTrades.filter(t => t.profit > 0).length;
-    const losing = symbolTrades.filter(t => t.profit < 0).length;
-    const profit = symbolTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+    const winning = symbolTrades.filter(t => parseFloat(t.profit) > 0).length;
+    const losing = symbolTrades.filter(t => parseFloat(t.profit) < 0).length;
+    const profit = symbolTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+    const loss = symbolTrades.reduce((sum, t) => sum + (parseFloat(t.profit) < 0 ? Math.abs(parseFloat(t.profit)) : 0), 0);
     const winRate = total > 0 ? (winning / total * 100).toFixed(1) : 0;
-    return { symbol, trades: total, winning, losing, profit, winRate };
+    const avgProfit = total > 0 ? profit / total : 0;
+    const profitFactor = loss > 0 ? profit / loss : (profit > 0 ? Infinity : 0);
+    return { symbol, trades: total, winning, losing, profit, loss, winRate, avgProfit, profitFactor };
   });
 
   data.sort((a, b) => b.profit - a.profit);
@@ -34,14 +46,28 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const totalProfit = data.reduce((sum, item) => sum + item.profit, 0);
   const totalTrades = data.reduce((sum, item) => sum + item.trades, 0);
   const totalWinning = data.reduce((sum, item) => sum + item.winning, 0);
+  const totalLoss = data.reduce((sum, item) => sum + item.loss, 0);
   const overallWinRate = totalTrades > 0 ? (totalWinning / totalTrades * 100).toFixed(1) : 0;
+  const overallProfitFactor = totalLoss > 0 ? totalProfit / totalLoss : (totalProfit > 0 ? Infinity : 0);
+
+  const bestSymbol = data.length > 0 ? data[0] : null;
+  const worstSymbol = data.length > 0 ? data[data.length - 1] : null;
 
   return (
     <div className="report-content-inner">
       <div className="report-description">
         <h5>📖 درباره این گزارش</h5>
         <p>این گزارش عملکرد مالی شما را بر اساس هر نماد معاملاتی نمایش می‌دهد. با استفاده از این گزارش می‌توانید ببینید کدام نمادها بیشترین سود و کدام‌یک بیشترین ضرر را برای شما داشته‌اند.</p>
-        <p className="formula-text"><strong>فرمول محاسبه:</strong> سود کل = مجموع سود/زیان تمام تریدهای آن نماد | نرخ برد = (تعداد تریدهای برنده / کل تریدها) × ۱۰۰</p>
+        <div className="formula-box">
+          <p className="formula-text"><strong>📐 فرمول محاسبه:</strong></p>
+          <ul className="formula-list">
+            <li><strong>سود کل نماد:</strong> مجموع سود/زیان تمام تریدهای آن نماد</li>
+            <li><strong>نرخ برد:</strong> (تعداد تریدهای برنده / کل تریدهای آن نماد) × ۱۰۰</li>
+            <li><strong>میانگین سود:</strong> سود کل / تعداد تریدهای آن نماد</li>
+            <li><strong>نسبت سود به ضرر:</strong> سود کل / مجموع ضررهای آن نماد</li>
+          </ul>
+        </div>
+        <p className="interpretation-text"><strong>💡 نحوه تفسیر:</strong> نمادهایی با سود بالا و نرخ برد مناسب، گزینه‌های بهتری برای معامله هستند. نمادهایی با ضرر بالا ممکن است نیاز به تغییر استراتژی یا اجتناب داشته باشند.</p>
       </div>
 
       <div className="report-summary">
@@ -52,17 +78,21 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
           </span>
         </div>
         <div className="summary-item">
-          <span className="summary-label">کل تریدها</span>
-          <span className="summary-value">{totalTrades}</span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">نرخ برد کلی</span>
-          <span className="summary-value">{overallWinRate}%</span>
-        </div>
-        <div className="summary-item">
           <span className="summary-label">بهترین نماد</span>
           <span className="summary-value success">
-            {data.length > 0 ? data[0].symbol : '-'} (+${data.length > 0 ? data[0].profit : 0})
+            {bestSymbol ? `${bestSymbol.symbol} (+${bestSymbol.profit})` : '-'}
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">بدترین نماد</span>
+          <span className="summary-value danger">
+            {worstSymbol ? `${worstSymbol.symbol} (${worstSymbol.profit})` : '-'}
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">نسبت سود به ضرر</span>
+          <span className={`summary-value ${overallProfitFactor >= 1 ? 'success' : 'danger'}`}>
+            {overallProfitFactor === Infinity ? '∞' : overallProfitFactor.toFixed(2)}
           </span>
         </div>
       </div>
@@ -76,6 +106,7 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
             <th>بازنده</th>
             <th>نرخ برد</th>
             <th>سود کل</th>
+            <th>نسبت سود/ضرر</th>
           </tr>
         </thead>
         <tbody>
@@ -89,6 +120,7 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
               <td className={item.profit >= 0 ? 'positive' : 'negative'}>
                 ${item.profit}
               </td>
+              <td>{item.profitFactor === Infinity ? '∞' : item.profitFactor.toFixed(2)}</td>
             </tr>
           ))}
         </tbody>
@@ -102,9 +134,45 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
             <th className={totalProfit >= 0 ? 'positive' : 'negative'}>
               ${totalProfit}
             </th>
+            <th>{overallProfitFactor === Infinity ? '∞' : overallProfitFactor.toFixed(2)}</th>
           </tr>
         </tfoot>
       </table>
+
+      <div className="insight-box">
+        <h5>💡 تحلیل و بینش</h5>
+        <ul className="insight-list">
+          <li>
+            <strong>عملکرد کلی:</strong>
+            {totalProfit >= 0 && ` ✅ شما در مجموع ${totalProfit}$ سود داشته‌اید.`}
+            {totalProfit < 0 && ` ❌ شما در مجموع ${Math.abs(totalProfit)}$ ضرر داشته‌اید.`}
+          </li>
+          <li>
+            <strong>بهترین نماد:</strong>
+            {bestSymbol && ` ${bestSymbol.symbol} با سود ${bestSymbol.profit}$ و نرخ برد ${bestSymbol.winRate}% بهترین عملکرد را داشته است.`}
+          </li>
+          <li>
+            <strong>نمادهای نیازمند توجه:</strong>
+            {data.filter(d => d.profit < 0).length > 0 && (
+              <span>
+                {' '}نمادهای زیر عملکرد منفی داشته‌اند:
+                {data.filter(d => d.profit < 0).map((d, i, arr) => (
+                  <span key={d.symbol}>
+                    {d.symbol} (${d.profit})
+                    {i < arr.length - 2 ? '، ' : i === arr.length - 2 ? ' و ' : ''}
+                  </span>
+                ))}
+              </span>
+            )}
+          </li>
+          <li>
+            <strong>پیشنهاد:</strong>
+            {totalProfit < 0 && ' برای بهبود عملکرد، روی نمادهایی با سود مثبت تمرکز کنید و از نمادهای پرضرر دوری کنید.'}
+            {totalProfit >= 0 && data.some(d => d.profit < 0) && ' با وجود سود کلی، برخی نمادها ضررده هستند. بهتر است استراتژی خود را برای آنها بازبینی کنید.'}
+            {totalProfit >= 0 && data.every(d => d.profit >= 0) && ' 🎯 عملکرد شما در همه نمادها مثبت است! این را حفظ کنید.'}
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };

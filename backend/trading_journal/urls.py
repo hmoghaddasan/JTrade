@@ -6,6 +6,9 @@ from django.http import JsonResponse
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.contrib import admin
+from django.urls import path, include
+from django.http import JsonResponse
 
 # API Documentation
 schema_view = get_schema_view(
@@ -29,12 +32,35 @@ def health_check(request):
         'message': 'Server is running'
     })
 
-# backend/trading_journal/urls.py
 
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+
+
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('apps.accounts.urls')),
+    path('api/trading/', include('apps.trading.urls')),
+    path('api/subscription/', include('apps.subscriptions.urls')),
+
+    # ✅ اصلاح مسیر - از api/messages/ به جای api/messaging/
+    # ✅ اصلاح مسیر - استفاده از 'messages' به جای 'messaging'
+    path('api/messages/', include('apps.messaging.urls')),
+    path('api/admin/', include('apps.admin_panel.urls')),
+    path('api/system/', include('apps.accounts.system_urls')),
+    path('health/', health_check, name='health_check'),
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('apps.accounts.urls')),
+    path('api/trading/', include('apps.trading.urls')),
+    path('api/subscription/', include('apps.subscriptions.urls')),
+    path('api/messages/', include('apps.messaging.urls')),
+    path('api/admin/', include('apps.admin_panel.urls')),
+    path('api/system/', include('apps.accounts.system_urls')),
+    path('health/', health_check, name='health_check'),
+
+    # ✅ اضافه کردن مسیر WebSocket
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.accounts.urls')),
     path('api/trading/', include('apps.trading.urls')),
