@@ -3,6 +3,7 @@
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
+from django.conf import settings
 import logging
 
 from .models import (
@@ -13,6 +14,8 @@ from .models import (
     UserLoginLog,
     UserActivityLog
 )
+from apps.subscriptions.models import UserSubscription, SubscriptionPlan
+from apps.trading.models import TradeGroup
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +40,88 @@ def user_pre_save(sender, instance, **kwargs):
             pass
 
 
+def _create_default_groups(user):
+    """ایجاد دسته‌بندی‌های پیش‌فرض برای کاربر جدید"""
+    default_groups = [
+        {'name': 'فارکس', 'icon': '💱', 'description': 'تریدهای جفت ارزهای اصلی و فرعی'},
+        {'name': 'کریپتو', 'icon': '₿', 'description': 'تریدهای ارز دیجیتال'},
+        {'name': 'شاخص‌ها', 'icon': '📈', 'description': 'تریدهای شاخص‌های سهام'},
+        {'name': 'کالاها', 'icon': '🏆', 'description': 'تریدهای کالاهای اساسی'},
+    ]
+
+    for idx, group_data in enumerate(default_groups):
+        TradeGroup.objects.get_or_create(
+            user=user,
+            group_name=group_data['name'],
+            defaults={
+                'icon': group_data['icon'],
+                'description': group_data['description'],
+                'is_active': True,
+                'is_default': False,
+                'created_by': user,
+                'order_index': idx
+            }
+        )
+    logger.info(f"✅ Default groups created for user {user.phone_number}")
+
+
+def _create_trial_subscription(user):
+    """ایجاد اشتراک آزمایشی برای کاربر جدید"""
+    if UserSubscription.objects.filter(user=user, is_active=True).exists():
+        logger.info(f"User {user.phone_number} already has an active subscription, skipping trial.")
+        return
+
+    trial_days = SystemSetting.get_setting('trial_days', 7)
+    try:
+        trial_days = int(trial_days)
+    except (ValueError, TypeError):
+        trial_days = 7
+
+    try:
+        plan = SubscriptionPlan.objects.filter(
+            plan_type='basic',
+            is_active=True
+        ).first()
+
+        if not plan:
+            plan = SubscriptionPlan.objects.filter(is_active=True).first()
+
+        if not plan:
+            logger.error("No active subscription plan found, cannot create trial subscription.")
+            return
+
+        start_date = timezone.now()
+        end_date = start_date + timezone.timedelta(days=trial_days)
+
+        UserSubscription.objects.create(
+            user=user,
+            plan=plan,
+            start_date=start_date,
+            end_date=end_date,
+            is_active=True,
+            is_trial=True,
+            trades_limit=plan.monthly_trades_limit,
+            ai_consultations_limit=plan.monthly_ai_consultations_limit,
+            trades_used=0,
+            ai_consultations_used=0,
+            payment_status='paid',
+            amount_paid=0
+        )
+        logger.info(f"✅ Trial subscription ({trial_days} days) created for user {user.phone_number}")
+    except Exception as e:
+        logger.error(f"❌ Error creating trial subscription: {str(e)}")
+
+
 @receiver(post_save, sender=User)
 def user_post_save(sender, instance, created, **kwargs):
     if created:
         logger.info(f"User created: {instance.phone_number}")
+
+        # ✅ ایجاد اشتراک آزمایشی
+        _create_trial_subscription(instance)
+
+        # ✅ ایجاد دسته‌بندی‌های پیش‌فرض
+        _create_default_groups(instance)
 
         sms_enabled = SystemSetting.get_setting('enable_sms', True)
         if sms_enabled:
@@ -124,7 +205,8 @@ def create_default_settings(sender, instance, created, **kwargs):
             'site_address': {'value': 'تهران، خیابان ولیعصر، پلاک ۱۲۳', 'type': 'text', 'description': 'آدرس سایت'},
             'logo_path': {'value': '/static/images/logo.png', 'type': 'string', 'description': 'مسیر لوگو'},
             'favicon_path': {'value': '/static/images/favicon.ico', 'type': 'string', 'description': 'مسیر آیکون'},
-            'bg_image_path': {'value': '/static/images/background.jpg', 'type': 'string', 'description': 'مسیر تصویر پس‌زمینه'},
+            'bg_image_path': {'value': '/static/images/background.jpg', 'type': 'string',
+                              'description': 'مسیر تصویر پس‌زمینه'},
             'footer_text': {'value': 'تمامی حقوق محفوظ است.', 'type': 'string', 'description': 'متن فوتر'},
         }
 

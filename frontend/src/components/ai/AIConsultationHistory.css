@@ -1,0 +1,662 @@
+/* frontend/src/components/ai/AIConsultationHistory.css */
+
+.ai-history-container {
+  padding: 20px 30px;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.ai-history-container.light {
+  background-color: #f5f7fa;
+  color: #1a1a2e;
+}
+
+.ai-history-container.dark {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+}
+
+/* ===== هدر ===== */
+.ai-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(26, 35, 126, 0.2);
+  margin-bottom: 20px;
+}
+
+.ai-history-header h2 {
+  font-size: 24px;
+  margin: 0;
+  color: #1a237e;
+}
+
+.dark .ai-history-header h2 {
+  color: #7986cb;
+}
+
+.history-count {
+  padding: 4px 14px;
+  background: #e8eaf6;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #1a237e;
+}
+
+.dark .history-count {
+  background: #2d2d44;
+  color: #b0b0d0;
+}
+
+/* ===== لیست خالی ===== */
+.empty-history {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+}
+
+.dark .empty-history {
+  background: #2d2d44;
+}
+
+.empty-history .empty-icon {
+  font-size: 64px;
+  margin-bottom: 15px;
+}
+
+.empty-history h3 {
+  font-size: 20px;
+  margin: 10px 0;
+  color: #1a237e;
+}
+
+.dark .empty-history h3 {
+  color: #7986cb;
+}
+
+.empty-history p {
+  color: #888;
+}
+
+/* ===== آیتم تاریخچه ===== */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  background: white;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+
+.dark .history-item {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.history-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dark .history-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== هدر آیتم ===== */
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dark .item-header {
+  border-bottom-color: #3d3d5c;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.item-symbol {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a237e;
+}
+
+.dark .item-symbol {
+  color: #7986cb;
+}
+
+.item-direction {
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.item-direction.buy {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.item-direction.sell {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.item-score {
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.item-score.high {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.item-score.medium {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.item-score.low {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.item-date {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ===== بدنه آیتم ===== */
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-price {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #555;
+}
+
+.dark .item-price {
+  color: #aaa;
+}
+
+.item-price span {
+  background: #f5f5f5;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.dark .item-price span {
+  background: #3d3d5c;
+}
+
+.item-conditions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.condition-badge,
+.emotion-badge,
+.question-badge {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.dark .condition-badge,
+.dark .emotion-badge,
+.dark .question-badge {
+  background: rgba(13, 71, 161, 0.2);
+  color: #64b5f6;
+}
+
+/* ===== بازخورد ===== */
+.item-feedback {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.dark .item-feedback {
+  border-top-color: #3d3d5c;
+}
+
+.follow-status,
+.trade-result {
+  font-size: 13px;
+  color: #555;
+}
+
+.dark .follow-status,
+.dark .trade-result {
+  color: #aaa;
+}
+
+.feedback-done {
+  font-size: 13px;
+  color: #2e7d32;
+}
+
+.dark .feedback-done {
+  color: #66bb6a;
+}
+
+.btn-feedback {
+  padding: 4px 14px;
+  background: linear-gradient(135deg, #ffb300, #f57f17);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.btn-feedback:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(245, 127, 23, 0.4);
+}
+
+/* ===== دکمه مشاهده جزئیات ===== */
+.item-actions {
+  margin-top: 8px;
+}
+
+.btn-view-detail {
+  padding: 6px 16px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 6px;
+  color: #1a237e;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-view-detail:hover {
+  background: #c5cae9;
+}
+
+.dark .btn-view-detail {
+  background: #3d3d5c;
+  color: #b0b0d0;
+}
+
+.dark .btn-view-detail:hover {
+  background: #4d4d6c;
+}
+
+/* ===== لودینگ ===== */
+.ai-history-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.ai-history-loading .loading-spinner {
+  font-size: 48px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.dark .pagination {
+  border-top-color: #3d3d5c;
+}
+
+.btn-page {
+  padding: 8px 20px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 6px;
+  color: #1a237e;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: #c5cae9;
+}
+
+.btn-page:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dark .btn-page {
+  background: #3d3d5c;
+  color: #b0b0d0;
+}
+
+.dark .btn-page:hover:not(:disabled) {
+  background: #4d4d6c;
+}
+
+.page-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.dark .page-info {
+  color: #aaa;
+}
+
+/* ===== مودال بازخورد ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.feedback-modal {
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dark .feedback-modal {
+  background: #1e1e1e;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dark .modal-header {
+  border-bottom-color: #3d3d5c;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a237e;
+}
+
+.dark .modal-header h3 {
+  color: #7986cb;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #888;
+  padding: 0 4px;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.dark .modal-close {
+  color: #aaa;
+}
+
+.dark .modal-close:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.feedback-info {
+  background: #f5f7fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.dark .feedback-info {
+  background: #2d2d44;
+}
+
+.feedback-info p {
+  margin: 4px 0;
+  color: #555;
+}
+
+.dark .feedback-info p {
+  color: #aaa;
+}
+
+.feedback-info p strong {
+  color: #1a237e;
+}
+
+.dark .feedback-info p strong {
+  color: #7986cb;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feedback-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feedback-form .form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.dark .feedback-form .form-group label {
+  color: #aaa;
+}
+
+.feedback-form .form-group select,
+.feedback-form .form-group textarea {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.dark .feedback-form .form-group select,
+.dark .feedback-form .form-group textarea {
+  background: #3d3d5c;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.feedback-form .form-group select:focus,
+.feedback-form .form-group textarea:focus {
+  outline: none;
+  border-color: #1a237e;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+}
+
+.dark .feedback-form .form-group select:focus,
+.dark .feedback-form .form-group textarea:focus {
+  border-color: #7986cb;
+  box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.15);
+}
+
+.feedback-form .form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ===== ستاره‌ها ===== */
+.star-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.3;
+  padding: 0 2px;
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+.star-btn.active {
+  opacity: 1;
+}
+
+.star-btn.active:hover {
+  transform: scale(1.2);
+}
+
+/* ===== فوتر مودال ===== */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.dark .modal-footer {
+  border-top-color: #3d3d5c;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 8px;
+  color: #1a237e;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-cancel:hover {
+  background: #c5cae9;
+}
+
+.dark .btn-cancel {
+  background: #3d3d5c;
+  color: #b0b0d0;
+}
+
+.dark .btn-cancel:hover {
+  background: #4d4d6c;
+}
+
+.btn-submit-feedback {
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-submit-feedback:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
+}
+
+.dark .btn-submit-feedback {
+  background: linear-gradient(135deg, #3949ab, #1a237e);
+}

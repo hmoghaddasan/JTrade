@@ -31,11 +31,15 @@ const Profile = () => {
     plan: 'آزمایشی',
     remainingDays: 7,
     remainingTrades: 50,
+    remainingAiConsultations: 5,
+    aiConsultationsUsed: 0,
+    aiConsultationsLimit: 5,
     totalTrades: 0,
     startDate: '',
     endDate: '',
     isActive: true,
-    isExpired: false
+    isExpired: false,
+    isTrial: false,
   });
 
   // ============================================
@@ -69,39 +73,49 @@ const Profile = () => {
     // ✅ دریافت اشتراک از سرور
     const fetchSubscription = async () => {
       try {
-        const response = await RealApiService.getUserSubscription();
-        const subData = response.data;
-        console.log('📊 Subscription from server:', subData);
+        const response = await RealApiService.getSubscriptionStatus();
+        const data = response.data;
+        console.log('📊 Subscription from server:', data);
 
-        if (subData && subData.id) {
-          // اگر کاربر ادمین است
-          if (subData.is_admin) {
-            setSubscription({
-              plan: 'ادمین (نامحدود)',
-              remainingDays: '♾️',
-              remainingTrades: '♾️',
-              startDate: '—',
-              endDate: '♾️ بدون محدودیت',
-              isActive: true,
-              isExpired: false,
-              totalTrades: trades.length
-            });
-            return;
-          }
+        // بررسی اینکه آیا کاربر ادمین است
+        const isAdmin = user?.is_admin || data.plan_type === 'admin';
 
-          const endDate = new Date(subData.end_date);
+        if (isAdmin) {
+          setSubscription({
+            plan: 'ادمین (نامحدود)',
+            remainingDays: '♾️',
+            remainingTrades: '♾️',
+            remainingAiConsultations: '♾️',
+            aiConsultationsUsed: 0,
+            aiConsultationsLimit: '♾️',
+            startDate: '—',
+            endDate: '♾️ بدون محدودیت',
+            isActive: true,
+            isExpired: false,
+            totalTrades: trades.length,
+            isTrial: false,
+          });
+          return;
+        }
+
+        if (data && data.has_subscription) {
+          const endDate = new Date(data.end_date);
           const now = new Date();
           const remainingDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
 
           setSubscription({
-            plan: subData.plan_name || 'حرفه‌ای',
+            plan: data.plan_name || 'حرفه‌ای',
             remainingDays: remainingDays > 0 ? remainingDays : 0,
-            remainingTrades: (subData.trades_limit || 0) - (subData.trades_used || 0),
-            startDate: new Date(subData.start_date).toLocaleDateString('fa-IR'),
-            endDate: new Date(subData.end_date).toLocaleDateString('fa-IR'),
-            isActive: subData.is_active,
-            isExpired: remainingDays <= 0,
-            totalTrades: trades.length
+            remainingTrades: data.remaining_trades ?? 0,
+            remainingAiConsultations: data.remaining_ai_consultations ?? 0,
+            aiConsultationsUsed: data.ai_consultations_used ?? 0,
+            aiConsultationsLimit: data.ai_consultations_limit ?? 0,
+            startDate: data.start_date ? new Date(data.start_date).toLocaleDateString('fa-IR') : '-',
+            endDate: data.end_date ? new Date(data.end_date).toLocaleDateString('fa-IR') : '-',
+            isActive: data.is_active,
+            isExpired: data.is_expired || remainingDays <= 0,
+            totalTrades: trades.length,
+            isTrial: data.is_trial || false,
           });
         } else {
           // کاربر اشتراک ندارد
@@ -111,8 +125,12 @@ const Profile = () => {
             plan: 'بدون اشتراک',
             remainingDays: 0,
             remainingTrades: 0,
+            remainingAiConsultations: 0,
+            aiConsultationsUsed: 0,
+            aiConsultationsLimit: 0,
             isActive: false,
-            isExpired: true
+            isExpired: true,
+            isTrial: false,
           }));
         }
       } catch (error) {
@@ -218,9 +236,11 @@ const Profile = () => {
 
       setMessage({ type: 'success', text: '✅ اطلاعات با موفقیت به‌روزرسانی شد' });
       setEditMode(false);
+      showToast('✅ اطلاعات با موفقیت به‌روزرسانی شد', 'success');
     } catch (error) {
       console.error('Error updating profile:', error);
       setMessage({ type: 'error', text: '❌ خطا در به‌روزرسانی اطلاعات' });
+      showToast('❌ خطا در به‌روزرسانی اطلاعات', 'error');
     } finally {
       setLoading(false);
     }
@@ -244,6 +264,14 @@ const Profile = () => {
     weekAgo.setDate(weekAgo.getDate() - 7);
     return new Date(t.trade_date) >= weekAgo;
   }).length;
+
+  // ============================================
+  // تابع کمکی برای نمایش مقدار ∞ یا عدد
+  // ============================================
+  const formatLimit = (value) => {
+    if (value === '♾️' || value === Infinity || value === 999999) return '♾️';
+    return value;
+  };
 
   return (
     <div className={`profile-container ${isDark ? 'dark' : 'light'}`}>
@@ -354,22 +382,29 @@ const Profile = () => {
             <div className="stat-item"><span className="stat-icon">📉</span><div><span className="stat-label">بدترین ترید</span><span className="stat-value danger">${worstTrade}</span></div></div>
             <div className="stat-item"><span className="stat-icon">📅</span><div><span className="stat-label">تریدهای امروز</span><span className="stat-value">{todayTrades}</span></div></div>
             <div className="stat-item"><span className="stat-icon">📆</span><div><span className="stat-label">تریدهای این هفته</span><span className="stat-value">{thisWeekTrades}</span></div></div>
+            {/* ✅ مشاوره‌های کل */}
+            <div className="stat-item"><span className="stat-icon">🧠</span><div><span className="stat-label">مشاوره‌های استفاده شده</span><span className="stat-value">{subscription.aiConsultationsUsed || 0}</span></div></div>
           </div>
         </div>
 
-        {/* اطلاعات اشتراک - ✅ از سرور */}
+        {/* اطلاعات اشتراک - ✅ با مشاوره‌ها */}
         <div className="profile-card">
           <div className="card-header">
             <h3>📊 اطلاعات اشتراک</h3>
+            {subscription.isTrial && (
+              <span className="expiry-badge trial-badge" style={{ background: '#6a1b9a', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                🔬 آزمایشی
+              </span>
+            )}
             {user?.is_admin && (
               <span className="expiry-badge admin-badge" style={{ background: '#1a237e', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
                 👑 مدیر
               </span>
             )}
-            {!user?.is_admin && subscription.isExpired && (
+            {!user?.is_admin && !subscription.isTrial && subscription.isExpired && (
               <span className="expiry-badge">⏰ منقضی شده</span>
             )}
-            {!user?.is_admin && !subscription.isExpired && subscription.remainingDays <= 3 && subscription.remainingDays !== '♾️' && (
+            {!user?.is_admin && !subscription.isTrial && !subscription.isExpired && subscription.remainingDays <= 3 && subscription.remainingDays !== '♾️' && (
               <span className="expiry-badge warning">⚠️ در حال اتمام</span>
             )}
           </div>
@@ -377,8 +412,8 @@ const Profile = () => {
           <div className="subscription-info">
             <div className="sub-item">
               <span className="sub-label">نوع پلن</span>
-              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.plan === 'حرفه‌ای' ? 'premium' : subscription.plan === 'بدون اشتراک' ? 'danger' : 'trial'}`}>
-                {user?.is_admin ? '👑 ادمین (نامحدود)' : subscription.plan}
+              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isTrial ? 'trial' : subscription.plan === 'حرفه‌ای' ? 'premium' : subscription.plan === 'بدون اشتراک' ? 'danger' : ''}`}>
+                {user?.is_admin ? '👑 ادمین (نامحدود)' : subscription.isTrial ? '🔬 آزمایشی' : subscription.plan}
               </span>
             </div>
             <div className="sub-item">
@@ -388,9 +423,16 @@ const Profile = () => {
               </span>
             </div>
             <div className="sub-item">
-              <span className="sub-label">تریدهای باقیمانده</span>
-              <span className="sub-value">
+              <span className="sub-label">📈 تریدهای باقیمانده</span>
+              <span className={`sub-value ${subscription.remainingTrades <= 0 && !user?.is_admin && !subscription.isTrial ? 'danger' : ''}`}>
                 {user?.is_admin ? '♾️ نامحدود' : subscription.remainingTrades === '♾️' ? '♾️' : `${subscription.remainingTrades} عدد`}
+              </span>
+            </div>
+            {/* ✅ مشاوره‌های باقیمانده */}
+            <div className="sub-item">
+              <span className="sub-label">🧠 مشاوره‌های باقیمانده</span>
+              <span className={`sub-value ${subscription.remainingAiConsultations <= 0 && !user?.is_admin && !subscription.isTrial ? 'danger' : ''}`}>
+                {user?.is_admin ? '♾️ نامحدود' : subscription.remainingAiConsultations === '♾️' ? '♾️' : `${subscription.remainingAiConsultations} عدد`}
               </span>
             </div>
             <div className="sub-item">

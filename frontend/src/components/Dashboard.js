@@ -1,6 +1,6 @@
 // frontend/src/components/Dashboard.js
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -39,13 +40,46 @@ const Dashboard = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryIcon, setNewCategoryIcon] = useState('📁');
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [subscriptionStats, setSubscriptionStats] = useState({
+    remaining_trades: 0,
+    remaining_ai_consultations: 0,
+    total_trades: 0,
+    plan_name: 'بدون اشتراک',
+    remaining_days: 0,
+    is_trial: false,
+  });
 
-  // ============================================
   // State برای نمایش بیشتر
-  // ============================================
   const [showAllTrades, setShowAllTrades] = useState(false);
   const [showAllGroups, setShowAllGroups] = useState(false);
   const DISPLAY_LIMIT = 15;
+
+  // ============================================
+  // دریافت آمار اشتراک
+  // ============================================
+  useEffect(() => {
+    const loadSubscriptionStats = async () => {
+      try {
+        const response = await RealApiService.getSubscriptionStatus();
+        const data = response.data;
+        console.log('📊 Subscription data:', data);
+        setSubscriptionStats({
+          remaining_trades: data.remaining_trades ?? 0,
+          remaining_ai_consultations: data.remaining_ai_consultations ?? 0,
+          total_trades: trades.length || 0,
+          plan_name: data.is_trial ? 'آزمایشی' : (data.plan_name || 'بدون اشتراک'),
+          remaining_days: data.remaining_days || 0,
+          is_trial: data.is_trial || false,
+        });
+      } catch (error) {
+        console.error('Error loading subscription stats:', error);
+      }
+    };
+
+    if (user) {
+      loadSubscriptionStats();
+    }
+  }, [user, trades]);
 
   // ============================================
   // بارگذاری داده‌ها از دیتابیس
@@ -60,7 +94,6 @@ const Dashboard = () => {
       try {
         console.log('📁 Loading data for user:', user.id);
 
-        // ۱- دریافت دسته‌بندی‌ها
         const groupsResponse = await RealApiService.getTradeGroups();
         let groupsData = groupsResponse.data.results || groupsResponse.data || [];
         console.log('📁 All groups:', groupsData);
@@ -68,7 +101,6 @@ const Dashboard = () => {
         const userGroups = groupsData.filter(g => g.user_id === user.id);
         console.log('📁 User groups:', userGroups);
 
-        // ۲- ساخت لیست دسته‌بندی‌ها
         const allCategory = {
           id: 0,
           name: 'همه دسته‌بندی‌ها',
@@ -92,7 +124,6 @@ const Dashboard = () => {
         console.log('📁 Final categories:', categoriesData);
         setCategories(categoriesData);
 
-        // ۳- دریافت تریدها
         const tradesResponse = await RealApiService.getTrades();
         const tradesData = tradesResponse.data.results || tradesResponse.data || [];
         console.log('📊 Trades loaded:', tradesData.length);
@@ -103,13 +134,8 @@ const Dashboard = () => {
 
         setTrades(tradesData);
 
-        // ۴- انتخاب اولین دسته‌بندی
         if (categoriesData.length > 0) {
           setSelectedCategory(categoriesData[0]);
-        }
-
-        if (tradesData.length > 0) {
-          setSelectedTrade(tradesData[0]);
         }
 
       } catch (error) {
@@ -162,14 +188,49 @@ const Dashboard = () => {
   }, [categories, showAllGroups]);
 
   // ============================================
+  // دریافت جزئیات کامل یک ترید از سرور
+  // ============================================
+  const fetchTradeDetail = async (tradeId) => {
+    if (!tradeId) return;
+    setLoadingDetail(true);
+    try {
+      const response = await RealApiService.getTrade(tradeId);
+      setSelectedTrade(response.data);
+      console.log('📋 Trade detail loaded:', response.data);
+    } catch (error) {
+      console.error('Error fetching trade detail:', error);
+      showToast('خطا در دریافت جزئیات ترید', 'error');
+      setSelectedTrade(null);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  // ============================================
+  // انتخاب خودکار اولین ترید هر دسته‌بندی
+  // ============================================
+  const prevFirstTradeIdRef = useRef(null);
+
+  useEffect(() => {
+    if (filteredTrades.length > 0) {
+      const firstTrade = filteredTrades[0];
+      if (prevFirstTradeIdRef.current !== firstTrade.id) {
+        prevFirstTradeIdRef.current = firstTrade.id;
+        fetchTradeDetail(firstTrade.id);
+      }
+    } else {
+      setSelectedTrade(null);
+      prevFirstTradeIdRef.current = null;
+    }
+  }, [filteredTrades]);
+
+  // ============================================
   // انتخاب دسته‌بندی
   // ============================================
   const handleCategorySelect = (category) => {
     if (selectedCategory?.id !== category.id) {
       setSelectedCategory(category);
-      setSelectedTrade(null);
       setSelectedDate(null);
-      // بازنشانی نمایش بیشتر
       setShowAllTrades(false);
       console.log('📁 Selected category:', category);
     }
@@ -179,7 +240,8 @@ const Dashboard = () => {
   // انتخاب ترید
   // ============================================
   const handleTradeSelect = (trade) => {
-    setSelectedTrade(trade);
+    if (selectedTrade && selectedTrade.id === trade.id) return;
+    fetchTradeDetail(trade.id);
   };
 
   // ============================================
@@ -189,10 +251,11 @@ const Dashboard = () => {
     setSelectedDate(date);
     const dayTrades = trades.filter(t => t.trade_date === date);
     if (dayTrades.length > 0) {
-      setSelectedTrade(dayTrades[0]);
+      fetchTradeDetail(dayTrades[0].id);
       showToast(`✅ ${dayTrades.length} ترید در این روز یافت شد`, 'info');
     } else {
       showToast('📭 هیچ تریدی در این روز وجود ندارد', 'info');
+      setSelectedTrade(null);
     }
   };
 
@@ -221,7 +284,7 @@ const Dashboard = () => {
         const updatedTrades = trades.filter(t => t.id !== selectedTrade.id);
         setTrades(updatedTrades);
         setShowDeleteModal(false);
-        setSelectedTrade(updatedTrades.length > 0 ? updatedTrades[0] : null);
+        setSelectedTrade(null);
         showToast('✅ ترید با موفقیت حذف شد', 'success');
       } catch (error) {
         console.error('Error deleting trade:', error);
@@ -461,8 +524,14 @@ const Dashboard = () => {
         <button className="action-btn secondary" onClick={() => navigate('/trades')}>
           <span className="action-icon">📋</span><span>لیست تریدها</span>
         </button>
+        <button className="action-btn success" onClick={() => navigate('/analytics')}>
+          <span className="action-icon">📊</span><span>تحلیل عملکرد</span>
+        </button>
         <button className="action-btn warning" onClick={() => navigate('/reports')}>
-          <span className="action-icon">📊</span><span>تحلیل تریدها</span>
+          <span className="action-icon">📈</span><span>گزارش‌های پیشرفته</span>
+        </button>
+        <button className="action-btn ai" onClick={() => navigate('/ai-consultation')}>
+          <span className="action-icon">🧠</span><span>مشاور AI</span>
         </button>
         <button className="action-btn info" onClick={() => navigate('/profile')}>
           <span className="action-icon">👤</span><span>پروفایل</span>
@@ -474,7 +543,7 @@ const Dashboard = () => {
 
       {/* ===== سه ستون اصلی ===== */}
       <div className="three-column-layout">
-        {/* ===== ستون ۱: دسته‌بندی‌ها ===== */}
+        {/* ستون ۱: دسته‌بندی‌ها */}
         <div className="col-groups">
           <div className="col-header">
             <h3>📁 دسته‌بندی‌ها</h3>
@@ -523,7 +592,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* ===== ستون ۲: لیست تریدها ===== */}
+        {/* ستون ۲: لیست تریدها */}
         <div className="col-trades">
           <div className="col-header">
             <h3>📈 تریدها</h3>
@@ -561,8 +630,7 @@ const Dashboard = () => {
                     <div className="trade-item-info">
                       <span className="trade-date">{trade.trade_date || new Date(trade.created_at).toLocaleDateString('fa-IR')}</span>
                       <span className={`trade-profit ${parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}`}>
-                        {parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$
-                      </span>
+                        {parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$</span>
                     </div>
                   </div>
                 ))}
@@ -579,9 +647,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* ===== ستون ۳: جزئیات ترید ===== */}
+        {/* ستون ۳: جزئیات ترید */}
         <div className="col-details">
-          {selectedTrade ? (
+          {loadingDetail ? (
+            <div className="loading-detail">
+              <div className="loading-spinner">⏳</div>
+              <p>در حال دریافت جزئیات...</p>
+            </div>
+          ) : selectedTrade ? (
             <>
               <div className="col-header">
                 <h3>📋 جزئیات ترید</h3>
@@ -605,7 +678,7 @@ const Dashboard = () => {
                 ))}
               </div>
               <div className="detail-content">
-                {/* ===== تب عمومی ===== */}
+                {/* تب عمومی */}
                 {activeTab === 'general' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -631,8 +704,7 @@ const Dashboard = () => {
                     <div className="detail-row">
                       <span className="detail-label">سود/زیان</span>
                       <span className={`detail-value ${parseFloat(selectedTrade.profit) >= 0 ? 'profit' : 'loss'}`}>
-                        {parseFloat(selectedTrade.profit) >= 0 ? '+' : ''}{parseFloat(selectedTrade.profit) || 0}$
-                      </span>
+                        {parseFloat(selectedTrade.profit) >= 0 ? '+' : ''}{parseFloat(selectedTrade.profit) || 0}$</span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">کیفیت اجرا</span>
@@ -659,7 +731,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* ===== تب اجرا ===== */}
+                {/* تب اجرا */}
                 {activeTab === 'execution' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -711,7 +783,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* ===== تب روانشناسی ===== */}
+                {/* تب روانشناسی */}
                 {activeTab === 'psychology' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -762,7 +834,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* ===== تب چک‌لیست ===== */}
+                {/* تب چک‌لیست */}
                 {activeTab === 'checklist' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -820,7 +892,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* ===== تب بازبینی ===== */}
+                {/* تب بازبینی */}
                 {activeTab === 'review' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -882,7 +954,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* ===== تب ICT ===== */}
+                {/* تب ICT */}
                 {activeTab === 'ict' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -945,31 +1017,46 @@ const Dashboard = () => {
       {/* ===== کارت‌های آمار ===== */}
       <div className="stats-cards">
         <div className="stat-card">
-          <div className="stat-icon">📅</div>
+          <div className="stat-icon">📊</div>
           <div className="stat-info">
-            <span className="stat-label">روزهای باقیمانده</span>
-            <span className="stat-value">۲۵</span>
+            <span className="stat-label">کل تریدها</span>
+            <span className="stat-value">{trades.length}</span>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">📈</div>
           <div className="stat-info">
             <span className="stat-label">تریدهای باقیمانده</span>
-            <span className="stat-value">۴۵</span>
+            <span className={`stat-value ${subscriptionStats.remaining_trades > 0 ? 'active' : 'danger'}`}>
+              {subscriptionStats.remaining_trades >= 999999 ? '∞' : subscriptionStats.remaining_trades}
+            </span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">🧠</div>
+          <div className="stat-info">
+            <span className="stat-label">مشاوره‌های باقیمانده</span>
+            <span className={`stat-value ${subscriptionStats.remaining_ai_consultations > 0 ? 'active' : 'danger'}`}>
+              {subscriptionStats.remaining_ai_consultations >= 999999 ? '∞' : subscriptionStats.remaining_ai_consultations}
+            </span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">📅</div>
+          <div className="stat-info">
+            <span className="stat-label">روزهای باقیمانده</span>
+            <span className={`stat-value ${subscriptionStats.remaining_days > 0 ? 'active' : 'danger'}`}>
+              {subscriptionStats.remaining_days >= 999999 ? '∞' : `${subscriptionStats.remaining_days} روز`}
+            </span>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-info">
             <span className="stat-label">وضعیت اشتراک</span>
-            <span className="stat-value active">فعال</span>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-info">
-            <span className="stat-label">کل تریدها</span>
-            <span className="stat-value">{trades.length}</span>
+            <span className={`stat-value ${subscriptionStats.is_trial ? 'trial' : subscriptionStats.plan_name !== 'بدون اشتراک' ? 'active' : 'inactive'}`}>
+              {subscriptionStats.is_trial ? '🔬 آزمایشی' : subscriptionStats.plan_name}
+            </span>
           </div>
         </div>
       </div>

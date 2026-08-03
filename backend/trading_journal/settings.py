@@ -1,7 +1,9 @@
 # backend/trading_journal/settings.py
 
 import os
+import sys
 from pathlib import Path
+from datetime import timedelta
 
 # ============================================
 # مسیر پایه پروژه
@@ -26,13 +28,16 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
-# backend/trading_journal/settings.py
+# ============================================
+# تنظیمات دوره آزمایشی
+# ============================================
+TRIAL_DAYS = 7  # تعداد روزهای آزمایشی
+TRIAL_TRADES_LIMIT = 10  # محدودیت ترید در دوره آزمایشی
+TRIAL_AI_CONSULTATIONS_LIMIT = 5  # محدودیت مشاوره AI در دوره آزمایشی
 
 # ============================================
-# ✅ تنظیمات لاگ - اصلاح شده برای پشتیبانی از یونیکد
+# تنظیمات لاگ - اصلاح شده برای پشتیبانی از یونیکد
 # ============================================
-import sys
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -50,13 +55,13 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
-            'stream': sys.stdout,  # ✅ استفاده از stdout برای پشتیبانی از یونیکد
+            'stream': sys.stdout,
         },
         'file': {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'trading_journal.log'),
             'formatter': 'verbose',
-            'encoding': 'utf-8',  # ✅ تنظیم encoding به utf-8
+            'encoding': 'utf-8',
         },
     },
     'root': {
@@ -199,6 +204,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ============================================
+# تنظیمات AI (Ollama)
+# ============================================
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434/api/generate')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3.1:8b')
+
+# ============================================
 # تنظیمات CORS
 # ============================================
 CORS_ALLOWED_ORIGINS = [
@@ -208,7 +219,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # فقط در حالت توسعه
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -260,8 +271,6 @@ REST_FRAMEWORK = {
 # ============================================
 # تنظیمات JWT
 # ============================================
-from datetime import timedelta
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -279,90 +288,47 @@ SIMPLE_JWT = {
 }
 
 # ============================================
-# ✅ تنظیمات زرین‌پال - اضافه شده
+# تنظیمات زرین‌پال
 # ============================================
 ZARINPAL_MERCHANT_ID = os.environ.get('ZARINPAL_MERCHANT_ID', 'c9f6ca76-02cf-11e9-a61e-005056a205be')
 ZARINPAL_SANDBOX = os.environ.get('ZARINPAL_SANDBOX', 'True') == 'True'
 ZARINPAL_CALLBACK_URL = os.environ.get('ZARINPAL_CALLBACK_URL', 'http://localhost:3000/payment/verify/')
 
 # ============================================
-# ✅ تنظیمات پیامک (SMS) - اصلاح شده
+# تنظیمات پیامک (SMS)
 # ============================================
 SMS_API_KEY = os.environ.get('SMS_API_KEY', '')
 SMS_SENDER_NUMBER = os.environ.get('SMS_SENDER_NUMBER', '3000****')
-SMS_OTP_TEMPLATE = os.environ.get('SMS_OTP_TEMPLATE', 'verifycode')  # ✅ اصلاح: بدون خط تیره
+SMS_OTP_TEMPLATE = os.environ.get('SMS_OTP_TEMPLATE', 'verifycode')
 SMS_ENABLED = bool(SMS_API_KEY)
 
 ADMIN_PHONE_NUMBER = os.environ.get('ADMIN_PHONE_NUMBER', '09155511393')
 
 # ============================================
-# تنظیمات لاگ
-# ============================================
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {asctime} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'trading_journal.log'),
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'apps': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
-
-# ============================================
 # تنظیمات امنیتی اضافی (برای محیط تولید)
 # ============================================
 if not DEBUG:
-    # امنیت در محیط تولید
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-    SECURE_HSTS_SECONDS = 31536000  # 1 سال
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-    # در تولید، لاگ‌ها را با دقت بیشتری ثبت کن
     LOGGING['handlers']['file']['level'] = 'WARNING'
     LOGGING['root']['level'] = 'WARNING'
 
-    # کش کردن قالب‌ها
     TEMPLATES[0]['OPTIONS']['loaders'] = [
         ('django.template.loaders.cached.Loader', [
             'django.template.loaders.filesystem.Loader',
             'django.template.loaders.app_directories.Loader',
         ]),
     ]
+
+# ============================================
+# ✅ تنظیمات Alpha Vantage (قیمت لحظه‌ای) – اصلاح‌شده
+# ============================================
+ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY', '')

@@ -83,6 +83,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """سریالایزر برای به‌روزرسانی پروفایل کاربر"""
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
@@ -155,8 +157,11 @@ class SubscriptionStatusSerializer(serializers.Serializer):
     end_date = serializers.DateTimeField(required=False, allow_null=True)
     remaining_days = serializers.IntegerField(required=False)
     remaining_trades = serializers.IntegerField(required=False)
+    remaining_ai_consultations = serializers.IntegerField(required=False)
     trades_limit = serializers.IntegerField(required=False)
     trades_used = serializers.IntegerField(required=False)
+    ai_consultations_limit = serializers.IntegerField(required=False)
+    ai_consultations_used = serializers.IntegerField(required=False)
     is_trial = serializers.BooleanField(required=False)
     expired = serializers.BooleanField(required=False)
     is_admin = serializers.BooleanField(required=False)

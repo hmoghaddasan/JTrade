@@ -1,6 +1,16 @@
 // frontend/src/components/reports/reports/RiskRewardReport.js
 
 import React from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
 
 const RiskRewardReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -53,6 +63,8 @@ const RiskRewardReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const bestRange = data.reduce((best, current) => current.profit > best.profit ? current : best, data[0]);
   const bestWinRateRange = data.reduce((best, current) => parseFloat(current.winRate) > parseFloat(best.winRate) ? current : best, data[0]);
 
+  const chartAxisColor = isDark ? '#ccc' : '#666';
+
   return (
     <div className="report-content-inner">
       <div className="report-description">
@@ -85,6 +97,28 @@ const RiskRewardReport = ({ dateRange, selectedCategory, isDark, trades }) => {
           <span className="summary-label">بیشترین نرخ برد</span>
           <span className="summary-value">{bestWinRateRange.label} ({bestWinRateRange.winRate}%)</span>
         </div>
+      </div>
+
+      {/* بخش نمودار */}
+      <div className="chart-wrapper" style={{ margin: '20px 0', height: '250px' }}>
+        <h6 style={{ color: isDark ? '#eee' : '#333' }}>سود کل در هر محدوده R:R</h6>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+            <XAxis dataKey="label" stroke={chartAxisColor} />
+            <YAxis stroke={chartAxisColor} />
+            <Tooltip
+              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+              itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              formatter={(value) => [`$${value}`, 'سود کل']}
+            />
+            <Bar dataKey="profit" name="سود کل">
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <table className="report-table">

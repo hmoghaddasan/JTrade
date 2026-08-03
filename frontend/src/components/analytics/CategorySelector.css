@@ -1,0 +1,46 @@
+/* frontend/src/components/analytics/CategorySelector.css */
+
+.category-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.selector-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.dark .selector-label {
+  color: #7986cb;
+}
+
+.selector-select {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 180px;
+  transition: all 0.2s;
+}
+
+.selector-select:focus {
+  outline: none;
+  border-color: #1a237e;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+}
+
+.dark .selector-select {
+  background: #2d2d44;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.dark .selector-select:focus {
+  border-color: #7986cb;
+  box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.2);
+}

@@ -3,20 +3,29 @@
 from rest_framework import status, generics, permissions, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Sum, Avg
-from django.http import HttpResponse
+from django.db.models import Sum, Avg, Count, Q
+from django.http import HttpResponse, StreamingHttpResponse
+from rest_framework.views import APIView  # اگر قبلاً import نشده، اضافه کنید
+from datetime import datetime
 import csv
 import io
-from .models import CurrencyPair, TradeGroup, Trade
+from .models import CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion, AIConsultationAnalytics
 from .serializers import (
     CurrencyPairSerializer,
     TradeGroupSerializer,
     TradeListSerializer,
     TradeDetailSerializer,
     TradeCreateSerializer,
-    TradeUpdateSerializer
+    TradeUpdateSerializer,
+    AIConsultationSerializer,
+    AIConsultationInputSerializer,
+    AIConsultationFeedbackSerializer,
+    AIPromptVersionSerializer,
+    AIConsultationAnalyticsSerializer,
 )
+from .ai_service import AIService, AIFeedbackService, AIAnalyticsService
 from apps.accounts.permissions import IsAuthenticatedWithSubscription, CanTrade
+from apps.subscriptions.models import UserSubscription
 
 
 # ============================================
@@ -30,6 +39,14 @@ class CurrencyPairListView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['symbol', 'description']
     ordering_fields = ['symbol', 'pair_type']
+
+class SymbolListView(APIView):
+    """لیست تمام نمادها بدون pagination"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        symbols = CurrencyPair.objects.filter(is_active=True).values_list('symbol', flat=True)
+        return Response(list(symbols))
 
 
 class CurrencyPairDetailView(generics.RetrieveAPIView):
@@ -49,7 +66,6 @@ class TradeGroupListCreateView(generics.ListCreateAPIView):
     serializer_class = TradeGroupSerializer
 
     def get_queryset(self):
-        """فقط گروه‌های کاربر جاری را برگردان"""
         user = self.request.user
         print(f"🔍 User ID: {user.id}")
         print(f"🔍 User phone: {user.phone_number}")
@@ -66,7 +82,6 @@ class TradeGroupListCreateView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        """ایجاد گروه جدید با کاربر جاری"""
         user = self.request.user
         print(f"📝 Creating group for user: {user.id}")
 
@@ -154,18 +169,38 @@ class TradeListCreateView(generics.ListCreateAPIView):
         return queryset.order_by('-trade_date', '-created_at')
 
     def perform_create(self, serializer):
+        user = self.request.user
         group_id = self.request.data.get('group_id')
+
         if not group_id:
             from rest_framework import serializers
             raise serializers.ValidationError({'group_id': 'انتخاب دسته‌بندی اجباری است'})
 
         try:
-            group = TradeGroup.objects.get(id=group_id, user=self.request.user, is_active=True)
+            group = TradeGroup.objects.get(id=group_id, user=user, is_active=True)
         except TradeGroup.DoesNotExist:
             from rest_framework import serializers
             raise serializers.ValidationError({'group_id': 'دسته‌بندی انتخاب شده معتبر نیست'})
 
-        serializer.save(user=self.request.user, group=group)
+        # بررسی محدودیت ترید
+        try:
+            subscription = UserSubscription.objects.filter(
+                user=user,
+                is_active=True
+            ).latest('created_at')
+
+            if not subscription.can_trade():
+                from rest_framework import serializers
+                raise serializers.ValidationError({
+                    'limit': f'محدودیت ترید شما به پایان رسیده است. ({subscription.trades_limit} ترید)'
+                })
+        except UserSubscription.DoesNotExist:
+            from rest_framework import serializers
+            raise serializers.ValidationError({
+                'subscription': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
+            })
+
+        serializer.save(user=user, group=group)
 
 
 class TradeDetailView(generics.RetrieveAPIView):
@@ -442,6 +477,574 @@ class TimeframeReportView(APIView):
                 })
 
         return Response(report)
+
+
+# ============================================
+# تحلیل دسته‌بندی شده
+# ============================================
+class AnalyticsView(APIView):
+    """دریافت داده‌های تحلیلی دسته‌بندی شده بر اساس معیارهای مختلف"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        category_by = request.query_params.get('category_by', 'day_of_week')
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+        symbol = request.query_params.get('symbol')
+        trade_type = request.query_params.get('trade_type')
+        status_filter = request.query_params.get('status')
+
+        trades = Trade.objects.filter(user=user, is_deleted=False)
+
+        if date_from:
+            try:
+                date_from_parsed = datetime.strptime(date_from, '%Y-%m-%d').date()
+                trades = trades.filter(trade_date__gte=date_from_parsed)
+            except ValueError:
+                pass
+        if date_to:
+            try:
+                date_to_parsed = datetime.strptime(date_to, '%Y-%m-%d').date()
+                trades = trades.filter(trade_date__lte=date_to_parsed)
+            except ValueError:
+                pass
+
+        if symbol:
+            trades = trades.filter(symbol__icontains=symbol)
+        if trade_type:
+            trades = trades.filter(trade_type=trade_type)
+        if status_filter:
+            if status_filter == 'win':
+                trades = trades.filter(profit__gt=0)
+            elif status_filter == 'loss':
+                trades = trades.filter(profit__lt=0)
+            elif status_filter == 'breakeven':
+                trades = trades.filter(profit=0)
+
+        total_trades = trades.count()
+        if total_trades == 0:
+            return Response({
+                'summary': {
+                    'total_trades': 0,
+                    'win_rate': 0,
+                    'total_profit': 0,
+                    'profit_factor': 0,
+                    'avg_rr': 0,
+                    'avg_quality': 0,
+                },
+                'categories': [],
+                'distribution': {'win': 0, 'loss': 0, 'breakeven': 0}
+            })
+
+        win_count = trades.filter(profit__gt=0).count()
+        loss_count = trades.filter(profit__lt=0).count()
+        breakeven_count = trades.filter(profit=0).count()
+        total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
+        total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
+        total_loss_abs = abs(total_loss)
+        avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
+        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+
+        win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
+        profit_factor = (total_profit / total_loss_abs) if total_loss_abs > 0 else (999 if total_profit > 0 else 0)
+
+        summary = {
+            'total_trades': total_trades,
+            'win_rate': round(win_rate, 1),
+            'total_profit': round(total_profit, 2),
+            'profit_factor': round(profit_factor, 2),
+            'avg_rr': round(avg_rr, 2),
+            'avg_quality': round(avg_quality, 1),
+        }
+
+        distribution = {
+            'win': win_count,
+            'loss': loss_count,
+            'breakeven': breakeven_count,
+        }
+
+        categories = []
+        group_by = category_by
+
+        if group_by == 'day_of_week':
+            day_order = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+            day_names_fa = {
+                'Saturday': 'شنبه', 'Sunday': 'یکشنبه', 'Monday': 'دوشنبه',
+                'Tuesday': 'سه‌شنبه', 'Wednesday': 'چهارشنبه', 'Thursday': 'پنجشنبه',
+                'Friday': 'جمعه'
+            }
+            grouped = trades.values('day_of_week').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            )
+            grouped_dict = {item['day_of_week']: item for item in grouped if item['day_of_week']}
+            for day in day_order:
+                if day in grouped_dict:
+                    data = grouped_dict[day]
+                    categories.append({
+                        'name': day_names_fa.get(day, day),
+                        'count': data['count'],
+                        'win_count': data['win_count'] or 0,
+                        'loss_count': data['loss_count'] or 0,
+                        'total_profit': round(data['total_profit'] or 0, 2),
+                        'avg_rr': round(data['avg_rr'] or 0, 2),
+                        'avg_quality': round(data['avg_quality'] or 0, 1),
+                        'win_rate': round((data['win_count'] / data['count'] * 100) if data['count'] > 0 else 0, 1),
+                    })
+
+        elif group_by == 'symbol':
+            grouped = trades.values('symbol').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            ).order_by('-total_profit')
+            for item in grouped:
+                categories.append({
+                    'name': item['symbol'],
+                    'count': item['count'],
+                    'win_count': item['win_count'] or 0,
+                    'loss_count': item['loss_count'] or 0,
+                    'total_profit': round(item['total_profit'] or 0, 2),
+                    'avg_rr': round(item['avg_rr'] or 0, 2),
+                    'avg_quality': round(item['avg_quality'] or 0, 1),
+                    'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                })
+
+        elif group_by == 'trade_type':
+            grouped = trades.values('trade_type').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            )
+            type_names = {'Buy': 'خرید', 'Sell': 'فروش'}
+            for item in grouped:
+                categories.append({
+                    'name': type_names.get(item['trade_type'], item['trade_type']),
+                    'count': item['count'],
+                    'win_count': item['win_count'] or 0,
+                    'loss_count': item['loss_count'] or 0,
+                    'total_profit': round(item['total_profit'] or 0, 2),
+                    'avg_rr': round(item['avg_rr'] or 0, 2),
+                    'avg_quality': round(item['avg_quality'] or 0, 1),
+                    'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                })
+
+        elif group_by == 'dominant_feeling':
+            grouped = trades.values('dominant_feeling').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            ).order_by('-total_profit')
+            for item in grouped:
+                if item['dominant_feeling']:
+                    categories.append({
+                        'name': item['dominant_feeling'],
+                        'count': item['count'],
+                        'win_count': item['win_count'] or 0,
+                        'loss_count': item['loss_count'] or 0,
+                        'total_profit': round(item['total_profit'] or 0, 2),
+                        'avg_rr': round(item['avg_rr'] or 0, 2),
+                        'avg_quality': round(item['avg_quality'] or 0, 1),
+                        'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                    })
+
+        elif group_by == 'strategy_type':
+            grouped = trades.values('strategy_type').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            )
+            for item in grouped:
+                if item['strategy_type']:
+                    categories.append({
+                        'name': item['strategy_type'],
+                        'count': item['count'],
+                        'win_count': item['win_count'] or 0,
+                        'loss_count': item['loss_count'] or 0,
+                        'total_profit': round(item['total_profit'] or 0, 2),
+                        'avg_rr': round(item['avg_rr'] or 0, 2),
+                        'avg_quality': round(item['avg_quality'] or 0, 1),
+                        'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                    })
+
+        elif group_by == 'bias':
+            grouped = trades.values('bias').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            )
+            for item in grouped:
+                if item['bias']:
+                    categories.append({
+                        'name': item['bias'],
+                        'count': item['count'],
+                        'win_count': item['win_count'] or 0,
+                        'loss_count': item['loss_count'] or 0,
+                        'total_profit': round(item['total_profit'] or 0, 2),
+                        'avg_rr': round(item['avg_rr'] or 0, 2),
+                        'avg_quality': round(item['avg_quality'] or 0, 1),
+                        'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                    })
+
+        elif group_by == 'session_type':
+            grouped = trades.values('session_type').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            )
+            for item in grouped:
+                if item['session_type']:
+                    categories.append({
+                        'name': item['session_type'],
+                        'count': item['count'],
+                        'win_count': item['win_count'] or 0,
+                        'loss_count': item['loss_count'] or 0,
+                        'total_profit': round(item['total_profit'] or 0, 2),
+                        'avg_rr': round(item['avg_rr'] or 0, 2),
+                        'avg_quality': round(item['avg_quality'] or 0, 1),
+                        'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                    })
+
+        elif group_by == 'month':
+            grouped = trades.values('month').annotate(
+                count=Count('id'),
+                win_count=Count('id', filter=Q(profit__gt=0)),
+                loss_count=Count('id', filter=Q(profit__lt=0)),
+                total_profit=Sum('profit'),
+                avg_rr=Avg('risk_reward_ratio', filter=Q(risk_reward_ratio__isnull=False)),
+                avg_quality=Avg('execution_quality_score', filter=Q(execution_quality_score__isnull=False)),
+            ).order_by('month')
+            month_names = {
+                1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد', 4: 'تیر', 5: 'مرداد', 6: 'شهریور',
+                7: 'مهر', 8: 'آبان', 9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
+            }
+            for item in grouped:
+                if item['month']:
+                    categories.append({
+                        'name': month_names.get(item['month'], str(item['month'])),
+                        'count': item['count'],
+                        'win_count': item['win_count'] or 0,
+                        'loss_count': item['loss_count'] or 0,
+                        'total_profit': round(item['total_profit'] or 0, 2),
+                        'avg_rr': round(item['avg_rr'] or 0, 2),
+                        'avg_quality': round(item['avg_quality'] or 0, 1),
+                        'win_rate': round((item['win_count'] / item['count'] * 100) if item['count'] > 0 else 0, 1),
+                    })
+
+        else:
+            return Response({
+                'error': 'معیار دسته‌بندی نامعتبر است',
+                'valid_options': ['day_of_week', 'month', 'symbol', 'trade_type', 'dominant_feeling',
+                                  'strategy_type', 'bias', 'session_type']
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'summary': summary,
+            'categories': categories,
+            'distribution': distribution
+        })
+
+
+# ============================================
+# مشاوره AI (غیراستریم)
+# ============================================
+class AIConsultationView(APIView):
+    """دریافت مشاوره هوشمند از AI"""
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
+
+    def post(self, request):
+        serializer = AIConsultationInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription = UserSubscription.objects.filter(
+                user=request.user,
+                is_active=True
+            ).latest('created_at')
+
+            if not subscription.can_consult_ai():
+                return Response({
+                    'error': 'limit_reached',
+                    'message': f'محدودیت مشاوره AI شما به پایان رسیده است. ({subscription.ai_consultations_limit} مشاوره)'
+                }, status=status.HTTP_403_FORBIDDEN)
+        except UserSubscription.DoesNotExist:
+            return Response({
+                'error': 'no_subscription',
+                'message': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            result = AIService.get_consultation(request.user, serializer.validated_data)
+
+            # اگر خطا برگردانده شده (اعتبارسنجی)
+            if isinstance(result, dict) and 'error' in result:
+                return Response({
+                    'error': result['error'],
+                    'message': result.get('message', '')
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            consultation = result
+            remaining = subscription.get_remaining_ai_consultations()
+
+            return Response({
+                'id': consultation.id,
+                'score': consultation.ai_score,
+                'response': consultation.ai_response,
+                'created_at': consultation.created_at,
+                'remaining_consultations': remaining,
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ============================================
+# مشاوره AI با استریم (اصلاح‌شده)
+# ============================================
+
+class AIConsultationStreamView(APIView):
+    """دریافت مشاوره هوشمند از AI به صورت استریم"""
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
+
+    def post(self, request):
+        serializer = AIConsultationInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # بررسی محدودیت مشاوره
+        try:
+            subscription = UserSubscription.objects.filter(
+                user=request.user,
+                is_active=True
+            ).latest('created_at')
+
+            if not subscription.can_consult_ai():
+                return Response({
+                    'error': 'limit_reached',
+                    'message': f'محدودیت مشاوره AI شما به پایان رسیده است. ({subscription.ai_consultations_limit} مشاوره)'
+                }, status=status.HTTP_403_FORBIDDEN)
+        except UserSubscription.DoesNotExist:
+            return Response({
+                'error': 'no_subscription',
+                'message': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            result = AIService.get_consultation_stream(request.user, serializer.validated_data)
+
+            # ✅ بررسی خطاها (هم دیکشنری و هم tuple)
+            if isinstance(result, dict) and 'error' in result:
+                return Response({
+                    'error': result['error'],
+                    'message': result.get('message', '')
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # اگر result یک tuple است، آن را unpack کن
+            if isinstance(result, tuple) and len(result) == 2:
+                consultation, generator = result
+            else:
+                # اگر نوع نامشخص بود، خطا برگردان
+                return Response({
+                    'error': 'invalid_response',
+                    'message': 'پاسخ نامعتبر از سرویس AI'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            def stream_generator():
+                for chunk in generator():
+                    yield chunk
+
+            response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
+            response['X-Consultation-ID'] = str(consultation.id)
+            return response
+
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AIConsultationHistoryView(APIView):
+    """دریافت تاریخچه مشاوره‌های کاربر"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        consultations = AIConsultation.objects.filter(
+            user=request.user
+        ).order_by('-created_at')
+
+        page = request.query_params.get('page', 1)
+        page_size = request.query_params.get('page_size', 20)
+
+        start = (int(page) - 1) * int(page_size)
+        end = start + int(page_size)
+
+        total = consultations.count()
+        paginated = consultations[start:end]
+
+        return Response({
+            'results': AIConsultationSerializer(paginated, many=True).data,
+            'count': total,
+            'page': int(page),
+            'page_size': int(page_size),
+            'total_pages': (total + int(page_size) - 1) // int(page_size),
+        })
+
+
+class AIConsultationDetailView(APIView):
+    """دریافت جزئیات یک مشاوره خاص"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            consultation = AIConsultation.objects.get(id=pk, user=request.user)
+            return Response(AIConsultationSerializer(consultation).data)
+        except AIConsultation.DoesNotExist:
+            return Response(
+                {'error': 'مشاوره یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class AIConsultationFeedbackView(APIView):
+    """ثبت بازخورد برای یک مشاوره"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        serializer = AIConsultationFeedbackSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            consultation = AIFeedbackService.save_feedback(pk, request.user, serializer.validated_data)
+            return Response(AIConsultationSerializer(consultation).data)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ============================================
+# مدیریت AI (فقط ادمین)
+# ============================================
+class AIAnalyticsDashboardView(APIView):
+    """داشبورد مدیریتی برای توسعه‌دهنده (فقط ادمین)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_admin:
+            return Response(
+                {'error': 'دسترسی غیرمجاز'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            data = AIAnalyticsService.get_admin_dashboard()
+            return Response(data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AIPromptVersionView(APIView):
+    """مدیریت نسخه‌های پرامپت (فقط ادمین)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_admin:
+            return Response(
+                {'error': 'دسترسی غیرمجاز'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        versions = AIPromptVersion.objects.all().order_by('-created_at')
+        return Response(AIPromptVersionSerializer(versions, many=True).data)
+
+    def post(self, request):
+        if not request.user.is_admin:
+            return Response(
+                {'error': 'دسترسی غیرمجاز'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = AIPromptVersionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AIPromptVersionDetailView(APIView):
+    """ویرایش و حذف نسخه پرامپت (فقط ادمین)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, pk, user):
+        if not user.is_admin:
+            return None
+        try:
+            return AIPromptVersion.objects.get(id=pk)
+        except AIPromptVersion.DoesNotExist:
+            return None
+
+    def put(self, request, pk):
+        if not request.user.is_admin:
+            return Response(
+                {'error': 'دسترسی غیرمجاز'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        instance = self.get_object(pk, request.user)
+        if not instance:
+            return Response(
+                {'error': 'نسخه یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = AIPromptVersionSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        if not request.user.is_admin:
+            return Response(
+                {'error': 'دسترسی غیرمجاز'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        instance = self.get_object(pk, request.user)
+        if not instance:
+            return Response(
+                {'error': 'نسخه یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        instance.delete()
+        return Response({'message': 'نسخه با موفقیت حذف شد'})
 
 
 # ============================================

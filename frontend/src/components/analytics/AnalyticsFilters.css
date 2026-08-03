@@ -1,0 +1,124 @@
+/* frontend/src/components/analytics/AnalyticsFilters.css */
+
+.analytics-filters {
+  background: white;
+  border-radius: 12px;
+  padding: 15px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.dark .analytics-filters {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.filters-row:first-child {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.dark .filters-row:first-child {
+  border-bottom-color: #444;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+}
+
+.dark .filter-group label {
+  color: #aaa;
+}
+
+.filter-input,
+.filter-select {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  min-width: 120px;
+  transition: all 0.2s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #1a237e;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+}
+
+.dark .filter-input,
+.dark .filter-select {
+  background: #3d3d5c;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.dark .filter-input:focus,
+.dark .filter-select:focus {
+  border-color: #7986cb;
+  box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.15);
+}
+
+.btn-clear-filters {
+  padding: 6px 16px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 6px;
+  color: #1a237e;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  margin-right: auto;
+}
+
+.btn-clear-filters:hover {
+  background: #c5cae9;
+}
+
+.dark .btn-clear-filters {
+  background: #3d3d5c;
+  color: #b0b0d0;
+}
+
+.dark .btn-clear-filters:hover {
+  background: #4d4d6c;
+}
+
+@media (max-width: 768px) {
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-input,
+  .filter-select {
+    width: 100%;
+  }
+
+  .btn-clear-filters {
+    margin-right: 0;
+    width: 100%;
+  }
+}

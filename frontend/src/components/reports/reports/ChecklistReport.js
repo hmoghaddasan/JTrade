@@ -1,6 +1,19 @@
 // frontend/src/components/reports/reports/ChecklistReport.js
 
 import React from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 
 const ChecklistReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -41,13 +54,11 @@ const ChecklistReport = ({ dateRange, selectedCategory, isDark, trades }) => {
 
   const total = trades.length;
 
-  // محاسبه دقیق با parseFloat
   const checklistData = checklistItems.map(item => {
     const itemTrades = trades.filter(t => t[item.key] === true);
     const count = itemTrades.length;
     const percentage = total > 0 ? (count / total * 100).toFixed(1) : 0;
 
-    // محاسبه سود برای تریدهایی که این آیتم را رعایت کرده‌اند
     const profit = itemTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
     const avgProfit = itemTrades.length > 0 ? profit / itemTrades.length : 0;
     const winCount = itemTrades.filter(t => parseFloat(t.profit) > 0).length;
@@ -56,16 +67,21 @@ const ChecklistReport = ({ dateRange, selectedCategory, isDark, trades }) => {
     return { ...item, count, percentage, profit, avgProfit, winCount, winRate };
   });
 
-  // محاسبه امتیاز کلی
   const overallScore = checklistData.reduce((sum, item) => sum + parseFloat(item.percentage), 0) / checklistData.length;
-
-  // محاسبه مجموع سود برای آیتم‌های رعایت شده
   const totalProfitAdhered = checklistData.reduce((sum, item) => sum + item.profit, 0);
   const totalProfitAdheredAvg = checklistData.length > 0 ? totalProfitAdhered / checklistData.length : 0;
-
-  // پیدا کردن بهترین و بدترین آیتم از نظر سود
   const bestItem = checklistData.reduce((best, current) => current.profit > best.profit ? current : best, checklistData[0]);
   const worstItem = checklistData.reduce((worst, current) => current.profit < worst.profit ? current : worst, checklistData[0]);
+
+  // رنگ‌های سازگار با حالت تاریک
+  const chartAxisColor = isDark ? '#ccc' : '#666';
+  const COLORS = isDark ? ['#8884d8', '#82ca9d'] : ['#4caf50', '#f44336'];
+
+  // آماده‌سازی داده برای دونات (امتیاز کلی)
+  const donutData = [
+    { name: 'پایبندی', value: parseFloat(overallScore.toFixed(1)) },
+    { name: 'نیاز به بهبود', value: 100 - parseFloat(overallScore.toFixed(1)) },
+  ];
 
   return (
     <div className="report-content-inner">
@@ -105,6 +121,52 @@ const ChecklistReport = ({ dateRange, selectedCategory, isDark, trades }) => {
         <div className="summary-item">
           <span className="summary-label">بدترین آیتم</span>
           <span className="summary-value danger">{worstItem.label}</span>
+        </div>
+      </div>
+
+      {/* بخش نمودارها */}
+      <div className="chart-wrapper" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', margin: '20px 0' }}>
+        <div style={{ flex: '1 1 250px', height: '200px' }}>
+          <h6 style={{ color: isDark ? '#eee' : '#333' }}>امتیاز کلی</h6>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={donutData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
+                {donutData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              />
+              <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" style={{ fontSize: '20px', fontWeight: 'bold', fill: isDark ? '#fff' : '#333' }}>
+                {overallScore.toFixed(1)}%
+              </text>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ flex: '1 1 350px', height: '200px' }}>
+          <h6 style={{ color: isDark ? '#eee' : '#333' }}>درصد رعایت آیتم‌ها</h6>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={checklistData} layout="vertical" margin={{ top: 5, right: 20, left: 60, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis type="number" stroke={chartAxisColor} />
+              <YAxis dataKey="label" type="category" stroke={chartAxisColor} width={100} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`${value}%`, 'درصد رعایت']}
+              />
+              <Bar dataKey="percentage" name="درصد رعایت">
+                {checklistData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={
+                    parseFloat(entry.percentage) >= 70 ? '#4caf50' :
+                    parseFloat(entry.percentage) >= 50 ? '#ff9800' : '#f44336'
+                  } />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

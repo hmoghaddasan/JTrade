@@ -1,0 +1,157 @@
+/* frontend/src/components/analytics/CategoryTable.css */
+
+.category-table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 15px 18px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.dark .category-table-container {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.table-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #1a237e;
+}
+
+.dark .table-title {
+  color: #7986cb;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.category-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.category-table thead {
+  background: #f5f7fa;
+}
+
+.dark .category-table thead {
+  background: #3d3d5c;
+}
+
+.category-table th {
+  padding: 10px 12px;
+  text-align: right;
+  font-weight: 600;
+  color: #1a237e;
+  border-bottom: 2px solid #e8ecf4;
+}
+
+.dark .category-table th {
+  color: #b0b0d0;
+  border-bottom-color: #444;
+}
+
+.category-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8ecf4;
+  text-align: right;
+}
+
+.dark .category-table td {
+  border-bottom-color: #3d3d5c;
+}
+
+.category-table tbody tr:hover {
+  background: rgba(26, 35, 126, 0.04);
+}
+
+.dark .category-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.category-name {
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.dark .category-name {
+  color: #7986cb;
+}
+
+.win-rate {
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.win-rate.high {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.win-rate.low {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.1);
+}
+
+.dark .win-rate.high {
+  color: #66bb6a;
+  background: rgba(102, 187, 106, 0.15);
+}
+
+.dark .win-rate.low {
+  color: #ef5350;
+  background: rgba(239, 83, 80, 0.15);
+}
+
+.win-count {
+  color: #2e7d32;
+}
+
+.loss-count {
+  color: #c62828;
+}
+
+.profit {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.loss {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.quality-badge {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.quality-badge.high {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.quality-badge.medium {
+  color: #f57c00;
+  background: rgba(245, 124, 0, 0.1);
+}
+
+.quality-badge.low {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.1);
+}
+
+.category-table-empty {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+}

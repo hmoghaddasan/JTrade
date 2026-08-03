@@ -1,0 +1,143 @@
+/* frontend/src/components/analytics/AnalyticsDashboard.css */
+
+.analytics-dashboard {
+  padding: 20px 30px;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.analytics-dashboard.light {
+  background-color: #f5f7fa;
+  color: #1a1a2e;
+}
+
+.analytics-dashboard.dark {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+}
+
+/* ===== هدر ===== */
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(26, 35, 126, 0.2);
+  margin-bottom: 20px;
+}
+
+.analytics-header h2 {
+  font-size: 24px;
+  margin: 0;
+  color: #1a237e;
+}
+
+.analytics-header .header-subtitle {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-top: 2px;
+}
+
+.dark .analytics-header h2 {
+  color: #7986cb;
+}
+
+.dark .analytics-header .header-subtitle {
+  color: #aaa;
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 8px;
+  color: #1a237e;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: #c5cae9;
+}
+
+.dark .btn-back {
+  background: #2d2d44;
+  color: #e0e0e0;
+}
+
+.dark .btn-back:hover {
+  background: #3d3d5c;
+}
+
+/* ===== لودینگ و خطا ===== */
+.analytics-loading,
+.analytics-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+
+.loading-spinner {
+  font-size: 48px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.analytics-error .error-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.analytics-error h3 {
+  margin: 10px 0 5px;
+}
+
+.btn-retry {
+  margin-top: 15px;
+  padding: 10px 25px;
+  background: #1a237e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-retry:hover {
+  background: #0d47a1;
+}
+
+/* ===== پیام بدون داده ===== */
+.no-data-message {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.dark .no-data-message {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.no-data-message .empty-icon {
+  font-size: 64px;
+  margin-bottom: 15px;
+}
+
+.no-data-message h3 {
+  font-size: 20px;
+  margin: 10px 0;
+}
+
+.no-data-message p {
+  color: #888;
+}

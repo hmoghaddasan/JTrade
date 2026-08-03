@@ -5,16 +5,20 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import RealApiService from '../services/realApiService';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import './TradeForm.css';
 
 const TradeForm = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState([]);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [showLimitWarning, setShowLimitWarning] = useState(false);
 
   // لیست کامل نمادها
   const symbols = [
@@ -71,7 +75,7 @@ const TradeForm = () => {
     trade_type: 'Buy',
     session_type: 'High Pro',
     weekly_profile_note: '',
-    group_id: '', // دسته‌بندی
+    group_id: '',
     sleep_quality: 'خوب',
     food_status: false,
     focus: false,
@@ -145,14 +149,37 @@ const TradeForm = () => {
   });
 
   // ============================================
-  // دریافت دسته‌بندی‌های کاربر از دیتابیس
+  // بررسی وضعیت اشتراک
+  // ============================================
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const response = await RealApiService.getSubscriptionStatus();
+        const data = response.data;
+        setSubscriptionStatus(data);
+
+        if (data.is_trade_limit_reached) {
+          setShowLimitWarning(true);
+          showToast(
+            `⚠️ محدودیت ترید شما به پایان رسیده است. (${data.trades_limit} ترید)`,
+            'warning'
+          );
+        }
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      }
+    };
+    checkSubscription();
+  }, []);
+
+  // ============================================
+  // دریافت دسته‌بندی‌های کاربر
   // ============================================
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const response = await RealApiService.getTradeGroups();
         const groupsData = response.data.results || response.data || [];
-        // فیلتر دسته‌بندی‌های کاربر جاری
         const userGroups = groupsData.filter(g => g.user_id === user?.id);
         setCategories(userGroups);
       } catch (error) {
@@ -198,6 +225,13 @@ const TradeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ بررسی مجدد محدودیت قبل از ارسال
+    if (showLimitWarning || subscriptionStatus?.is_trade_limit_reached) {
+      showToast('❌ محدودیت ترید شما به پایان رسیده است. لطفاً اشتراک خود را تمدید کنید.', 'error');
+      return;
+    }
+
     setLoading(true);
     if (!validateForm()) {
       alert('❌ لطفاً خطاهای زیر را اصلاح کنید:\n\n' + errors.map((e, i) => `${i+1}. ${e}`).join('\n'));
@@ -213,11 +247,16 @@ const TradeForm = () => {
     try {
       await RealApiService.createTrade(formData);
       setLoading(false);
-      alert('✅ ترید با موفقیت ثبت شد!');
+      showToast('✅ ترید با موفقیت ثبت شد!', 'success');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error creating trade:', error);
-      alert('❌ خطا در ثبت ترید');
+      if (error.response?.data?.limit) {
+        showToast(error.response.data.limit, 'error');
+        setShowLimitWarning(true);
+      } else {
+        showToast('❌ خطا در ثبت ترید', 'error');
+      }
       setLoading(false);
     }
   };
@@ -234,7 +273,7 @@ const TradeForm = () => {
       <div className="form-row">
         <div className="form-group">
           <label>نماد معاملاتی</label>
-          <select name="symbol" value={formData.symbol} onChange={handleChange} required>
+          <select name="symbol" value={formData.symbol} onChange={handleChange} required disabled={showLimitWarning}>
             <option value="">انتخاب نماد</option>
             {Object.entries(symbolGroups).map(([group, items]) => (
               <optgroup key={group} label={group}>
@@ -245,7 +284,7 @@ const TradeForm = () => {
         </div>
         <div className="form-group">
           <label>نوع ترید</label>
-          <select name="trade_type" value={formData.trade_type} onChange={handleChange}>
+          <select name="trade_type" value={formData.trade_type} onChange={handleChange} disabled={showLimitWarning}>
             <option value="Buy">خرید (Buy)</option><option value="Sell">فروش (Sell)</option>
           </select>
         </div>
@@ -253,7 +292,7 @@ const TradeForm = () => {
       <div className="form-row">
         <div className="form-group">
           <label>نوع جلسه</label>
-          <select name="session_type" value={formData.session_type} onChange={handleChange}>
+          <select name="session_type" value={formData.session_type} onChange={handleChange} disabled={showLimitWarning}>
             <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
           </select>
         </div>
@@ -264,6 +303,7 @@ const TradeForm = () => {
             value={formData.group_id}
             onChange={handleChange}
             required
+            disabled={showLimitWarning}
           >
             <option value="">انتخاب دسته‌بندی</option>
             {categories.map(cat => (
@@ -279,7 +319,7 @@ const TradeForm = () => {
       </div>
       <div className="form-group">
         <label>یادداشت پروفایل هفتگی</label>
-        <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
+        <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" disabled={showLimitWarning} />
       </div>
     </div>
   );
@@ -293,11 +333,11 @@ const TradeForm = () => {
       <div className="form-row">
         <div className="form-group">
           <label>تاریخ معامله</label>
-          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required />
+          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required disabled={showLimitWarning} />
         </div>
         <div className="form-group">
           <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} />
+          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} disabled={showLimitWarning} />
         </div>
       </div>
     </div>
@@ -317,14 +357,14 @@ const TradeForm = () => {
         <div className="form-row">
           <div className="form-group">
             <label>کیفیت خواب</label>
-            <select name="sleep_quality" value={formData.sleep_quality} onChange={handleChange}>
+            <select name="sleep_quality" value={formData.sleep_quality} onChange={handleChange} disabled={showLimitWarning}>
               <option value="خوب">خوب</option><option value="متوسط">متوسط</option><option value="بد">بد</option>
             </select>
           </div>
           <div className="form-group">
             <label>تغذیه مناسب</label>
             <div className="checkbox-group">
-              <input type="checkbox" name="food_status" checked={formData.food_status} onChange={handleChange} />
+              <input type="checkbox" name="food_status" checked={formData.food_status} onChange={handleChange} disabled={showLimitWarning} />
               <label>آیا تغذیه مناسب داشتید؟</label>
             </div>
           </div>
@@ -332,14 +372,14 @@ const TradeForm = () => {
         <div className="emotions-grid">
           {emotions.map(emotion => (
             <div key={emotion.key} className="checkbox-group">
-              <input type="checkbox" name={emotion.key} checked={formData[emotion.key]} onChange={handleChange} />
+              <input type="checkbox" name={emotion.key} checked={formData[emotion.key]} onChange={handleChange} disabled={showLimitWarning} />
               <label>{emotion.label}</label>
             </div>
           ))}
         </div>
         <div className="form-group">
           <label>احساس غالب</label>
-          <input type="text" name="dominant_feeling" value={formData.dominant_feeling} onChange={handleChange} placeholder="مثلاً: آرامش، استرس، هیجان..." />
+          <input type="text" name="dominant_feeling" value={formData.dominant_feeling} onChange={handleChange} placeholder="مثلاً: آرامش، استرس، هیجان..." disabled={showLimitWarning} />
         </div>
       </div>
     );
@@ -367,13 +407,13 @@ const TradeForm = () => {
         <div className="form-row">
           <div className="form-group">
             <label>جهت‌گیری کلی</label>
-            <select name="bias" value={formData.bias} onChange={handleChange}>
+            <select name="bias" value={formData.bias} onChange={handleChange} disabled={showLimitWarning}>
               <option value="Bullish">صعودی (Bullish)</option><option value="Bearish">نزولی (Bearish)</option><option value="Neutral">خنثی (Neutral)</option>
             </select>
           </div>
           <div className="form-group">
             <label>نوع استراتژی</label>
-            <select name="strategy_type" value={formData.strategy_type} onChange={handleChange}>
+            <select name="strategy_type" value={formData.strategy_type} onChange={handleChange} disabled={showLimitWarning}>
               <option value="LTP">LTP</option><option value="ITP">ITP</option><option value="STP">STP</option>
             </select>
           </div>
@@ -383,7 +423,7 @@ const TradeForm = () => {
           <div className="checkbox-grid">
             {timeframes.map(tf => (
               <div key={tf.key} className="checkbox-group">
-                <input type="checkbox" name={tf.key} checked={formData[tf.key]} onChange={handleChange} />
+                <input type="checkbox" name={tf.key} checked={formData[tf.key]} onChange={handleChange} disabled={showLimitWarning} />
                 <label>{tf.label}</label>
               </div>
             ))}
@@ -391,14 +431,14 @@ const TradeForm = () => {
         </div>
         <div className="form-group">
           <label>مدل ورودی</label>
-          <input type="text" name="retirement_model" value={formData.retirement_model} onChange={handleChange} placeholder="مثلاً: ERL TO IRL" />
+          <input type="text" name="retirement_model" value={formData.retirement_model} onChange={handleChange} placeholder="مثلاً: ERL TO IRL" disabled={showLimitWarning} />
         </div>
         <div className="form-group">
           <label>چک‌لیست روزانه</label>
           <div className="checkbox-grid">
             {checklistItems.map(item => (
               <div key={item.key} className="checkbox-group">
-                <input type="checkbox" name={item.key} checked={formData[item.key]} onChange={handleChange} />
+                <input type="checkbox" name={item.key} checked={formData[item.key]} onChange={handleChange} disabled={showLimitWarning} />
                 <label>{item.label}</label>
               </div>
             ))}
@@ -406,7 +446,7 @@ const TradeForm = () => {
         </div>
         <div className="form-group">
           <label>توضیحات تکمیلی چک‌لیست</label>
-          <textarea name="checklist_extra" value={formData.checklist_extra} onChange={handleChange} placeholder="توضیحات اضافی..." rows="2" />
+          <textarea name="checklist_extra" value={formData.checklist_extra} onChange={handleChange} placeholder="توضیحات اضافی..." rows="2" disabled={showLimitWarning} />
         </div>
       </div>
     );
@@ -416,19 +456,19 @@ const TradeForm = () => {
     <div className="form-step">
       <h3>💰 جزئیات اجرای معامله</h3>
       <div className="form-row">
-        <div className="form-group"><label>قیمت ورود</label><input type="number" name="entry_price" value={formData.entry_price} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
-        <div className="form-group"><label>حد ضرر (SL)</label><input type="number" name="stop_loss" value={formData.stop_loss} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
+        <div className="form-group"><label>قیمت ورود</label><input type="number" name="entry_price" value={formData.entry_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>حد ضرر (SL)</label><input type="number" name="stop_loss" value={formData.stop_loss} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>حد سود اول (TP1)</label><input type="number" name="take_profit_1" value={formData.take_profit_1} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
-        <div className="form-group"><label>حد سود دوم (TP2)</label><input type="number" name="take_profit_2" value={formData.take_profit_2} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
+        <div className="form-group"><label>حد سود اول (TP1)</label><input type="number" name="take_profit_1" value={formData.take_profit_1} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>حد سود دوم (TP2)</label><input type="number" name="take_profit_2" value={formData.take_profit_2} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
       </div>
-      <div className="form-group"><label>حد سود سوم (TP3)</label><input type="number" name="take_profit_3" value={formData.take_profit_3} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
+      <div className="form-group"><label>حد سود سوم (TP3)</label><input type="number" name="take_profit_3" value={formData.take_profit_3} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
       <div className="form-row">
-        <div className="form-group"><label>مقدار ریسک به دلار</label><input type="number" name="risk_usd" value={formData.risk_usd} onChange={handleChange} step="0.01" placeholder="0.00" /></div>
-        <div className="form-group"><label>درصد ریسک از کل سرمایه</label><input type="number" name="risk_percent" value={formData.risk_percent} onChange={handleChange} step="0.01" placeholder="0.00" /></div>
+        <div className="form-group"><label>مقدار ریسک به دلار</label><input type="number" name="risk_usd" value={formData.risk_usd} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>درصد ریسک از کل سرمایه</label><input type="number" name="risk_percent" value={formData.risk_percent} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} /></div>
       </div>
-      <div className="form-group"><label>نسبت ریسک به ریوارد (R:R)</label><input type="number" name="risk_reward_ratio" value={formData.risk_reward_ratio} onChange={handleChange} step="0.01" placeholder="مثلاً 2.0" /></div>
+      <div className="form-group"><label>نسبت ریسک به ریوارد (R:R)</label><input type="number" name="risk_reward_ratio" value={formData.risk_reward_ratio} onChange={handleChange} step="0.01" placeholder="مثلاً 2.0" disabled={showLimitWarning} /></div>
     </div>
   );
 
@@ -436,10 +476,10 @@ const TradeForm = () => {
     <div className="form-step">
       <h3>📊 نتیجه معامله</h3>
       <div className="form-row">
-        <div className="form-group"><label>قیمت بسته‌شدن</label><input type="number" name="close_price" value={formData.close_price} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
-        <div className="form-group"><label>حد خورده شده</label><select name="tp_sl_hit" value={formData.tp_sl_hit} onChange={handleChange}><option value="">انتخاب کنید</option><option value="TP1">TP1</option><option value="TP2">TP2</option><option value="TP3">TP3</option><option value="SL">SL</option><option value="BE">BE</option></select></div>
+        <div className="form-group"><label>قیمت بسته‌شدن</label><input type="number" name="close_price" value={formData.close_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>حد خورده شده</label><select name="tp_sl_hit" value={formData.tp_sl_hit} onChange={handleChange} disabled={showLimitWarning}><option value="">انتخاب کنید</option><option value="TP1">TP1</option><option value="TP2">TP2</option><option value="TP3">TP3</option><option value="SL">SL</option><option value="BE">BE</option></select></div>
       </div>
-      <div className="form-group"><label>سود یا زیان نهایی (دلار)</label><input type="number" name="profit" value={formData.profit} onChange={handleChange} step="0.01" placeholder="0.00" /></div>
+      <div className="form-group"><label>سود یا زیان نهایی (دلار)</label><input type="number" name="profit" value={formData.profit} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} /></div>
     </div>
   );
 
@@ -447,28 +487,28 @@ const TradeForm = () => {
     <div className="form-step">
       <h3>🔄 احساسات و بازبینی</h3>
       <div className="form-row">
-        <div className="form-group"><label>استرس قبل معامله</label><select name="pre_trade_stress" value={formData.pre_trade_stress} onChange={handleChange}><option value="کم">کم</option><option value="متوسط">متوسط</option><option value="زیاد">زیاد</option></select></div>
-        <div className="form-group"><label>کنترل هیجان هنگام ورود</label><select name="entry_emotion_control" value={formData.entry_emotion_control} onChange={handleChange}><option value="بله">بله</option><option value="خیر">خیر</option><option value="متوسط">متوسط</option></select></div>
+        <div className="form-group"><label>استرس قبل معامله</label><select name="pre_trade_stress" value={formData.pre_trade_stress} onChange={handleChange} disabled={showLimitWarning}><option value="کم">کم</option><option value="متوسط">متوسط</option><option value="زیاد">زیاد</option></select></div>
+        <div className="form-group"><label>کنترل هیجان هنگام ورود</label><select name="entry_emotion_control" value={formData.entry_emotion_control} onChange={handleChange} disabled={showLimitWarning}><option value="بله">بله</option><option value="خیر">خیر</option><option value="متوسط">متوسط</option></select></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>واکنش به سود</label><input type="text" name="reaction_to_profit" value={formData.reaction_to_profit} onChange={handleChange} placeholder="مثلاً: محتاطانه، شتابزده..." /></div>
-        <div className="form-group"><label>مدیریت انتظار</label><select name="expectation_management" value={formData.expectation_management} onChange={handleChange}><option value="ضعیف">ضعیف</option><option value="متوسط">متوسط</option><option value="خوب">خوب</option></select></div>
+        <div className="form-group"><label>واکنش به سود</label><input type="text" name="reaction_to_profit" value={formData.reaction_to_profit} onChange={handleChange} placeholder="مثلاً: محتاطانه، شتابزده..." disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>مدیریت انتظار</label><select name="expectation_management" value={formData.expectation_management} onChange={handleChange} disabled={showLimitWarning}><option value="ضعیف">ضعیف</option><option value="متوسط">متوسط</option><option value="خوب">خوب</option></select></div>
       </div>
-      <div className="form-group"><label>کنترل احساسات پس از ضرر</label><textarea name="emotion_after_losses" value={formData.emotion_after_losses} onChange={handleChange} placeholder="اگر ضرر قبلی در روز داشتید، کنترل احساسات چگونه بود؟" rows="2" /></div>
+      <div className="form-group"><label>کنترل احساسات پس از ضرر</label><textarea name="emotion_after_losses" value={formData.emotion_after_losses} onChange={handleChange} placeholder="اگر ضرر قبلی در روز داشتید، کنترل احساسات چگونه بود؟" rows="2" disabled={showLimitWarning} /></div>
       <div className="form-row">
-        <div className="form-group"><label>کد اشتباه</label><input type="text" name="mistake_code" value={formData.mistake_code} onChange={handleChange} placeholder="مثلاً: ورود زودهنگام" /></div>
-        <div className="form-group"><label>وزن اشتباه (0.1 تا 0.9)</label><input type="number" name="mistake_weight" value={formData.mistake_weight} onChange={handleChange} step="0.1" min="0.1" max="0.9" placeholder="0.5" /></div>
+        <div className="form-group"><label>کد اشتباه</label><input type="text" name="mistake_code" value={formData.mistake_code} onChange={handleChange} placeholder="مثلاً: ورود زودهنگام" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>وزن اشتباه (0.1 تا 0.9)</label><input type="number" name="mistake_weight" value={formData.mistake_weight} onChange={handleChange} step="0.1" min="0.1" max="0.9" placeholder="0.5" disabled={showLimitWarning} /></div>
       </div>
-      <div className="form-group"><label>امتیاز کیفیت اجرا (۱-۱۰)</label><input type="number" name="execution_quality_score" value={formData.execution_quality_score} onChange={handleChange} min="1" max="10" placeholder="5" /></div>
+      <div className="form-group"><label>امتیاز کیفیت اجرا (۱-۱۰)</label><input type="number" name="execution_quality_score" value={formData.execution_quality_score} onChange={handleChange} min="1" max="10" placeholder="5" disabled={showLimitWarning} /></div>
       <div className="checkbox-grid">
-        <div className="checkbox-group"><input type="checkbox" name="stop_loss_adherence" checked={formData.stop_loss_adherence} onChange={handleChange} /><label>پایبندی به حد ضرر</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="strategy_adherence" checked={formData.strategy_adherence} onChange={handleChange} /><label>پایبندی به استراتژی</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="capital_management_adherence" checked={formData.capital_management_adherence} onChange={handleChange} /><label>پایبندی به مدیریت سرمایه</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="over_trade" checked={formData.over_trade} onChange={handleChange} /><label>اورترید محسوب می‌شود</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="post_trade_scan" checked={formData.post_trade_scan} onChange={handleChange} /><label>اسکن پس از معامله انجام شد</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="entry_reason_written" checked={formData.entry_reason_written} onChange={handleChange} /><label>دلیل ورود یادداشت شد</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="exit_reason_written" checked={formData.exit_reason_written} onChange={handleChange} /><label>دلیل خروج یادداشت شد</label></div>
-        <div className="checkbox-group"><input type="checkbox" name="mistakes_recorded" checked={formData.mistakes_recorded} onChange={handleChange} /><label>اشتباهات ثبت شد</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="stop_loss_adherence" checked={formData.stop_loss_adherence} onChange={handleChange} disabled={showLimitWarning} /><label>پایبندی به حد ضرر</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="strategy_adherence" checked={formData.strategy_adherence} onChange={handleChange} disabled={showLimitWarning} /><label>پایبندی به استراتژی</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="capital_management_adherence" checked={formData.capital_management_adherence} onChange={handleChange} disabled={showLimitWarning} /><label>پایبندی به مدیریت سرمایه</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="over_trade" checked={formData.over_trade} onChange={handleChange} disabled={showLimitWarning} /><label>اورترید محسوب می‌شود</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="post_trade_scan" checked={formData.post_trade_scan} onChange={handleChange} disabled={showLimitWarning} /><label>اسکن پس از معامله انجام شد</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="entry_reason_written" checked={formData.entry_reason_written} onChange={handleChange} disabled={showLimitWarning} /><label>دلیل ورود یادداشت شد</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="exit_reason_written" checked={formData.exit_reason_written} onChange={handleChange} disabled={showLimitWarning} /><label>دلیل خروج یادداشت شد</label></div>
+        <div className="checkbox-group"><input type="checkbox" name="mistakes_recorded" checked={formData.mistakes_recorded} onChange={handleChange} disabled={showLimitWarning} /><label>اشتباهات ثبت شد</label></div>
       </div>
     </div>
   );
@@ -477,22 +517,22 @@ const TradeForm = () => {
     <div className="form-step">
       <h3>📊 تحلیل ICT</h3>
       <div className="form-row">
-        <div className="form-group"><label>FVG (Fair Value Gap)</label><input type="text" name="fvg" value={formData.fvg} onChange={handleChange} placeholder="مثلاً: FVG خرید" /></div>
-        <div className="form-group"><label>Order Block</label><input type="text" name="order_block" value={formData.order_block} onChange={handleChange} placeholder="مثلاً: OB فروش" /></div>
+        <div className="form-group"><label>FVG (Fair Value Gap)</label><input type="text" name="fvg" value={formData.fvg} onChange={handleChange} placeholder="مثلاً: FVG خرید" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>Order Block</label><input type="text" name="order_block" value={formData.order_block} onChange={handleChange} placeholder="مثلاً: OB فروش" disabled={showLimitWarning} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>BOS (Break of Structure)</label><input type="text" name="bos" value={formData.bos} onChange={handleChange} placeholder="مثلاً: BOS صعودی" /></div>
-        <div className="form-group"><label>CHOCH (Change of Character)</label><input type="text" name="choch" value={formData.choch} onChange={handleChange} placeholder="مثلاً: CHOCH نزولی" /></div>
+        <div className="form-group"><label>BOS (Break of Structure)</label><input type="text" name="bos" value={formData.bos} onChange={handleChange} placeholder="مثلاً: BOS صعودی" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>CHOCH (Change of Character)</label><input type="text" name="choch" value={formData.choch} onChange={handleChange} placeholder="مثلاً: CHOCH نزولی" disabled={showLimitWarning} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>MSS (Market Structure Shift)</label><input type="text" name="mss" value={formData.mss} onChange={handleChange} placeholder="مثلاً: MSS تایید شده" /></div>
-        <div className="form-group"><label>Liquidity Sweep</label><input type="text" name="liquidity_sweep" value={formData.liquidity_sweep} onChange={handleChange} placeholder="مثلاً: Sweep High" /></div>
+        <div className="form-group"><label>MSS (Market Structure Shift)</label><input type="text" name="mss" value={formData.mss} onChange={handleChange} placeholder="مثلاً: MSS تایید شده" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>Liquidity Sweep</label><input type="text" name="liquidity_sweep" value={formData.liquidity_sweep} onChange={handleChange} placeholder="مثلاً: Sweep High" disabled={showLimitWarning} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>POI (Point of Interest)</label><input type="text" name="poi" value={formData.poi} onChange={handleChange} placeholder="مثلاً: POI ورود" /></div>
-        <div className="form-group"><label>Demand Zone</label><input type="text" name="demand_zone" value={formData.demand_zone} onChange={handleChange} placeholder="مثلاً: 1.0850-1.0870" /></div>
+        <div className="form-group"><label>POI (Point of Interest)</label><input type="text" name="poi" value={formData.poi} onChange={handleChange} placeholder="مثلاً: POI ورود" disabled={showLimitWarning} /></div>
+        <div className="form-group"><label>Demand Zone</label><input type="text" name="demand_zone" value={formData.demand_zone} onChange={handleChange} placeholder="مثلاً: 1.0850-1.0870" disabled={showLimitWarning} /></div>
       </div>
-      <div className="form-group"><label>Supply Zone</label><input type="text" name="supply_zone" value={formData.supply_zone} onChange={handleChange} placeholder="مثلاً: 1.0920-1.0940" /></div>
+      <div className="form-group"><label>Supply Zone</label><input type="text" name="supply_zone" value={formData.supply_zone} onChange={handleChange} placeholder="مثلاً: 1.0920-1.0940" disabled={showLimitWarning} /></div>
     </div>
   );
 
@@ -517,6 +557,24 @@ const TradeForm = () => {
         <button className="btn-back" onClick={() => navigate('/dashboard')}>↩️ بازگشت</button>
       </div>
 
+      {showLimitWarning && (
+        <div className="limit-warning">
+          <div className="warning-icon">⚠️</div>
+          <div className="warning-content">
+            <h4>محدودیت ترید به پایان رسیده!</h4>
+            <p>
+              شما {subscriptionStatus?.trades_limit || 0} ترید در پلن خود دارید که همه را استفاده کرده‌اید.
+            </p>
+            <button
+              className="btn-upgrade"
+              onClick={() => navigate('/profile')}
+            >
+              🚀 تمدید اشتراک
+            </button>
+          </div>
+        </div>
+      )}
+
       {errors.length > 0 && (
         <div className="validation-errors">
           <span className="error-icon">⚠️</span>
@@ -540,22 +598,28 @@ const TradeForm = () => {
 
         <div className="form-actions">
           {currentStep > 1 && (
-            <button type="button" className="btn-prev" onClick={prevStep}>
+            <button type="button" className="btn-prev" onClick={prevStep} disabled={loading || showLimitWarning}>
               ← قبلی
             </button>
           )}
           {currentStep < 8 && (
-            <button type="button" className="btn-next" onClick={nextStep}>
+            <button type="button" className="btn-next" onClick={nextStep} disabled={loading || showLimitWarning}>
               بعدی →
             </button>
           )}
           {currentStep === 8 && (
-            <button type="submit" className="btn-submit" disabled={loading}>
+            <button type="submit" className="btn-submit" disabled={loading || showLimitWarning}>
               {loading ? 'در حال ثبت...' : '✅ ثبت ترید'}
             </button>
           )}
         </div>
       </form>
+
+      {subscriptionStatus && !showLimitWarning && (
+        <div className="subscription-info">
+          <span>📈 تریدهای باقیمانده: {subscriptionStatus.remaining_trades >= 999999 ? '∞' : subscriptionStatus.remaining_trades}</span>
+        </div>
+      )}
     </div>
   );
 };

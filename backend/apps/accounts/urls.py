@@ -32,11 +32,8 @@ urlpatterns = [
     # مسیرهای پروفایل کاربر (Profile)
     # ============================================
 
-    # دریافت اطلاعات پروفایل
+    # دریافت و ویرایش پروفایل (GET, PUT, PATCH)
     path('profile/', views.ProfileView.as_view(), name='profile'),
-
-    # ویرایش پروفایل
-    path('profile/update/', views.ProfileUpdateView.as_view(), name='profile_update'),
 
     # تغییر رمز عبور
     path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),

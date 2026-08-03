@@ -1,6 +1,16 @@
 // frontend/src/components/reports/reports/ReactionReport.js
 
 import React from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
 
 const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -21,7 +31,6 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const reactionTypes = ['محتاطانه', 'شتابزده', 'آرام', 'هیجانی'];
   const emotionTypes = ['کنترل شده', 'عصبی', 'مصمم', 'ناامید'];
 
-  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const reactionData = reactionTypes.map(reaction => {
     const reactionTrades = trades.filter(t => t.reaction_to_profit === reaction);
     const count = reactionTrades.length;
@@ -32,7 +41,6 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
     return { reaction, count, profit, avgProfit, winRate };
   });
 
-  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const emotionData = emotionTypes.map(emotion => {
     const emotionTrades = trades.filter(t => t.emotion_after_losses === emotion);
     const count = emotionTrades.length;
@@ -40,6 +48,8 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
     const avgNextProfit = count > 0 ? nextProfit / count : 0;
     return { emotion, count, nextProfit, avgNextProfit };
   });
+
+  const chartAxisColor = isDark ? '#ccc' : '#666';
 
   return (
     <div className="report-content-inner">
@@ -50,6 +60,27 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       </div>
 
       <h5>🎭 واکنش به سود</h5>
+      {/* نمودار واکنش به سود */}
+      <div className="chart-wrapper" style={{ margin: '15px 0', height: '200px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={reactionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+            <XAxis dataKey="reaction" stroke={chartAxisColor} />
+            <YAxis stroke={chartAxisColor} />
+            <Tooltip
+              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+              itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود']}
+            />
+            <Bar dataKey="avgProfit" name="میانگین سود">
+              {reactionData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.avgProfit >= 0 ? '#4caf50' : '#f44336'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
       <table className="report-table">
         <thead>
           <tr>
@@ -76,6 +107,27 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       </table>
 
       <h5>🧠 کنترل احساسات پس از ضرر</h5>
+      {/* نمودار کنترل احساسات */}
+      <div className="chart-wrapper" style={{ margin: '15px 0', height: '200px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={emotionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+            <XAxis dataKey="emotion" stroke={chartAxisColor} />
+            <YAxis stroke={chartAxisColor} />
+            <Tooltip
+              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+              itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود ترید بعدی']}
+            />
+            <Bar dataKey="avgNextProfit" name="میانگین سود ترید بعدی">
+              {emotionData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.avgNextProfit >= 0 ? '#4caf50' : '#f44336'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
       <table className="report-table">
         <thead>
           <tr>

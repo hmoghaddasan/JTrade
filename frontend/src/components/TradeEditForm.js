@@ -22,7 +22,7 @@ const TradeEditForm = () => {
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState([]);
 
-  // لیست کامل نمادها
+  // لیست کامل نمادها (همانند قبل)
   const symbols = [
     'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'USDCHF', 'NZDUSD',
     'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY', 'CADJPY', 'CHFJPY', 'NZDJPY',
@@ -96,18 +96,16 @@ const TradeEditForm = () => {
       setLoading(true);
       try {
         const response = await RealApiService.getTrade(id);
-        console.log('📊 Trade loaded:', response.data);
-
-        // ✅ اطمینان از اینکه group_id به درستی تنظیم شده است
         const trade = response.data;
+        console.log('📊 Trade loaded:', trade);
 
-        // اگر group_id وجود ندارد اما group وجود دارد، از group استفاده کن
-        if (!trade.group_id && trade.group) {
-          trade.group_id = trade.group;
+        // ✅ اطمینان از اینکه group به درستی تنظیم شده است
+        // (سرور فیلد group را به عنوان شناسه گروه برمی‌گرداند)
+        if (!trade.group) {
+          console.warn('⚠️ Trade has no group!');
         }
 
         setTradeData(trade);
-        console.log('📊 Trade group_id:', trade.group_id);
         console.log('📊 Trade group:', trade.group);
 
       } catch (error) {
@@ -133,9 +131,11 @@ const TradeEditForm = () => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
       setTradeData(prev => ({ ...prev, [name]: value.toUpperCase() }));
-    } else if (name === 'group_id') {
-      console.log('📁 Group selected:', value);
-      setTradeData(prev => ({ ...prev, [name]: parseInt(value) || value }));
+    } else if (name === 'group') {
+      // ✅ group را به عنوان عدد ذخیره کن
+      const groupId = parseInt(value) || null;
+      console.log('📁 Group selected:', groupId);
+      setTradeData(prev => ({ ...prev, [name]: groupId }));
     } else {
       setTradeData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
@@ -150,7 +150,7 @@ const TradeEditForm = () => {
     if (!tradeData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
     if (!tradeData.trade_date) validationErrors.push('لطفاً تاریخ معامله را وارد کنید');
     if (!tradeData.trade_type) validationErrors.push('لطفاً نوع ترید را انتخاب کنید');
-    if (!tradeData.group_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
+    if (!tradeData.group) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
     if (!tradeData.entry_price || parseFloat(tradeData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید');
     if (!tradeData.close_price || parseFloat(tradeData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید');
     if (tradeData.profit && isNaN(parseFloat(tradeData.profit))) validationErrors.push('مقدار سود/زیان باید عدد باشد');
@@ -175,18 +175,22 @@ const TradeEditForm = () => {
 
     setSaving(true);
     try {
+      // محاسبه روز هفته و ماه
       const date = new Date(tradeData.trade_date);
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       tradeData.day_of_week = days[date.getDay()];
       tradeData.month = date.getMonth() + 1;
 
-      // اطمینان از اینکه group_id عدد است
+      // ✅ داده‌های ارسالی را آماده کن
       const submitData = {
         ...tradeData,
-        group_id: parseInt(tradeData.group_id)
+        // اطمینان از اینکه group به صورت عدد ارسال شود
+        group: parseInt(tradeData.group) || null
       };
 
       console.log('📤 Submitting trade data:', submitData);
+      console.log('📤 Group being sent:', submitData.group);
+
       await RealApiService.updateTrade(id, submitData);
 
       showToast('✅ ترید با موفقیت ویرایش شد!', 'success');
@@ -201,7 +205,16 @@ const TradeEditForm = () => {
       }
     } catch (error) {
       console.error('Error updating trade:', error);
-      showToast('❌ خطا در ذخیره تغییرات', 'error');
+      // نمایش جزئیات خطا از سرور
+      if (error.response && error.response.data) {
+        console.error('Server error details:', error.response.data);
+        const errorMsg = error.response.data.group
+          ? `خطا در فیلد دسته‌بندی: ${error.response.data.group.join(', ')}`
+          : 'خطا در ذخیره تغییرات';
+        showToast(`❌ ${errorMsg}`, 'error');
+      } else {
+        showToast('❌ خطا در ذخیره تغییرات', 'error');
+      }
     } finally {
       setSaving(false);
     }
@@ -244,7 +257,8 @@ const TradeEditForm = () => {
         <div className="form-group">
           <label>نوع ترید</label>
           <select name="trade_type" value={tradeData.trade_type || 'Buy'} onChange={handleChange}>
-            <option value="Buy">خرید (Buy)</option><option value="Sell">فروش (Sell)</option>
+            <option value="Buy">خرید (Buy)</option>
+            <option value="Sell">فروش (Sell)</option>
           </select>
         </div>
       </div>
@@ -252,14 +266,15 @@ const TradeEditForm = () => {
         <div className="form-group">
           <label>نوع جلسه</label>
           <select name="session_type" value={tradeData.session_type || 'High Pro'} onChange={handleChange}>
-            <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
+            <option value="High Pro">حرفه‌ای (High Pro)</option>
+            <option value="Low Pro">مبتدی (Low Pro)</option>
           </select>
         </div>
         <div className="form-group">
           <label>دسته‌بندی <span className="required">*</span></label>
           <select
-            name="group_id"
-            value={tradeData.group_id || ''}
+            name="group"
+            value={tradeData.group || ''}
             onChange={handleChange}
             required
           >
@@ -270,7 +285,7 @@ const TradeEditForm = () => {
               </option>
             ))}
           </select>
-          {!tradeData.group_id && (
+          {!tradeData.group && (
             <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>
           )}
         </div>

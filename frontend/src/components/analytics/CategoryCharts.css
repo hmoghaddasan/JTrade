@@ -1,0 +1,67 @@
+/* frontend/src/components/analytics/CategoryCharts.css */
+
+.category-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-box {
+  background: white;
+  border-radius: 12px;
+  padding: 15px 18px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .chart-box {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.chart-box.full-width {
+  grid-column: 1 / -1;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #1a237e;
+}
+
+.dark .chart-title {
+  color: #7986cb;
+}
+
+.chart-container {
+  width: 100%;
+  height: 280px;
+}
+
+.no-chart-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 14px;
+}
+
+/* ===== واکنش‌گرا ===== */
+@media (max-width: 992px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-box.bar-chart-box,
+  .chart-box.pie-chart-box {
+    grid-column: 1 / -1;
+  }
+}

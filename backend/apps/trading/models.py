@@ -83,7 +83,6 @@ class TradeGroup(models.Model):
         return f"{self.user.phone_number} - {self.group_name}"
 
     def save(self, *args, **kwargs):
-        # اگر این گروه پیش‌فرض است، سایر گروه‌های پیش‌فرض کاربر را غیرفعال کن
         if self.is_default:
             TradeGroup.objects.filter(
                 user=self.user,
@@ -152,7 +151,7 @@ class Trade(models.Model):
     )
     group = models.ForeignKey(
         TradeGroup,
-        on_delete=models.PROTECT,  # جلوگیری از حذف گروهی که ترید دارد
+        on_delete=models.PROTECT,
         related_name='trades',
         verbose_name='گروه'
     )
@@ -373,3 +372,175 @@ class TradeAnalytics(models.Model):
         verbose_name = 'تحلیل ترید'
         verbose_name_plural = 'تحلیل‌های ترید'
         ordering = ['-analysis_date']
+
+
+# ============================================
+# مدل‌های جدید برای AI Validator
+# ============================================
+
+class AIConsultation(models.Model):
+    """
+    مدل ذخیره‌سازی مشاوره‌های AI
+    """
+    DIRECTION_CHOICES = [
+        ('Buy', 'خرید'),
+        ('Sell', 'فروش'),
+    ]
+
+    MARKET_CONDITION_CHOICES = [
+        ('trending', 'رونددار'),
+        ('ranging', 'رنج'),
+        ('neutral', 'خنثی'),
+        ('volatile', 'پرنوسان'),
+    ]
+
+    EMOTION_CHOICES = [
+        ('calm', 'آرام'),
+        ('excited', 'هیجان'),
+        ('fear', 'ترس'),
+        ('greed', 'طمع'),
+        ('patient', 'صبر'),
+        ('stress', 'استرس'),
+        ('confident', 'بااعتمادبه‌نفس'),
+        ('uncertain', 'مردد'),
+    ]
+
+    TRADE_RESULT_CHOICES = [
+        ('win', 'سود'),
+        ('loss', 'زیان'),
+        ('breakeven', 'مساوی'),
+        ('open', 'باز'),
+    ]
+
+    FOLLOW_STATUS_CHOICES = [
+        ('full', 'کاملاً'),
+        ('partial', 'تا حدی'),
+        ('none', 'خیر'),
+    ]
+
+    HELPFULNESS_CHOICES = [
+        ('very_helpful', 'بسیار مفید'),
+        ('somewhat_helpful', 'نسبتاً مفید'),
+        ('little_helpful', 'کم‌فایده'),
+        ('not_helpful', 'بی‌فایده'),
+    ]
+
+    # ===== ارتباطات =====
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ai_consultations')
+    trade = models.ForeignKey('Trade', on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name='ai_consultations')
+
+    # ===== ورودی کاربر =====
+    symbol = models.CharField(max_length=20, db_index=True)
+    direction = models.CharField(max_length=10, choices=DIRECTION_CHOICES)
+    entry_price = models.DecimalField(max_digits=15, decimal_places=5)
+    stop_loss = models.DecimalField(max_digits=15, decimal_places=5, null=True, blank=True)
+    take_profit = models.DecimalField(max_digits=15, decimal_places=5, null=True, blank=True)
+    market_condition = models.CharField(max_length=20, choices=MARKET_CONDITION_CHOICES, null=True, blank=True)
+    emotion = models.CharField(max_length=20, choices=EMOTION_CHOICES, null=True, blank=True)
+    time_ny = models.TimeField(null=True, blank=True, help_text="ساعت به وقت نیویورک")
+    user_question = models.TextField(null=True, blank=True)
+
+    # ===== خروجی AI =====
+    ai_score = models.IntegerField(help_text="امتیاز اعتبار ۰-۱۰۰")
+    ai_response = models.JSONField(default=dict, help_text="تحلیل کامل AI شامل strengths, warnings, suggestion, tip")
+    prompt_used = models.TextField(null=True, blank=True, help_text="پرامپت ارسال‌شده به AI")
+
+    # ===== وضعیت و پیگیری =====
+    is_followed = models.CharField(max_length=10, choices=FOLLOW_STATUS_CHOICES, null=True, blank=True)
+    trade_result = models.CharField(max_length=10, choices=TRADE_RESULT_CHOICES, null=True, blank=True)
+
+    # ===== بازخورد =====
+    feedback_score = models.IntegerField(null=True, blank=True, help_text="امتیاز ۱-۵")
+    feedback_helpfulness = models.CharField(max_length=20, choices=HELPFULNESS_CHOICES, null=True, blank=True)
+    feedback_comment = models.TextField(null=True, blank=True)
+    feedback_given_at = models.DateTimeField(null=True, blank=True)
+
+    # ===== زمان‌ها =====
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'trading_ai_consultation'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'symbol']),
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['ai_score']),
+        ]
+
+    def __str__(self):
+        return f"{self.symbol} - {self.direction} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+    def get_ai_summary(self):
+        """دریافت خلاصه تحلیل AI"""
+        if not self.ai_response:
+            return None
+        return {
+            'score': self.ai_score,
+            'strengths': self.ai_response.get('strengths', []),
+            'warnings': self.ai_response.get('warnings', []),
+            'suggestion': self.ai_response.get('suggestion', ''),
+            'tip': self.ai_response.get('tip', ''),
+        }
+
+    def get_feedback_display(self):
+        """دریافت نمایش خوانا از بازخورد"""
+        if self.feedback_score is None:
+            return None
+        return {
+            'score': self.feedback_score,
+            'helpfulness': dict(self.HELPFULNESS_CHOICES).get(self.feedback_helpfulness, ''),
+            'comment': self.feedback_comment,
+        }
+
+
+class AIPromptVersion(models.Model):
+    """
+    مدل ذخیره‌سازی نسخه‌های مختلف پرامپت برای A/B Testing
+    """
+    VERSION_STATUS = [
+        ('draft', 'پیش‌نویس'),
+        ('active', 'فعال'),
+        ('archived', 'بایگانی'),
+    ]
+
+    version = models.CharField(max_length=20, unique=True)
+    prompt_template = models.TextField()
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=VERSION_STATUS, default='draft')
+    performance_score = models.FloatField(default=0, help_text="امتیاز عملکرد بر اساس بازخوردها")
+    usage_count = models.IntegerField(default=0, help_text="تعداد استفاده از این نسخه")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'trading_ai_prompt_versions'
+        ordering = ['-performance_score']
+
+    def __str__(self):
+        return f"v{self.version} - {self.status} - {self.performance_score}%"
+
+
+class AIConsultationAnalytics(models.Model):
+    """
+    مدل ذخیره‌سازی آمار تحلیلی برای توسعه‌دهنده
+    """
+    date = models.DateField(auto_now_add=True)
+    total_consultations = models.IntegerField(default=0)
+    total_feedback = models.IntegerField(default=0)
+    avg_score = models.FloatField(default=0)
+    avg_feedback_score = models.FloatField(default=0)
+    success_rate = models.FloatField(default=0, help_text="نرخ موفقیت پیشنهادات")
+    most_consulted_symbol = models.CharField(max_length=20, blank=True)
+    most_effective_prompt = models.CharField(max_length=20, blank=True)
+
+    details = models.JSONField(default=dict)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'trading_ai_analytics'
+        ordering = ['-date']

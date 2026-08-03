@@ -1,4 +1,5 @@
 // frontend/src/services/apiService.js
+
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -8,7 +9,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 120000, // ✅ افزایش timeout به ۱۲۰ ثانیه
 });
 
 // ============================================

@@ -27,7 +27,86 @@
   font-size: 24px;
   margin: 0;
 }
+/* frontend/src/components/TradeForm.css و AIConsultation.css */
 
+/* ===== هشدار محدودیت ===== */
+.limit-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #fff3e0;
+  border: 2px solid #f57c00;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.limit-warning .warning-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.limit-warning .warning-content h4 {
+  margin: 0 0 4px 0;
+  color: #e65100;
+  font-size: 16px;
+}
+
+.limit-warning .warning-content p {
+  margin: 0 0 10px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.dark .limit-warning {
+  background: rgba(245, 124, 0, 0.15);
+  border-color: #f57c00;
+}
+
+.dark .limit-warning .warning-content h4 {
+  color: #ffa726;
+}
+
+.dark .limit-warning .warning-content p {
+  color: #aaa;
+}
+
+.btn-upgrade {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #f57c00, #e65100);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.btn-upgrade:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.4);
+}
+
+/* ===== هشدار AI ===== */
+.limit-warning.ai-limit {
+  background: #f3e5f5;
+  border-color: #7b1fa2;
+}
+
+.dark .limit-warning.ai-limit {
+  background: rgba(123, 31, 162, 0.2);
+  border-color: #7b1fa2;
+}
+
+.limit-warning.ai-limit .warning-content h4 {
+  color: #6a1b9a;
+}
+
+.dark .limit-warning.ai-limit .warning-content h4 {
+  color: #ab47bc;
+}
 .btn-back {
   padding: 8px 16px;
   background: var(--border-color);

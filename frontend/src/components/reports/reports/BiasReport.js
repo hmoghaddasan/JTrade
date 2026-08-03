@@ -1,6 +1,19 @@
 // frontend/src/components/reports/reports/BiasReport.js
 
 import React from 'react';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
 
 const BiasReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -48,6 +61,11 @@ const BiasReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const bestBias = data.reduce((best, current) => current.profit > best.profit ? current : best, data[0]);
   const worstBias = data.reduce((worst, current) => current.profit < worst.profit ? current : worst, data[0]);
 
+  // رنگ‌های سازگار با حالت تاریک
+  const COLORS = isDark ? ['#8884d8', '#82ca9d', '#ffc658'] : ['#4caf50', '#f44336', '#ffeb3b'];
+
+  const chartAxisColor = isDark ? '#ccc' : '#666';
+
   return (
     <div className="report-content-inner">
       <div className="report-description">
@@ -78,6 +96,47 @@ const BiasReport = ({ dateRange, selectedCategory, isDark, trades }) => {
           <span className={`summary-value ${totalProfit >= 0 ? 'success' : 'danger'}`}>
             ${totalProfit}
           </span>
+        </div>
+      </div>
+
+      {/* بخش نمودارها */}
+      <div className="chart-wrapper" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', margin: '20px 0' }}>
+        <div style={{ flex: '1 1 300px', height: '250px' }}>
+          <h6 style={{ color: isDark ? '#eee' : '#333' }}>توزیع تعداد تریدها</h6>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={80}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              />
+              <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: isDark ? '#fff' : '#333' }}>{value}</span>} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ flex: '1 1 300px', height: '250px' }}>
+          <h6 style={{ color: isDark ? '#eee' : '#333' }}>سود کل هر Bias</h6>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis dataKey="label" stroke={chartAxisColor} />
+              <YAxis stroke={chartAxisColor} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`$${value}`, 'سود']}
+              />
+              <Bar dataKey="profit" name="سود کل">
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

@@ -1,6 +1,16 @@
 // frontend/src/components/reports/reports/ExecutionQualityReport.js
 
 import React from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
 
 const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -26,7 +36,6 @@ const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades })
     { min: 1, max: 2, label: '۱-۲' }
   ];
 
-  // ✅ اصلاح: استفاده از parseFloat برای جمع عددی
   const data = ranges.map(range => {
     const rangeTrades = trades.filter(t => {
       const score = parseFloat(t.execution_quality_score) || 0;
@@ -42,6 +51,8 @@ const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades })
 
   const totalTrades = data.reduce((sum, item) => sum + item.count, 0);
   const avgQuality = trades.reduce((sum, t) => sum + (parseFloat(t.execution_quality_score) || 0), 0) / trades.length;
+
+  const chartAxisColor = isDark ? '#ccc' : '#666';
 
   return (
     <div className="report-content-inner">
@@ -62,6 +73,28 @@ const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades })
             ${data[0]?.profit || 0}
           </span>
         </div>
+      </div>
+
+      {/* بخش نمودار */}
+      <div className="chart-wrapper" style={{ margin: '20px 0', height: '250px' }}>
+        <h6 style={{ color: isDark ? '#eee' : '#333' }}>میانگین سود در هر سطح کیفیت</h6>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+            <XAxis dataKey="label" stroke={chartAxisColor} />
+            <YAxis stroke={chartAxisColor} />
+            <Tooltip
+              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+              itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود']}
+            />
+            <Bar dataKey="avgProfit" name="میانگین سود">
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.avgProfit >= 0 ? '#4caf50' : '#f44336'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <table className="report-table">

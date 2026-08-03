@@ -236,6 +236,7 @@ const SubscriptionRenewal = () => {
       plan: selectedPlan?.plan_name || 'حرفه‌ای',
       remainingDays: selectedPlan?.duration_days || 30,
       remainingTrades: selectedPlan?.monthly_trades_limit || 50,
+      remainingAiConsultations: selectedPlan?.monthly_ai_consultations_limit || 0,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       isActive: true,
@@ -260,6 +261,8 @@ const SubscriptionRenewal = () => {
         return 'حرفه‌ای';
       case 'vip':
         return 'ویژه (VIP)';
+      case 'admin':
+        return 'مدیریت';
       case 'basic':
       default:
         return 'پایه';
@@ -272,6 +275,8 @@ const SubscriptionRenewal = () => {
         return 'premium';
       case 'vip':
         return 'vip';
+      case 'admin':
+        return 'admin';
       case 'basic':
       default:
         return 'basic';
@@ -345,9 +350,16 @@ const SubscriptionRenewal = () => {
               </span>
             </div>
             <div className="sub-info-item">
-              <span className="sub-label">تریدهای باقیمانده</span>
+              <span className="sub-label">📈 تریدهای باقیمانده</span>
               <span className="sub-value">
                 {(currentSubscription.trades_limit || 0) - (currentSubscription.trades_used || 0)}
+              </span>
+            </div>
+            {/* ✅ مشاوره‌های باقیمانده */}
+            <div className="sub-info-item">
+              <span className="sub-label">🧠 مشاوره‌های باقیمانده</span>
+              <span className="sub-value">
+                {(currentSubscription.ai_consultations_limit || 0) - (currentSubscription.ai_consultations_used || 0)}
               </span>
             </div>
           </div>
@@ -364,11 +376,17 @@ const SubscriptionRenewal = () => {
               <h4 className={`plan-group-title ${getPlanBadge(planType)}`}>
                 {getPlanTypeLabel(planType)}
                 {planType === 'vip' && ' ⭐ ویژه'}
+                {planType === 'admin' && ' 👑 مدیریت'}
               </h4>
               <div className="plan-cards">
                 {planItems.map(plan => {
                   const { discountedPrice, vat, total } = calculateTotal(plan.price);
                   const isSelected = selectedPlan?.id === plan.id;
+
+                  // ✅ نمایش تعداد مشاوره
+                  const aiConsultationsDisplay = plan.monthly_ai_consultations_limit >= 999
+                    ? '♾️ نامحدود'
+                    : `${plan.monthly_ai_consultations_limit} عدد`;
 
                   return (
                     <div
@@ -399,10 +417,13 @@ const SubscriptionRenewal = () => {
                         </div>
                       )}
                       <ul className="plan-features">
-                        <li>✅ {plan.monthly_trades_limit} ترید در ماه</li>
-                        <li>✅ {plan.duration_days} روز اعتبار</li>
+                        <li>📈 {plan.monthly_trades_limit} ترید در ماه</li>
+                        {/* ✅ اضافه شدن خط مشاوره */}
+                        <li>🧠 {aiConsultationsDisplay} مشاوره AI</li>
+                        <li>⏳ {plan.duration_days} روز اعتبار</li>
                         {plan.plan_type === 'professional' && <li>✅ تحلیل ICT پیشرفته</li>}
                         {plan.plan_type === 'vip' && <li>✅ مشاوره اختصاصی</li>}
+                        {plan.plan_type === 'admin' && <li>👑 دسترسی کامل مدیریتی</li>}
                       </ul>
                       {isSelected && (
                         <div className="selected-badge">✓ انتخاب شده</div>
@@ -453,8 +474,17 @@ const SubscriptionRenewal = () => {
                   <span>{selectedPlan.plan_name} - {selectedPlan.duration_days} روز</span>
                 </div>
                 <div className="summary-row">
-                  <span>تعداد ترید</span>
+                  <span>📈 تعداد ترید</span>
                   <span>{selectedPlan.monthly_trades_limit} عدد</span>
+                </div>
+                {/* ✅ اضافه شدن ردیف مشاوره در خلاصه */}
+                <div className="summary-row">
+                  <span>🧠 تعداد مشاوره AI</span>
+                  <span>
+                    {selectedPlan.monthly_ai_consultations_limit >= 999
+                      ? '♾️ نامحدود'
+                      : `${selectedPlan.monthly_ai_consultations_limit} عدد`}
+                  </span>
                 </div>
                 <div className="summary-row">
                   <span>💰 قیمت پایه</span>

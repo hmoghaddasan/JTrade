@@ -13,7 +13,7 @@ urlpatterns = [
     path('currency-pairs/<str:symbol>/', views.CurrencyPairDetailView.as_view(), name='currency_pair_detail'),
 
     # ============================================
-    # گروه‌های ترید - استفاده از کلاس‌های موجود
+    # گروه‌های ترید
     # ============================================
     path('groups/', views.TradeGroupListCreateView.as_view(), name='trade_groups'),
     path('groups/<int:pk>/', views.TradeGroupDetailView.as_view(), name='trade_group_detail'),
@@ -40,4 +40,29 @@ urlpatterns = [
     path('reports/mistakes/', views.MistakesReportView.as_view(), name='mistakes_report'),
     path('reports/bias/', views.BiasReportView.as_view(), name='bias_report'),
     path('reports/timeframe/', views.TimeframeReportView.as_view(), name='timeframe_report'),
+    path('symbols/', views.SymbolListView.as_view(), name='symbols'),
+    # ============================================
+    # تحلیل دسته‌بندی شده
+    # ============================================
+    path('analytics/', views.AnalyticsView.as_view(), name='analytics'),
+
+    # ============================================
+    # مشاوره AI (غیراستریم)
+    # ============================================
+    path('ai/consult/', views.AIConsultationView.as_view(), name='ai_consult'),
+    path('ai/history/', views.AIConsultationHistoryView.as_view(), name='ai_history'),
+    path('ai/history/<int:pk>/', views.AIConsultationDetailView.as_view(), name='ai_detail'),
+    path('ai/feedback/<int:pk>/', views.AIConsultationFeedbackView.as_view(), name='ai_feedback'),
+
+    # ============================================
+    # مشاوره AI با استریم (جدید)
+    # ============================================
+    path('ai/consult/stream/', views.AIConsultationStreamView.as_view(), name='ai_consult_stream'),
+
+    # ============================================
+    # مدیریت AI (فقط ادمین)
+    # ============================================
+    path('admin/ai/dashboard/', views.AIAnalyticsDashboardView.as_view(), name='ai_dashboard'),
+    path('admin/ai/prompts/', views.AIPromptVersionView.as_view(), name='ai_prompts'),
+    path('admin/ai/prompts/<int:pk>/', views.AIPromptVersionDetailView.as_view(), name='ai_prompt_detail'),
 ]

@@ -9,4 +9,8 @@ class AccountsConfig(AppConfig):
     verbose_name = 'مدیریت کاربران'
 
     def ready(self):
+        """
+        بارگذاری سیگنال‌ها هنگام راه‌اندازی اپلیکیشن
+        این متد باعث می‌شود سیگنال‌های موجود در signals.py فعال شوند
+        """
         import apps.accounts.signals

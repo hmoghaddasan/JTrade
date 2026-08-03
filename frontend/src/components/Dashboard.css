@@ -109,11 +109,11 @@
 }
 
 /* ============================================
-   Quick Actions
+   Quick Actions – ۶ دکمه
    ============================================ */
 .quick-actions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
   padding: 16px 24px;
   background: var(--bg-secondary);
@@ -146,20 +146,67 @@
   font-size: 20px;
 }
 
+/* ===== پالت رنگی دکمه‌ها ===== */
 .quick-actions .action-btn.primary {
   background: linear-gradient(135deg, #1a237e, #0d47a1);
 }
+.quick-actions .action-btn.primary:hover {
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.5);
+}
 
 .quick-actions .action-btn.secondary {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  background: linear-gradient(135deg, #00897b, #00695c);
+}
+.quick-actions .action-btn.secondary:hover {
+  box-shadow: 0 4px 12px rgba(0, 105, 92, 0.5);
+}
+
+.quick-actions .action-btn.success {
+  background: linear-gradient(135deg, #7b1fa2, #4a148c);
+}
+.quick-actions .action-btn.success:hover {
+  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
 }
 
 .quick-actions .action-btn.warning {
   background: linear-gradient(135deg, #f57f17, #e65100);
 }
+.quick-actions .action-btn.warning:hover {
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5);
+}
+
+.quick-actions .action-btn.ai {
+  background: linear-gradient(135deg, #6a1b9a, #4a148c);
+}
+.quick-actions .action-btn.ai:hover {
+  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
+}
 
 .quick-actions .action-btn.info {
-  background: linear-gradient(135deg, #00695c, #004d40);
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+}
+.quick-actions .action-btn.info:hover {
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.5);
+}
+
+/* ===== حالت تاریک ===== */
+.dark-theme .quick-actions .action-btn.primary {
+  background: linear-gradient(135deg, #3949ab, #1a237e);
+}
+.dark-theme .quick-actions .action-btn.secondary {
+  background: linear-gradient(135deg, #26a69a, #00897b);
+}
+.dark-theme .quick-actions .action-btn.success {
+  background: linear-gradient(135deg, #ab47bc, #7b1fa2);
+}
+.dark-theme .quick-actions .action-btn.warning {
+  background: linear-gradient(135deg, #ffa726, #f57f17);
+}
+.dark-theme .quick-actions .action-btn.ai {
+  background: linear-gradient(135deg, #ab47bc, #6a1b9a);
+}
+.dark-theme .quick-actions .action-btn.info {
+  background: linear-gradient(135deg, #43a047, #2e7d32);
 }
 
 /* ============================================
@@ -656,11 +703,11 @@
 }
 
 /* ============================================
-   Stats Cards
+   Stats Cards – ۵ ستون
    ============================================ */
 .stats-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
   padding: 16px 24px;
   background: var(--bg-secondary);
@@ -708,8 +755,32 @@
   color: #2e7d32;
 }
 
+.stats-cards .stat-value.danger {
+  color: #c62828;
+}
+
+.stats-cards .stat-value.trial {
+  color: #6a1b9a;
+}
+
+.stats-cards .stat-value.inactive {
+  color: #888;
+}
+
 .dark-theme .stats-cards .stat-value.active {
   color: #4caf50;
+}
+
+.dark-theme .stats-cards .stat-value.danger {
+  color: #ef5350;
+}
+
+.dark-theme .stats-cards .stat-value.trial {
+  color: #ab47bc;
+}
+
+.dark-theme .stats-cards .stat-value.inactive {
+  color: #999;
 }
 
 /* ============================================
@@ -947,11 +1018,11 @@
   }
 
   .stats-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .quick-actions {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -995,13 +1066,13 @@
   }
 
   .stats-cards {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     padding: 12px 16px;
     gap: 10px;
   }
 
   .quick-actions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     padding: 12px 16px;
     gap: 8px;
   }

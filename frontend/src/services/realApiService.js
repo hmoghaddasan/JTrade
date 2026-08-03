@@ -191,26 +191,35 @@ class RealApiService {
   }
 
   // ============================================
-  // ✅ اشتراک و پرداخت (نیاز به توکن دارد) - اصلاح شده
+  // جفت ارزها (Currency Pairs) – ✅ اضافه شد
   // ============================================
 
-  // دریافت وضعیت اشتراک
+async getCurrencyPairs(params = {}) {
+  // ✅ افزایش page_size برای دریافت تمام نمادها
+  const defaultParams = { page_size: 1000, ...params };
+  return this.request('/trading/currency-pairs/', { params: defaultParams });
+}
+async getAllSymbols() {
+  return this.request('/trading/symbols/');
+}
+
+  // ============================================
+  // اشتراک و پرداخت (نیاز به توکن دارد)
+  // ============================================
+
   async getSubscriptionStatus() {
     return this.request('/subscription/status/');
   }
 
-  // دریافت اشتراک کاربر
   async getUserSubscription() {
     return this.request('/subscription/current/');
   }
 
-  // ✅ دریافت پلن‌های اشتراک (اصلاح نام متد)
   async getPlans() {
     console.log('📤 Getting subscription plans...');
     return this.request('/subscription/plans/');
   }
 
-  // ✅ خرید اشتراک (اصلاح نام متد)
   async purchaseSubscription(planId, discountCode = '') {
     return this.request('/subscription/purchase/', {
       method: 'POST',
@@ -221,7 +230,6 @@ class RealApiService {
     });
   }
 
-  // ✅ اعتبارسنجی کد تخفیف (اصلاح نام متد)
   async validateDiscount(code, planId = null) {
     return this.request('/subscription/discount/validate/', {
       method: 'POST',
@@ -232,7 +240,6 @@ class RealApiService {
     });
   }
 
-  // ✅ تایید پرداخت
   async verifyPayment(authority, status, subscriptionId) {
     return this.request('/subscription/verify-payment/', {
       method: 'GET',

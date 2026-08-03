@@ -206,13 +206,32 @@ class RegisterUserView(APIView):
                 user.email = email
             user.save()
 
-            # ایجاد اشتراک آزمایشی
+            # ============================================
+            # ✅ ایجاد اشتراک آزمایشی
+            # ============================================
             trial_days = SystemSetting.get_setting('trial_days', 7)
+            try:
+                trial_days = int(trial_days)
+            except (ValueError, TypeError):
+                trial_days = 7
+
+            # ابتدا پلن حرفه‌ای با مدت زمان مشخص را بررسی کن
             trial_plan = SubscriptionPlan.objects.filter(
                 plan_type='professional',
                 duration_days=trial_days,
                 is_active=True
             ).first()
+
+            # اگر پلن حرفه‌ای با مدت مشخص وجود نداشت، از پلن پایه استفاده کن
+            if not trial_plan:
+                trial_plan = SubscriptionPlan.objects.filter(
+                    plan_type='basic',
+                    is_active=True
+                ).first()
+
+            # اگر هیچ پلنی وجود نداشت، اولین پلن فعال را بگیر
+            if not trial_plan:
+                trial_plan = SubscriptionPlan.objects.filter(is_active=True).first()
 
             if trial_plan:
                 existing_trial = UserSubscription.objects.filter(
@@ -230,10 +249,12 @@ class RegisterUserView(APIView):
                         is_active=True,
                         trades_used=0,
                         trades_limit=trial_plan.monthly_trades_limit,
+                        ai_consultations_limit=trial_plan.monthly_ai_consultations_limit,  # ✅ اضافه شد
                         is_trial=True,
                         payment_status='paid',
                         amount_paid=0
                     )
+                    logger.info(f"✅ Trial subscription created for user {user.phone_number} in RegisterUserView")
 
             # تولید توکن
             refresh = RefreshToken.for_user(user)
@@ -346,26 +367,29 @@ class TokenRefreshView(TokenRefreshView):
 
 
 # ============================================
-# پروفایل کاربر
+# پروفایل کاربر – با PUT و PATCH
 # ============================================
 class ProfileView(APIView):
-    """مشاهده پروفایل کاربر"""
+    """مشاهده و ویرایش پروفایل کاربر"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
 
-
-class ProfileUpdateView(APIView):
-    """ویرایش پروفایل کاربر"""
-    permission_classes = [IsAuthenticated]
-
     def put(self, request):
+        """به‌روزرسانی کامل پروفایل"""
+        return self._update_profile(request, partial=False)
+
+    def patch(self, request):
+        """به‌روزرسانی جزئی پروفایل"""
+        return self._update_profile(request, partial=True)
+
+    def _update_profile(self, request, partial=False):
         serializer = UserProfileUpdateSerializer(
             request.user,
             data=request.data,
-            partial=True
+            partial=partial
         )
         if serializer.is_valid():
             serializer.save()
@@ -518,12 +542,15 @@ class SubscriptionStatusView(APIView):
                 'is_near_expiry': False,
                 'remaining_days': 36500,
                 'remaining_trades': 99999,
+                'remaining_ai_consultations': 99999,
                 'plan_name': 'ادمین',
                 'plan_type': 'admin',
                 'start_date': timezone.now(),
                 'end_date': timezone.now() + timezone.timedelta(days=36500),
                 'trades_limit': 99999,
                 'trades_used': 0,
+                'ai_consultations_limit': 99999,
+                'ai_consultations_used': 0,
                 'is_trial': False,
                 'payment_status': 'paid',
                 'is_admin': True,
@@ -544,6 +571,7 @@ class SubscriptionStatusView(APIView):
 
         remaining_days = subscription.get_remaining_days()
         remaining_trades = subscription.get_remaining_trades()
+        remaining_ai = subscription.get_remaining_ai_consultations()
 
         is_expired = subscription.end_date < timezone.now()
         is_active = subscription.is_active and not is_expired
@@ -558,12 +586,15 @@ class SubscriptionStatusView(APIView):
             'is_near_expiry': is_near_expiry,
             'remaining_days': remaining_days,
             'remaining_trades': remaining_trades,
+            'remaining_ai_consultations': remaining_ai,
             'plan_name': subscription.plan.plan_name,
             'plan_type': subscription.plan.plan_type,
             'start_date': subscription.start_date,
             'end_date': subscription.end_date,
             'trades_limit': subscription.trades_limit,
             'trades_used': subscription.trades_used,
+            'ai_consultations_limit': subscription.ai_consultations_limit,
+            'ai_consultations_used': subscription.ai_consultations_used,
             'is_trial': subscription.is_trial,
             'payment_status': subscription.payment_status,
             'is_admin': False

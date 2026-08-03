@@ -1,6 +1,16 @@
 // frontend/src/components/reports/reports/PnLReport.js
 
 import React from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
 
 const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -53,6 +63,8 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   const bestSymbol = data.length > 0 ? data[0] : null;
   const worstSymbol = data.length > 0 ? data[data.length - 1] : null;
 
+  const chartAxisColor = isDark ? '#ccc' : '#666';
+
   return (
     <div className="report-content-inner">
       <div className="report-description">
@@ -95,6 +107,28 @@ const PnLReport = ({ dateRange, selectedCategory, isDark, trades }) => {
             {overallProfitFactor === Infinity ? '∞' : overallProfitFactor.toFixed(2)}
           </span>
         </div>
+      </div>
+
+      {/* بخش نمودار */}
+      <div className="chart-wrapper" style={{ margin: '20px 0', height: '300px' }}>
+        <h6 style={{ color: isDark ? '#eee' : '#333' }}>سود/زیان هر نماد</h6>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+            <XAxis dataKey="symbol" stroke={chartAxisColor} />
+            <YAxis stroke={chartAxisColor} />
+            <Tooltip
+              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+              itemStyle={{ color: isDark ? '#fff' : '#333' }}
+              formatter={(value) => [`$${value}`, 'سود/زیان']}
+            />
+            <Bar dataKey="profit" name="سود/زیان">
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <table className="report-table">

@@ -51,6 +51,13 @@ const TradeList = () => {
 
         const tradesResponse = await RealApiService.getTrades();
         const tradesData = tradesResponse.data.results || tradesResponse.data || [];
+        console.log('📊 Trades loaded:', tradesData.length);
+        // لاگ برای بررسی وجود فیلدها
+        if (tradesData.length > 0) {
+          console.log('🔍 Sample trade fields:', Object.keys(tradesData[0]));
+          console.log('📊 risk_reward_ratio:', tradesData[0].risk_reward_ratio);
+          console.log('📊 execution_quality_score:', tradesData[0].execution_quality_score);
+        }
         setTrades(tradesData);
 
       } catch (error) {
@@ -153,9 +160,6 @@ const TradeList = () => {
     setCurrentPage(1);
   };
 
-  // ============================================
-  // ✅ مشاهده جزئیات - استفاده از navigate با مسیر کامل
-  // ============================================
   const handleViewDetails = (tradeId) => {
     if (!tradeId) {
       showToast('شناسه ترید معتبر نیست', 'error');
@@ -164,9 +168,6 @@ const TradeList = () => {
     navigate(`/trades/${tradeId}`);
   };
 
-  // ============================================
-  // ویرایش
-  // ============================================
   const handleEditTrade = (tradeId) => {
     if (!tradeId) {
       showToast('شناسه ترید معتبر نیست', 'error');
@@ -177,9 +178,6 @@ const TradeList = () => {
     navigate(`/trades/edit/${tradeId}`);
   };
 
-  // ============================================
-  // حذف
-  // ============================================
   const handleDelete = async (tradeId) => {
     if (!window.confirm('آیا از حذف این ترید اطمینان دارید؟')) return;
 
@@ -194,7 +192,7 @@ const TradeList = () => {
   };
 
   // ============================================
-  // ✅ چاپ لیست تریدها
+  // چاپ لیست کامل
   // ============================================
   const handlePrintList = () => {
     if (filteredTrades.length === 0) {
@@ -223,6 +221,8 @@ const TradeList = () => {
           </td>
           <td>${trade.risk_reward_ratio || '-'}</td>
           <td>${trade.execution_quality_score || '-'}/10</td>
+          <td>${trade.bias || '-'}</td>
+          <td>${trade.strategy_type || '-'}</td>
         </tr>
       `;
     });
@@ -266,18 +266,18 @@ const TradeList = () => {
           table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 11px;
             margin-top: 10px;
           }
           th {
             background: #1a237e;
             color: white;
-            padding: 8px 10px;
+            padding: 6px 8px;
             text-align: center;
             font-weight: 600;
           }
           td {
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-bottom: 1px solid #e8ecf4;
             text-align: center;
           }
@@ -356,6 +356,8 @@ const TradeList = () => {
               <th>سود/زیان</th>
               <th>R:R</th>
               <th>کیفیت</th>
+              <th>بایاس</th>
+              <th>استراتژی</th>
             </tr>
           </thead>
           <tbody>
@@ -377,7 +379,7 @@ const TradeList = () => {
   };
 
   // ============================================
-  // ✅ خروجی اکسل لیست تریدها
+  // خروجی اکسل کامل (تمام فیلدهای مهم)
   // ============================================
   const handleExportExcel = () => {
     if (filteredTrades.length === 0) {
@@ -387,9 +389,19 @@ const TradeList = () => {
 
     const BOM = '\uFEFF';
     const headers = [
-      'تاریخ', 'نماد', 'نوع', 'دسته‌بندی', 'قیمت ورود', 'قیمت خروج',
-      'سود/زیان', 'حد خورده', 'نسبت R:R', 'کیفیت اجرا', 'بایاس', 'استراتژی',
-      'کیفیت خواب', 'احساس غالب', 'نوع جلسه'
+      'تاریخ', 'نماد', 'نوع', 'دسته‌بندی',
+      'قیمت ورود', 'قیمت خروج', 'حد ضرر', 'حد سود TP1', 'حد سود TP2', 'حد سود TP3',
+      'سود/زیان', 'حد خورده شده', 'نسبت R:R', 'ریسک (دلار)', 'درصد ریسک',
+      'بایاس', 'نوع استراتژی', 'مدل ورودی',
+      'کیفیت اجرا', 'نوع جلسه', 'ساعت (نیویورک)',
+      'کیفیت خواب', 'تغذیه مناسب', 'احساس غالب',
+      'استرس قبل معامله', 'کنترل هیجان هنگام ورود', 'واکنش به سود', 'مدیریت انتظار',
+      'SMT تایید شد', 'سطوح کلیدی بررسی شد', 'حمایت BOND/DXY',
+      'اخبار هفتگی چاپ شد', 'ساعت صفر مشخص شد', 'رنج آسیا مشخص شد',
+      'رنج لندن مشخص شد', 'Judas LO مشخص شد',
+      'کد اشتباه', 'وزن اشتباه',
+      'پایبندی به حد ضرر', 'پایبندی به استراتژی', 'پایبندی به مدیریت سرمایه', 'اورترید',
+      'FVG', 'Order Block', 'BOS', 'CHOCH', 'MSS', 'Liquidity Sweep', 'POI', 'Demand Zone', 'Supply Zone'
     ];
 
     let csvContent = BOM + headers.join(',') + '\n';
@@ -402,15 +414,51 @@ const TradeList = () => {
         getCategoryName(trade.group || trade.group_id),
         trade.entry_price || '',
         trade.close_price || '',
+        trade.stop_loss || '',
+        trade.take_profit_1 || '',
+        trade.take_profit_2 || '',
+        trade.take_profit_3 || '',
         parseFloat(trade.profit) || 0,
         trade.tp_sl_hit || '',
         trade.risk_reward_ratio || '',
-        trade.execution_quality_score || '',
+        trade.risk_usd || '0',
+        trade.risk_percent || '0',
         trade.bias || '',
         trade.strategy_type || '',
+        trade.retirement_model || '',
+        trade.execution_quality_score || '',
+        trade.session_type || '',
+        trade.time_ny || '',
         trade.sleep_quality || '',
+        trade.food_status ? 'بله' : 'خیر',
         trade.dominant_feeling || '',
-        trade.session_type || ''
+        trade.pre_trade_stress || '',
+        trade.entry_emotion_control || '',
+        trade.reaction_to_profit || '',
+        trade.expectation_management || '',
+        trade.smt_confirmed ? 'بله' : 'خیر',
+        trade.key_levels_reviewed ? 'بله' : 'خیر',
+        trade.bond_dxy_support ? 'بله' : 'خیر',
+        trade.weekly_news_printed ? 'بله' : 'خیر',
+        trade.zero_hour_identified ? 'بله' : 'خیر',
+        trade.asian_range_identified ? 'بله' : 'خیر',
+        trade.london_range_identified ? 'بله' : 'خیر',
+        trade.judas_lo_identified ? 'بله' : 'خیر',
+        trade.mistake_code || '',
+        trade.mistake_weight || '',
+        trade.stop_loss_adherence ? 'بله' : 'خیر',
+        trade.strategy_adherence ? 'بله' : 'خیر',
+        trade.capital_management_adherence ? 'بله' : 'خیر',
+        trade.over_trade ? 'بله' : 'خیر',
+        trade.fvg || '',
+        trade.order_block || '',
+        trade.bos || '',
+        trade.choch || '',
+        trade.mss || '',
+        trade.liquidity_sweep || '',
+        trade.poi || '',
+        trade.demand_zone || '',
+        trade.supply_zone || ''
       ];
       csvContent += row.join(',') + '\n';
     });
@@ -421,7 +469,7 @@ const TradeList = () => {
     link.download = `trades_export_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-    showToast('✅ خروجی اکسل با موفقیت دانلود شد', 'success');
+    showToast('✅ خروجی اکسل کامل با موفقیت دانلود شد', 'success');
   };
 
   // ============================================
@@ -465,7 +513,7 @@ const TradeList = () => {
           <button className="btn-print-list" onClick={handlePrintList} title="چاپ لیست تریدها">
             🖨️ چاپ
           </button>
-          <button className="btn-excel-list" onClick={handleExportExcel} title="خروجی اکسل">
+          <button className="btn-excel-list" onClick={handleExportExcel} title="خروجی اکسل کامل">
             📄 اکسل
           </button>
           <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
@@ -634,7 +682,6 @@ const TradeList = () => {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        {/* ✅ کلید مشاهده جزئیات */}
                         <button
                           className="btn-view"
                           onClick={(e) => {
