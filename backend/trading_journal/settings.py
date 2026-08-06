@@ -17,7 +17,7 @@ try:
     from dotenv import load_dotenv
     load_dotenv(os.path.join(BASE_DIR, '.env'))
 except ImportError:
-    pass  # اگر dotenv نصب نبود، از متغیرهای سیستم استفاده کن
+    pass
 
 # ============================================
 # کلیدهای امنیتی و تنظیمات پایه
@@ -31,12 +31,12 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').s
 # ============================================
 # تنظیمات دوره آزمایشی
 # ============================================
-TRIAL_DAYS = 7  # تعداد روزهای آزمایشی
-TRIAL_TRADES_LIMIT = 10  # محدودیت ترید در دوره آزمایشی
-TRIAL_AI_CONSULTATIONS_LIMIT = 5  # محدودیت مشاوره AI در دوره آزمایشی
+TRIAL_DAYS = 7
+TRIAL_TRADES_LIMIT = 10
+TRIAL_AI_CONSULTATIONS_LIMIT = 5
 
 # ============================================
-# تنظیمات لاگ - اصلاح شده برای پشتیبانی از یونیکد
+# ✅ تنظیمات لاگ - اصلاح شده برای فیلتر کردن خطاهای 404
 # ============================================
 LOGGING = {
     'version': 1,
@@ -74,6 +74,17 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        # ✅ اضافه شده: فیلتر کردن خطاهای 404 و درخواست‌های غیرمجاز
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',  # فقط خطاهای جدی (5xx) را نشان بده
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
         'apps': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
@@ -92,13 +103,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # پکیج‌های شخص ثالث
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-
-    # اپلیکیشن‌های پروژه
     'apps.accounts',
     'apps.trading',
     'apps.subscriptions',
@@ -198,6 +205,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+# ============================================
+# ✅ تنظیمات مدیا (آپلود فایل)
+# ============================================
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -208,6 +218,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ============================================
 OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434/api/generate')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3.1:8b')
+OLLAMA_AVAILABLE_MODELS = os.environ.get('OLLAMA_AVAILABLE_MODELS', 'llama3.1:8b,mistral:7b,deepseek-r1:7b')
 
 # ============================================
 # تنظیمات CORS
@@ -220,7 +231,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
-
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
@@ -301,8 +311,30 @@ SMS_API_KEY = os.environ.get('SMS_API_KEY', '')
 SMS_SENDER_NUMBER = os.environ.get('SMS_SENDER_NUMBER', '3000****')
 SMS_OTP_TEMPLATE = os.environ.get('SMS_OTP_TEMPLATE', 'verifycode')
 SMS_ENABLED = bool(SMS_API_KEY)
-
 ADMIN_PHONE_NUMBER = os.environ.get('ADMIN_PHONE_NUMBER', '09155511393')
+
+# ============================================
+# تنظیمات سرویس‌های قیمت لحظه‌ای
+# ============================================
+LIVE_PRICE_PROVIDER = os.environ.get('LIVE_PRICE_PROVIDER', 'none')
+TWELVEDATA_API_KEY = os.environ.get('TWELVEDATA_API_KEY', '')
+TWELVEDATA_BASE_URL = os.environ.get('TWELVEDATA_BASE_URL', 'https://api.twelvedata.com')
+FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
+FINNHUB_BASE_URL = os.environ.get('FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
+ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY', '')
+
+# ============================================
+# ✅ تنظیمات آپلود تصویر (جدید)
+# ============================================
+# حداکثر ابعاد تصویر (پیکسل)
+MAX_IMAGE_WIDTH = int(os.environ.get('MAX_IMAGE_WIDTH', 2000))
+MAX_IMAGE_HEIGHT = int(os.environ.get('MAX_IMAGE_HEIGHT', 2000))
+# کیفیت تصویر (۱-۱۰۰)
+IMAGE_QUALITY = int(os.environ.get('IMAGE_QUALITY', 85))
+# حداکثر حجم فایل (مگابایت)
+MAX_IMAGE_SIZE_MB = int(os.environ.get('MAX_IMAGE_SIZE_MB', 5))
+# نمایش/مخفی‌سازی بخش آپلود تصویر در فرم ثبت ترید
+SHOW_SCREENSHOT_UPLOAD = os.environ.get('SHOW_SCREENSHOT_UPLOAD', 'True') == 'True'
 
 # ============================================
 # تنظیمات امنیتی اضافی (برای محیط تولید)
@@ -327,8 +359,3 @@ if not DEBUG:
             'django.template.loaders.app_directories.Loader',
         ]),
     ]
-
-# ============================================
-# ✅ تنظیمات Alpha Vantage (قیمت لحظه‌ای) – اصلاح‌شده
-# ============================================
-ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY', '')

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
+import RulesManager from './rules/RulesManager';
 import './Profile.css';
 
 const Profile = () => {
@@ -27,6 +28,7 @@ const Profile = () => {
   const [trades, setTrades] = useState([]);
   const [appVersions, setAppVersions] = useState([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
+  const [activeProfileTab, setActiveProfileTab] = useState('info'); // 'info' | 'rules'
   const [subscription, setSubscription] = useState({
     plan: 'آزمایشی',
     remainingDays: 7,
@@ -55,7 +57,6 @@ const Profile = () => {
       });
     }
 
-    // ✅ دریافت تریدها از سرور
     const fetchTrades = async () => {
       try {
         const response = await RealApiService.getTrades();
@@ -70,14 +71,12 @@ const Profile = () => {
       }
     };
 
-    // ✅ دریافت اشتراک از سرور
     const fetchSubscription = async () => {
       try {
         const response = await RealApiService.getSubscriptionStatus();
         const data = response.data;
         console.log('📊 Subscription from server:', data);
 
-        // بررسی اینکه آیا کاربر ادمین است
         const isAdmin = user?.is_admin || data.plan_type === 'admin';
 
         if (isAdmin) {
@@ -118,7 +117,6 @@ const Profile = () => {
             isTrial: data.is_trial || false,
           });
         } else {
-          // کاربر اشتراک ندارد
           console.log('ℹ️ کاربر اشتراک فعال ندارد');
           setSubscription(prev => ({
             ...prev,
@@ -135,7 +133,6 @@ const Profile = () => {
         }
       } catch (error) {
         console.error('Error fetching subscription from server:', error);
-        // در صورت خطا، وضعیت پیش‌فرض را نگه می‌داریم
       }
     };
 
@@ -247,6 +244,26 @@ const Profile = () => {
   };
 
   // ============================================
+  // رندر تب‌های پروفایل
+  // ============================================
+  const renderProfileTabs = () => (
+    <div className="profile-tabs">
+      <button
+        className={`profile-tab-btn ${activeProfileTab === 'info' ? 'active' : ''}`}
+        onClick={() => setActiveProfileTab('info')}
+      >
+        👤 اطلاعات شخصی
+      </button>
+      <button
+        className={`profile-tab-btn ${activeProfileTab === 'rules' ? 'active' : ''}`}
+        onClick={() => setActiveProfileTab('rules')}
+      >
+        📋 قوانین معاملاتی
+      </button>
+    </div>
+  );
+
+  // ============================================
   // محاسبه آمار
   // ============================================
   const totalTrades = trades.length;
@@ -265,14 +282,14 @@ const Profile = () => {
     return new Date(t.trade_date) >= weekAgo;
   }).length;
 
-  // ============================================
-  // تابع کمکی برای نمایش مقدار ∞ یا عدد
-  // ============================================
   const formatLimit = (value) => {
     if (value === '♾️' || value === Infinity || value === 999999) return '♾️';
     return value;
   };
 
+  // ============================================
+  // رندر اصلی
+  // ============================================
   return (
     <div className={`profile-container ${isDark ? 'dark' : 'light'}`}>
       <div className="profile-header">
@@ -282,270 +299,280 @@ const Profile = () => {
         </button>
       </div>
 
+      {renderProfileTabs()}
+
       <div className="profile-content">
-        {/* اطلاعات شخصی */}
-        <div className="profile-card">
-          <div className="card-header">
-            <h3>📋 اطلاعات شخصی</h3>
-            <div className="card-actions">
+        {/* تب اطلاعات شخصی */}
+        {activeProfileTab === 'info' && (
+          <>
+            {/* اطلاعات شخصی */}
+            <div className="profile-card">
+              <div className="card-header">
+                <h3>📋 اطلاعات شخصی</h3>
+                <div className="card-actions">
+                  <button
+                    className="btn-edit"
+                    onClick={() => setEditMode(!editMode)}
+                  >
+                    {editMode ? '❌ لغو' : '✏️ ویرایش'}
+                  </button>
+                </div>
+              </div>
+
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>شماره تلفن</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      disabled
+                      className="disabled-input"
+                    />
+                    <span className="field-hint">شماره تلفن قابل تغییر نیست</span>
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>نام</label>
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleChange}
+                      disabled={!editMode || loading}
+                      className={!editMode ? 'disabled-input' : ''}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>نام خانوادگی</label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      disabled={!editMode || loading}
+                      className={!editMode ? 'disabled-input' : ''}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>ایمیل</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={!editMode || loading}
+                    className={!editMode ? 'disabled-input' : ''}
+                    placeholder="example@email.com"
+                  />
+                </div>
+
+                {editMode && (
+                  <button type="submit" className="btn-save" disabled={loading}>
+                    {loading ? 'در حال ذخیره...' : '💾 ذخیره تغییرات'}
+                  </button>
+                )}
+              </form>
+            </div>
+
+            {/* آمار سریع */}
+            <div className="profile-card">
+              <div className="card-header">
+                <h3>📊 آمار سریع</h3>
+              </div>
+
+              <div className="quick-stats">
+                <div className="stat-item"><span className="stat-icon">📈</span><div><span className="stat-label">کل تریدها</span><span className="stat-value">{totalTrades}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">✅</span><div><span className="stat-label">تریدهای برنده</span><span className="stat-value success">{winningTrades}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">❌</span><div><span className="stat-label">تریدهای بازنده</span><span className="stat-value danger">{losingTrades}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">📊</span><div><span className="stat-label">نرخ برد</span><span className="stat-value">{winRate}%</span></div></div>
+                <div className="stat-item"><span className="stat-icon">💰</span><div><span className="stat-label">سود کل</span><span className={`stat-value ${totalProfit >= 0 ? 'success' : 'danger'}`}>${totalProfit}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">📏</span><div><span className="stat-label">میانگین سود</span><span className="stat-value">${avgProfit}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">🏆</span><div><span className="stat-label">بهترین ترید</span><span className="stat-value success">+${bestTrade}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">📉</span><div><span className="stat-label">بدترین ترید</span><span className="stat-value danger">${worstTrade}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">📅</span><div><span className="stat-label">تریدهای امروز</span><span className="stat-value">{todayTrades}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">📆</span><div><span className="stat-label">تریدهای این هفته</span><span className="stat-value">{thisWeekTrades}</span></div></div>
+                <div className="stat-item"><span className="stat-icon">🧠</span><div><span className="stat-label">مشاوره‌های استفاده شده</span><span className="stat-value">{subscription.aiConsultationsUsed || 0}</span></div></div>
+              </div>
+            </div>
+
+            {/* اطلاعات اشتراک */}
+            <div className="profile-card">
+              <div className="card-header">
+                <h3>📊 اطلاعات اشتراک</h3>
+                {subscription.isTrial && (
+                  <span className="expiry-badge trial-badge" style={{ background: '#6a1b9a', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                    🔬 آزمایشی
+                  </span>
+                )}
+                {user?.is_admin && (
+                  <span className="expiry-badge admin-badge" style={{ background: '#1a237e', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                    👑 مدیر
+                  </span>
+                )}
+                {!user?.is_admin && !subscription.isTrial && subscription.isExpired && (
+                  <span className="expiry-badge">⏰ منقضی شده</span>
+                )}
+                {!user?.is_admin && !subscription.isTrial && !subscription.isExpired && subscription.remainingDays <= 3 && subscription.remainingDays !== '♾️' && (
+                  <span className="expiry-badge warning">⚠️ در حال اتمام</span>
+                )}
+              </div>
+
+              <div className="subscription-info">
+                <div className="sub-item">
+                  <span className="sub-label">نوع پلن</span>
+                  <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isTrial ? 'trial' : subscription.plan === 'حرفه‌ای' ? 'premium' : subscription.plan === 'بدون اشتراک' ? 'danger' : ''}`}>
+                    {user?.is_admin ? '👑 ادمین (نامحدود)' : subscription.isTrial ? '🔬 آزمایشی' : subscription.plan}
+                  </span>
+                </div>
+                <div className="sub-item">
+                  <span className="sub-label">روزهای باقیمانده</span>
+                  <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.remainingDays === '♾️' ? 'admin' : subscription.remainingDays < 3 && subscription.remainingDays !== '♾️' ? 'danger' : ''}`}>
+                    {user?.is_admin ? '♾️ نامحدود' : subscription.remainingDays === '♾️' ? '♾️' : `${subscription.remainingDays} روز`}
+                  </span>
+                </div>
+                <div className="sub-item">
+                  <span className="sub-label">📈 تریدهای باقیمانده</span>
+                  <span className={`sub-value ${subscription.remainingTrades <= 0 && !user?.is_admin && !subscription.isTrial ? 'danger' : ''}`}>
+                    {user?.is_admin ? '♾️ نامحدود' : subscription.remainingTrades === '♾️' ? '♾️' : `${subscription.remainingTrades} عدد`}
+                  </span>
+                </div>
+                <div className="sub-item">
+                  <span className="sub-label">🧠 مشاوره‌های باقیمانده</span>
+                  <span className={`sub-value ${subscription.remainingAiConsultations <= 0 && !user?.is_admin && !subscription.isTrial ? 'danger' : ''}`}>
+                    {user?.is_admin ? '♾️ نامحدود' : subscription.remainingAiConsultations === '♾️' ? '♾️' : `${subscription.remainingAiConsultations} عدد`}
+                  </span>
+                </div>
+                <div className="sub-item">
+                  <span className="sub-label">تاریخ شروع</span>
+                  <span className="sub-value">{user?.is_admin ? '—' : subscription.startDate || '-'}</span>
+                </div>
+                <div className="sub-item">
+                  <span className="sub-label">تاریخ پایان</span>
+                  <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isExpired ? 'danger' : ''}`}>
+                    {user?.is_admin ? '♾️ بدون محدودیت' : subscription.endDate || '-'}
+                  </span>
+                </div>
+              </div>
+
               <button
-                className="btn-edit"
-                onClick={() => setEditMode(!editMode)}
+                className="btn-renew"
+                onClick={handleRenewSubscription}
+                disabled={loading}
               >
-                {editMode ? '❌ لغو' : '✏️ ویرایش'}
+                {loading ? '⏳ در حال تمدید...' : '🔄 تمدید اشتراک'}
               </button>
-            </div>
-          </div>
 
-          {message.text && (
-            <div className={`message ${message.type}`}>
-              {message.text}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>شماره تلفن</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  disabled
-                  className="disabled-input"
-                />
-                <span className="field-hint">شماره تلفن قابل تغییر نیست</span>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>نام</label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  disabled={!editMode || loading}
-                  className={!editMode ? 'disabled-input' : ''}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>نام خانوادگی</label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  disabled={!editMode || loading}
-                  className={!editMode ? 'disabled-input' : ''}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>ایمیل</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={!editMode || loading}
-                className={!editMode ? 'disabled-input' : ''}
-                placeholder="example@email.com"
-              />
-            </div>
-
-            {editMode && (
-              <button type="submit" className="btn-save" disabled={loading}>
-                {loading ? 'در حال ذخیره...' : '💾 ذخیره تغییرات'}
-              </button>
-            )}
-          </form>
-        </div>
-
-        {/* آمار سریع */}
-        <div className="profile-card">
-          <div className="card-header">
-            <h3>📊 آمار سریع</h3>
-          </div>
-
-          <div className="quick-stats">
-            <div className="stat-item"><span className="stat-icon">📈</span><div><span className="stat-label">کل تریدها</span><span className="stat-value">{totalTrades}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">✅</span><div><span className="stat-label">تریدهای برنده</span><span className="stat-value success">{winningTrades}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">❌</span><div><span className="stat-label">تریدهای بازنده</span><span className="stat-value danger">{losingTrades}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">📊</span><div><span className="stat-label">نرخ برد</span><span className="stat-value">{winRate}%</span></div></div>
-            <div className="stat-item"><span className="stat-icon">💰</span><div><span className="stat-label">سود کل</span><span className={`stat-value ${totalProfit >= 0 ? 'success' : 'danger'}`}>${totalProfit}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">📏</span><div><span className="stat-label">میانگین سود</span><span className="stat-value">${avgProfit}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">🏆</span><div><span className="stat-label">بهترین ترید</span><span className="stat-value success">+${bestTrade}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">📉</span><div><span className="stat-label">بدترین ترید</span><span className="stat-value danger">${worstTrade}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">📅</span><div><span className="stat-label">تریدهای امروز</span><span className="stat-value">{todayTrades}</span></div></div>
-            <div className="stat-item"><span className="stat-icon">📆</span><div><span className="stat-label">تریدهای این هفته</span><span className="stat-value">{thisWeekTrades}</span></div></div>
-            {/* ✅ مشاوره‌های کل */}
-            <div className="stat-item"><span className="stat-icon">🧠</span><div><span className="stat-label">مشاوره‌های استفاده شده</span><span className="stat-value">{subscription.aiConsultationsUsed || 0}</span></div></div>
-          </div>
-        </div>
-
-        {/* اطلاعات اشتراک - ✅ با مشاوره‌ها */}
-        <div className="profile-card">
-          <div className="card-header">
-            <h3>📊 اطلاعات اشتراک</h3>
-            {subscription.isTrial && (
-              <span className="expiry-badge trial-badge" style={{ background: '#6a1b9a', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
-                🔬 آزمایشی
-              </span>
-            )}
-            {user?.is_admin && (
-              <span className="expiry-badge admin-badge" style={{ background: '#1a237e', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
-                👑 مدیر
-              </span>
-            )}
-            {!user?.is_admin && !subscription.isTrial && subscription.isExpired && (
-              <span className="expiry-badge">⏰ منقضی شده</span>
-            )}
-            {!user?.is_admin && !subscription.isTrial && !subscription.isExpired && subscription.remainingDays <= 3 && subscription.remainingDays !== '♾️' && (
-              <span className="expiry-badge warning">⚠️ در حال اتمام</span>
-            )}
-          </div>
-
-          <div className="subscription-info">
-            <div className="sub-item">
-              <span className="sub-label">نوع پلن</span>
-              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isTrial ? 'trial' : subscription.plan === 'حرفه‌ای' ? 'premium' : subscription.plan === 'بدون اشتراک' ? 'danger' : ''}`}>
-                {user?.is_admin ? '👑 ادمین (نامحدود)' : subscription.isTrial ? '🔬 آزمایشی' : subscription.plan}
-              </span>
-            </div>
-            <div className="sub-item">
-              <span className="sub-label">روزهای باقیمانده</span>
-              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.remainingDays === '♾️' ? 'admin' : subscription.remainingDays < 3 && subscription.remainingDays !== '♾️' ? 'danger' : ''}`}>
-                {user?.is_admin ? '♾️ نامحدود' : subscription.remainingDays === '♾️' ? '♾️' : `${subscription.remainingDays} روز`}
-              </span>
-            </div>
-            <div className="sub-item">
-              <span className="sub-label">📈 تریدهای باقیمانده</span>
-              <span className={`sub-value ${subscription.remainingTrades <= 0 && !user?.is_admin && !subscription.isTrial ? 'danger' : ''}`}>
-                {user?.is_admin ? '♾️ نامحدود' : subscription.remainingTrades === '♾️' ? '♾️' : `${subscription.remainingTrades} عدد`}
-              </span>
-            </div>
-            {/* ✅ مشاوره‌های باقیمانده */}
-            <div className="sub-item">
-              <span className="sub-label">🧠 مشاوره‌های باقیمانده</span>
-              <span className={`sub-value ${subscription.remainingAiConsultations <= 0 && !user?.is_admin && !subscription.isTrial ? 'danger' : ''}`}>
-                {user?.is_admin ? '♾️ نامحدود' : subscription.remainingAiConsultations === '♾️' ? '♾️' : `${subscription.remainingAiConsultations} عدد`}
-              </span>
-            </div>
-            <div className="sub-item">
-              <span className="sub-label">تاریخ شروع</span>
-              <span className="sub-value">{user?.is_admin ? '—' : subscription.startDate || '-'}</span>
-            </div>
-            <div className="sub-item">
-              <span className="sub-label">تاریخ پایان</span>
-              <span className={`sub-value ${user?.is_admin ? 'admin' : subscription.isExpired ? 'danger' : ''}`}>
-                {user?.is_admin ? '♾️ بدون محدودیت' : subscription.endDate || '-'}
-              </span>
-            </div>
-          </div>
-
-          <button
-            className="btn-renew"
-            onClick={handleRenewSubscription}
-            disabled={loading}
-          >
-            {loading ? '⏳ در حال تمدید...' : '🔄 تمدید اشتراک'}
-          </button>
-
-          {!user?.is_admin && subscription.isExpired && (
-            <button
-              className="btn-logout"
-              onClick={handleLogout}
-              style={{
-                marginTop: '10px',
-                width: '100%',
-                padding: '12px',
-                background: '#c62828',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                fontFamily: 'inherit'
-              }}
-              onMouseEnter={(e) => { e.target.style.background = '#b71c1c'; e.target.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.target.style.background = '#c62828'; e.target.style.transform = 'translateY(0)'; }}
-            >
-              🚪 خروج از سیستم
-            </button>
-          )}
-        </div>
-
-        {/* نسخه نرم‌افزار و تغییرات */}
-        <div className="profile-card">
-          <div className="card-header">
-            <h3>📱 درباره نرم‌افزار</h3>
-          </div>
-
-          <div className="version-info">
-            <div className="version-item">
-              <span className="version-label">نسخه فعلی</span>
-              <span className="version-value">
-                {appVersions.find(v => v.is_current)?.version_number || '1.4.1'}
-              </span>
-            </div>
-            <div className="version-item">
-              <span className="version-label">تاریخ انتشار</span>
-              <span className="version-value">
-                {appVersions.find(v => v.is_current)?.release_date
-                  ? new Date(appVersions.find(v => v.is_current).release_date).toLocaleDateString('fa-IR')
-                  : '۱۴۰۳/۱۰/۰۱'}
-              </span>
-            </div>
-          </div>
-
-          <button className="btn-versions" onClick={() => setShowVersions(!showVersions)}>
-            {showVersions ? '🔽 بستن تاریخچه تغییرات' : '📜 مشاهده تاریخچه تغییرات'}
-          </button>
-
-          {showVersions && (
-            <div className="versions-list">
-              {versionsLoading ? (
-                <div className="loading-spinner">⏳ در حال بارگذاری...</div>
-              ) : appVersions.length > 0 ? (
-                <table className="versions-table">
-                  <thead><tr><th>نسخه</th><th>تاریخ</th><th>تغییرات</th></tr></thead>
-                  <tbody>
-                    {appVersions.map((item, index) => (
-                      <tr key={index} className={item.is_current ? 'current-version' : ''}>
-                        <td><strong>v{item.version_number}</strong></td>
-                        <td>{item.release_date_persian || new Date(item.release_date).toLocaleDateString('fa-IR')}</td>
-                        <td>{item.release_notes}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="empty-state">هیچ نسخه‌ای یافت نشد</div>
+              {!user?.is_admin && subscription.isExpired && (
+                <button
+                  className="btn-logout"
+                  onClick={handleLogout}
+                  style={{
+                    marginTop: '10px',
+                    width: '100%',
+                    padding: '12px',
+                    background: '#c62828',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={(e) => { e.target.style.background = '#b71c1c'; e.target.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={(e) => { e.target.style.background = '#c62828'; e.target.style.transform = 'translateY(0)'; }}
+                >
+                  🚪 خروج از سیستم
+                </button>
               )}
             </div>
-          )}
-        </div>
 
-        {/* تماس با ما */}
-        <div className="profile-card">
-          <div className="card-header">
-            <h3>📞 تماس با ما</h3>
-          </div>
-          <div className="contact-info">
-            <p>در صورت داشتن هرگونه سؤال، مشکل یا پیشنهاد، می‌توانید از طریق فرم زیر با ما در ارتباط باشید.</p>
-            <p className="contact-note">📌 همکاران ما پس از دریافت پیام شما، در اسرع وقت بررسی کرده و در صورت نیاز با شما تماس خواهند گرفت.</p>
-            <div className="contact-buttons">
-              <button className="btn-contact" onClick={() => navigate('/messages/new')}>✉️ ارسال پیام جدید</button>
-              <button className="btn-messages" onClick={() => navigate('/messages')}>📬 مشاهده پیام‌ها</button>
+            {/* نسخه نرم‌افزار و تغییرات */}
+            <div className="profile-card">
+              <div className="card-header">
+                <h3>📱 درباره نرم‌افزار</h3>
+              </div>
+
+              <div className="version-info">
+                <div className="version-item">
+                  <span className="version-label">نسخه فعلی</span>
+                  <span className="version-value">
+                    {appVersions.find(v => v.is_current)?.version_number || '1.4.1'}
+                  </span>
+                </div>
+                <div className="version-item">
+                  <span className="version-label">تاریخ انتشار</span>
+                  <span className="version-value">
+                    {appVersions.find(v => v.is_current)?.release_date
+                      ? new Date(appVersions.find(v => v.is_current).release_date).toLocaleDateString('fa-IR')
+                      : '۱۴۰۳/۱۰/۰۱'}
+                  </span>
+                </div>
+              </div>
+
+              <button className="btn-versions" onClick={() => setShowVersions(!showVersions)}>
+                {showVersions ? '🔽 بستن تاریخچه تغییرات' : '📜 مشاهده تاریخچه تغییرات'}
+              </button>
+
+              {showVersions && (
+                <div className="versions-list">
+                  {versionsLoading ? (
+                    <div className="loading-spinner">⏳ در حال بارگذاری...</div>
+                  ) : appVersions.length > 0 ? (
+                    <table className="versions-table">
+                      <thead><tr><th>نسخه</th><th>تاریخ</th><th>تغییرات</th></tr></thead>
+                      <tbody>
+                        {appVersions.map((item, index) => (
+                          <tr key={index} className={item.is_current ? 'current-version' : ''}>
+                            <td><strong>v{item.version_number}</strong></td>
+                            <td>{item.release_date_persian || new Date(item.release_date).toLocaleDateString('fa-IR')}</td>
+                            <td>{item.release_notes}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="empty-state">هیچ نسخه‌ای یافت نشد</div>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-        </div>
+
+            {/* تماس با ما */}
+            <div className="profile-card">
+              <div className="card-header">
+                <h3>📞 تماس با ما</h3>
+              </div>
+              <div className="contact-info">
+                <p>در صورت داشتن هرگونه سؤال، مشکل یا پیشنهاد، می‌توانید از طریق فرم زیر با ما در ارتباط باشید.</p>
+                <p className="contact-note">📌 همکاران ما پس از دریافت پیام شما، در اسرع وقت بررسی کرده و در صورت نیاز با شما تماس خواهند گرفت.</p>
+                <div className="contact-buttons">
+                  <button className="btn-contact" onClick={() => navigate('/messages/new')}>✉️ ارسال پیام جدید</button>
+                  <button className="btn-messages" onClick={() => navigate('/messages')}>📬 مشاهده پیام‌ها</button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* تب قوانین معاملاتی */}
+        {activeProfileTab === 'rules' && (
+          <RulesManager />
+        )}
       </div>
     </div>
   );

@@ -24,6 +24,14 @@ const AIConsultation = () => {
   const [streamingText, setStreamingText] = useState('');
   const [consultationId, setConsultationId] = useState(null);
 
+  // ✅ State برای مودال خطا (به‌جای Toast)
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    details: null
+  });
+
   // فرم ورودی
   const [formData, setFormData] = useState({
     symbol: '',
@@ -35,51 +43,78 @@ const AIConsultation = () => {
     emotion: '',
     time_ny: '',
     user_question: '',
+    model: '',
   });
 
   // لیست نمادها
   const [symbols, setSymbols] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
 
+  // ✅ لیست مدل‌های هوش مصنوعی
+  const [availableModels, setAvailableModels] = useState([]);
+  const [modelsLoading, setModelsLoading] = useState(true);
+
   // Ref برای المان استریم
   const streamingContainerRef = useRef(null);
 
   // ============================================
-  // بارگذاری نمادها – با دریافت تمام نمادها از دیتابیس
+  // بارگذاری نمادها
   // ============================================
-useEffect(() => {
-  const loadSymbols = async () => {
-    setSymbolsLoading(true);
-    try {
-      // ✅ استفاده از متد جدید getAllSymbols
-      const response = await RealApiService.getAllSymbols();
-      console.log('📊 Symbols response:', response.data);
+  useEffect(() => {
+    const loadSymbols = async () => {
+      setSymbolsLoading(true);
+      try {
+        const response = await RealApiService.getAllSymbols();
+        console.log('📊 Symbols response:', response.data);
 
-      let symbolList = [];
-      if (Array.isArray(response.data)) {
-        symbolList = response.data.filter(Boolean);
-      } else if (response.data && response.data.results) {
-        symbolList = response.data.results.filter(Boolean);
-      }
+        let symbolList = [];
+        if (Array.isArray(response.data)) {
+          symbolList = response.data.filter(Boolean);
+        } else if (response.data && response.data.results) {
+          symbolList = response.data.results.filter(Boolean);
+        }
 
-      console.log('📊 Extracted symbols count:', symbolList.length);
+        console.log('📊 Extracted symbols count:', symbolList.length);
 
-      if (symbolList.length > 0) {
-        setSymbols(symbolList);
-      } else {
-        console.warn('⚠️ No symbols received, using fallback list');
+        if (symbolList.length > 0) {
+          setSymbols(symbolList);
+        } else {
+          console.warn('⚠️ No symbols received, using fallback list');
+          setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
+        }
+      } catch (error) {
+        console.error('❌ Error loading symbols:', error);
         setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
+      } finally {
+        setSymbolsLoading(false);
       }
-    } catch (error) {
-      console.error('❌ Error loading symbols:', error);
-      setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
-    } finally {
-      setSymbolsLoading(false);
-    }
-  };
-  loadSymbols();
-}, []);
+    };
+    loadSymbols();
+  }, []);
 
+  // ============================================
+  // ✅ بارگذاری لیست مدل‌های AI
+  // ============================================
+  useEffect(() => {
+    const loadModels = async () => {
+      setModelsLoading(true);
+      try {
+        const response = await RealApiService.getAvailableModels();
+        console.log('🤖 Available models:', response.data);
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setAvailableModels(response.data);
+        } else {
+          setAvailableModels(['llama3.1:8b']);
+        }
+      } catch (error) {
+        console.error('❌ Error loading models:', error);
+        setAvailableModels(['llama3.1:8b']);
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+    loadModels();
+  }, []);
 
   // ============================================
   // بررسی وضعیت اشتراک
@@ -131,7 +166,6 @@ useEffect(() => {
     try {
       const lines = text.split('\n');
 
-      // استخراج امتیاز
       for (const line of lines) {
         if (line.includes('امتیاز:')) {
           const parts = line.split(':');
@@ -146,7 +180,6 @@ useEffect(() => {
         }
       }
 
-      // استخراج نقاط قوت
       let strengthsSection = false;
       for (const line of lines) {
         if (line.includes('نقاط قوت:')) {
@@ -156,13 +189,12 @@ useEffect(() => {
         if (strengthsSection) {
           if (line.includes('هشدارها:') || line.includes('پیشنهاد:') || line.includes('نکته:')) {
             strengthsSection = false;
-          } else if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+          } else if (line.trim().startssWith('-') || line.trim().startsWith('•')) {
             result.strengths.push(line.trim().replace(/^[-•]\s*/, ''));
           }
         }
       }
 
-      // استخراج هشدارها
       let warningsSection = false;
       for (const line of lines) {
         if (line.includes('هشدارها:')) {
@@ -178,7 +210,6 @@ useEffect(() => {
         }
       }
 
-      // استخراج پیشنهاد
       for (let i = 0; i < lines.length; i++) {
         if (lines[i].includes('پیشنهاد:')) {
           let suggestionText = lines[i].split(':', 1)[1].trim();
@@ -193,7 +224,6 @@ useEffect(() => {
         }
       }
 
-      // استخراج نکته
       for (let i = 0; i < lines.length; i++) {
         if (lines[i].includes('نکته:')) {
           let tipText = lines[i].split(':', 1)[1].trim();
@@ -229,21 +259,38 @@ useEffect(() => {
   const handleConsult = async (e) => {
     e.preventDefault();
 
+    // ✅ اعتبارسنجی ساده در فرانت‌اند
     if (!formData.symbol) {
-      showToast('لطفاً نماد معاملاتی را انتخاب کنید', 'warning');
+      setErrorModal({
+        open: true,
+        title: 'خطا در فرم',
+        message: 'لطفاً نماد معاملاتی را انتخاب کنید.'
+      });
       return;
     }
     if (!formData.direction) {
-      showToast('لطفاً جهت معامله را انتخاب کنید', 'warning');
+      setErrorModal({
+        open: true,
+        title: 'خطا در فرم',
+        message: 'لطفاً جهت معامله را انتخاب کنید.'
+      });
       return;
     }
     if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) {
-      showToast('لطفاً قیمت ورود را وارد کنید', 'warning');
+      setErrorModal({
+        open: true,
+        title: 'خطا در فرم',
+        message: 'لطفاً قیمت ورود را به‌صورت عدد معتبر وارد کنید.'
+      });
       return;
     }
 
     if (limitReached) {
-      showToast('❌ محدودیت مشاوره AI شما به پایان رسیده است. لطفاً اشتراک خود را تمدید کنید.', 'error');
+      setErrorModal({
+        open: true,
+        title: 'محدودیت مشاوره',
+        message: 'محدودیت مشاوره AI شما به پایان رسیده است. لطفاً اشتراک خود را تمدید کنید.'
+      });
       return;
     }
 
@@ -281,13 +328,22 @@ useEffect(() => {
     let fullText = '';
 
     try {
+      // ✅ ساخت داده‌های درخواست با تبدیل فیلدهای خالی به null
+      const requestData = {
+        symbol: formData.symbol,
+        direction: formData.direction,
+        entry_price: parseFloat(formData.entry_price),
+        stop_loss: formData.stop_loss ? parseFloat(formData.stop_loss) : null,
+        take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
+        market_condition: formData.market_condition || null,
+        emotion: formData.emotion || null,
+        time_ny: formData.time_ny || null,
+        user_question: formData.user_question || null,
+        model: formData.model || null,
+      };
+
       await AIService.getConsultationStream(
-        {
-          ...formData,
-          entry_price: parseFloat(formData.entry_price),
-          stop_loss: formData.stop_loss ? parseFloat(formData.stop_loss) : null,
-          take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
-        },
+        requestData,
         (chunk) => {
           fullText += chunk;
           const el = document.getElementById('streaming-response');
@@ -313,14 +369,38 @@ useEffect(() => {
       console.error('Error getting consultation:', error);
 
       let errorMessage = '❌ خطا در دریافت مشاوره';
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
+      let errorDetails = null;
+
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.message) {
+          errorMessage = data.message;
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.detail) {
+          errorMessage = data.detail;
+        } else if (data.non_field_errors) {
+          errorMessage = data.non_field_errors.join(' ');
+        } else if (typeof data === 'object') {
+          const fieldErrors = Object.entries(data)
+            .filter(([key, value]) => key !== 'error' && key !== 'message')
+            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+            .join(' | ');
+          if (fieldErrors) {
+            errorMessage = `خطا در فیلدها: ${fieldErrors}`;
+            errorDetails = data;
+          }
+        }
       } else if (error.message) {
         errorMessage = error.message;
       }
-      showToast(errorMessage, 'error');
+
+      setErrorModal({
+        open: true,
+        title: 'خطا در دریافت مشاوره',
+        message: errorMessage,
+        details: errorDetails
+      });
 
     } finally {
       setConsulting(false);
@@ -341,11 +421,19 @@ useEffect(() => {
       emotion: '',
       time_ny: '',
       user_question: '',
+      model: '',
     });
     setResult(null);
     setStreamingText('');
     const el = document.getElementById('streaming-response');
     if (el) el.remove();
+  };
+
+  // ============================================
+  // بستن مودال خطا
+  // ============================================
+  const closeErrorModal = () => {
+    setErrorModal({ open: false, title: '', message: '', details: null });
   };
 
   // ============================================
@@ -395,8 +483,6 @@ useEffect(() => {
               <p>پس از بسته شدن معامله، می‌توانید نتیجه را ثبت کنید تا سیستم برای دفعات بعدی دقیق‌تر شود.</p>
             </div>
           </div>
-
-          {/* مرحله ۵: جدول تأثیر تعداد ترید */}
           <div className="guide-step">
             <span className="step-number">۵</span>
             <div>
@@ -415,8 +501,6 @@ useEffect(() => {
               </table>
             </div>
           </div>
-
-          {/* مرحله ۶: جدول داده‌های استفاده‌شده با سطر کامل */}
           <div className="guide-step">
             <span className="step-number">۶</span>
             <div>
@@ -437,7 +521,6 @@ useEffect(() => {
               </table>
             </div>
           </div>
-
           <div className="guide-tip">
             💡 <strong>نکات کلیدی:</strong>
             <ul style={{ marginTop: '6px', paddingRight: '20px' }}>
@@ -696,6 +779,33 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* ✅ فیلد جدید: انتخاب مدل هوش مصنوعی */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>مدل هوش مصنوعی</label>
+                <select
+                  name="model"
+                  value={formData.model}
+                  onChange={handleChange}
+                  disabled={limitReached || modelsLoading}
+                >
+                  <option value="">پیش‌فرض ({availableModels[0] || 'llama3.1:8b'})</option>
+                  {availableModels.map((model) => (
+                    <option key={model} value={model}>{model}</option>
+                  ))}
+                </select>
+                {modelsLoading && (
+                  <span className="field-hint">⏳ در حال بارگذاری لیست مدل‌ها...</span>
+                )}
+                {!modelsLoading && availableModels.length > 1 && (
+                  <span className="field-hint">🧠 {availableModels.length} مدل موجود است.</span>
+                )}
+              </div>
+              <div className="form-group">
+                {/* فضای خالی برای هم‌ترازی */}
+              </div>
+            </div>
+
             <div className="form-group full-width">
               <label>سوال شما (اختیاری)</label>
               <textarea
@@ -747,6 +857,44 @@ useEffect(() => {
 
         {renderResult()}
       </div>
+
+      {/* ✅ مودال خطا با دکمه بسته شدن */}
+      {errorModal.open && (
+        <div className="modal-overlay" onClick={closeErrorModal}>
+          <div className="modal-content feedback-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>❌ {errorModal.title}</h3>
+              <button className="modal-close" onClick={closeErrorModal}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '15px', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                {errorModal.message}
+              </p>
+              {errorModal.details && (
+                <details style={{ marginTop: '12px', fontSize: '13px', color: '#888' }}>
+                  <summary>جزئیات فنی</summary>
+                  <pre style={{
+                    background: '#f5f5f5',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    maxHeight: '200px',
+                    overflow: 'auto',
+                    color: '#333'
+                  }}>
+                    {JSON.stringify(errorModal.details, null, 2)}
+                  </pre>
+                </details>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn-submit-feedback" onClick={closeErrorModal}>
+                ✅ متوجه شدم
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import RealApiService from '../services/realApiService';
+import RuleService from '../services/ruleService';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import './TradeForm.css';
@@ -19,6 +20,11 @@ const TradeForm = () => {
   const [errors, setErrors] = useState([]);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
+
+  // State برای قوانین
+  const [rules, setRules] = useState([]);
+  const [checkedRules, setCheckedRules] = useState([]);
+  const [rulesLoading, setRulesLoading] = useState(false);
 
   // لیست کامل نمادها
   const symbols = [
@@ -191,6 +197,38 @@ const TradeForm = () => {
     loadCategories();
   }, [user]);
 
+  // ============================================
+  // بارگذاری قوانین کاربر
+  // ============================================
+  useEffect(() => {
+    const loadRules = async () => {
+      setRulesLoading(true);
+      try {
+        const response = await RuleService.getRules();
+        if (response.success && response.data) {
+          setRules(response.data);
+          setCheckedRules(response.data.map(r => ({ id: r.id, checked: false })));
+        }
+      } catch (error) {
+        console.error('Error loading rules:', error);
+      } finally {
+        setRulesLoading(false);
+      }
+    };
+    loadRules();
+  }, []);
+
+  // ============================================
+  // تغییر وضعیت بررسی قانون
+  // ============================================
+  const handleRuleCheck = (ruleId) => {
+    setCheckedRules(prev =>
+      prev.map(item =>
+        item.id === ruleId ? { ...item, checked: !item.checked } : item
+      )
+    );
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
@@ -226,7 +264,6 @@ const TradeForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ بررسی مجدد محدودیت قبل از ارسال
     if (showLimitWarning || subscriptionStatus?.is_trade_limit_reached) {
       showToast('❌ محدودیت ترید شما به پایان رسیده است. لطفاً اشتراک خود را تمدید کنید.', 'error');
       return;
@@ -244,8 +281,15 @@ const TradeForm = () => {
     formData.day_of_week = days[date.getDay()];
     formData.month = date.getMonth() + 1;
 
+    // افزودن قوانین به داده‌های ارسالی
+    const ruleCheckIds = checkedRules.filter(r => r.checked).map(r => r.id);
+    const submitData = {
+      ...formData,
+      rule_checks: ruleCheckIds,
+    };
+
     try {
-      await RealApiService.createTrade(formData);
+      await RealApiService.createTrade(submitData);
       setLoading(false);
       showToast('✅ ترید با موفقیت ثبت شد!', 'success');
       navigate('/dashboard');
@@ -254,6 +298,8 @@ const TradeForm = () => {
       if (error.response?.data?.limit) {
         showToast(error.response.data.limit, 'error');
         setShowLimitWarning(true);
+      } else if (error.response?.data?.rule_checks) {
+        showToast(error.response.data.rule_checks, 'error');
       } else {
         showToast('❌ خطا در ثبت ترید', 'error');
       }
@@ -261,8 +307,27 @@ const TradeForm = () => {
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 8));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 9));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  // ============================================
+  // Step 1: شناسه و تاریخ
+  // ============================================
+  const renderStep1 = () => (
+    <div className="form-step">
+      <h3>📅 شناسه و تاریخ</h3>
+      <div className="form-row">
+        <div className="form-group">
+          <label>تاریخ معامله</label>
+          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>ساعت به وقت نیویورک</label>
+          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} disabled={showLimitWarning} />
+        </div>
+      </div>
+    </div>
+  );
 
   // ============================================
   // Step 2: جلسه و نماد (با انتخاب دسته‌بندی اجباری)
@@ -325,24 +390,8 @@ const TradeForm = () => {
   );
 
   // ============================================
-  // سایر استپ‌ها (همانند نسخه قبل)
+  // Step 3: وضعیت روحی و ذهنی
   // ============================================
-  const renderStep1 = () => (
-    <div className="form-step">
-      <h3>📅 شناسه و تاریخ</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>تاریخ معامله</label>
-          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required disabled={showLimitWarning} />
-        </div>
-        <div className="form-group">
-          <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} disabled={showLimitWarning} />
-        </div>
-      </div>
-    </div>
-  );
-
   const renderStep3 = () => {
     const emotions = [
       { key: 'focus', label: 'تمرکز' }, { key: 'calm', label: 'آرامش' }, { key: 'excited', label: 'هیجان' },
@@ -385,6 +434,9 @@ const TradeForm = () => {
     );
   };
 
+  // ============================================
+  // Step 4: برنامه و بایاس روزانه
+  // ============================================
   const renderStep4 = () => {
     const timeframes = [
       { key: 'timeframe_d', label: 'D1' }, { key: 'timeframe_h4', label: 'H4' },
@@ -452,6 +504,9 @@ const TradeForm = () => {
     );
   };
 
+  // ============================================
+  // Step 5: جزئیات اجرای معامله
+  // ============================================
   const renderStep5 = () => (
     <div className="form-step">
       <h3>💰 جزئیات اجرای معامله</h3>
@@ -472,6 +527,9 @@ const TradeForm = () => {
     </div>
   );
 
+  // ============================================
+  // Step 6: نتیجه معامله
+  // ============================================
   const renderStep6 = () => (
     <div className="form-step">
       <h3>📊 نتیجه معامله</h3>
@@ -483,6 +541,9 @@ const TradeForm = () => {
     </div>
   );
 
+  // ============================================
+  // Step 7: احساسات و بازبینی
+  // ============================================
   const renderStep7 = () => (
     <div className="form-step">
       <h3>🔄 احساسات و بازبینی</h3>
@@ -513,6 +574,9 @@ const TradeForm = () => {
     </div>
   );
 
+  // ============================================
+  // Step 8: تحلیل ICT
+  // ============================================
   const renderICTStep = () => (
     <div className="form-step">
       <h3>📊 تحلیل ICT</h3>
@@ -536,6 +600,100 @@ const TradeForm = () => {
     </div>
   );
 
+  // ============================================
+  // Step 9: قوانین معاملاتی
+  // ============================================
+  const renderRulesStep = () => {
+    if (rulesLoading) {
+      return (
+        <div className="form-step">
+          <h3>📋 قوانین معاملاتی</h3>
+          <div className="loading-spinner">⏳ در حال بارگذاری قوانین...</div>
+        </div>
+      );
+    }
+
+    if (rules.length === 0) {
+      return (
+        <div className="form-step">
+          <h3>📋 قوانین معاملاتی</h3>
+          <div className="empty-rules-message">
+            <p>هیچ قانون معاملاتی تعریف نشده است.</p>
+            <p className="hint">برای تعریف قوانین، به بخش <strong>پروفایل → قوانین معاملاتی</strong> بروید.</p>
+          </div>
+        </div>
+      );
+    }
+
+    const groupedRules = rules.reduce((acc, rule) => {
+      const category = rule.category_label || 'متفرقه';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(rule);
+      return acc;
+    }, {});
+
+    const categoryIcons = {
+      'قوانین ورود': '📈',
+      'قوانین خروج': '🚪',
+      'مدیریت ریسک': '🛡️',
+      'روانشناختی': '🧠',
+      'قوانین زمانی': '⏰',
+      'متفرقه': '📋',
+    };
+
+    return (
+      <div className="form-step rules-step">
+        <h3>📋 قوانین معاملاتی</h3>
+        <p className="rules-hint">
+          قبل از ثبت ترید، قوانین رعایت‌شده را علامت بزنید.
+          <span className="required-hint">قوانین با * اجباری هستند.</span>
+        </p>
+
+        {Object.entries(groupedRules).map(([category, categoryRules]) => (
+          <div key={category} className="rules-category">
+            <div className="rules-category-header">
+              <span className="category-icon">{categoryIcons[category] || '📋'}</span>
+              <span className="category-name">{category}</span>
+              <span className="category-count">{categoryRules.length} قانون</span>
+            </div>
+            <div className="rules-list">
+              {categoryRules.map(rule => {
+                const isChecked = checkedRules.find(r => r.id === rule.id)?.checked || false;
+                return (
+                  <div key={rule.id} className={`rule-item ${isChecked ? 'checked' : ''}`}>
+                    <div className="rule-checkbox">
+                      <input
+                        type="checkbox"
+                        id={`rule-${rule.id}`}
+                        checked={isChecked}
+                        onChange={() => handleRuleCheck(rule.id)}
+                        disabled={showLimitWarning}
+                      />
+                      <label htmlFor={`rule-${rule.id}`}>
+                        <span className="rule-text">{rule.rule_text}</span>
+                        {rule.is_required && <span className="rule-required">*</span>}
+                      </label>
+                    </div>
+                    {isChecked && <span className="rule-checked-icon">✅</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <div className="rules-summary">
+          <span>
+            قوانین رعایت‌شده: {checkedRules.filter(r => r.checked).length} از {rules.length}
+          </span>
+          <span className="rules-compliance">
+            {rules.length > 0 ? Math.round((checkedRules.filter(r => r.checked).length / rules.length) * 100) : 0}%
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   const renderStep = () => {
     switch(currentStep) {
       case 1: return renderStep1();
@@ -546,6 +704,7 @@ const TradeForm = () => {
       case 6: return renderStep6();
       case 7: return renderStep7();
       case 8: return renderICTStep();
+      case 9: return renderRulesStep();
       default: return null;
     }
   };
@@ -584,13 +743,19 @@ const TradeForm = () => {
       )}
 
       <div className="step-indicator">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map(step => (
-          <div key={step} className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`} onClick={() => setCurrentStep(step)}>{step}</div>
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(step => (
+          <div
+            key={step}
+            className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`}
+            onClick={() => setCurrentStep(step)}
+          >
+            {step}
+          </div>
         ))}
       </div>
 
       <div className="step-labels">
-        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span><span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span>
+        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span><span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span><span>قوانین</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
@@ -602,12 +767,12 @@ const TradeForm = () => {
               ← قبلی
             </button>
           )}
-          {currentStep < 8 && (
+          {currentStep < 9 && (
             <button type="button" className="btn-next" onClick={nextStep} disabled={loading || showLimitWarning}>
               بعدی →
             </button>
           )}
-          {currentStep === 8 && (
+          {currentStep === 9 && (
             <button type="submit" className="btn-submit" disabled={loading || showLimitWarning}>
               {loading ? 'در حال ثبت...' : '✅ ثبت ترید'}
             </button>

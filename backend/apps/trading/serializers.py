@@ -1,7 +1,7 @@
 # backend/apps/trading/serializers.py
 
 from rest_framework import serializers
-from .models import CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion, AIConsultationAnalytics
+from .models import CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion, AIConsultationAnalytics, TradingRule, TradeRuleCheck
 
 
 # ============================================
@@ -65,6 +65,7 @@ class TradeListSerializer(serializers.ModelSerializer):
     group_icon = serializers.CharField(source='group.icon', read_only=True, default=None)
     timeframes = serializers.SerializerMethodField()
     emotions = serializers.SerializerMethodField()
+    rule_compliance = serializers.SerializerMethodField()
 
     class Meta:
         model = Trade
@@ -98,9 +99,10 @@ class TradeListSerializer(serializers.ModelSerializer):
             'exit_reason_written', 'mistakes_recorded',
             'fvg', 'order_block', 'bos', 'choch', 'mss',
             'liquidity_sweep', 'poi', 'demand_zone', 'supply_zone',
+            'screenshot',  # ✅ اضافه شد
             'group', 'group_name', 'group_icon',
             'created_at', 'updated_at',
-            'timeframes', 'emotions'
+            'timeframes', 'emotions', 'rule_compliance'
         ]
 
     def get_timeframes(self, obj):
@@ -108,6 +110,19 @@ class TradeListSerializer(serializers.ModelSerializer):
 
     def get_emotions(self, obj):
         return obj.get_emotions()
+
+    def get_rule_compliance(self, obj):
+        """محاسبه درصد پایبندی به قوانین"""
+        checks = obj.rule_checks.all()
+        if not checks:
+            return None
+        total = checks.count()
+        checked = checks.filter(is_checked=True).count()
+        return {
+            'total': total,
+            'checked': checked,
+            'percentage': round((checked / total * 100), 1) if total > 0 else 0
+        }
 
 
 # ============================================
@@ -121,10 +136,12 @@ class TradeDetailSerializer(serializers.ModelSerializer):
     timeframes = serializers.SerializerMethodField()
     emotions = serializers.SerializerMethodField()
     checklist_items = serializers.SerializerMethodField()
+    rule_compliance = serializers.SerializerMethodField()
+    rule_checks_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = Trade
-        fields = '__all__'
+        fields = '__all__'  # شامل screenshot می‌شود
 
     def get_timeframes(self, obj):
         return obj.get_timeframes_used()
@@ -135,12 +152,41 @@ class TradeDetailSerializer(serializers.ModelSerializer):
     def get_checklist_items(self, obj):
         return obj.get_checklist_items()
 
+    def get_rule_compliance(self, obj):
+        """محاسبه درصد پایبندی به قوانین"""
+        checks = obj.rule_checks.all()
+        if not checks:
+            return None
+        total = checks.count()
+        checked = checks.filter(is_checked=True).count()
+        return {
+            'total': total,
+            'checked': checked,
+            'percentage': round((checked / total * 100), 1) if total > 0 else 0
+        }
+
+    def get_rule_checks_detail(self, obj):
+        """دریافت جزئیات بررسی قوانین"""
+        checks = obj.rule_checks.select_related('rule').all()
+        return [{
+            'rule_id': check.rule.id,
+            'rule_text': check.rule.rule_text,
+            'rule_category': check.rule.get_category_label(),
+            'is_checked': check.is_checked,
+        } for check in checks]
+
 
 # ============================================
-# سریالایزر ایجاد ترید
+# سریالایزر ایجاد ترید (با قوانین و تصویر)
 # ============================================
 class TradeCreateSerializer(serializers.ModelSerializer):
-    """سریالایزر برای ایجاد ترید"""
+    """سریالایزر برای ایجاد ترید - با فیلد rule_checks و پشتیبانی از تصویر"""
+    rule_checks = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True,
+        help_text="لیست شناسه قوانین رعایت‌شده"
+    )
 
     class Meta:
         model = Trade
@@ -152,12 +198,39 @@ class TradeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("انتخاب دسته‌بندی اجباری است")
         return value
 
+    def validate_rule_checks(self, value):
+        """اعتبارسنجی قوانین اجباری"""
+        if value is None:
+            return []
+
+        # دریافت قوانین اجباری کاربر
+        user = self.context.get('request').user
+        required_rules = TradingRule.objects.filter(user=user, is_active=True, is_required=True)
+        required_rule_ids = set(required_rules.values_list('id', flat=True))
+        checked_rule_ids = set(value)
+
+        # بررسی اینکه همه قوانین اجباری بررسی شده‌اند
+        missing_required = required_rule_ids - checked_rule_ids
+        if missing_required:
+            missing_texts = TradingRule.objects.filter(id__in=missing_required).values_list('rule_text', flat=True)
+            raise serializers.ValidationError(
+                f"قوانین اجباری زیر باید رعایت شوند: {', '.join(missing_texts)}"
+            )
+
+        return value
+
 
 # ============================================
 # سریالایزر ویرایش ترید
 # ============================================
 class TradeUpdateSerializer(serializers.ModelSerializer):
-    """سریالایزر برای ویرایش ترید"""
+    """سریالایزر برای ویرایش ترید - با پشتیبانی از تصویر"""
+    rule_checks = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True,
+        help_text="لیست شناسه قوانین رعایت‌شده"
+    )
 
     class Meta:
         model = Trade
@@ -166,11 +239,39 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
 
 
 # ============================================
-# سریالایزرهای جدید برای AI Validator
+# سریالایزرهای قوانین معاملاتی
+# ============================================
+
+class TradingRuleSerializer(serializers.ModelSerializer):
+    """سریالایزر برای قوانین معاملاتی"""
+    category_label = serializers.CharField(source='get_category_label', read_only=True)
+
+    class Meta:
+        model = TradingRule
+        fields = [
+            'id', 'rule_text', 'category', 'category_label',
+            'is_active', 'is_required', 'order_index',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class TradeRuleCheckSerializer(serializers.ModelSerializer):
+    """سریالایزر برای بررسی قوانین"""
+    rule_text = serializers.CharField(source='rule.rule_text', read_only=True)
+    rule_category = serializers.CharField(source='rule.get_category_label', read_only=True)
+
+    class Meta:
+        model = TradeRuleCheck
+        fields = ['id', 'rule', 'rule_text', 'rule_category', 'is_checked', 'checked_at']
+
+
+# ============================================
+# سریالایزرهای AI Validator (موجود)
 # ============================================
 
 class AIConsultationInputSerializer(serializers.Serializer):
-    """سریالایزر برای ورودی مشاوره AI"""
+    """سریالایزر برای ورودی مشاوره AI - با فیلد model جدید"""
     symbol = serializers.CharField(max_length=20)
     direction = serializers.ChoiceField(choices=['Buy', 'Sell'])
     entry_price = serializers.DecimalField(max_digits=15, decimal_places=5)
@@ -180,6 +281,7 @@ class AIConsultationInputSerializer(serializers.Serializer):
     emotion = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
     time_ny = serializers.TimeField(required=False, allow_null=True)
     user_question = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    model = serializers.CharField(max_length=50, required=False, allow_null=True, allow_blank=True)
 
 
 class AIConsultationResponseSerializer(serializers.Serializer):
@@ -233,3 +335,16 @@ class AIConsultationAnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AIConsultationAnalytics
         fields = '__all__'
+
+
+# ============================================
+# سریالایزر گزارش قوانین
+# ============================================
+
+class RulesReportSerializer(serializers.Serializer):
+    """سریالایزر برای گزارش قوانین"""
+    total_rules = serializers.IntegerField()
+    rules_by_category = serializers.DictField()
+    overall_compliance = serializers.FloatField()
+    rules_stats = serializers.ListField()
+    compliance_by_category = serializers.DictField()

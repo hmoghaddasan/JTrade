@@ -1,0 +1,444 @@
+/* frontend/src/components/reports/RulesReport.css */
+
+.rules-report {
+  padding: 16px 0;
+}
+
+.rules-report.dark {
+  color: #e0e0e0;
+}
+
+.rules-report-loading,
+.rules-report-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.rules-report-loading .loading-spinner {
+  font-size: 48px;
+  animation: spin 1s linear infinite;
+}
+
+.rules-report-empty .empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.rules-report-empty h3 {
+  margin: 0 0 8px 0;
+  color: var(--text-primary, #333);
+}
+
+.rules-report-empty p {
+  color: var(--text-muted, #888);
+  max-width: 400px;
+}
+
+/* ===== کارت‌های خلاصه ===== */
+.report-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.dark .summary-card {
+  background: #2d2d44;
+  border-color: #444;
+}
+
+.summary-card .card-icon {
+  font-size: 28px;
+}
+
+.summary-card .card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-card .card-label {
+  font-size: 12px;
+  color: var(--text-muted, #888);
+}
+
+.summary-card .card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #333);
+}
+
+.dark .summary-card .card-value {
+  color: #e0e0e0;
+}
+
+.summary-card .card-value.high {
+  color: #2e7d32;
+}
+
+.dark .summary-card .card-value.high {
+  color: #66bb6a;
+}
+
+.summary-card .card-value.medium {
+  color: #f57c00;
+}
+
+.dark .summary-card .card-value.medium {
+  color: #ffa726;
+}
+
+.summary-card .card-value.low {
+  color: #c62828;
+}
+
+.dark .summary-card .card-value.low {
+  color: #ef5350;
+}
+
+/* ===== بخش‌های گزارش ===== */
+.report-section {
+  margin-bottom: 24px;
+}
+
+.report-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: var(--text-primary, #333);
+}
+
+.dark .report-section h3 {
+  color: #e0e0e0;
+}
+
+/* ===== توزیع دسته‌بندی‌ها ===== */
+.category-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dist-item {
+  display: grid;
+  grid-template-columns: 130px 1fr 70px;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .dist-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+.dist-label {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.dark .dist-label {
+  color: #aaa;
+}
+
+.dist-bar {
+  height: 8px;
+  background: var(--bg-secondary, #f0f0f0);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dark .dist-bar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dist-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.dist-count {
+  font-size: 12px;
+  color: var(--text-muted, #888);
+}
+
+/* ===== پایبندی به تفکیک دسته‌بندی ===== */
+.compliance-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comp-item {
+  display: grid;
+  grid-template-columns: 140px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .comp-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+.comp-label {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.dark .comp-label {
+  color: #aaa;
+}
+
+.comp-bar {
+  height: 10px;
+  background: var(--bg-secondary, #f0f0f0);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dark .comp-bar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.comp-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+
+.comp-fill.high {
+  background: linear-gradient(90deg, #4caf50, #2e7d32);
+}
+
+.comp-fill.medium {
+  background: linear-gradient(90deg, #ffc107, #f57c00);
+}
+
+.comp-fill.low {
+  background: linear-gradient(90deg, #ef5350, #c62828);
+}
+
+.comp-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.comp-value.high {
+  color: #2e7d32;
+}
+
+.dark .comp-value.high {
+  color: #66bb6a;
+}
+
+.comp-value.medium {
+  color: #f57c00;
+}
+
+.dark .comp-value.medium {
+  color: #ffa726;
+}
+
+.comp-value.low {
+  color: #c62828;
+}
+
+.dark .comp-value.low {
+  color: #ef5350;
+}
+
+/* ===== جدول قوانین ===== */
+.rules-table-wrapper {
+  overflow-x: auto;
+}
+
+.rules-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.rules-table thead {
+  background: var(--bg-secondary, #f5f5f5);
+}
+
+.dark .rules-table thead {
+  background: #3d3d5c;
+}
+
+.rules-table th {
+  padding: 10px 12px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-secondary, #666);
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
+  white-space: nowrap;
+}
+
+.dark .rules-table th {
+  color: #aaa;
+  border-color: #555;
+}
+
+.rules-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color, #eee);
+  color: var(--text-primary, #333);
+}
+
+.dark .rules-table td {
+  border-color: #3d3d5c;
+  color: #ddd;
+}
+
+.rules-table tr:hover td {
+  background: rgba(26, 35, 126, 0.04);
+}
+
+.dark .rules-table tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rule-text-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: var(--bg-secondary, #e8eaf6);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+}
+
+.dark .category-badge {
+  background: #3d3d5c;
+  color: #aaa;
+}
+
+.compliance-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.compliance-badge.high {
+  background: rgba(46, 125, 50, 0.12);
+  color: #2e7d32;
+}
+
+.compliance-badge.medium {
+  background: rgba(245, 124, 0, 0.12);
+  color: #f57c00;
+}
+
+.compliance-badge.low {
+  background: rgba(198, 40, 40, 0.12);
+  color: #c62828;
+}
+
+.dark .compliance-badge.high {
+  background: rgba(46, 125, 50, 0.2);
+  color: #66bb6a;
+}
+
+.dark .compliance-badge.medium {
+  background: rgba(245, 124, 0, 0.2);
+  color: #ffa726;
+}
+
+.dark .compliance-badge.low {
+  background: rgba(198, 40, 40, 0.2);
+  color: #ef5350;
+}
+
+.rules-table .positive {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.dark .rules-table .positive {
+  color: #66bb6a;
+}
+
+.rules-table .negative {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.dark .rules-table .negative {
+  color: #ef5350;
+}
+
+/* ===== نکات و توصیه‌ها ===== */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--card-bg, #ffffff);
+  border-radius: 10px;
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.dark .tip-item {
+  background: #2d2d44;
+  border-color: #444;
+}
+
+.tip-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.tip-item strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary, #333);
+}
+
+.dark .tip-item strong {
+  color: #e0e0e0;
+}
+
+.tip-item p {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+}
+
+.dark .tip-item p {
+  color: #aaa;
+}

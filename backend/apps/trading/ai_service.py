@@ -19,7 +19,20 @@ class AIService:
 
     OLLAMA_URL = getattr(settings, 'OLLAMA_URL', 'http://localhost:11434/api/generate')
     OLLAMA_MODEL = getattr(settings, 'OLLAMA_MODEL', 'llama3.1:8b')
+
+    # ===== تنظیمات سرویس‌های قیمت =====
+    LIVE_PRICE_PROVIDER = getattr(settings, 'LIVE_PRICE_PROVIDER', 'none')
+
+    # Alpha Vantage
     ALPHA_VANTAGE_API_KEY = getattr(settings, 'ALPHA_VANTAGE_API_KEY', '')
+
+    # Twelve Data
+    TWELVEDATA_API_KEY = getattr(settings, 'TWELVEDATA_API_KEY', '')
+    TWELVEDATA_BASE_URL = getattr(settings, 'TWELVEDATA_BASE_URL', 'https://api.twelvedata.com')
+
+    # Finnhub
+    FINNHUB_API_KEY = getattr(settings, 'FINNHUB_API_KEY', '')
+    FINNHUB_BASE_URL = getattr(settings, 'FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
 
     @classmethod
     def get_user_analytics(cls, user, symbol=None):
@@ -35,7 +48,8 @@ class AIService:
         total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = \
+        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / abs(total_loss)) if total_loss and abs(total_loss) > 0 else 0
@@ -48,7 +62,8 @@ class AIService:
                 'count': symbol_trades.count(),
                 'win_rate': (symbol_win_count / symbol_trades.count() * 100),
                 'total_profit': symbol_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
+                'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                              'avg'] or 0,
             }
 
         today = datetime.now()
@@ -149,15 +164,18 @@ class AIService:
 
         if analytics.get('symbol_stats'):
             s = analytics['symbol_stats']
-            lines.append(f"- عملکرد این نماد: {s['count']} ترید، نرخ برد {s['win_rate']:.1f}%، سود ${s['total_profit']}")
+            lines.append(
+                f"- عملکرد این نماد: {s['count']} ترید، نرخ برد {s['win_rate']:.1f}%، سود ${s['total_profit']}")
 
         if analytics.get('day_stats'):
             d = analytics['day_stats']
-            lines.append(f"- عملکرد امروز (همان روز هفته): {d['count']} ترید، نرخ برد {d['win_rate']:.1f}%، سود ${d['total_profit']}")
+            lines.append(
+                f"- عملکرد امروز (همان روز هفته): {d['count']} ترید، نرخ برد {d['win_rate']:.1f}%، سود ${d['total_profit']}")
 
         if analytics.get('emotion_stats'):
             e = analytics['emotion_stats']
-            lines.append(f"- عملکرد با احساس {e['emotion']}: {e['count']} ترید، نرخ برد {e['win_rate']:.1f}%، سود ${e['total_profit']}")
+            lines.append(
+                f"- عملکرد با احساس {e['emotion']}: {e['count']} ترید، نرخ برد {e['win_rate']:.1f}%، سود ${e['total_profit']}")
 
         lines.append(f"- پایبندی به SMT: {analytics.get('smt_rate', 0)}%")
         lines.append(f"- پایبندی به سطوح کلیدی: {analytics.get('key_levels_rate', 0)}%")
@@ -242,11 +260,15 @@ class AIService:
 """
 
     @classmethod
-    def call_ollama(cls, prompt):
-        """ارسال درخواست به Ollama و دریافت پاسخ (غیراستریم)"""
+    def call_ollama(cls, prompt, model=None):
+        """
+        ارسال درخواست به Ollama و دریافت پاسخ (غیراستریم)
+        model: نام مدل انتخابی توسط کاربر (اختیاری)
+        """
+        model = model or cls.OLLAMA_MODEL
         try:
             payload = {
-                "model": cls.OLLAMA_MODEL,
+                "model": model,
                 "prompt": prompt,
                 "stream": False,
                 "options": {
@@ -272,11 +294,15 @@ class AIService:
             return f"❌ خطا در ارتباط با سرویس AI: {str(e)}"
 
     @classmethod
-    def call_ollama_stream(cls, prompt):
-        """ارسال درخواست به Ollama با استریم و بازگرداندن ژنراتور"""
+    def call_ollama_stream(cls, prompt, model=None):
+        """
+        ارسال درخواست به Ollama با استریم و بازگرداندن ژنراتور
+        model: نام مدل انتخابی توسط کاربر (اختیاری)
+        """
+        model = model or cls.OLLAMA_MODEL
         try:
             payload = {
-                "model": cls.OLLAMA_MODEL,
+                "model": model,
                 "prompt": prompt,
                 "stream": True,
                 "options": {
@@ -384,35 +410,115 @@ class AIService:
 
         return result
 
+    # ============================================
+    # دریافت قیمت لحظه‌ای با انتخاب provider
+    # ============================================
     @classmethod
     def get_live_price(cls, symbol):
-        """دریافت قیمت لحظه‌ای از Alpha Vantage"""
-        if not cls.ALPHA_VANTAGE_API_KEY:
-            logger.warning("⚠️ Alpha Vantage API Key not configured")
+        """
+        دریافت قیمت لحظه‌ای از سرویس انتخاب‌شده توسط ادمین
+        اگر provider برابر 'none' باشد، قیمت دریافت نمی‌شود
+        """
+        provider = cls.LIVE_PRICE_PROVIDER.lower()
+
+        # ✅ اگر provider برابر 'none' باشد، قیمت دریافت نمی‌شود
+        if provider == 'none':
+            logger.info("ℹ️ دریافت قیمت لحظه‌ای غیرفعال است (LIVE_PRICE_PROVIDER=none)")
+            return None
+
+        if provider == 'twelvedata':
+            return cls._get_price_from_twelvedata(symbol)
+        elif provider == 'finnhub':
+            return cls._get_price_from_finnhub(symbol)
+        elif provider == 'alphavantage':
+            return cls._get_price_from_alphavantage(symbol)
+        else:
+            logger.warning(f"⚠️ Provider '{provider}' نامعتبر است. قیمت لحظه‌ای دریافت نمی‌شود.")
+            return None
+
+    # ============================================
+    # پیاده‌سازی سرویس‌ها
+    # ============================================
+    @classmethod
+    def _get_price_from_twelvedata(cls, symbol):
+        """دریافت قیمت از Twelve Data"""
+        if not cls.TWELVEDATA_API_KEY:
+            logger.warning("⚠️ Twelve Data API Key تنظیم نشده است")
             return None
 
         try:
-            # برای XAUUSD و XAGUSD از تابع جداگانه استفاده می‌کنیم
-            if symbol in ['XAUUSD', 'XAGUSD']:
-                return cls.get_commodity_price(symbol)
+            formatted_symbol = cls._format_symbol_for_twelvedata(symbol)
 
-            if symbol.endswith('USD'):
-                base = symbol[:-3]
-                from_symbol, to_symbol = base, 'USD'
-            elif symbol == 'EURUSD':
-                from_symbol, to_symbol = 'EUR', 'USD'
-            elif symbol == 'GBPUSD':
-                from_symbol, to_symbol = 'GBP', 'USD'
-            elif symbol == 'USDJPY':
-                from_symbol, to_symbol = 'USD', 'JPY'
-            elif symbol == 'BTCUSD':
-                from_symbol, to_symbol = 'BTC', 'USD'
-            elif symbol == 'ETHUSD':
-                from_symbol, to_symbol = 'ETH', 'USD'
-            elif symbol in ['USOIL', 'UKOIL']:
-                return cls.get_oil_price(symbol)
+            url = f"{cls.TWELVEDATA_BASE_URL}/price"
+            params = {
+                'symbol': formatted_symbol,
+                'apikey': cls.TWELVEDATA_API_KEY,
+            }
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+
+            if 'price' in data and data['price']:
+                return float(data['price'])
             else:
-                from_symbol, to_symbol = symbol, 'USD'
+                logger.warning(f"⚠️ Twelve Data: قیمت برای {symbol} یافت نشد. پاسخ: {data}")
+                return None
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ Twelve Data error: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ Twelve Data error: {str(e)}")
+            return None
+
+    @classmethod
+    def _get_price_from_finnhub(cls, symbol):
+        """دریافت قیمت از Finnhub"""
+        if not cls.FINNHUB_API_KEY:
+            logger.warning("⚠️ Finnhub API Key تنظیم نشده است")
+            return None
+
+        try:
+            formatted_symbol = cls._format_symbol_for_finnhub(symbol)
+
+            url = f"{cls.FINNHUB_BASE_URL}/quote"
+            params = {
+                'symbol': formatted_symbol,
+                'token': cls.FINNHUB_API_KEY,
+            }
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+
+            if 'c' in data and data['c']:
+                return float(data['c'])
+            else:
+                logger.warning(f"⚠️ Finnhub: قیمت برای {symbol} یافت نشد. پاسخ: {data}")
+                return None
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ Finnhub error: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ Finnhub error: {str(e)}")
+            return None
+
+    @classmethod
+    def _get_price_from_alphavantage(cls, symbol):
+        """دریافت قیمت از Alpha Vantage (همان متد قبلی)"""
+        if not cls.ALPHA_VANTAGE_API_KEY:
+            logger.warning("⚠️ Alpha Vantage API Key تنظیم نشده است")
+            return None
+
+        try:
+            if symbol in ['XAUUSD', 'XAGUSD', 'XPDUSD', 'XPTUSD']:
+                return cls._get_commodity_price_av(symbol)
+            if symbol in ['USOIL', 'UKOIL']:
+                return cls._get_oil_price_av(symbol)
+
+            from_symbol, to_symbol = cls._parse_symbol_av(symbol)
+            if not from_symbol or not to_symbol:
+                return None
 
             url = "https://www.alphavantage.co/query"
             params = {
@@ -421,16 +527,13 @@ class AIService:
                 'to_currency': to_symbol,
                 'apikey': cls.ALPHA_VANTAGE_API_KEY
             }
-
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
-
             data = response.json()
             if 'Realtime Currency Exchange Rate' in data:
                 price = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
                 return float(price)
             else:
-                # اگر خطای اطلاعات برگشت، یعنی محدودیت روزانه
                 if 'Information' in data:
                     logger.warning(f"⚠️ Alpha Vantage rate limit: {data['Information']}")
                 else:
@@ -438,14 +541,56 @@ class AIService:
                 return None
 
         except Exception as e:
-            logger.error(f"❌ Error fetching live price: {str(e)}")
+            logger.error(f"❌ Alpha Vantage error: {str(e)}")
             return None
 
+    # ===== متدهای کمکی =====
     @classmethod
-    def get_commodity_price(cls, symbol):
-        """دریافت قیمت کامودیتی (طلا، نقره) از Alpha Vantage"""
+    def _format_symbol_for_twelvedata(cls, symbol):
+        """تبدیل نماد به فرمت Twelve Data (مثلاً EURUSD -> EUR/USD)"""
+        if '/' in symbol:
+            return symbol
+        if symbol.endswith('USD') and len(symbol) > 3:
+            base = symbol[:-3]
+            return f"{base}/USD"
+        if len(symbol) == 6:
+            return f"{symbol[:3]}/{symbol[3:]}"
+        return symbol
+
+    @classmethod
+    def _format_symbol_for_finnhub(cls, symbol):
+        """تبدیل نماد به فرمت Finnhub"""
+        if len(symbol) == 6:
+            return f"OANDA:{symbol}"
+        if symbol.endswith('USD'):
+            return f"BINANCE:{symbol}"
+        if symbol in ['XAUUSD', 'XAGUSD', 'XPDUSD', 'XPTUSD']:
+            return f"OANDA:{symbol}"
+        return symbol
+
+    @classmethod
+    def _parse_symbol_av(cls, symbol):
+        """تبدیل نماد به from_currency و to_currency برای Alpha Vantage"""
+        if symbol.endswith('USD'):
+            return symbol[:-3], 'USD'
+        if symbol == 'EURUSD':
+            return 'EUR', 'USD'
+        if symbol == 'GBPUSD':
+            return 'GBP', 'USD'
+        if symbol == 'USDJPY':
+            return 'USD', 'JPY'
+        if symbol == 'BTCUSD':
+            return 'BTC', 'USD'
+        if symbol == 'ETHUSD':
+            return 'ETH', 'USD'
+        if len(symbol) == 6:
+            return symbol[:3], symbol[3:]
+        return None, None
+
+    @classmethod
+    def _get_commodity_price_av(cls, symbol):
+        """دریافت قیمت کامودیتی از Alpha Vantage"""
         try:
-            # تبدیل نماد به فرمت مناسب برای Alpha Vantage
             commodity_map = {
                 'XAUUSD': 'XAU',
                 'XAGUSD': 'XAG',
@@ -453,7 +598,6 @@ class AIService:
                 'XPTUSD': 'XPT'
             }
             commodity = commodity_map.get(symbol, symbol)
-
             url = "https://www.alphavantage.co/query"
             params = {
                 'function': 'CURRENCY_EXCHANGE_RATE',
@@ -461,24 +605,19 @@ class AIService:
                 'to_currency': 'USD',
                 'apikey': cls.ALPHA_VANTAGE_API_KEY
             }
-
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
-
             data = response.json()
             if 'Realtime Currency Exchange Rate' in data:
                 price = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
                 return float(price)
-            else:
-                logger.warning(f"⚠️ Commodity price not available for {symbol}")
-                return None
-
+            return None
         except Exception as e:
-            logger.error(f"❌ Error fetching commodity price: {str(e)}")
+            logger.error(f"❌ Commodity price error: {str(e)}")
             return None
 
     @classmethod
-    def get_oil_price(cls, symbol):
+    def _get_oil_price_av(cls, symbol):
         """دریافت قیمت نفت از Alpha Vantage"""
         try:
             function = 'WTI' if symbol == 'USOIL' else 'BRENT'
@@ -494,20 +633,27 @@ class AIService:
                 return float(data['data'][0]['value'])
             return None
         except Exception as e:
-            logger.error(f"❌ Error fetching oil price: {str(e)}")
+            logger.error(f"❌ Oil price error: {str(e)}")
             return None
 
+    # ============================================
+    # اعتبارسنجی قیمت با قیمت لحظه‌ای (اصلاح‌شده)
+    # ============================================
     @classmethod
     def validate_prices_with_live(cls, user_input):
         """
         اعتبارسنجی قیمت‌های وارد شده با قیمت لحظه‌ای
-        (اکنون فقط هشدار می‌دهد و مانع ادامه نمی‌شود)
+        اگر provider برابر 'none' باشد، هشدار عدم دسترسی داده می‌شود
         """
         symbol = user_input.get('symbol')
         entry_price = user_input.get('entry_price')
 
         if not symbol or not entry_price:
             return True, ""
+
+        # ✅ اگر قیمت لحظه‌ای غیرفعال است، پیام مناسب برگردان
+        if cls.LIVE_PRICE_PROVIDER.lower() == 'none':
+            return True, "ℹ️ دریافت قیمت لحظه‌ای غیرفعال است. لطفاً قیمت را خودتان بررسی کنید."
 
         live_price = cls.get_live_price(symbol)
         if live_price is None:
@@ -520,7 +666,30 @@ class AIService:
             return True, f"⚠️ قیمت وارد شده ({entry}) بیش از ۲۰% با قیمت لحظه‌ای ({live_price:.4f}) تفاوت دارد."
         elif deviation_percent > 10:
             return True, f"⚠️ قیمت وارد شده ({entry}) حدود {deviation_percent:.1f}% با قیمت لحظه‌ای ({live_price:.4f}) تفاوت دارد."
+
         return True, f"✅ قیمت وارد شده با قیمت لحظه‌ای ({live_price:.4f}) منطبق است."
+
+    # ============================================
+    # تست اتصال به سرویس قیمت (جدید)
+    # ============================================
+    @classmethod
+    def test_connection(cls, symbol='EURUSD'):
+        """
+        تست اتصال به provider فعال و دریافت قیمت برای یک نماد نمونه
+        بازگشت: (success, message, price)
+        """
+        provider = cls.LIVE_PRICE_PROVIDER.lower()
+
+        # ✅ اگر provider برابر 'none' باشد
+        if provider == 'none':
+            return False, "ℹ️ دریافت قیمت لحظه‌ای غیرفعال است (LIVE_PRICE_PROVIDER=none). برای فعال‌سازی، مقدار را به twelvedata, finnhub یا alphavantage تغییر دهید.", None
+
+        price = cls.get_live_price(symbol)
+
+        if price is not None:
+            return True, f"✅ اتصال به {provider} موفق. قیمت {symbol}: {price}", price
+        else:
+            return False, f"❌ اتصال به {provider} ناموفق. لطفاً کلید API و تنظیمات را بررسی کنید.", None
 
     @classmethod
     def validate_trade_logic(cls, user_input):
@@ -609,7 +778,11 @@ class AIService:
 
         analytics = cls.get_user_analytics(user, user_input.get('symbol'))
         prompt = cls.build_prompt(analytics, user_input)
-        response_text = cls.call_ollama(prompt)
+
+        # ✅ دریافت مدل انتخابی کاربر (اگر ارسال شده باشد)
+        model = user_input.get('model') or None
+
+        response_text = cls.call_ollama(prompt, model=model)
         parsed_response = cls.parse_ai_response(response_text)
 
         consultation = AIConsultation.objects.create(
@@ -639,7 +812,6 @@ class AIService:
         return consultation
 
     @classmethod
-    @classmethod
     def get_consultation_stream(cls, user, user_input):
         """
         دریافت مشاوره به صورت استریم (برای نمایش تدریجی به کاربر)
@@ -655,7 +827,6 @@ class AIService:
         # ✅ اعتبارسنجی منطق معامله
         validation = cls.validate_trade_logic(user_input)
         if not validation['is_valid']:
-            # ✅ فقط دیکشنری برگردان (نه tuple)
             return {
                 'error': 'invalid_trade_logic',
                 'message': '\n'.join(validation['errors'])
@@ -663,6 +834,9 @@ class AIService:
 
         analytics = cls.get_user_analytics(user, user_input.get('symbol'))
         prompt = cls.build_prompt(analytics, user_input)
+
+        # ✅ دریافت مدل انتخابی کاربر (اگر ارسال شده باشد)
+        model = user_input.get('model') or None
 
         consultation = AIConsultation.objects.create(
             user=user,
@@ -682,7 +856,7 @@ class AIService:
 
         def generate():
             full_response = ""
-            for chunk in cls.call_ollama_stream(prompt):
+            for chunk in cls.call_ollama_stream(prompt, model=model):
                 full_response += chunk
                 yield chunk
 
@@ -700,6 +874,7 @@ class AIService:
                 logger.error(f"Error updating prompt stats: {str(e)}")
 
         return consultation, generate
+
 
 class AIFeedbackService:
     """
@@ -744,7 +919,8 @@ class AIFeedbackService:
 
             prompt_score = (feedback_score / 5 * 70) + trade_bonus
 
-            total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (best_prompt.usage_count + 1)
+            total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (
+                        best_prompt.usage_count + 1)
             best_prompt.performance_score = max(0, min(100, total_score))
             best_prompt.save()
 

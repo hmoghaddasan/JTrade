@@ -41,10 +41,30 @@ urlpatterns = [
     path('reports/bias/', views.BiasReportView.as_view(), name='bias_report'),
     path('reports/timeframe/', views.TimeframeReportView.as_view(), name='timeframe_report'),
     path('symbols/', views.SymbolListView.as_view(), name='symbols'),
+
     # ============================================
     # تحلیل دسته‌بندی شده
     # ============================================
     path('analytics/', views.AnalyticsView.as_view(), name='analytics'),
+
+    # ============================================
+    # ✅ تحلیل مالی احساسات (Emotional P&L)
+    # ============================================
+    path('analytics/emotional-pnl/', views.EmotionalPnLView.as_view(), name='emotional_pnl'),
+
+    # ============================================
+    # ✅ قوانین معاملاتی (Trading Rules)
+    # ============================================
+    path('rules/', views.TradingRuleListView.as_view(), name='rules_list'),
+    path('rules/create/', views.TradingRuleCreateView.as_view(), name='rules_create'),
+    path('rules/<int:pk>/', views.TradingRuleDetailView.as_view(), name='rules_detail'),
+    path('rules/reorder/', views.TradingRuleReorderView.as_view(), name='rules_reorder'),
+    path('rules/report/', views.RulesReportView.as_view(), name='rules_report'),
+
+    # ============================================
+    # ✅ لیست مدل‌های هوش مصنوعی
+    # ============================================
+    path('ai/models/', views.AvailableModelsView.as_view(), name='ai_models'),
 
     # ============================================
     # مشاوره AI (غیراستریم)
@@ -55,7 +75,7 @@ urlpatterns = [
     path('ai/feedback/<int:pk>/', views.AIConsultationFeedbackView.as_view(), name='ai_feedback'),
 
     # ============================================
-    # مشاوره AI با استریم (جدید)
+    # مشاوره AI با استریم
     # ============================================
     path('ai/consult/stream/', views.AIConsultationStreamView.as_view(), name='ai_consult_stream'),
 

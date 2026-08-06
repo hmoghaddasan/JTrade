@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
+import RuleService from '../services/ruleService';
 import './TradeForm.css';
 
 const TradeEditForm = () => {
@@ -21,6 +22,11 @@ const TradeEditForm = () => {
   const [tradeData, setTradeData] = useState(null);
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState([]);
+
+  // State برای قوانین
+  const [rules, setRules] = useState([]);
+  const [checkedRules, setCheckedRules] = useState([]);
+  const [rulesLoading, setRulesLoading] = useState(false);
 
   // لیست کامل نمادها (همانند قبل)
   const symbols = [
@@ -69,7 +75,7 @@ const TradeEditForm = () => {
   };
 
   // ============================================
-  // دریافت دسته‌بندی‌های کاربر از دیتابیس
+  // دریافت دسته‌بندی‌های کاربر
   // ============================================
   useEffect(() => {
     const loadCategories = async () => {
@@ -89,24 +95,48 @@ const TradeEditForm = () => {
   }, [user]);
 
   // ============================================
-  // بارگذاری داده‌های ترید
+  // بارگذاری داده‌های ترید و قوانین
   // ============================================
   useEffect(() => {
-    const loadTrade = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
-        const response = await RealApiService.getTrade(id);
-        const trade = response.data;
+        const tradeResponse = await RealApiService.getTrade(id);
+        const trade = tradeResponse.data;
         console.log('📊 Trade loaded:', trade);
 
-        // ✅ اطمینان از اینکه group به درستی تنظیم شده است
-        // (سرور فیلد group را به عنوان شناسه گروه برمی‌گرداند)
         if (!trade.group) {
           console.warn('⚠️ Trade has no group!');
         }
 
         setTradeData(trade);
-        console.log('📊 Trade group:', trade.group);
+
+        // ============================================
+        // بارگذاری قوانین و تنظیم checkedRules
+        // ============================================
+        setRulesLoading(true);
+        try {
+          const rulesResponse = await RuleService.getRules();
+          if (rulesResponse.success && rulesResponse.data) {
+            const rulesList = rulesResponse.data;
+            setRules(rulesList);
+
+            // دریافت قوانین بررسی‌شده از ترید
+            const tradeRuleChecks = trade.rule_checks_detail || [];
+            const checkedRuleIds = new Set(tradeRuleChecks.filter(r => r.is_checked).map(r => r.rule_id));
+
+            // مقداردهی checkedRules
+            const initialChecked = rulesList.map(rule => ({
+              id: rule.id,
+              checked: checkedRuleIds.has(rule.id)
+            }));
+            setCheckedRules(initialChecked);
+          }
+        } catch (error) {
+          console.error('Error loading rules for edit:', error);
+        } finally {
+          setRulesLoading(false);
+        }
 
       } catch (error) {
         console.error('Error loading trade:', error);
@@ -118,7 +148,7 @@ const TradeEditForm = () => {
     };
 
     if (id) {
-      loadTrade();
+      loadData();
     } else {
       navigate('/trades');
     }
@@ -132,7 +162,6 @@ const TradeEditForm = () => {
     if (name === 'symbol') {
       setTradeData(prev => ({ ...prev, [name]: value.toUpperCase() }));
     } else if (name === 'group') {
-      // ✅ group را به عنوان عدد ذخیره کن
       const groupId = parseInt(value) || null;
       console.log('📁 Group selected:', groupId);
       setTradeData(prev => ({ ...prev, [name]: groupId }));
@@ -140,6 +169,17 @@ const TradeEditForm = () => {
       setTradeData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
     setErrors(prev => prev.filter(err => !err.includes(name)));
+  };
+
+  // ============================================
+  // تغییر وضعیت بررسی قانون
+  // ============================================
+  const handleRuleCheck = (ruleId) => {
+    setCheckedRules(prev =>
+      prev.map(item =>
+        item.id === ruleId ? { ...item, checked: !item.checked } : item
+      )
+    );
   };
 
   // ============================================
@@ -175,28 +215,24 @@ const TradeEditForm = () => {
 
     setSaving(true);
     try {
-      // محاسبه روز هفته و ماه
       const date = new Date(tradeData.trade_date);
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       tradeData.day_of_week = days[date.getDay()];
       tradeData.month = date.getMonth() + 1;
 
-      // ✅ داده‌های ارسالی را آماده کن
       const submitData = {
         ...tradeData,
-        // اطمینان از اینکه group به صورت عدد ارسال شود
-        group: parseInt(tradeData.group) || null
+        group: parseInt(tradeData.group) || null,
+        rule_checks: checkedRules.filter(r => r.checked).map(r => r.id)
       };
 
       console.log('📤 Submitting trade data:', submitData);
-      console.log('📤 Group being sent:', submitData.group);
 
       await RealApiService.updateTrade(id, submitData);
 
       showToast('✅ ترید با موفقیت ویرایش شد!', 'success');
 
       const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
-
       if (fromDashboard) {
         localStorage.removeItem('returnToDashboard');
         navigate('/dashboard');
@@ -205,7 +241,6 @@ const TradeEditForm = () => {
       }
     } catch (error) {
       console.error('Error updating trade:', error);
-      // نمایش جزئیات خطا از سرور
       if (error.response && error.response.data) {
         console.error('Server error details:', error.response.data);
         const errorMsg = error.response.data.group
@@ -221,7 +256,7 @@ const TradeEditForm = () => {
   };
 
   // ============================================
-  // بازگشت به صفحه مناسب
+  // بازگشت
   // ============================================
   const handleBack = () => {
     const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
@@ -233,11 +268,30 @@ const TradeEditForm = () => {
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 8));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 9));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   // ============================================
-  // Step 2: جلسه و نماد (با انتخاب دسته‌بندی)
+  // Step 1: شناسه و تاریخ
+  // ============================================
+  const renderStep1 = () => (
+    <div className="form-step">
+      <h3>📅 شناسه و تاریخ</h3>
+      <div className="form-row">
+        <div className="form-group">
+          <label>تاریخ معامله</label>
+          <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label>ساعت به وقت نیویورک</label>
+          <input type="time" name="time_ny" value={tradeData.time_ny || ''} onChange={handleChange} />
+        </div>
+      </div>
+    </div>
+  );
+
+  // ============================================
+  // Step 2: جلسه و نماد
   // ============================================
   const renderStep2 = () => (
     <div className="form-step">
@@ -293,25 +347,6 @@ const TradeEditForm = () => {
       <div className="form-group">
         <label>یادداشت پروفایل هفتگی</label>
         <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
-      </div>
-    </div>
-  );
-
-  // ============================================
-  // Step 1: شناسه و تاریخ
-  // ============================================
-  const renderStep1 = () => (
-    <div className="form-step">
-      <h3>📅 شناسه و تاریخ</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>تاریخ معامله</label>
-          <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={tradeData.time_ny || ''} onChange={handleChange} />
-        </div>
       </div>
     </div>
   );
@@ -528,6 +563,99 @@ const TradeEditForm = () => {
   );
 
   // ============================================
+  // Step 9: قوانین معاملاتی
+  // ============================================
+  const renderRulesStep = () => {
+    if (rulesLoading) {
+      return (
+        <div className="form-step">
+          <h3>📋 قوانین معاملاتی</h3>
+          <div className="loading-spinner">⏳ در حال بارگذاری قوانین...</div>
+        </div>
+      );
+    }
+
+    if (rules.length === 0) {
+      return (
+        <div className="form-step">
+          <h3>📋 قوانین معاملاتی</h3>
+          <div className="empty-rules-message">
+            <p>هیچ قانون معاملاتی تعریف نشده است.</p>
+            <p className="hint">برای تعریف قوانین، به بخش <strong>پروفایل → قوانین معاملاتی</strong> بروید.</p>
+          </div>
+        </div>
+      );
+    }
+
+    const groupedRules = rules.reduce((acc, rule) => {
+      const category = rule.category_label || 'متفرقه';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(rule);
+      return acc;
+    }, {});
+
+    const categoryIcons = {
+      'قوانین ورود': '📈',
+      'قوانین خروج': '🚪',
+      'مدیریت ریسک': '🛡️',
+      'روانشناختی': '🧠',
+      'قوانین زمانی': '⏰',
+      'متفرقه': '📋',
+    };
+
+    return (
+      <div className="form-step rules-step">
+        <h3>📋 قوانین معاملاتی</h3>
+        <p className="rules-hint">
+          قوانین رعایت‌شده در این ترید را علامت بزنید.
+          <span className="required-hint">قوانین با * اجباری هستند.</span>
+        </p>
+
+        {Object.entries(groupedRules).map(([category, categoryRules]) => (
+          <div key={category} className="rules-category">
+            <div className="rules-category-header">
+              <span className="category-icon">{categoryIcons[category] || '📋'}</span>
+              <span className="category-name">{category}</span>
+              <span className="category-count">{categoryRules.length} قانون</span>
+            </div>
+            <div className="rules-list">
+              {categoryRules.map(rule => {
+                const isChecked = checkedRules.find(r => r.id === rule.id)?.checked || false;
+                return (
+                  <div key={rule.id} className={`rule-item ${isChecked ? 'checked' : ''}`}>
+                    <div className="rule-checkbox">
+                      <input
+                        type="checkbox"
+                        id={`rule-${rule.id}`}
+                        checked={isChecked}
+                        onChange={() => handleRuleCheck(rule.id)}
+                      />
+                      <label htmlFor={`rule-${rule.id}`}>
+                        <span className="rule-text">{rule.rule_text}</span>
+                        {rule.is_required && <span className="rule-required">*</span>}
+                      </label>
+                    </div>
+                    {isChecked && <span className="rule-checked-icon">✅</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <div className="rules-summary">
+          <span>
+            قوانین رعایت‌شده: {checkedRules.filter(r => r.checked).length} از {rules.length}
+          </span>
+          <span className="rules-compliance">
+            {rules.length > 0 ? Math.round((checkedRules.filter(r => r.checked).length / rules.length) * 100) : 0}%
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
   // رندر بر اساس مرحله
   // ============================================
   const renderStep = () => {
@@ -540,6 +668,7 @@ const TradeEditForm = () => {
       case 6: return renderStep6();
       case 7: return renderStep7();
       case 8: return renderICTStep();
+      case 9: return renderRulesStep();
       default: return null;
     }
   };
@@ -568,13 +697,13 @@ const TradeEditForm = () => {
       )}
 
       <div className="step-indicator">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map(step => (
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(step => (
           <div key={step} className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`} onClick={() => setCurrentStep(step)}>{step}</div>
         ))}
       </div>
 
       <div className="step-labels">
-        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span><span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span>
+        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span><span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span><span>قوانین</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
@@ -584,10 +713,10 @@ const TradeEditForm = () => {
           {currentStep > 1 && (
             <button type="button" className="btn-prev" onClick={prevStep} disabled={saving}>← قبلی</button>
           )}
-          {currentStep < 8 && (
+          {currentStep < 9 && (
             <button type="button" className="btn-next" onClick={nextStep} disabled={saving}>بعدی →</button>
           )}
-          {currentStep === 8 && (
+          {currentStep === 9 && (
             <button type="submit" className="btn-submit" disabled={saving}>
               {saving ? '⏳ در حال ذخیره...' : '💾 ذخیره تغییرات'}
             </button>

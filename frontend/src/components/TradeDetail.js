@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
+import ImageZoom from './ImageZoom';
 import './TradeDetail.css';
 
 const TradeDetail = () => {
@@ -16,6 +17,8 @@ const TradeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('general');
   const [categories, setCategories] = useState([]);
+  const [ruleChecks, setRuleChecks] = useState([]);
+  const [ruleCompliance, setRuleCompliance] = useState(null);
 
   // ============================================
   // بارگذاری داده‌ها
@@ -29,6 +32,13 @@ const TradeDetail = () => {
         const tradeResponse = await RealApiService.getTrade(id);
         console.log('📊 Trade loaded:', tradeResponse.data);
         setTrade(tradeResponse.data);
+
+        if (tradeResponse.data.rule_checks_detail) {
+          setRuleChecks(tradeResponse.data.rule_checks_detail);
+        }
+        if (tradeResponse.data.rule_compliance) {
+          setRuleCompliance(tradeResponse.data.rule_compliance);
+        }
 
         const groupsResponse = await RealApiService.getTradeGroups();
         let groupsData = groupsResponse.data.results || groupsResponse.data || [];
@@ -73,10 +83,8 @@ const TradeDetail = () => {
       return;
     }
 
-    // یافتن نام دسته‌بندی
     const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی';
 
-    // لیست احساسات
     const emotionLabels = {
       focus: 'تمرکز', calm: 'آرامش', excited: 'هیجان', fear: 'ترس',
       greed: 'طمع', relaxed: 'ریلکس', happy: 'خوشحال', sad: 'غمگین',
@@ -256,6 +264,18 @@ const TradeDetail = () => {
           </div>
         </div>
 
+        <!-- بخش ۷: تصویر چارت (جدید) -->
+        ${trade.screenshot ? `
+        <div class="section">
+          <div class="section-title">🖼️ تصویر چارت</div>
+          <div class="section-body" style="text-align: center;">
+            <img src="${trade.screenshot.startsWith('http') ? trade.screenshot : 'http://localhost:8000' + trade.screenshot}" 
+                 alt="چارت ${trade.symbol}" 
+                 style="max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+          </div>
+        </div>
+        ` : ''}
+
         <div class="print-footer">
           چاپ شده در: ${new Date().toLocaleDateString('fa-IR')} — ${new Date().toLocaleTimeString('fa-IR')}
           <br>تولید شده توسط ژورنال حرفه‌ای ترید
@@ -283,7 +303,6 @@ const TradeDetail = () => {
     const BOM = '\uFEFF';
     const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی';
 
-    // تمام فیلدهای مدل Trade
     const headers = [
       'شناسه', 'تاریخ', 'روز هفته', 'ماه', 'ساعت (نیویورک)', 'نماد',
       'نوع ترید', 'نوع جلسه', 'یادداشت هفتگی', 'کیفیت خواب', 'تغذیه مناسب',
@@ -303,7 +322,8 @@ const TradeDetail = () => {
       'اسکن پس از معامله', 'دلیل ورود یادداشت شد', 'دلیل خروج یادداشت شد',
       'اشتباهات ثبت شد', 'کیفیت اجرا', 'FVG', 'Order Block', 'BOS',
       'CHOCH', 'MSS', 'Liquidity Sweep', 'POI', 'Demand Zone', 'Supply Zone',
-      'دسته‌بندی', 'تاریخ ایجاد', 'تاریخ بروزرسانی'
+      'دسته‌بندی', 'تاریخ ایجاد', 'تاریخ بروزرسانی',
+      'تصویر چارت'  // ✅ اضافه شد
     ];
 
     let csvContent = BOM + headers.join(',') + '\n';
@@ -390,7 +410,8 @@ const TradeDetail = () => {
       trade.supply_zone || '',
       categoryName,
       trade.created_at || '',
-      trade.updated_at || ''
+      trade.updated_at || '',
+      trade.screenshot || ''  // ✅ اضافه شد
     ];
 
     csvContent += row.join(',') + '\n';
@@ -405,7 +426,7 @@ const TradeDetail = () => {
   };
 
   // ============================================
-  // تعریف تب‌ها
+  // تعریف تب‌ها (با تب قوانین و تصویر)
   // ============================================
   const sections = [
     { id: 'general', label: '📋 عمومی' },
@@ -414,10 +435,12 @@ const TradeDetail = () => {
     { id: 'checklist', label: '✅ چک‌لیست' },
     { id: 'review', label: '🔄 بازبینی' },
     { id: 'ict', label: '📊 ICT' },
+    { id: 'rules', label: '📋 قوانین' },
+    { id: 'screenshot', label: '🖼️ چارت' },  // ✅ جدید
   ];
 
   // ============================================
-  // توابع رندر هر تب (همانند قبل)
+  // توابع رندر هر تب
   // ============================================
   const renderGeneral = () => (
     <div className="detail-section">
@@ -542,6 +565,103 @@ const TradeDetail = () => {
     </div>
   );
 
+  const renderRules = () => {
+    if (!ruleChecks || ruleChecks.length === 0) {
+      return (
+        <div className="detail-section">
+          <h3>📋 قوانین معاملاتی</h3>
+          <p className="no-data-message">هیچ قانونی برای این ترید ثبت نشده است.</p>
+        </div>
+      );
+    }
+
+    const checkedCount = ruleChecks.filter(r => r.is_checked).length;
+    const totalCount = ruleChecks.length;
+    const percentage = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
+
+    const grouped = ruleChecks.reduce((acc, item) => {
+      const cat = item.rule_category || 'متفرقه';
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(item);
+      return acc;
+    }, {});
+
+    const categoryIcons = {
+      'قوانین ورود': '📈',
+      'قوانین خروج': '🚪',
+      'مدیریت ریسک': '🛡️',
+      'روانشناختی': '🧠',
+      'قوانین زمانی': '⏰',
+      'متفرقه': '📋',
+    };
+
+    return (
+      <div className="detail-section">
+        <div className="rules-compliance-header">
+          <h3>📋 قوانین معاملاتی</h3>
+          <div className="compliance-badge">
+            <span className="compliance-number">{percentage}%</span>
+            <span className="compliance-label">پایبندی</span>
+          </div>
+        </div>
+
+        <div className="rules-summary-bar">
+          <span>{checkedCount} از {totalCount} قانون رعایت شده</span>
+          <div className="compliance-bar">
+            <div className="compliance-fill" style={{ width: `${percentage}%` }} />
+          </div>
+        </div>
+
+        {Object.entries(grouped).map(([category, items]) => (
+          <div key={category} className="rules-category-detail">
+            <div className="category-header">
+              <span className="category-icon">{categoryIcons[category] || '📋'}</span>
+              <span className="category-name">{category}</span>
+              <span className="category-count">
+                {items.filter(r => r.is_checked).length}/{items.length}
+              </span>
+            </div>
+            <div className="rules-list-detail">
+              {items.map((item, index) => (
+                <div key={index} className={`rule-detail-item ${item.is_checked ? 'checked' : 'unchecked'}`}>
+                  <span className="rule-status">{item.is_checked ? '✅' : '❌'}</span>
+                  <span className="rule-text">{item.rule_text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // ============================================
+  // ✅ رندر تب تصویر چارت (جدید)
+  // ============================================
+  const renderScreenshot = () => {
+    if (!trade.screenshot) {
+      return (
+        <div className="detail-section">
+          <h3>🖼️ تصویر چارت</h3>
+          <p className="no-data-message">هیچ تصویری برای این ترید آپلود نشده است.</p>
+        </div>
+      );
+    }
+
+    const imageUrl = trade.screenshot.startsWith('http')
+      ? trade.screenshot
+      : `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:8000'}${trade.screenshot}`;
+
+    return (
+      <div className="detail-section">
+        <h3>🖼️ تصویر چارت</h3>
+        <div className="screenshot-container">
+          <ImageZoom src={imageUrl} alt={`چارت ${trade.symbol}`} />
+        </div>
+      </div>
+    );
+  };
+
   // ============================================
   // رندر بر اساس تب فعال
   // ============================================
@@ -553,6 +673,8 @@ const TradeDetail = () => {
       case 'checklist': return renderChecklist();
       case 'review': return renderReview();
       case 'ict': return renderICT();
+      case 'rules': return renderRules();
+      case 'screenshot': return renderScreenshot();  // ✅ جدید
       default: return null;
     }
   };

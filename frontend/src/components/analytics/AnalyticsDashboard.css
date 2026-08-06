@@ -56,6 +56,7 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  font-family: inherit;
 }
 
 .btn-back:hover {
@@ -69,6 +70,103 @@
 
 .dark .btn-back:hover {
   background: #3d3d5c;
+}
+
+/* ===== تب‌ها ===== */
+.analytics-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .analytics-tabs {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.tab-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  flex: 0 0 auto;
+}
+
+.tab-btn:hover {
+  background: rgba(26, 35, 126, 0.06);
+  color: var(--text-primary, #333);
+}
+
+.dark .tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e0e0e0;
+}
+
+.tab-btn.active {
+  background: #1a237e;
+  color: white;
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
+}
+
+.dark .tab-btn.active {
+  background: #3949ab;
+  box-shadow: 0 2px 8px rgba(57, 73, 171, 0.3);
+}
+
+/* ===== تب احساسات ===== */
+.tab-btn.emotional-tab {
+  position: relative;
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.05), rgba(255, 193, 7, 0.05));
+  border: 1px solid rgba(106, 27, 154, 0.1);
+}
+
+.dark .tab-btn.emotional-tab {
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.08), rgba(255, 193, 7, 0.03));
+  border-color: rgba(106, 27, 154, 0.15);
+}
+
+.tab-btn.emotional-tab.active {
+  background: linear-gradient(135deg, #6a1b9a, #4a148c);
+  color: white;
+  border-color: #6a1b9a;
+  box-shadow: 0 2px 12px rgba(106, 27, 154, 0.4);
+}
+
+.dark .tab-btn.emotional-tab.active {
+  background: linear-gradient(135deg, #7b1fa2, #4a148c);
+  box-shadow: 0 2px 12px rgba(106, 27, 154, 0.3);
+}
+
+.tab-badge {
+  display: inline-block;
+  padding: 0 8px;
+  background: #ffc107;
+  color: #1a1a2e;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 6px;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.dark .tab-badge {
+  background: #ffc107;
+  color: #1a1a2e;
 }
 
 /* ===== لودینگ و خطا ===== */
@@ -109,6 +207,7 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-family: inherit;
 }
 
 .btn-retry:hover {
@@ -140,4 +239,33 @@
 
 .no-data-message p {
   color: #888;
+}
+/* frontend/src/components/analytics/AnalyticsDashboard.css */
+
+/* ... (بقیه استایل‌ها) ... */
+
+/* ============================================
+   تب قوانین
+   ============================================ */
+.tab-btn.rules-tab {
+  position: relative;
+  background: linear-gradient(135deg, rgba(26, 35, 126, 0.05), rgba(13, 71, 161, 0.05));
+  border: 1px solid rgba(26, 35, 126, 0.1);
+}
+
+.dark .tab-btn.rules-tab {
+  background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(13, 71, 161, 0.03));
+  border-color: rgba(26, 35, 126, 0.15);
+}
+
+.tab-btn.rules-tab.active {
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  color: white;
+  border-color: #1a237e;
+  box-shadow: 0 2px 12px rgba(26, 35, 126, 0.4);
+}
+
+.dark .tab-btn.rules-tab.active {
+  background: linear-gradient(135deg, #283593, #0d47a1);
+  box-shadow: 0 2px 12px rgba(26, 35, 126, 0.3);
 }

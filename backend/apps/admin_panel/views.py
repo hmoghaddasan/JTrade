@@ -512,10 +512,10 @@ class AdminDiscountDeleteView(APIView):
                 description=f'حذف کد تخفیف {code}'
             )
 
-            return Response({'message': 'کد تخفیف با موفقیت حذف شد'})
+            return Response({'message': 'کد تخفیف با موفقیت حذف شد.'})
         except DiscountCode.DoesNotExist:
             return Response(
-                {'error': 'کد تخفیف یافت نشد'},
+                {'error': 'کد تخفیف یافت نشد.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 

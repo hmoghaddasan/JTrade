@@ -89,7 +89,7 @@ class PurchaseSubscriptionView(APIView):
             plan = SubscriptionPlan.objects.get(id=plan_id, is_active=True)
         except SubscriptionPlan.DoesNotExist:
             return Response(
-                {'error': 'پلن انتخابی یافت نشد'},
+                {'error': 'پلن انتخابی یافت نشد.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -101,13 +101,13 @@ class PurchaseSubscriptionView(APIView):
                 discount = DiscountCode.objects.get(code=discount_code, is_active=True)
                 if not discount.is_valid():
                     return Response(
-                        {'error': 'کد تخفیف نامعتبر است'},
+                        {'error': 'کد تخفیف نامعتبر است.'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 discount_percent = float(discount.discount_percent)
             except DiscountCode.DoesNotExist:
                 return Response(
-                    {'error': 'کد تخفیف یافت نشد'},
+                    {'error': 'کد تخفیف یافت نشد.'},
                     status=status.HTTP_404_NOT_FOUND
                 )
 
@@ -132,7 +132,7 @@ class PurchaseSubscriptionView(APIView):
             end_date=end_date,
             is_active=False,
             trades_limit=plan.monthly_trades_limit,
-            ai_consultations_limit=plan.monthly_ai_consultations_limit,  # ✅ اضافه شد
+            ai_consultations_limit=plan.monthly_ai_consultations_limit,
             is_trial=False,
             payment_status='pending',
             amount_paid=total_amount
@@ -167,7 +167,7 @@ class PurchaseSubscriptionView(APIView):
 
 
 # ============================================
-# تایید پرداخت
+# تایید پرداخت (اصلاح‌شده با ثبت استفاده از کد تخفیف)
 # ============================================
 class VerifyPaymentView(APIView):
     """تایید پرداخت"""
@@ -175,15 +175,25 @@ class VerifyPaymentView(APIView):
 
     @transaction.atomic
     def get(self, request):
-        print("=" * 60)
+        # ============================================
+        # ✅ لاگ کامل برای عیب‌یابی
+        # ============================================
+        import json
+        print("=" * 80)
         print("🔍 VerifyPaymentView called!")
         print(f"📥 Full URL: {request.build_absolute_uri()}")
-        print(f"📥 Query params: {dict(request.query_params)}")
-        print("=" * 60)
+        print(f"📥 Query params (GET): {dict(request.GET)}")
+        print(f"📥 Request headers: {dict(request.headers)}")
+        print("=" * 80)
 
-        authority = request.query_params.get('Authority')
-        status_param = request.query_params.get('Status')
-        subscription_id = request.query_params.get('subscription_id')
+        # ✅ استخراج پارامترها با هر دو حالت (بزرگ و کوچک)
+        authority = request.GET.get('authority') or request.GET.get('Authority')
+        status_param = request.GET.get('status') or request.GET.get('Status')
+        subscription_id = request.GET.get('subscription_id') or request.GET.get('subscription_id')
+
+        print(f"🔑 Extracted Authority: {authority}")
+        print(f"🔑 Extracted Status: {status_param}")
+        print(f"🔑 Extracted subscription_id: {subscription_id}")
 
         if status_param != 'OK':
             return Response({
@@ -225,9 +235,27 @@ class VerifyPaymentView(APIView):
             subscription.payment_reference = verification.get('ref_id')
             subscription.save()
 
+            # ✅ ثبت استفاده از کد تخفیف در جدول تاریخچه
             if subscription.discount_code:
-                subscription.discount_code.used_count += 1
-                subscription.discount_code.save()
+                discount = subscription.discount_code
+
+                # محاسبه مبلغ تخفیف
+                original_price = float(subscription.plan.price)
+                final_price = float(subscription.amount_paid)
+                vat_amount = final_price - (final_price / 1.1)  # VAT 10%
+                discount_amount = original_price - (final_price - vat_amount)
+
+                success, message, usage = discount.use(
+                    user=subscription.user,
+                    subscription=subscription,
+                    discount_amount=discount_amount,
+                    final_amount=final_price - vat_amount  # مبلغ بدون مالیات
+                )
+
+                if success:
+                    logger.info(f"✅ Discount code {discount.code} used by user {subscription.user.id}")
+                else:
+                    logger.warning(f"⚠️ Failed to use discount code {discount.code}: {message}")
 
             try:
                 send_purchase_confirmation(
@@ -278,24 +306,39 @@ class ValidateDiscountView(APIView):
         if not code:
             return Response({
                 'success': False,
-                'error': 'کد تخفیف را وارد کنید'
+                'error': 'کد تخفیف را وارد کنید.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            discount = DiscountCode.objects.get(code=code, is_active=True)
+            discount = DiscountCode.objects.get(code=code)
+
+            # ✅ بررسی اعتبار کد با متد is_valid
             if not discount.is_valid():
+                # بررسی دلیل نامعتبر بودن برای پیام دقیق‌تر
+                if not discount.is_active:
+                    error_msg = 'کد تخفیف غیرفعال شده است.'
+                elif discount.max_uses <= 0:
+                    error_msg = 'کد تخفیف معتبر نیست (تعداد استفاده مجاز صفر است).'
+                elif discount.used_count >= discount.max_uses:
+                    error_msg = 'کد تخفیف به پایان رسیده است (تعداد استفاده کامل شد).'
+                elif discount.expires_at and discount.expires_at < timezone.now():
+                    error_msg = 'کد تخفیف منقضی شده است.'
+                else:
+                    error_msg = 'کد تخفیف نامعتبر است.'
+
                 return Response({
                     'success': False,
-                    'error': 'کد تخفیف منقضی شده یا استفاده شده است'
+                    'error': error_msg
                 }, status=status.HTTP_400_BAD_REQUEST)
 
+            # بررسی تطابق با پلن
             if discount.plan and plan_id:
                 try:
                     plan = SubscriptionPlan.objects.get(id=plan_id)
                     if discount.plan != plan:
                         return Response({
                             'success': False,
-                            'error': 'این کد تخفیف برای این پلن معتبر نیست'
+                            'error': 'این کد تخفیف برای این پلن معتبر نیست.'
                         }, status=status.HTTP_400_BAD_REQUEST)
                 except SubscriptionPlan.DoesNotExist:
                     pass
@@ -309,12 +352,11 @@ class ValidateDiscountView(APIView):
         except DiscountCode.DoesNotExist:
             return Response({
                 'success': False,
-                'error': 'کد تخفیف یافت نشد'
+                'error': 'کد تخفیف یافت نشد.'
             }, status=status.HTTP_404_NOT_FOUND)
 
-
 # ============================================
-# وضعیت اشتراک (اصلاح‌شده)
+# وضعیت اشتراک (اصلاح‌شده با فیلدهای AI)
 # ============================================
 class SubscriptionStatusView(APIView):
     """دریافت وضعیت اشتراک کاربر"""
@@ -332,9 +374,9 @@ class SubscriptionStatusView(APIView):
                 'is_near_expiry': False,
                 'remaining_days': 36500,
                 'remaining_trades': 99999,
-                'remaining_ai_consultations': 99999,   # ✅ اضافه شد
-                'ai_consultations_limit': 99999,       # ✅ اضافه شد
-                'ai_consultations_used': 0,            # ✅ اضافه شد
+                'remaining_ai_consultations': 99999,
+                'ai_consultations_limit': 99999,
+                'ai_consultations_used': 0,
                 'plan_name': 'ادمین',
                 'plan_type': 'admin',
                 'start_date': timezone.now(),
@@ -376,9 +418,9 @@ class SubscriptionStatusView(APIView):
             'is_near_expiry': is_near_expiry,
             'remaining_days': remaining_days,
             'remaining_trades': remaining_trades,
-            'remaining_ai_consultations': remaining_ai,   # ✅ اضافه شد
-            'ai_consultations_limit': subscription.ai_consultations_limit,  # ✅ اضافه شد
-            'ai_consultations_used': subscription.ai_consultations_used,    # ✅ اضافه شد
+            'remaining_ai_consultations': remaining_ai,
+            'ai_consultations_limit': subscription.ai_consultations_limit,
+            'ai_consultations_used': subscription.ai_consultations_used,
             'plan_name': subscription.plan.plan_name,
             'plan_type': subscription.plan.plan_type,
             'start_date': subscription.start_date,
@@ -437,7 +479,7 @@ class ExtendSubscriptionView(APIView):
                 'total': total_amount,
                 'duration_days': plan.duration_days,
                 'trades_limit': plan.monthly_trades_limit,
-                'ai_consultations_limit': plan.monthly_ai_consultations_limit,  # ✅ اضافه شد
+                'ai_consultations_limit': plan.monthly_ai_consultations_limit,
                 'discount_percent': discount_percent
             },
             'message': 'درخواست تمدید ثبت شد'

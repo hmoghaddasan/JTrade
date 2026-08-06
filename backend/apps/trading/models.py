@@ -5,6 +5,11 @@ from django.utils import timezone
 from django.conf import settings
 
 
+def screenshot_upload_path(instance, filename):
+    """مسیر ذخیره‌سازی تصویر چارت"""
+    return f'trades/user_{instance.user.id}/{filename}'
+
+
 class CurrencyPair(models.Model):
     """جفت ارزها (فیات و کریپتو)"""
     PAIR_TYPES = [
@@ -92,7 +97,7 @@ class TradeGroup(models.Model):
 
 
 class Trade(models.Model):
-    """مدل اصلی ترید - اصلاح شده با group_id اجباری"""
+    """مدل اصلی ترید - اصلاح شده با group_id اجباری و فیلد screenshot"""
 
     TRADE_TYPES = [
         ('Buy', 'خرید'),
@@ -282,6 +287,17 @@ class Trade(models.Model):
     supply_zone = models.CharField('Supply Zone', max_length=50, blank=True, null=True)
 
     # ============================================
+    # ✅ فیلد جدید: تصویر چارت
+    # ============================================
+    screenshot = models.ImageField(
+        'تصویر چارت',
+        upload_to=screenshot_upload_path,
+        blank=True,
+        null=True,
+        help_text='آپلود تصویر چارت معامله (حداکثر ۵ مگابایت)'
+    )
+
+    # ============================================
     # فیلدهای سیستمی
     # ============================================
     is_deleted = models.BooleanField('حذف شده', default=False)
@@ -375,7 +391,83 @@ class TradeAnalytics(models.Model):
 
 
 # ============================================
-# مدل‌های جدید برای AI Validator
+# مدل‌های جدید برای قوانین معاملاتی (Trading Rules)
+# ============================================
+
+class TradingRule(models.Model):
+    """قوانین معاملاتی کاربر"""
+    RULE_CATEGORIES = [
+        ('entry', 'قوانین ورود'),
+        ('exit', 'قوانین خروج'),
+        ('risk', 'مدیریت ریسک'),
+        ('psychology', 'روانشناختی'),
+        ('time', 'قوانین زمانی'),
+        ('general', 'متفرقه'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='trading_rules',
+        verbose_name='کاربر'
+    )
+    rule_text = models.TextField('متن قانون')
+    category = models.CharField('دسته‌بندی', max_length=20, choices=RULE_CATEGORIES, default='general')
+    is_active = models.BooleanField('فعال', default=True)
+    is_required = models.BooleanField('اجباری', default=True,
+                                       help_text='آیا این قانون برای ثبت ترید اجباری است؟')
+    order_index = models.IntegerField('ترتیب نمایش', default=0)
+    created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
+    updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
+
+    class Meta:
+        verbose_name = 'قانون معاملاتی'
+        verbose_name_plural = 'قوانین معاملاتی'
+        ordering = ['category', 'order_index']
+        unique_together = [['user', 'rule_text']]
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['user', 'category']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.phone_number} - {self.rule_text[:30]}..."
+
+    def get_category_label(self):
+        return dict(self.RULE_CATEGORIES).get(self.category, self.category)
+
+
+class TradeRuleCheck(models.Model):
+    """بررسی رعایت قوانین در هر ترید"""
+    trade = models.ForeignKey(
+        Trade,
+        on_delete=models.CASCADE,
+        related_name='rule_checks',
+        verbose_name='ترید'
+    )
+    rule = models.ForeignKey(
+        TradingRule,
+        on_delete=models.CASCADE,
+        related_name='rule_checks',
+        verbose_name='قانون'
+    )
+    is_checked = models.BooleanField('رعایت شده', default=False)
+    checked_at = models.DateTimeField('زمان بررسی', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'بررسی قانون'
+        verbose_name_plural = 'بررسی‌های قوانین'
+        unique_together = [['trade', 'rule']]
+        indexes = [
+            models.Index(fields=['trade', 'rule']),
+        ]
+
+    def __str__(self):
+        return f"{self.trade.id} - {self.rule.rule_text[:20]}... - {'✅' if self.is_checked else '❌'}"
+
+
+# ============================================
+# مدل‌های موجود برای AI Validator
 # ============================================
 
 class AIConsultation(models.Model):
@@ -473,7 +565,6 @@ class AIConsultation(models.Model):
         return f"{self.symbol} - {self.direction} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
     def get_ai_summary(self):
-        """دریافت خلاصه تحلیل AI"""
         if not self.ai_response:
             return None
         return {
@@ -485,7 +576,6 @@ class AIConsultation(models.Model):
         }
 
     def get_feedback_display(self):
-        """دریافت نمایش خوانا از بازخورد"""
         if self.feedback_score is None:
             return None
         return {
@@ -496,9 +586,6 @@ class AIConsultation(models.Model):
 
 
 class AIPromptVersion(models.Model):
-    """
-    مدل ذخیره‌سازی نسخه‌های مختلف پرامپت برای A/B Testing
-    """
     VERSION_STATUS = [
         ('draft', 'پیش‌نویس'),
         ('active', 'فعال'),
@@ -509,8 +596,8 @@ class AIPromptVersion(models.Model):
     prompt_template = models.TextField()
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=VERSION_STATUS, default='draft')
-    performance_score = models.FloatField(default=0, help_text="امتیاز عملکرد بر اساس بازخوردها")
-    usage_count = models.IntegerField(default=0, help_text="تعداد استفاده از این نسخه")
+    performance_score = models.FloatField(default=0)
+    usage_count = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -524,20 +611,15 @@ class AIPromptVersion(models.Model):
 
 
 class AIConsultationAnalytics(models.Model):
-    """
-    مدل ذخیره‌سازی آمار تحلیلی برای توسعه‌دهنده
-    """
     date = models.DateField(auto_now_add=True)
     total_consultations = models.IntegerField(default=0)
     total_feedback = models.IntegerField(default=0)
     avg_score = models.FloatField(default=0)
     avg_feedback_score = models.FloatField(default=0)
-    success_rate = models.FloatField(default=0, help_text="نرخ موفقیت پیشنهادات")
+    success_rate = models.FloatField(default=0)
     most_consulted_symbol = models.CharField(max_length=20, blank=True)
     most_effective_prompt = models.CharField(max_length=20, blank=True)
-
     details = models.JSONField(default=dict)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

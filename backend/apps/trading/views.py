@@ -3,13 +3,18 @@
 from rest_framework import status, generics, permissions, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Sum, Avg, Count, Q
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from django.db.models import Sum, Avg, Count, Q, Value, F
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse, StreamingHttpResponse
-from rest_framework.views import APIView  # اگر قبلاً import نشده، اضافه کنید
 from datetime import datetime
 import csv
 import io
-from .models import CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion, AIConsultationAnalytics
+import json
+from .models import (
+    CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion,
+    AIConsultationAnalytics, TradingRule, TradeRuleCheck
+)
 from .serializers import (
     CurrencyPairSerializer,
     TradeGroupSerializer,
@@ -22,10 +27,14 @@ from .serializers import (
     AIConsultationFeedbackSerializer,
     AIPromptVersionSerializer,
     AIConsultationAnalyticsSerializer,
+    TradingRuleSerializer,
+    TradeRuleCheckSerializer,
+    RulesReportSerializer,
 )
 from .ai_service import AIService, AIFeedbackService, AIAnalyticsService
 from apps.accounts.permissions import IsAuthenticatedWithSubscription, CanTrade
 from apps.subscriptions.models import UserSubscription
+from django.conf import settings
 
 
 # ============================================
@@ -39,6 +48,7 @@ class CurrencyPairListView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['symbol', 'description']
     ordering_fields = ['symbol', 'pair_type']
+
 
 class SymbolListView(APIView):
     """لیست تمام نمادها بدون pagination"""
@@ -134,11 +144,12 @@ class TradeGroupDeleteView(APIView):
 
 
 # ============================================
-# تریدها
+# تریدها - با پشتیبانی از آپلود تصویر
 # ============================================
 class TradeListCreateView(generics.ListCreateAPIView):
-    """لیست و ایجاد تریدها"""
+    """لیست و ایجاد تریدها - با پشتیبانی از آپلود فایل"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription, CanTrade]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # ✅ پشتیبانی از آپلود فایل
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -200,7 +211,31 @@ class TradeListCreateView(generics.ListCreateAPIView):
                 'subscription': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
             })
 
-        serializer.save(user=user, group=group)
+        # دریافت قوانین بررسی‌شده (ممکن است به‌صورت JSON رشته باشد)
+        rule_checks = self.request.data.get('rule_checks', [])
+        if isinstance(rule_checks, str):
+            try:
+                rule_checks = json.loads(rule_checks)
+            except json.JSONDecodeError:
+                rule_checks = []
+
+        # ✅ دریافت تصویر از درخواست (اگر وجود داشته باشد)
+        screenshot = self.request.FILES.get('screenshot') if hasattr(self.request, 'FILES') else None
+
+        # ذخیره ترید با تصویر
+        trade = serializer.save(user=user, group=group, screenshot=screenshot)
+
+        # ثبت بررسی قوانین
+        for rule_id in rule_checks:
+            try:
+                rule = TradingRule.objects.get(id=rule_id, user=user, is_active=True)
+                TradeRuleCheck.objects.create(
+                    trade=trade,
+                    rule=rule,
+                    is_checked=True
+                )
+            except TradingRule.DoesNotExist:
+                pass
 
 
 class TradeDetailView(generics.RetrieveAPIView):
@@ -213,12 +248,49 @@ class TradeDetailView(generics.RetrieveAPIView):
 
 
 class TradeUpdateView(generics.UpdateAPIView):
-    """به‌روزرسانی ترید"""
+    """به‌روزرسانی ترید - با پشتیبانی از آپلود فایل"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
     serializer_class = TradeUpdateSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # ✅ پشتیبانی از آپلود فایل
 
     def get_queryset(self):
         return Trade.objects.filter(user=self.request.user, is_deleted=False).select_related('group')
+
+    def perform_update(self, serializer):
+        """ذخیره تصویر در صورت وجود"""
+        # ✅ دریافت تصویر از درخواست (اگر وجود داشته باشد)
+        screenshot = self.request.FILES.get('screenshot') if hasattr(self.request, 'FILES') else None
+
+        # دریافت قوانین بررسی‌شده (ممکن است به‌صورت JSON رشته باشد)
+        rule_checks = self.request.data.get('rule_checks', [])
+        if isinstance(rule_checks, str):
+            try:
+                rule_checks = json.loads(rule_checks)
+            except json.JSONDecodeError:
+                rule_checks = []
+
+        # ذخیره ترید با تصویر (اگر تصویر جدید ارسال شده باشد)
+        if screenshot:
+            serializer.save(screenshot=screenshot)
+        else:
+            serializer.save()
+
+        # بروزرسانی بررسی قوانین (حذف و ایجاد مجدد)
+        if rule_checks:
+            trade = serializer.instance
+            # حذف بررسی‌های قبلی
+            TradeRuleCheck.objects.filter(trade=trade).delete()
+            # ایجاد بررسی‌های جدید
+            for rule_id in rule_checks:
+                try:
+                    rule = TradingRule.objects.get(id=rule_id, user=self.request.user, is_active=True)
+                    TradeRuleCheck.objects.create(
+                        trade=trade,
+                        rule=rule,
+                        is_checked=True
+                    )
+                except TradingRule.DoesNotExist:
+                    pass
 
 
 class TradeDeleteView(APIView):
@@ -544,7 +616,8 @@ class AnalyticsView(APIView):
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         total_loss_abs = abs(total_loss)
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = \
+        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / total_loss_abs) if total_loss_abs > 0 else (999 if total_profit > 0 else 0)
@@ -769,6 +842,301 @@ class AnalyticsView(APIView):
 
 
 # ============================================
+# ✅ تحلیل مالی احساسات (Emotional P&L)
+# ============================================
+class EmotionalPnLView(APIView):
+    """دریافت تحلیل مالی احساسات (Emotional P&L)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        trades = Trade.objects.filter(user=user, is_deleted=False)
+
+        total_trades = trades.count()
+        if total_trades == 0:
+            return Response({
+                'has_data': False,
+                'message': 'هیچ تریدی برای تحلیل وجود ندارد'
+            })
+
+        # لیست احساسات ممکن (بر اساس فیلدهای موجود در مدل)
+        emotion_mapping = {
+            'آرامش': 'calm',
+            'تمرکز': 'focus',
+            'هیجان': 'excited',
+            'ترس': 'fear',
+            'طمع': 'greed',
+            'صبر': 'patience',
+            'FOMO': 'fomo',
+            'استرس': 'stress',
+            'ریلکس': 'relaxed',
+            'خوشحال': 'happy',
+            'غمگین': 'sad',
+            'پرانرژی': 'energetic',
+            'خسته': 'tired',
+            'قناعت': 'contentment',
+        }
+
+        # احساسات منفی برای محاسبه Emotional P&L Ratio
+        negative_emotions = ['ترس', 'طمع', 'هیجان', 'FOMO', 'استرس']
+
+        result = []
+        total_abs_pnl = 0
+
+        # محاسبه آمار برای هر احساس
+        for emotion_fa, emotion_en in emotion_mapping.items():
+            emotion_trades = trades.filter(dominant_feeling=emotion_fa)
+            count = emotion_trades.count()
+            if count == 0:
+                continue
+
+            total_pnl = emotion_trades.aggregate(total=Sum('profit'))['total'] or 0
+            win_count = emotion_trades.filter(profit__gt=0).count()
+            loss_count = emotion_trades.filter(profit__lt=0).count()
+            win_rate = (win_count / count * 100) if count > 0 else 0
+
+            avg_rr = emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(
+                avg=Avg('risk_reward_ratio')
+            )['avg'] or 0
+
+            avg_profit = total_pnl / count if count > 0 else 0
+
+            total_abs_pnl += abs(total_pnl)
+
+            result.append({
+                'emotion': emotion_fa,
+                'emotion_key': emotion_en,
+                'count': count,
+                'total_pnl': round(total_pnl, 2),
+                'win_count': win_count,
+                'loss_count': loss_count,
+                'win_rate': round(win_rate, 1),
+                'avg_rr': round(avg_rr, 2),
+                'avg_profit': round(avg_profit, 2),
+                'is_negative': emotion_fa in negative_emotions,
+            })
+
+        # محاسبه impact
+        for item in result:
+            if total_abs_pnl > 0:
+                item['impact'] = round(abs(item['total_pnl']) / total_abs_pnl * 100, 1)
+            else:
+                item['impact'] = 0
+
+        # محاسبه Emotional P&L Ratio
+        negative_loss = sum(item['total_pnl'] for item in result
+                            if item['is_negative'] and item['total_pnl'] < 0)
+        total_loss_all = sum(item['total_pnl'] for item in result if item['total_pnl'] < 0)
+
+        emotional_ratio = 0
+        if total_loss_all < 0:
+            emotional_ratio = round(abs(negative_loss) / abs(total_loss_all) * 100, 1)
+
+        # تعیین وضعیت با پیام‌های جدید
+        if emotional_ratio < 30:
+            status = 'good'
+            status_text = '✅ عملکرد عالی – کمتر از ۳۰٪ ضررهای شما ناشی از احساسات منفی است. کنترل روانی بالایی دارید.'
+            status_color = '#2e7d32'
+        elif emotional_ratio < 50:
+            status = 'warning'
+            status_text = '⚠️ نیاز به توجه – بین ۳۰ تا ۵۰٪ ضررهای شما ناشی از احساسات است. روی مدیریت ترس و طمع کار کنید.'
+            status_color = '#f57c00'
+        else:
+            status = 'danger'
+            status_text = '❌ زنگ خطر – بیش از ۵۰٪ ضررهای شما ناشی از احساسات است. بدون کنترل احساسی معامله نکنید!'
+            status_color = '#c62828'
+
+        total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
+        result.sort(key=lambda x: x['total_pnl'], reverse=True)
+
+        return Response({
+            'has_data': True,
+            'total_trades': total_trades,
+            'total_profit': round(total_profit, 2),
+            'emotions': result,
+            'summary': {
+                'emotional_ratio': emotional_ratio,
+                'status': status,
+                'status_text': status_text,
+                'status_color': status_color,
+                'negative_emotions': negative_emotions,
+                'negative_loss': round(negative_loss, 2),
+                'total_loss': round(total_loss_all, 2),
+            }
+        })
+
+
+# ============================================
+# ✅ قوانین معاملاتی (Trading Rules)
+# ============================================
+
+class TradingRuleListView(APIView):
+    """دریافت لیست قوانین معاملاتی کاربر"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        rules = TradingRule.objects.filter(user=request.user, is_active=True)
+        serializer = TradingRuleSerializer(rules, many=True)
+        return Response(serializer.data)
+
+
+class TradingRuleCreateView(APIView):
+    """ایجاد قانون معاملاتی جدید"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = TradingRuleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TradingRuleDetailView(APIView):
+    """ویرایش یا حذف یک قانون"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, pk, user):
+        try:
+            return TradingRule.objects.get(id=pk, user=user)
+        except TradingRule.DoesNotExist:
+            return None
+
+    def put(self, request, pk):
+        rule = self.get_object(pk, request.user)
+        if not rule:
+            return Response({'error': 'قانون یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = TradingRuleSerializer(rule, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        rule = self.get_object(pk, request.user)
+        if not rule:
+            return Response({'error': 'قانون یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+        rule.is_active = False
+        rule.save()
+        return Response({'message': 'قانون با موفقیت حذف شد'})
+
+
+class TradingRuleReorderView(APIView):
+    """تغییر ترتیب قوانین"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        rule_ids = request.data.get('rule_ids', [])
+        if not rule_ids:
+            return Response({'error': 'لیست شناسه‌ها الزامی است'}, status=status.HTTP_400_BAD_REQUEST)
+
+        for index, rule_id in enumerate(rule_ids):
+            try:
+                rule = TradingRule.objects.get(id=rule_id, user=request.user)
+                rule.order_index = index
+                rule.save()
+            except TradingRule.DoesNotExist:
+                pass
+
+        return Response({'message': 'ترتیب با موفقیت به‌روزرسانی شد'})
+
+
+class RulesReportView(APIView):
+    """گزارش تحلیلی پایبندی به قوانین"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        rules = TradingRule.objects.filter(user=user, is_active=True)
+        trades = Trade.objects.filter(user=user, is_deleted=False)
+
+        if not rules.exists():
+            return Response({
+                'has_data': False,
+                'message': 'هیچ قانون معاملاتی تعریف نشده است'
+            })
+
+        total_rules = rules.count()
+        rules_by_category = {}
+        for category in TradingRule.RULE_CATEGORIES:
+            count = rules.filter(category=category[0]).count()
+            if count > 0:
+                rules_by_category[category[1]] = count
+
+        # محاسبه پایبندی کلی
+        total_checks = 0
+        total_checked = 0
+        rules_stats = []
+
+        for rule in rules:
+            checks = TradeRuleCheck.objects.filter(rule=rule, trade__in=trades)
+            total = checks.count()
+            checked = checks.filter(is_checked=True).count()
+            total_checks += total
+            total_checked += checked
+
+            # محاسبه عملکرد تریدهایی که قانون رعایت شده vs نشده
+            checked_trades = checks.filter(is_checked=True).values_list('trade_id', flat=True)
+            unchecked_trades = checks.filter(is_checked=False).values_list('trade_id', flat=True)
+
+            checked_profit = Trade.objects.filter(id__in=checked_trades).aggregate(total=Sum('profit'))['total'] or 0
+            unchecked_profit = Trade.objects.filter(id__in=unchecked_trades).aggregate(total=Sum('profit'))[
+                                   'total'] or 0
+
+            rules_stats.append({
+                'rule_id': rule.id,
+                'rule_text': rule.rule_text[:50] + ('...' if len(rule.rule_text) > 50 else ''),
+                'category': rule.get_category_label(),
+                'total_checks': total,
+                'checked_count': checked,
+                'compliance_rate': round((checked / total * 100), 1) if total > 0 else 0,
+                'profit_checked': round(checked_profit, 2),
+                'profit_unchecked': round(unchecked_profit, 2),
+                'impact': round(checked_profit - unchecked_profit, 2),
+            })
+
+        overall_compliance = round((total_checked / total_checks * 100), 1) if total_checks > 0 else 0
+
+        # پایبندی به تفکیک دسته‌بندی
+        compliance_by_category = {}
+        for category, label in TradingRule.RULE_CATEGORIES:
+            cat_rules = rules.filter(category=category[0])
+            if not cat_rules.exists():
+                continue
+            cat_checks = TradeRuleCheck.objects.filter(rule__in=cat_rules, trade__in=trades)
+            cat_total = cat_checks.count()
+            cat_checked = cat_checks.filter(is_checked=True).count()
+            if cat_total > 0:
+                compliance_by_category[label] = round((cat_checked / cat_total * 100), 1)
+            else:
+                compliance_by_category[label] = 0
+
+        return Response({
+            'has_data': True,
+            'total_rules': total_rules,
+            'rules_by_category': rules_by_category,
+            'overall_compliance': overall_compliance,
+            'rules_stats': rules_stats,
+            'compliance_by_category': compliance_by_category,
+        })
+
+
+# ============================================
+# ✅ دریافت لیست مدل‌های هوش مصنوعی موجود
+# ============================================
+class AvailableModelsView(APIView):
+    """دریافت لیست مدل‌های هوش مصنوعی قابل انتخاب توسط کاربر"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        models_str = getattr(settings, 'OLLAMA_AVAILABLE_MODELS', 'llama3.1:8b')
+        models = [m.strip() for m in models_str.split(',') if m.strip()]
+        return Response(models)
+
+
+# ============================================
 # مشاوره AI (غیراستریم)
 # ============================================
 class AIConsultationView(APIView):
@@ -800,7 +1168,6 @@ class AIConsultationView(APIView):
         try:
             result = AIService.get_consultation(request.user, serializer.validated_data)
 
-            # اگر خطا برگردانده شده (اعتبارسنجی)
             if isinstance(result, dict) and 'error' in result:
                 return Response({
                     'error': result['error'],
@@ -827,7 +1194,6 @@ class AIConsultationView(APIView):
 # ============================================
 # مشاوره AI با استریم (اصلاح‌شده)
 # ============================================
-
 class AIConsultationStreamView(APIView):
     """دریافت مشاوره هوشمند از AI به صورت استریم"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
@@ -858,18 +1224,15 @@ class AIConsultationStreamView(APIView):
         try:
             result = AIService.get_consultation_stream(request.user, serializer.validated_data)
 
-            # ✅ بررسی خطاها (هم دیکشنری و هم tuple)
             if isinstance(result, dict) and 'error' in result:
                 return Response({
                     'error': result['error'],
                     'message': result.get('message', '')
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # اگر result یک tuple است، آن را unpack کن
             if isinstance(result, tuple) and len(result) == 2:
                 consultation, generator = result
             else:
-                # اگر نوع نامشخص بود، خطا برگردان
                 return Response({
                     'error': 'invalid_response',
                     'message': 'پاسخ نامعتبر از سرویس AI'
@@ -887,6 +1250,7 @@ class AIConsultationStreamView(APIView):
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class AIConsultationHistoryView(APIView):
     """دریافت تاریخچه مشاوره‌های کاربر"""

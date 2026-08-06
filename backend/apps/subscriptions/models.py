@@ -67,6 +67,15 @@ class DiscountCode(models.Model):
     )
     is_active = models.BooleanField('فعال', default=True)
     expires_at = models.DateTimeField('تاریخ انقضا', null=True, blank=True)
+
+    # ✅ فیلد جدید: توضیحات
+    description = models.TextField(
+        'توضیحات',
+        blank=True,
+        null=True,
+        help_text='توضیحات و یادداشت‌های مربوط به کد تخفیف'
+    )
+
     created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
     updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
 
@@ -82,12 +91,78 @@ class DiscountCode(models.Model):
         """بررسی اعتبار کد"""
         if not self.is_active:
             return False
-        if self.max_uses and self.used_count >= self.max_uses:
+        if self.max_uses <= 0:  # ✅ اگر max_uses صفر یا منفی باشد
+            return False
+        if self.used_count >= self.max_uses:
             return False
         if self.expires_at and self.expires_at < timezone.now():
             return False
         return True
 
+    def use(self, user, subscription, discount_amount, final_amount):
+        """
+        ثبت استفاده از کد تخفیف توسط کاربر
+        بازگشت: (success, message, usage_record)
+        """
+        if not self.is_valid():
+            return False, 'کد تخفیف نامعتبر است', None
+
+        # ثبت در جدول تاریخچه
+        usage = DiscountCodeUsage.objects.create(
+            discount_code=self,
+            user=user,
+            subscription=subscription,
+            used_at=timezone.now(),
+            discount_amount=discount_amount,
+            final_amount=final_amount
+        )
+
+        self.used_count += 1
+
+        # اگر به حداکثر استفاده رسید، غیرفعال کن
+        if self.max_uses and self.used_count >= self.max_uses:
+            self.is_active = False
+
+        self.save()
+        return True, 'کد تخفیف با موفقیت ثبت شد', usage
+
+
+class DiscountCodeUsage(models.Model):
+    """تاریخچه استفاده از کدهای تخفیف"""
+    discount_code = models.ForeignKey(
+        DiscountCode,
+        on_delete=models.CASCADE,
+        related_name='usages',
+        verbose_name='کد تخفیف'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='discount_usages',
+        verbose_name='کاربر'
+    )
+    subscription = models.ForeignKey(
+        'UserSubscription',
+        on_delete=models.CASCADE,
+        related_name='discount_usages',
+        verbose_name='اشتراک'
+    )
+    used_at = models.DateTimeField('زمان استفاده', default=timezone.now)
+    discount_amount = models.DecimalField('مبلغ تخفیف', max_digits=10, decimal_places=2)
+    final_amount = models.DecimalField('مبلغ نهایی', max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = 'subscriptions_discountcode_usage'  # ✅ تطابق با SQL
+        verbose_name = 'تاریخچه استفاده از تخفیف'
+        verbose_name_plural = 'تاریخچه استفاده از تخفیف‌ها'
+        ordering = ['-used_at']
+        indexes = [
+            models.Index(fields=['discount_code', 'user']),
+            models.Index(fields=['used_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.discount_code.code} - {self.user.phone_number} - {self.used_at}"
 
 class UserSubscription(models.Model):
     """اشتراک کاربر"""
@@ -237,7 +312,3 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.phone_number} - {self.total_amount} تومان"
-
-# توجه: کلاس SMSLog قبلاً تعریف شده، اما تکرار نشود
-# اگر قبلاً در بالای فایل تعریف شده، این بخش را حذف کنید
-# اما برای اطمینان، فقط یک بار تعریف می‌کنیم

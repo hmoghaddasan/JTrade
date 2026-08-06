@@ -2,6 +2,38 @@
 
 import axios from 'axios';
 
+// ✅ ============================================
+// ✅ غیرفعال‌سازی کامل WebSocket در مرورگر
+// ✅ ============================================
+if (typeof window !== 'undefined' && window.WebSocket) {
+  const OriginalWebSocket = window.WebSocket;
+  window.WebSocket = function(url, protocols) {
+    // اگر URL به /ws ختم می‌شود، اتصال را متوقف کن
+    if (url && (url.includes('/ws') || url.includes('ws://'))) {
+      console.warn('⚠️ WebSocket connection blocked:', url);
+      // یک WebSocket ساختگی برگردان که هیچ کاری نمی‌کند
+      return {
+        readyState: 3, // CLOSED
+        close: () => {},
+        send: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        onopen: null,
+        onclose: null,
+        onmessage: null,
+        onerror: null
+      };
+    }
+    return new OriginalWebSocket(url, protocols);
+  };
+  // کپی کردن static properties
+  Object.assign(window.WebSocket, OriginalWebSocket);
+  window.WebSocket.CONNECTING = 0;
+  window.WebSocket.OPEN = 1;
+  window.WebSocket.CLOSING = 2;
+  window.WebSocket.CLOSED = 3;
+}
+
 class RealApiService {
   constructor() {
     this.apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -191,17 +223,33 @@ class RealApiService {
   }
 
   // ============================================
-  // جفت ارزها (Currency Pairs) – ✅ اضافه شد
+  // جفت ارزها (Currency Pairs)
   // ============================================
 
-async getCurrencyPairs(params = {}) {
-  // ✅ افزایش page_size برای دریافت تمام نمادها
-  const defaultParams = { page_size: 1000, ...params };
-  return this.request('/trading/currency-pairs/', { params: defaultParams });
-}
-async getAllSymbols() {
-  return this.request('/trading/symbols/');
-}
+  async getCurrencyPairs(params = {}) {
+    const defaultParams = { page_size: 1000, ...params };
+    return this.request('/trading/currency-pairs/', { params: defaultParams });
+  }
+
+  async getAllSymbols() {
+    return this.request('/trading/symbols/');
+  }
+
+  // ============================================
+  // ✅ دریافت لیست مدل‌های هوش مصنوعی
+  // ============================================
+
+  async getAvailableModels() {
+    return this.request('/trading/ai/models/');
+  }
+
+  // ============================================
+  // ✅ دریافت نسخه فعلی نرم‌افزار (جدید)
+  // ============================================
+
+  async getCurrentVersion() {
+    return this.request('/system/version/');
+  }
 
   // ============================================
   // اشتراک و پرداخت (نیاز به توکن دارد)
@@ -342,11 +390,11 @@ async getAllSymbols() {
   }
 
   // ============================================
-  // وب‌سوکت - کاملاً غیرفعال
+  // ✅ وب‌سوکت - کاملاً غیرفعال (بدون لاگ)
   // ============================================
 
   connectWebSocket() {
-    console.warn('⚠️ WebSocket is disabled');
+    // کاملاً غیرفعال - هیچ اتصالی برقرار نمی‌شود
     return null;
   }
 }

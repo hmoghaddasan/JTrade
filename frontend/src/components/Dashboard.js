@@ -25,6 +25,9 @@ const Dashboard = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
+  // ===== State جدید برای نسخه =====
+  const [appVersion, setAppVersion] = useState('1.0.0');
+
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [trades, setTrades] = useState([]);
@@ -53,6 +56,28 @@ const Dashboard = () => {
   const [showAllTrades, setShowAllTrades] = useState(false);
   const [showAllGroups, setShowAllGroups] = useState(false);
   const DISPLAY_LIMIT = 15;
+
+  // ============================================
+  // دریافت نسخه جاری از سرور
+  // ============================================
+  useEffect(() => {
+    const loadVersion = async () => {
+      try {
+        const response = await RealApiService.getCurrentVersion();
+        if (response.data && response.data.version_number) {
+          setAppVersion(response.data.version_number);
+        }
+      } catch (error) {
+        console.warn('⚠️ Unable to fetch version, using fallback:', error);
+        // در صورت خطا، از متغیر محیطی استفاده کن (در صورت وجود)
+        const envVersion = process.env.REACT_APP_VERSION;
+        if (envVersion) {
+          setAppVersion(envVersion);
+        }
+      }
+    };
+    loadVersion();
+  }, []);
 
   // ============================================
   // دریافت آمار اشتراک
@@ -505,7 +530,7 @@ const Dashboard = () => {
       {/* ===== هدر ===== */}
       <header className="dashboard-header">
         <div className="header-left">
-          <h1>📊 ژورنال حرفه‌ای ترید <span className="header-version">v1.4.1</span></h1>
+          <h1>📊 ژورنال حرفه‌ای ترید <span className="header-version">v{appVersion}</span></h1>
         </div>
         <div className="header-right">
           <button className="theme-toggle" onClick={toggleTheme}>

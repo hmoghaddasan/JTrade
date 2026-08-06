@@ -1,4 +1,5 @@
 // frontend/src/services/tradeService.js
+
 import apiService from './apiService';
 
 /**
@@ -54,96 +55,39 @@ export const getTradeDetail = async (id) => {
 };
 
 /**
- * ایجاد ترید جدید
+ * ایجاد ترید جدید - با پشتیبانی از آپلود تصویر (FormData)
  */
 export const createTrade = async (data) => {
   try {
-    // تبدیل داده‌ها به فرمت مورد نیاز بک‌اند
-    const tradeData = {
-      trade_date: data.trade_date,
-      symbol: data.symbol,
-      trade_type: data.trade_type,
-      session_type: data.session_type,
-      sleep_quality: data.sleep_quality,
-      food_status: data.food_status || false,
-      focus: data.focus || false,
-      calm: data.calm || false,
-      excited: data.excited || false,
-      fear: data.fear || false,
-      greed: data.greed || false,
-      relaxed: data.relaxed || false,
-      happy: data.happy || false,
-      sad: data.sad || false,
-      energetic: data.energetic || false,
-      tired: data.tired || false,
-      fomo: data.fomo || false,
-      patience: data.patience || false,
-      contentment: data.contentment || false,
-      dominant_feeling: data.dominant_feeling || '',
-      bias: data.bias,
-      strategy_type: data.strategy_type,
-      timeframe_d: data.timeframe_d || false,
-      timeframe_h4: data.timeframe_h4 || false,
-      timeframe_h1: data.timeframe_h1 || false,
-      timeframe_m15: data.timeframe_m15 || false,
-      timeframe_m5: data.timeframe_m5 || false,
-      timeframe_m1: data.timeframe_m1 || false,
-      retirement_model: data.retirement_model || '',
-      weekly_news_printed: data.weekly_news_printed || false,
-      zero_hour_identified: data.zero_hour_identified || false,
-      asian_range_identified: data.asian_range_identified || false,
-      london_range_identified: data.london_range_identified || false,
-      judas_lo_identified: data.judas_lo_identified || false,
-      key_levels_reviewed: data.key_levels_reviewed || false,
-      smt_confirmed: data.smt_confirmed || false,
-      bond_dxy_support: data.bond_dxy_support || false,
-      entry_price: data.entry_price,
-      stop_loss: data.stop_loss,
-      take_profit_1: data.take_profit_1,
-      take_profit_2: data.take_profit_2,
-      take_profit_3: data.take_profit_3,
-      risk_usd: data.risk_usd,
-      risk_percent: data.risk_percent,
-      risk_reward_ratio: data.risk_reward_ratio,
-      close_price: data.close_price,
-      tp_sl_hit: data.tp_sl_hit || '',
-      profit: data.profit,
-      pre_trade_stress: data.pre_trade_stress,
-      entry_emotion_control: data.entry_emotion_control,
-      reaction_to_profit: data.reaction_to_profit || '',
-      stop_loss_adherence: data.stop_loss_adherence || false,
-      expectation_management: data.expectation_management,
-      strategy_adherence: data.strategy_adherence || false,
-      capital_management_adherence: data.capital_management_adherence || false,
-      over_trade: data.over_trade || false,
-      emotion_after_losses: data.emotion_after_losses || '',
-      mistake_code: data.mistake_code || '',
-      mistake_weight: data.mistake_weight,
-      post_trade_scan: data.post_trade_scan || false,
-      entry_reason_written: data.entry_reason_written || false,
-      exit_reason_written: data.exit_reason_written || false,
-      mistakes_recorded: data.mistakes_recorded || false,
-      execution_quality_score: data.execution_quality_score,
-      group_id: data.group_id,
-      // فیلدهای ICT
-      fvg: data.fvg || '',
-      order_block: data.order_block || '',
-      bos: data.bos || '',
-      choch: data.choch || '',
-      mss: data.mss || '',
-      liquidity_sweep: data.liquidity_sweep || '',
-      poi: data.poi || '',
-      demand_zone: data.demand_zone || '',
-      supply_zone: data.supply_zone || '',
-    };
+    const formData = new FormData();
 
-    const response = await apiService.post('/trading/trades/', tradeData);
+    // اضافه کردن تمام فیلدها به FormData
+    Object.keys(data).forEach(key => {
+      // فیلدهای خاص: تصویر و آرایه‌ها
+      if (key === 'screenshot' && data[key] instanceof File) {
+        formData.append('screenshot', data[key]);
+      } else if (key === 'rule_checks' && Array.isArray(data[key])) {
+        // آرایه‌ها را به JSON تبدیل می‌کنیم
+        formData.append(key, JSON.stringify(data[key]));
+      } else if (data[key] !== null && data[key] !== undefined) {
+        // سایر فیلدها را به‌صورت معمولی اضافه می‌کنیم
+        formData.append(key, data[key]);
+      }
+    });
+
+    const response = await apiService.post('/trading/trades/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     return {
       success: true,
       data: response.data,
       message: 'ترید با موفقیت ثبت شد',
     };
   } catch (error) {
+    console.error('Error creating trade:', error);
     return {
       success: false,
       error: error.message || 'خطا در ثبت ترید',
@@ -153,20 +97,42 @@ export const createTrade = async (data) => {
 };
 
 /**
- * به‌روزرسانی ترید
+ * به‌روزرسانی ترید - با پشتیبانی از آپلود تصویر (FormData)
  */
 export const updateTrade = async (id, data) => {
   try {
-    const response = await apiService.put(`/trading/trades/${id}/update/`, data);
+    const formData = new FormData();
+
+    Object.keys(data).forEach(key => {
+      if (key === 'screenshot' && data[key] instanceof File) {
+        formData.append('screenshot', data[key]);
+      } else if (key === 'rule_checks' && Array.isArray(data[key])) {
+        formData.append(key, JSON.stringify(data[key]));
+      } else if (data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key]);
+      }
+    });
+
+    // برای PUT، متد را به‌صورت _method ارسال می‌کنیم
+    formData.append('_method', 'PUT');
+
+    const response = await apiService.post(`/trading/trades/${id}/update/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     return {
       success: true,
       data: response.data,
       message: 'ترید با موفقیت به‌روزرسانی شد',
     };
   } catch (error) {
+    console.error('Error updating trade:', error);
     return {
       success: false,
       error: error.message || 'خطا در به‌روزرسانی ترید',
+      details: error.response?.data,
     };
   }
 };

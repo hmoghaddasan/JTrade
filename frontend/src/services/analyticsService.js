@@ -19,12 +19,24 @@ const AnalyticsService = {
    */
   async getAnalytics(params = {}) {
     try {
-      // ✅ مسیر صحیح با پیشوند trading/ مطابق با urlconf بک‌اند
       const response = await apiService.get('/trading/analytics/', { params });
       return response;
     } catch (error) {
       console.error('❌ Error fetching analytics:', error);
-      // propagate error to caller
+      throw error;
+    }
+  },
+
+  /**
+   * ✅ دریافت تحلیل مالی احساسات (Emotional P&L)
+   * @returns {Promise} پاسخ API شامل emotions, summary, total_trades, total_profit
+   */
+  async getEmotionalPnL() {
+    try {
+      const response = await apiService.get('/trading/analytics/emotional-pnl/');
+      return response;
+    } catch (error) {
+      console.error('❌ Error fetching emotional PnL:', error);
       throw error;
     }
   }

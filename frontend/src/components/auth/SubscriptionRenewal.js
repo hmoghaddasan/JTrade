@@ -102,16 +102,25 @@ const SubscriptionRenewal = () => {
     setDiscountCode('');
     setDiscountPercent(0);
     setPaymentData(null);
+    setMessage({ type: '', text: '' });
   };
 
   // ============================================
-  // اعمال کد تخفیف
+  // اعمال کد تخفیف (اصلاح نهایی)
   // ============================================
   const handleApplyDiscount = async () => {
+    // ✅ اگر کد خالی باشد، پیام خطا نشان بده
     if (!discountCode.trim()) {
-      setMessage({ type: 'error', text: 'لطفاً کد تخفیف را وارد کنید' });
+      const errorMsg = 'لطفاً کد تخفیف را وارد کنید';
+      setDiscountMessage(`❌ ${errorMsg}`);
+      setMessage({ type: 'error', text: errorMsg });
+      setDiscountApplied(false);
+      setDiscountPercent(0);
       return;
     }
+
+    setMessage({ type: '', text: '' });
+    setDiscountMessage('');
 
     try {
       const response = await RealApiService.validateDiscount(
@@ -119,20 +128,40 @@ const SubscriptionRenewal = () => {
         selectedPlan?.id
       );
 
+      console.log('📊 Discount validation response:', response.data);
+
       if (response.data.success) {
+        const discountPercentValue = response.data.discount_percent;
+        const successMessage = `✅ کد تخفیف ${discountPercentValue}% با موفقیت اعمال شد`;
+
         setDiscountApplied(true);
-        setDiscountPercent(response.data.discount_percent);
-        setDiscountMessage(`✅ کد تخفیف ${response.data.discount_percent}% با موفقیت اعمال شد`);
-        setMessage({ type: 'success', text: discountMessage });
+        setDiscountPercent(discountPercentValue);
+        setDiscountMessage(successMessage);
+        setMessage({ type: 'success', text: successMessage });
       } else {
-        setMessage({ type: 'error', text: response.data.error || 'کد تخفیف نامعتبر است' });
+        // خطای برگشتی از بک‌اند
+        const errorMsg = response.data.error || 'کد تخفیف نامعتبر است';
+        setDiscountMessage(`❌ ${errorMsg}`);
+        setMessage({ type: 'error', text: errorMsg });
+        setDiscountApplied(false);
+        setDiscountPercent(0);
       }
     } catch (error) {
       console.error('Error validating discount:', error);
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.error || 'خطا در اعتبارسنجی کد تخفیف'
-      });
+
+      let errorMsg = 'خطا در اعتبارسنجی کد تخفیف.';
+      if (error.response?.data?.error) {
+        errorMsg = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+
+      setDiscountMessage(`❌ ${errorMsg}`);
+      setMessage({ type: 'error', text: errorMsg });
+      setDiscountApplied(false);
+      setDiscountPercent(0);
     }
   };
 
@@ -176,7 +205,7 @@ const SubscriptionRenewal = () => {
   // ============================================
   const handlePayment = async () => {
     if (!selectedPlan) {
-      setMessage({ type: 'error', text: 'لطفاً یک پلن را انتخاب کنید' });
+      setMessage({ type: 'error', text: 'لطفاً یک پلن را انتخاب کنید.' });
       return;
     }
 
@@ -192,14 +221,12 @@ const SubscriptionRenewal = () => {
       console.log('💰 Purchase response:', response.data);
 
       if (response.data.success) {
-        // ✅ هدایت کاربر به درگاه زرین‌پال
         const paymentUrl = response.data.payment_url;
         if (paymentUrl) {
-          // ذخیره subscription_id برای استفاده در تایید پرداخت
           localStorage.setItem('pendingSubscriptionId', response.data.subscription_id);
           window.location.href = paymentUrl;
         } else {
-          setMessage({ type: 'error', text: 'آدرس پرداخت یافت نشد' });
+          setMessage({ type: 'error', text: 'آدرس پرداخت یافت نشد.' });
         }
       } else {
         setMessage({ type: 'error', text: response.data.error || 'خطا در ایجاد پرداخت' });
@@ -355,7 +382,6 @@ const SubscriptionRenewal = () => {
                 {(currentSubscription.trades_limit || 0) - (currentSubscription.trades_used || 0)}
               </span>
             </div>
-            {/* ✅ مشاوره‌های باقیمانده */}
             <div className="sub-info-item">
               <span className="sub-label">🧠 مشاوره‌های باقیمانده</span>
               <span className="sub-value">
@@ -383,7 +409,6 @@ const SubscriptionRenewal = () => {
                   const { discountedPrice, vat, total } = calculateTotal(plan.price);
                   const isSelected = selectedPlan?.id === plan.id;
 
-                  // ✅ نمایش تعداد مشاوره
                   const aiConsultationsDisplay = plan.monthly_ai_consultations_limit >= 999
                     ? '♾️ نامحدود'
                     : `${plan.monthly_ai_consultations_limit} عدد`;
@@ -418,7 +443,6 @@ const SubscriptionRenewal = () => {
                       )}
                       <ul className="plan-features">
                         <li>📈 {plan.monthly_trades_limit} ترید در ماه</li>
-                        {/* ✅ اضافه شدن خط مشاوره */}
                         <li>🧠 {aiConsultationsDisplay} مشاوره AI</li>
                         <li>⏳ {plan.duration_days} روز اعتبار</li>
                         {plan.plan_type === 'professional' && <li>✅ تحلیل ICT پیشرفته</li>}
@@ -444,7 +468,14 @@ const SubscriptionRenewal = () => {
               type="text"
               placeholder="کد تخفیف را وارد کنید..."
               value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
+              onChange={(e) => {
+                setDiscountCode(e.target.value);
+                // فقط اگر پیامی وجود دارد، آن را پاک کن (تا پیام خالی پاک نشود)
+                if (message.text) {
+                  setMessage({ type: '', text: '' });
+                  setDiscountMessage('');
+                }
+              }}
               disabled={discountApplied || processing}
               className="discount-input"
             />
@@ -453,7 +484,7 @@ const SubscriptionRenewal = () => {
               onClick={handleApplyDiscount}
               disabled={discountApplied || processing}
             >
-              {discountApplied ? '✅ اعمال شد' : 'اعمال'}
+              {discountApplied ? '✅ اعمال شد.' : 'اعمال'}
             </button>
           </div>
           {discountMessage && (
@@ -477,7 +508,6 @@ const SubscriptionRenewal = () => {
                   <span>📈 تعداد ترید</span>
                   <span>{selectedPlan.monthly_trades_limit} عدد</span>
                 </div>
-                {/* ✅ اضافه شدن ردیف مشاوره در خلاصه */}
                 <div className="summary-row">
                   <span>🧠 تعداد مشاوره AI</span>
                   <span>

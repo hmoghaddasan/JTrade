@@ -1,0 +1,231 @@
+/* frontend/src/components/dashboard/RulesComplianceWidget.css */
+
+.rules-widget {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.rules-widget.dark {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+.rules-widget-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.rules-widget-header:hover {
+  background: rgba(26, 35, 126, 0.04);
+}
+
+.dark .rules-widget-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.widget-icon {
+  font-size: 20px;
+}
+
+.widget-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary, #333);
+}
+
+.dark .widget-title {
+  color: #e0e0e0;
+}
+
+.widget-compliance {
+  font-size: 18px;
+  font-weight: 700;
+  padding: 2px 12px;
+  border-radius: 20px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.widget-compliance.high {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.12);
+}
+
+.widget-compliance.medium {
+  color: #f57c00;
+  background: rgba(245, 124, 0, 0.12);
+}
+
+.widget-compliance.low {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.12);
+}
+
+.dark .widget-compliance.high {
+  color: #66bb6a;
+  background: rgba(46, 125, 50, 0.2);
+}
+
+.dark .widget-compliance.medium {
+  color: #ffa726;
+  background: rgba(245, 124, 0, 0.2);
+}
+
+.dark .widget-compliance.low {
+  color: #ef5350;
+  background: rgba(198, 40, 40, 0.2);
+}
+
+.widget-toggle {
+  font-size: 12px;
+  color: var(--text-muted, #888);
+}
+
+.widget-loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.widget-status {
+  font-size: 13px;
+  color: var(--text-muted, #888);
+  padding: 2px 12px;
+  border-radius: 12px;
+  background: var(--bg-secondary, #f0f0f0);
+}
+
+.rules-widget-body {
+  padding: 0 16px 16px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.no-rules-message {
+  text-align: center;
+  padding: 16px 0;
+  color: var(--text-muted, #888);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.no-rules-message small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.widget-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.dark .stat-item {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #333);
+}
+
+.dark .stat-value {
+  color: #e0e0e0;
+}
+
+.widget-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 16px;
+  font-size: 12px;
+}
+
+.dark .category-item {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.category-name {
+  color: var(--text-secondary, #666);
+}
+
+.category-count {
+  color: var(--text-muted, #888);
+  font-size: 11px;
+}
+
+.widget-action {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color, #eee);
+}
+
+.dark .widget-action {
+  border-top-color: #333;
+}
+
+.btn-view-rules {
+  padding: 8px 24px;
+  background: var(--gradient-start, #1a237e);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.btn-view-rules:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+}
+
+.dark .btn-view-rules:hover {
+  box-shadow: 0 4px 12px rgba(57, 73, 171, 0.3);
+}

@@ -21,6 +21,17 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+  // ✅ وضعیت باز/بسته شدن از LocalStorage (پیش‌فرض: جمع‌شده)
+  const [isExpanded, setIsExpanded] = useState(() => {
+    const saved = localStorage.getItem('pnl_calendar_expanded');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+
+  // ذخیره وضعیت در LocalStorage هنگام تغییر
+  useEffect(() => {
+    localStorage.setItem('pnl_calendar_expanded', JSON.stringify(isExpanded));
+  }, [isExpanded]);
+
   // بررسی اندازه صفحه
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -138,134 +149,160 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
   const rowCount = getRowCount();
   const cellSize = getCellSize();
 
+  // ✅ تابع toggle برای باز/بسته کردن
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div className={`pnl-calendar-container ${compact ? 'compact' : ''}`}>
-      {/* ===== هدر تقویم ===== */}
-      <div className="pnl-calendar-header">
-        <div className="calendar-title">
-          <h3>📅 تقویم سود و زیان</h3>
-          <span className="calendar-month-year">
+      {/* ===== هدر تقویم (قابل کلیک) ===== */}
+      <div className="calendar-header" onClick={toggleExpand}>
+        <div className="calendar-header-left">
+          <span className="calendar-icon">📅</span>
+          <span className="calendar-title-text">تقویم سود و زیان</span>
+          <span className="calendar-badge">
+            {trades.length} ترید
+          </span>
+          <span className="calendar-month-badge">
             {getPersianMonthName(currentMonth)} {currentYear}
           </span>
         </div>
-        <div className="calendar-nav">
-          <button className="nav-btn" onClick={goToPrevMonth} title="ماه قبل">
-            ◀
-          </button>
-          <button className="nav-btn today-btn" onClick={goToToday}>
-            امروز
-          </button>
-          <button className="nav-btn" onClick={goToNextMonth} title="ماه بعد">
-            ▶
-          </button>
+        <div className="calendar-header-right">
+          <span className={`calendar-toggle ${isExpanded ? 'expanded' : 'collapsed'}`}>
+            {isExpanded ? '▲' : '▼'}
+          </span>
         </div>
       </div>
 
-      {/* ===== خلاصه آمار ماه ===== */}
-      <div className={`calendar-stats ${compact ? 'compact-stats' : ''}`}>
-        <div className="stat-item">
-          <span className="stat-label">سود ماه</span>
-          <span className={`stat-value ${monthStats.totalProfit >= 0 ? 'positive' : 'negative'}`}>
-            {monthStats.totalProfit >= 0 ? '+' : ''}{formatNumber(monthStats.totalProfit)}$
-          </span>
+      {/* ===== محتوای تقویم (فقط در حالت باز نمایش داده می‌شود) ===== */}
+      <div className={`calendar-body ${isExpanded ? 'expanded' : 'collapsed'}`}>
+        {/* ===== نوار ناوبری و آمار (درون محتوا) ===== */}
+        <div className="pnl-calendar-header">
+          <div className="calendar-title">
+            <span className="calendar-month-year">
+              {getPersianMonthName(currentMonth)} {currentYear}
+            </span>
+          </div>
+          <div className="calendar-nav">
+            <button className="nav-btn" onClick={goToPrevMonth} title="ماه قبل">
+              ◀
+            </button>
+            <button className="nav-btn today-btn" onClick={goToToday}>
+              امروز
+            </button>
+            <button className="nav-btn" onClick={goToNextMonth} title="ماه بعد">
+              ▶
+            </button>
+          </div>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">نرخ برد</span>
-          <span className="stat-value">{monthStats.winRate.toFixed(1)}%</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">برد/باخت</span>
-          <span className="stat-value">
-            <span className="win-count">{monthStats.winningTrades}</span>
-            <span className="separator">/</span>
-            <span className="loss-count">{monthStats.losingTrades}</span>
-          </span>
-        </div>
-        {compact && windowWidth > 768 && (
+
+        {/* ===== خلاصه آمار ماه ===== */}
+        <div className={`calendar-stats ${compact ? 'compact-stats' : ''}`}>
           <div className="stat-item">
-            <span className="stat-label">تعداد ترید</span>
-            <span className="stat-value">{monthStats.totalTrades}</span>
+            <span className="stat-label">سود ماه</span>
+            <span className={`stat-value ${monthStats.totalProfit >= 0 ? 'positive' : 'negative'}`}>
+              {monthStats.totalProfit >= 0 ? '+' : ''}{formatNumber(monthStats.totalProfit)}$
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* ===== تقویم ===== */}
-      <div className="calendar-grid">
-        {/* روزهای هفته */}
-        <div className="calendar-weekdays">
-          {weekDays.map((day, index) => (
-            <div key={index} className="weekday-cell">
-              {day}
+          <div className="stat-item">
+            <span className="stat-label">نرخ برد</span>
+            <span className="stat-value">{monthStats.winRate.toFixed(1)}%</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">برد/باخت</span>
+            <span className="stat-value">
+              <span className="win-count">{monthStats.winningTrades}</span>
+              <span className="separator">/</span>
+              <span className="loss-count">{monthStats.losingTrades}</span>
+            </span>
+          </div>
+          {compact && windowWidth > 768 && (
+            <div className="stat-item">
+              <span className="stat-label">تعداد ترید</span>
+              <span className="stat-value">{monthStats.totalTrades}</span>
             </div>
-          ))}
+          )}
         </div>
 
-        {/* روزهای ماه */}
-        <div className="calendar-days" style={{ gridTemplateRows: `repeat(${rowCount}, 1fr)` }}>
-          {calendarDays.map((dayData, index) => {
-            const isTodayDay = isToday(dayData.date);
-            const isSelectedDay = isSelected(dayData.date);
-            const isEmpty = dayData.day === null;
-            const profitClass = getProfitClass(dayData.profit, dayData.trades.length);
-            const color = getProfitColor(dayData.profit, maxProfit, dayData.trades.length);
-            const textColor = getTextColor(dayData.profit, maxProfit);
-
-            return (
-              <div
-                key={index}
-                className={`calendar-day-cell 
-                  ${isEmpty ? 'empty' : 'has-date'} 
-                  ${!isEmpty && profitClass} 
-                  ${isTodayDay ? 'today' : ''} 
-                  ${isSelectedDay ? 'selected' : ''}
-                  ${dayData.hasTrade ? 'has-trade' : ''}
-                  ${compact ? 'compact-cell' : ''}`}
-                style={{
-                  backgroundColor: isEmpty ? '#fafafa' : color,
-                  borderColor: isEmpty ? '#f0f0f0' : undefined,
-                  cursor: isEmpty ? 'default' : 'pointer',
-                  minHeight: cellSize,
-                  maxHeight: cellSize,
-                  color: isEmpty ? '#e0e0e0' : textColor
-                }}
-                onMouseEnter={(e) => !isEmpty && dayData.date && showTooltip(e, dayData)}
-                onMouseLeave={hideTooltip}
-                onClick={() => !isEmpty && handleDayClick(dayData)}
-              >
-                {dayData.day && (
-                  <>
-                    <span className="day-number">{dayData.day}</span>
-                    {dayData.hasTrade && (
-                      <span className={`day-profit-indicator ${dayData.profit > 0 ? 'up' : dayData.profit < 0 ? 'down' : 'zero'}`}>
-                        {dayData.profit > 0 ? '▲' : dayData.profit < 0 ? '▼' : '•'}
-                      </span>
-                    )}
-                  </>
-                )}
+        {/* ===== تقویم ===== */}
+        <div className="calendar-grid">
+          {/* روزهای هفته */}
+          <div className="calendar-weekdays">
+            {weekDays.map((day, index) => (
+              <div key={index} className="weekday-cell">
+                {day}
               </div>
-            );
-          })}
-        </div>
-      </div>
+            ))}
+          </div>
 
-      {/* ===== Legend - راهنمای رنگ ===== */}
-      <div className="calendar-legend">
-        <div className="legend-items">
-          <div className="legend-item">
-            <span className="legend-dot positive-dot"></span>
-            <span className="legend-label">سود</span>
+          {/* روزهای ماه */}
+          <div className="calendar-days" style={{ gridTemplateRows: `repeat(${rowCount}, 1fr)` }}>
+            {calendarDays.map((dayData, index) => {
+              const isTodayDay = isToday(dayData.date);
+              const isSelectedDay = isSelected(dayData.date);
+              const isEmpty = dayData.day === null;
+              const profitClass = getProfitClass(dayData.profit, dayData.trades.length);
+              const color = getProfitColor(dayData.profit, maxProfit, dayData.trades.length);
+              const textColor = getTextColor(dayData.profit, maxProfit);
+
+              return (
+                <div
+                  key={index}
+                  className={`calendar-day-cell 
+                    ${isEmpty ? 'empty' : 'has-date'} 
+                    ${!isEmpty && profitClass} 
+                    ${isTodayDay ? 'today' : ''} 
+                    ${isSelectedDay ? 'selected' : ''}
+                    ${dayData.hasTrade ? 'has-trade' : ''}
+                    ${compact ? 'compact-cell' : ''}`}
+                  style={{
+                    backgroundColor: isEmpty ? '#fafafa' : color,
+                    borderColor: isEmpty ? '#f0f0f0' : undefined,
+                    cursor: isEmpty ? 'default' : 'pointer',
+                    minHeight: cellSize,
+                    maxHeight: cellSize,
+                    color: isEmpty ? '#e0e0e0' : textColor
+                  }}
+                  onMouseEnter={(e) => !isEmpty && dayData.date && showTooltip(e, dayData)}
+                  onMouseLeave={hideTooltip}
+                  onClick={() => !isEmpty && handleDayClick(dayData)}
+                >
+                  {dayData.day && (
+                    <>
+                      <span className="day-number">{dayData.day}</span>
+                      {dayData.hasTrade && (
+                        <span className={`day-profit-indicator ${dayData.profit > 0 ? 'up' : dayData.profit < 0 ? 'down' : 'zero'}`}>
+                          {dayData.profit > 0 ? '▲' : dayData.profit < 0 ? '▼' : '•'}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <div className="legend-item">
-            <span className="legend-dot zero-dot"></span>
-            <span className="legend-label">صفر</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot negative-dot"></span>
-            <span className="legend-label">ضرر</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot no-data-dot"></span>
-            <span className="legend-label">بدون ترید</span>
+        </div>
+
+        {/* ===== Legend - راهنمای رنگ ===== */}
+        <div className="calendar-legend">
+          <div className="legend-items">
+            <div className="legend-item">
+              <span className="legend-dot positive-dot"></span>
+              <span className="legend-label">سود</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot zero-dot"></span>
+              <span className="legend-label">صفر</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot negative-dot"></span>
+              <span className="legend-label">ضرر</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot no-data-dot"></span>
+              <span className="legend-label">بدون ترید</span>
+            </div>
           </div>
         </div>
       </div>

@@ -2,13 +2,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import '@fontsource/vazirmatn'; // ✅ ایمپورت فونت وزیر (وزن‌های ۴۰۰ و ۷۰۰)
 import './index.css';
 import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>  // ✅ این را کامنت کنید
     <App />
-  </React.StrictMode>
+  // </React.StrictMode>
 );
