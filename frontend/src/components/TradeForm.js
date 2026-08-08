@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import RealApiService from '../services/realApiService';
 import RuleService from '../services/ruleService';
+import SystemSettingsService from '../services/systemSettingsService';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import ImageZoom from './ImageZoom';
 import './TradeForm.css';
 
 const TradeForm = () => {
@@ -21,12 +23,29 @@ const TradeForm = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
 
-  // State برای قوانین
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
   const [rulesLoading, setRulesLoading] = useState(false);
+  const [screenshotFile, setScreenshotFile] = useState(null); // Base64 string
 
-  // لیست کامل نمادها
+  // تنظیمات آپلود تصویر
+  const [screenshotSettings, setScreenshotSettings] = useState({
+    show_upload: true,
+    max_size_mb: 5,
+    max_width: 2000,
+    max_height: 2000,
+  });
+
+  // ===== تبدیل فایل به Base64 =====
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const symbols = [
     'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'USDCHF', 'NZDUSD',
     'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY', 'CADJPY', 'CHFJPY', 'NZDJPY',
@@ -154,33 +173,29 @@ const TradeForm = () => {
     supply_zone: '',
   });
 
-  // ============================================
-  // بررسی وضعیت اشتراک
-  // ============================================
+  // ===== useEffect ها =====
   useEffect(() => {
     const checkSubscription = async () => {
       try {
         const response = await RealApiService.getSubscriptionStatus();
         const data = response.data;
         setSubscriptionStatus(data);
-
+        // اگر کاربر ادمین است، محدودیت را نادیده بگیر
+        if (user?.is_admin) {
+          setShowLimitWarning(false);
+          return;
+        }
         if (data.is_trade_limit_reached) {
           setShowLimitWarning(true);
-          showToast(
-            `⚠️ محدودیت ترید شما به پایان رسیده است. (${data.trades_limit} ترید)`,
-            'warning'
-          );
+          showToast(`⚠️ محدودیت ترید شما به پایان رسیده است. (${data.trades_limit} ترید)`, 'warning');
         }
       } catch (error) {
         console.error('Error checking subscription:', error);
       }
     };
     checkSubscription();
-  }, []);
+  }, [user]);
 
-  // ============================================
-  // دریافت دسته‌بندی‌های کاربر
-  // ============================================
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -193,13 +208,9 @@ const TradeForm = () => {
         setCategories([]);
       }
     };
-
     loadCategories();
   }, [user]);
 
-  // ============================================
-  // بارگذاری قوانین کاربر
-  // ============================================
   useEffect(() => {
     const loadRules = async () => {
       setRulesLoading(true);
@@ -218,9 +229,16 @@ const TradeForm = () => {
     loadRules();
   }, []);
 
-  // ============================================
-  // تغییر وضعیت بررسی قانون
-  // ============================================
+  // بارگذاری تنظیمات آپلود تصویر
+  useEffect(() => {
+    const loadScreenshotSettings = async () => {
+      const settings = await SystemSettingsService.getScreenshotSettings();
+      setScreenshotSettings(settings);
+    };
+    loadScreenshotSettings();
+  }, []);
+
+  // ===== توابع تغییرات =====
   const handleRuleCheck = (ruleId) => {
     setCheckedRules(prev =>
       prev.map(item =>
@@ -239,28 +257,98 @@ const TradeForm = () => {
     setErrors(prev => prev.filter(err => !err.includes(name)));
   };
 
+  // ===== تغییر فایل با کنترل کامل =====
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 1️⃣ بررسی فعال بودن آپلود
+    if (!screenshotSettings.show_upload) {
+      showToast('❌ امکان آپلود تصویر غیرفعال است.', 'warning');
+      e.target.value = '';
+      return;
+    }
+
+    // 2️⃣ بررسی حجم
+    const maxSizeMB = screenshotSettings.max_size_mb || 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      showToast(`❌ حجم فایل نباید بیشتر از ${maxSizeMB} مگابایت باشد.`, 'error');
+      e.target.value = '';
+      return;
+    }
+
+    // 3️⃣ بررسی ابعاد (با استفاده از Image object)
+    try {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const maxW = screenshotSettings.max_width || 2000;
+      const maxH = screenshotSettings.max_height || 2000;
+
+      if (img.width > maxW || img.height > maxH) {
+        showToast(`❌ ابعاد تصویر باید کمتر از ${maxW}x${maxH} پیکسل باشد.`, 'error');
+        e.target.value = '';
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error('Error checking image dimensions:', error);
+      // ادامه بده، چون ممکن است خطا مربوط به بررسی ابعاد باشد
+    }
+
+    // 4️⃣ تبدیل به Base64
+    try {
+      const base64 = await fileToBase64(file);
+      setScreenshotFile(base64);
+      console.log('📸 File converted to Base64, length:', base64.length);
+    } catch (error) {
+      console.error('❌ Error converting file to Base64:', error);
+      showToast('❌ خطا در خواندن فایل', 'error');
+    }
+  };
+
+  // ===== اعتبارسنجی =====
   const validateForm = () => {
     const validationErrors = [];
     if (!formData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
     if (!formData.trade_date) validationErrors.push('لطفاً تاریخ معامله را وارد کنید');
     if (!formData.trade_type) validationErrors.push('لطفاً نوع ترید را انتخاب کنید');
     if (!formData.group_id) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
-    if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید');
-    if (!formData.close_price || parseFloat(formData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید');
-    if (formData.profit && isNaN(parseFloat(formData.profit))) validationErrors.push('مقدار سود/زیان باید عدد باشد');
+    if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) {
+      validationErrors.push('لطفاً قیمت ورود را وارد کنید');
+    }
+    if (!formData.close_price || parseFloat(formData.close_price) <= 0) {
+      validationErrors.push('لطفاً قیمت خروج را وارد کنید');
+    }
+    if (formData.profit && isNaN(parseFloat(formData.profit))) {
+      validationErrors.push('مقدار سود/زیان باید عدد باشد');
+    }
     if (formData.execution_quality_score) {
       const score = parseInt(formData.execution_quality_score);
-      if (isNaN(score) || score < 1 || score > 10) validationErrors.push('امتیاز کیفیت اجرا باید بین ۱ تا ۱۰ باشد');
+      if (isNaN(score) || score < 1 || score > 10) {
+        validationErrors.push('امتیاز کیفیت اجرا باید بین ۱ تا ۱۰ باشد');
+      }
     }
-    if (formData.risk_reward_ratio && parseFloat(formData.risk_reward_ratio) <= 0) validationErrors.push('نسبت ریسک به ریوارد باید بزرگتر از صفر باشد');
+    if (formData.risk_reward_ratio && parseFloat(formData.risk_reward_ratio) <= 0) {
+      validationErrors.push('نسبت ریسک به ریوارد باید بزرگتر از صفر باشد');
+    }
     if (formData.risk_percent) {
       const percent = parseFloat(formData.risk_percent);
-      if (isNaN(percent) || percent < 0 || percent > 100) validationErrors.push('درصد ریسک باید بین ۰ تا ۱۰۰ باشد');
+      if (isNaN(percent) || percent < 0 || percent > 100) {
+        validationErrors.push('درصد ریسک باید بین ۰ تا ۱۰۰ باشد');
+      }
     }
     setErrors(validationErrors);
     return validationErrors.length === 0;
   };
 
+  // ===== ارسال فرم (با JSON - مشابه فرم ویرایش) =====
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -270,6 +358,7 @@ const TradeForm = () => {
     }
 
     setLoading(true);
+
     if (!validateForm()) {
       alert('❌ لطفاً خطاهای زیر را اصلاح کنید:\n\n' + errors.map((e, i) => `${i+1}. ${e}`).join('\n'));
       setLoading(false);
@@ -278,28 +367,67 @@ const TradeForm = () => {
 
     const date = new Date(formData.trade_date);
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    formData.day_of_week = days[date.getDay()];
-    formData.month = date.getMonth() + 1;
+    const day_of_week = days[date.getDay()];
+    const month = date.getMonth() + 1;
 
-    // افزودن قوانین به داده‌های ارسالی
     const ruleCheckIds = checkedRules.filter(r => r.checked).map(r => r.id);
-    const submitData = {
+    const groupId = parseInt(formData.group_id);
+
+    if (isNaN(groupId) || groupId <= 0) {
+      alert('لطفاً یک دسته‌بندی معتبر انتخاب کنید.');
+      setLoading(false);
+      return;
+    }
+
+    // ===== ساخت payload به‌صورت JSON (دقیقاً مشابه فرم ویرایش) =====
+    const payload = {
       ...formData,
+      group: groupId,
+      group_id: groupId,
+      day_of_week: day_of_week,
+      month: month,
       rule_checks: ruleCheckIds,
     };
 
+    // ===== مدیریت تصویر (دقیقاً مشابه فرم ویرایش) =====
+    if (screenshotFile) {
+      payload.screenshot = screenshotFile; // Base64
+      console.log('✅ Screenshot added to payload, length:', screenshotFile.length);
+    } else {
+      console.warn('⚠️ No screenshot file');
+      delete payload.screenshot;
+    }
+
+    // حذف فیلدهای خالی (اختیاری)
+    const optionalFields = [
+      'time_ny', 'stop_loss', 'take_profit_1', 'take_profit_2', 'take_profit_3',
+      'risk_usd', 'risk_percent', 'risk_reward_ratio', 'profit', 'tp_sl_hit',
+      'mistake_weight', 'dominant_feeling', 'weekly_profile_note', 'retirement_model',
+      'checklist_extra', 'reaction_to_profit', 'emotion_after_losses', 'mistake_code',
+      'fvg', 'order_block', 'bos', 'choch', 'mss', 'liquidity_sweep', 'poi',
+      'demand_zone', 'supply_zone'
+    ];
+    optionalFields.forEach(field => {
+      if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
+        delete payload[field];
+      }
+    });
+
+    console.log('📤 Full payload being sent:', JSON.stringify(payload, null, 2));
+
     try {
-      await RealApiService.createTrade(submitData);
+      await RealApiService.createTrade(payload);
       setLoading(false);
       showToast('✅ ترید با موفقیت ثبت شد!', 'success');
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error creating trade:', error);
+      console.error('❌ Error creating trade:', error);
       if (error.response?.data?.limit) {
         showToast(error.response.data.limit, 'error');
         setShowLimitWarning(true);
-      } else if (error.response?.data?.rule_checks) {
-        showToast(error.response.data.rule_checks, 'error');
+      } else if (error.response?.data) {
+        const errorMessages = Object.values(error.response.data).flat().join('\n');
+        showToast(`❌ خطا: ${errorMessages}`, 'error');
       } else {
         showToast('❌ خطا در ثبت ترید', 'error');
       }
@@ -307,18 +435,16 @@ const TradeForm = () => {
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 9));
+  // ===== رندر مراحل =====
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 10));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  // ============================================
-  // Step 1: شناسه و تاریخ
-  // ============================================
   const renderStep1 = () => (
     <div className="form-step">
       <h3>📅 شناسه و تاریخ</h3>
       <div className="form-row">
         <div className="form-group">
-          <label>تاریخ معامله</label>
+          <label>تاریخ معامله <span style={{ color: 'red' }}>(اجباری)</span></label>
           <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required disabled={showLimitWarning} />
         </div>
         <div className="form-group">
@@ -329,15 +455,12 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 2: جلسه و نماد (با انتخاب دسته‌بندی اجباری)
-  // ============================================
   const renderStep2 = () => (
     <div className="form-step">
       <h3>📈 جلسه و نماد</h3>
       <div className="form-row">
         <div className="form-group">
-          <label>نماد معاملاتی</label>
+          <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
           <select name="symbol" value={formData.symbol} onChange={handleChange} required disabled={showLimitWarning}>
             <option value="">انتخاب نماد</option>
             {Object.entries(symbolGroups).map(([group, items]) => (
@@ -348,7 +471,7 @@ const TradeForm = () => {
           </select>
         </div>
         <div className="form-group">
-          <label>نوع ترید</label>
+          <label>نوع ترید <span style={{ color: 'red' }}>(اجباری)</span></label>
           <select name="trade_type" value={formData.trade_type} onChange={handleChange} disabled={showLimitWarning}>
             <option value="Buy">خرید (Buy)</option><option value="Sell">فروش (Sell)</option>
           </select>
@@ -362,14 +485,8 @@ const TradeForm = () => {
           </select>
         </div>
         <div className="form-group">
-          <label>دسته‌بندی <span className="required">*</span></label>
-          <select
-            name="group_id"
-            value={formData.group_id}
-            onChange={handleChange}
-            required
-            disabled={showLimitWarning}
-          >
+          <label>دسته‌بندی <span style={{ color: 'red' }}>(اجباری)</span></label>
+          <select name="group_id" value={formData.group_id} onChange={handleChange} required disabled={showLimitWarning}>
             <option value="">انتخاب دسته‌بندی</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>
@@ -377,9 +494,7 @@ const TradeForm = () => {
               </option>
             ))}
           </select>
-          {!formData.group_id && (
-            <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>
-          )}
+          {!formData.group_id && <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>}
         </div>
       </div>
       <div className="form-group">
@@ -389,9 +504,6 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 3: وضعیت روحی و ذهنی
-  // ============================================
   const renderStep3 = () => {
     const emotions = [
       { key: 'focus', label: 'تمرکز' }, { key: 'calm', label: 'آرامش' }, { key: 'excited', label: 'هیجان' },
@@ -434,9 +546,6 @@ const TradeForm = () => {
     );
   };
 
-  // ============================================
-  // Step 4: برنامه و بایاس روزانه
-  // ============================================
   const renderStep4 = () => {
     const timeframes = [
       { key: 'timeframe_d', label: 'D1' }, { key: 'timeframe_h4', label: 'H4' },
@@ -504,63 +613,124 @@ const TradeForm = () => {
     );
   };
 
-  // ============================================
-  // Step 5: جزئیات اجرای معامله
-  // ============================================
   const renderStep5 = () => (
     <div className="form-step">
       <h3>💰 جزئیات اجرای معامله</h3>
       <div className="form-row">
-        <div className="form-group"><label>قیمت ورود</label><input type="number" name="entry_price" value={formData.entry_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>حد ضرر (SL)</label><input type="number" name="stop_loss" value={formData.stop_loss} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
+        <div className="form-group">
+          <label>قیمت ورود <span style={{ color: 'red' }}>(اجباری)</span></label>
+          <input type="number" name="entry_price" value={formData.entry_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>حد ضرر (SL)</label>
+          <input type="number" name="stop_loss" value={formData.stop_loss} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
+        </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>حد سود اول (TP1)</label><input type="number" name="take_profit_1" value={formData.take_profit_1} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>حد سود دوم (TP2)</label><input type="number" name="take_profit_2" value={formData.take_profit_2} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
+        <div className="form-group">
+          <label>حد سود اول (TP1)</label>
+          <input type="number" name="take_profit_1" value={formData.take_profit_1} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>حد سود دوم (TP2)</label>
+          <input type="number" name="take_profit_2" value={formData.take_profit_2} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
+        </div>
       </div>
-      <div className="form-group"><label>حد سود سوم (TP3)</label><input type="number" name="take_profit_3" value={formData.take_profit_3} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
+      <div className="form-group">
+        <label>حد سود سوم (TP3)</label>
+        <input type="number" name="take_profit_3" value={formData.take_profit_3} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
+      </div>
       <div className="form-row">
-        <div className="form-group"><label>مقدار ریسک به دلار</label><input type="number" name="risk_usd" value={formData.risk_usd} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>درصد ریسک از کل سرمایه</label><input type="number" name="risk_percent" value={formData.risk_percent} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} /></div>
+        <div className="form-group">
+          <label>مقدار ریسک به دلار</label>
+          <input type="number" name="risk_usd" value={formData.risk_usd} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>درصد ریسک از کل سرمایه</label>
+          <input type="number" name="risk_percent" value={formData.risk_percent} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} />
+        </div>
       </div>
-      <div className="form-group"><label>نسبت ریسک به ریوارد (R:R)</label><input type="number" name="risk_reward_ratio" value={formData.risk_reward_ratio} onChange={handleChange} step="0.01" placeholder="مثلاً 2.0" disabled={showLimitWarning} /></div>
+      <div className="form-group">
+        <label>نسبت ریسک به ریوارد (R:R)</label>
+        <input type="number" name="risk_reward_ratio" value={formData.risk_reward_ratio} onChange={handleChange} step="0.01" placeholder="مثلاً 2.0" disabled={showLimitWarning} />
+      </div>
     </div>
   );
 
-  // ============================================
-  // Step 6: نتیجه معامله
-  // ============================================
   const renderStep6 = () => (
     <div className="form-step">
       <h3>📊 نتیجه معامله</h3>
       <div className="form-row">
-        <div className="form-group"><label>قیمت بسته‌شدن</label><input type="number" name="close_price" value={formData.close_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>حد خورده شده</label><select name="tp_sl_hit" value={formData.tp_sl_hit} onChange={handleChange} disabled={showLimitWarning}><option value="">انتخاب کنید</option><option value="TP1">TP1</option><option value="TP2">TP2</option><option value="TP3">TP3</option><option value="SL">SL</option><option value="BE">BE</option></select></div>
+        <div className="form-group">
+          <label>قیمت بسته‌شدن <span style={{ color: 'red' }}>(اجباری)</span></label>
+          <input type="number" name="close_price" value={formData.close_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>حد خورده شده</label>
+          <select name="tp_sl_hit" value={formData.tp_sl_hit} onChange={handleChange} disabled={showLimitWarning}>
+            <option value="">انتخاب کنید</option>
+            <option value="TP1">TP1</option>
+            <option value="TP2">TP2</option>
+            <option value="TP3">TP3</option>
+            <option value="SL">SL</option>
+            <option value="BE">BE</option>
+          </select>
+        </div>
       </div>
-      <div className="form-group"><label>سود یا زیان نهایی (دلار)</label><input type="number" name="profit" value={formData.profit} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} /></div>
+      <div className="form-group">
+        <label>سود یا زیان نهایی (دلار)</label>
+        <input type="number" name="profit" value={formData.profit} onChange={handleChange} step="0.01" placeholder="0.00" disabled={showLimitWarning} />
+      </div>
     </div>
   );
 
-  // ============================================
-  // Step 7: احساسات و بازبینی
-  // ============================================
   const renderStep7 = () => (
     <div className="form-step">
       <h3>🔄 احساسات و بازبینی</h3>
       <div className="form-row">
-        <div className="form-group"><label>استرس قبل معامله</label><select name="pre_trade_stress" value={formData.pre_trade_stress} onChange={handleChange} disabled={showLimitWarning}><option value="کم">کم</option><option value="متوسط">متوسط</option><option value="زیاد">زیاد</option></select></div>
-        <div className="form-group"><label>کنترل هیجان هنگام ورود</label><select name="entry_emotion_control" value={formData.entry_emotion_control} onChange={handleChange} disabled={showLimitWarning}><option value="بله">بله</option><option value="خیر">خیر</option><option value="متوسط">متوسط</option></select></div>
+        <div className="form-group">
+          <label>استرس قبل معامله</label>
+          <select name="pre_trade_stress" value={formData.pre_trade_stress} onChange={handleChange} disabled={showLimitWarning}>
+            <option value="کم">کم</option><option value="متوسط">متوسط</option><option value="زیاد">زیاد</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>کنترل هیجان هنگام ورود</label>
+          <select name="entry_emotion_control" value={formData.entry_emotion_control} onChange={handleChange} disabled={showLimitWarning}>
+            <option value="بله">بله</option><option value="خیر">خیر</option><option value="متوسط">متوسط</option>
+          </select>
+        </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>واکنش به سود</label><input type="text" name="reaction_to_profit" value={formData.reaction_to_profit} onChange={handleChange} placeholder="مثلاً: محتاطانه، شتابزده..." disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>مدیریت انتظار</label><select name="expectation_management" value={formData.expectation_management} onChange={handleChange} disabled={showLimitWarning}><option value="ضعیف">ضعیف</option><option value="متوسط">متوسط</option><option value="خوب">خوب</option></select></div>
+        <div className="form-group">
+          <label>واکنش به سود</label>
+          <input type="text" name="reaction_to_profit" value={formData.reaction_to_profit} onChange={handleChange} placeholder="مثلاً: محتاطانه، شتابزده..." disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>مدیریت انتظار</label>
+          <select name="expectation_management" value={formData.expectation_management} onChange={handleChange} disabled={showLimitWarning}>
+            <option value="ضعیف">ضعیف</option><option value="متوسط">متوسط</option><option value="خوب">خوب</option>
+          </select>
+        </div>
       </div>
-      <div className="form-group"><label>کنترل احساسات پس از ضرر</label><textarea name="emotion_after_losses" value={formData.emotion_after_losses} onChange={handleChange} placeholder="اگر ضرر قبلی در روز داشتید، کنترل احساسات چگونه بود؟" rows="2" disabled={showLimitWarning} /></div>
+      <div className="form-group">
+        <label>کنترل احساسات پس از ضرر</label>
+        <textarea name="emotion_after_losses" value={formData.emotion_after_losses} onChange={handleChange} placeholder="اگر ضرر قبلی در روز داشتید، کنترل احساسات چگونه بود؟" rows="2" disabled={showLimitWarning} />
+      </div>
       <div className="form-row">
-        <div className="form-group"><label>کد اشتباه</label><input type="text" name="mistake_code" value={formData.mistake_code} onChange={handleChange} placeholder="مثلاً: ورود زودهنگام" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>وزن اشتباه (0.1 تا 0.9)</label><input type="number" name="mistake_weight" value={formData.mistake_weight} onChange={handleChange} step="0.1" min="0.1" max="0.9" placeholder="0.5" disabled={showLimitWarning} /></div>
+        <div className="form-group">
+          <label>کد اشتباه</label>
+          <input type="text" name="mistake_code" value={formData.mistake_code} onChange={handleChange} placeholder="مثلاً: ورود زودهنگام" disabled={showLimitWarning} />
+        </div>
+        <div className="form-group">
+          <label>وزن اشتباه (0.1 تا 0.9)</label>
+          <input type="number" name="mistake_weight" value={formData.mistake_weight} onChange={handleChange} step="0.1" min="0.1" max="0.9" placeholder="0.5" disabled={showLimitWarning} />
+        </div>
       </div>
-      <div className="form-group"><label>امتیاز کیفیت اجرا (۱-۱۰)</label><input type="number" name="execution_quality_score" value={formData.execution_quality_score} onChange={handleChange} min="1" max="10" placeholder="5" disabled={showLimitWarning} /></div>
+      <div className="form-group">
+        <label>امتیاز کیفیت اجرا (۱-۱۰)</label>
+        <input type="number" name="execution_quality_score" value={formData.execution_quality_score} onChange={handleChange} min="1" max="10" placeholder="5" disabled={showLimitWarning} />
+      </div>
       <div className="checkbox-grid">
         <div className="checkbox-group"><input type="checkbox" name="stop_loss_adherence" checked={formData.stop_loss_adherence} onChange={handleChange} disabled={showLimitWarning} /><label>پایبندی به حد ضرر</label></div>
         <div className="checkbox-group"><input type="checkbox" name="strategy_adherence" checked={formData.strategy_adherence} onChange={handleChange} disabled={showLimitWarning} /><label>پایبندی به استراتژی</label></div>
@@ -574,9 +744,6 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 8: تحلیل ICT
-  // ============================================
   const renderICTStep = () => (
     <div className="form-step">
       <h3>📊 تحلیل ICT</h3>
@@ -600,9 +767,6 @@ const TradeForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 9: قوانین معاملاتی
-  // ============================================
   const renderRulesStep = () => {
     if (rulesLoading) {
       return (
@@ -694,6 +858,50 @@ const TradeForm = () => {
     );
   };
 
+  const renderStep10 = () => {
+    const maxSize = screenshotSettings.max_size_mb || 5;
+    const maxW = screenshotSettings.max_width || 2000;
+    const maxH = screenshotSettings.max_height || 2000;
+
+    return (
+      <div className="form-step">
+        <h3>🖼️ تصویر چارت</h3>
+        {screenshotSettings.show_upload ? (
+          <div className="form-group">
+            <label>آپلود تصویر چارت (اختیاری)</label>
+            <input type="file" accept="image/*" onChange={handleFileChange} disabled={showLimitWarning} />
+            {screenshotFile && (
+              <div className="file-preview">
+                <ImageZoom
+                  src={screenshotFile}
+                  alt="پیش‌نمایش چارت"
+                  className="thumbnail-image"
+                />
+                <button
+                  type="button"
+                  className="btn-remove-file"
+                  onClick={() => {
+                    setScreenshotFile(null);
+                    document.querySelector('input[type="file"]').value = '';
+                  }}
+                >
+                  ✕ حذف
+                </button>
+              </div>
+            )}
+            <small className="hint-text">
+              📌 حداکثر حجم: {maxSize} مگابایت &nbsp;|&nbsp;
+              حداکثر ابعاد: {maxW}×{maxH} پیکسل &nbsp;|&nbsp;
+              فرمت‌های مجاز: JPG, PNG, GIF, WebP
+            </small>
+          </div>
+        ) : (
+          <p className="upload-disabled-message">⛔ بخش آپلود تصویر توسط ادمین غیرفعال شده است.</p>
+        )}
+      </div>
+    );
+  };
+
   const renderStep = () => {
     switch(currentStep) {
       case 1: return renderStep1();
@@ -705,6 +913,7 @@ const TradeForm = () => {
       case 7: return renderStep7();
       case 8: return renderICTStep();
       case 9: return renderRulesStep();
+      case 10: return renderStep10();
       default: return null;
     }
   };
@@ -721,15 +930,8 @@ const TradeForm = () => {
           <div className="warning-icon">⚠️</div>
           <div className="warning-content">
             <h4>محدودیت ترید به پایان رسیده!</h4>
-            <p>
-              شما {subscriptionStatus?.trades_limit || 0} ترید در پلن خود دارید که همه را استفاده کرده‌اید.
-            </p>
-            <button
-              className="btn-upgrade"
-              onClick={() => navigate('/profile')}
-            >
-              🚀 تمدید اشتراک
-            </button>
+            <p>شما {subscriptionStatus?.trades_limit || 0} ترید در پلن خود دارید که همه را استفاده کرده‌اید.</p>
+            <button className="btn-upgrade" onClick={() => navigate('/profile')}>🚀 تمدید اشتراک</button>
           </div>
         </div>
       )}
@@ -743,7 +945,7 @@ const TradeForm = () => {
       )}
 
       <div className="step-indicator">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(step => (
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(step => (
           <div
             key={step}
             className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`}
@@ -755,24 +957,25 @@ const TradeForm = () => {
       </div>
 
       <div className="step-labels">
-        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span><span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span><span>قوانین</span>
+        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span>
+        <span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span>
+        <span>قوانین</span><span>تصویر</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="form-content">{renderStep()}</div>
-
         <div className="form-actions">
           {currentStep > 1 && (
             <button type="button" className="btn-prev" onClick={prevStep} disabled={loading || showLimitWarning}>
               ← قبلی
             </button>
           )}
-          {currentStep < 9 && (
+          {currentStep < 10 && (
             <button type="button" className="btn-next" onClick={nextStep} disabled={loading || showLimitWarning}>
               بعدی →
             </button>
           )}
-          {currentStep === 9 && (
+          {currentStep === 10 && (
             <button type="submit" className="btn-submit" disabled={loading || showLimitWarning}>
               {loading ? 'در حال ثبت...' : '✅ ثبت ترید'}
             </button>
@@ -780,7 +983,7 @@ const TradeForm = () => {
         </div>
       </form>
 
-      {subscriptionStatus && !showLimitWarning && (
+      {subscriptionStatus && !showLimitWarning && !user?.is_admin && (
         <div className="subscription-info">
           <span>📈 تریدهای باقیمانده: {subscriptionStatus.remaining_trades >= 999999 ? '∞' : subscriptionStatus.remaining_trades}</span>
         </div>

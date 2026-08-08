@@ -40,6 +40,10 @@ urlpatterns = [
     path('reports/mistakes/', views.MistakesReportView.as_view(), name='mistakes_report'),
     path('reports/bias/', views.BiasReportView.as_view(), name='bias_report'),
     path('reports/timeframe/', views.TimeframeReportView.as_view(), name='timeframe_report'),
+
+    # ============================================
+    # نمادها (برای لیست کامل)
+    # ============================================
     path('symbols/', views.SymbolListView.as_view(), name='symbols'),
 
     # ============================================
@@ -69,15 +73,27 @@ urlpatterns = [
     # ============================================
     # مشاوره AI (غیراستریم)
     # ============================================
-    path('ai/consult/', views.AIConsultationView.as_view(), name='ai_consult'),
-    path('ai/history/', views.AIConsultationHistoryView.as_view(), name='ai_history'),
-    path('ai/history/<int:pk>/', views.AIConsultationDetailView.as_view(), name='ai_detail'),
-    path('ai/feedback/<int:pk>/', views.AIConsultationFeedbackView.as_view(), name='ai_feedback'),
+    path('ai-consult/', views.AIConsultationView.as_view(), name='ai_consult'),
 
     # ============================================
-    # مشاوره AI با استریم
+    # مشاوره AI با استریم (برای نمایش تدریجی)
     # ============================================
-    path('ai/consult/stream/', views.AIConsultationStreamView.as_view(), name='ai_consult_stream'),
+    path('ai-consult-stream/', views.AIConsultationStreamView.as_view(), name='ai_consult_stream'),
+
+    # ============================================
+    # تاریخچه مشاوره‌ها
+    # ============================================
+    path('ai-consult-history/', views.AIConsultationHistoryView.as_view(), name='ai_consult_history'),
+
+    # ============================================
+    # جزئیات یک مشاوره خاص
+    # ============================================
+    path('ai-consult/<int:pk>/', views.AIConsultationDetailView.as_view(), name='ai_consult_detail'),
+
+    # ============================================
+    # ثبت بازخورد برای یک مشاوره
+    # ============================================
+    path('ai-consult/<int:pk>/feedback/', views.AIConsultationFeedbackView.as_view(), name='ai_consult_feedback'),
 
     # ============================================
     # مدیریت AI (فقط ادمین)
@@ -85,4 +101,10 @@ urlpatterns = [
     path('admin/ai/dashboard/', views.AIAnalyticsDashboardView.as_view(), name='ai_dashboard'),
     path('admin/ai/prompts/', views.AIPromptVersionView.as_view(), name='ai_prompts'),
     path('admin/ai/prompts/<int:pk>/', views.AIPromptVersionDetailView.as_view(), name='ai_prompt_detail'),
+
+    # ============================================
+    # خروجی‌ها
+    # ============================================
+    path('export/pdf/<int:pk>/', views.ExportTradePDFView.as_view(), name='export_pdf'),
+    path('export/excel/', views.ExportTradeExcelView.as_view(), name='export_excel'),
 ]

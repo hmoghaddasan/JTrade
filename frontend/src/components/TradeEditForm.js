@@ -7,6 +7,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
 import RuleService from '../services/ruleService';
+import SystemSettingsService from '../services/systemSettingsService';
+import ImageZoom from './ImageZoom';
 import './TradeForm.css';
 
 const TradeEditForm = () => {
@@ -23,12 +25,24 @@ const TradeEditForm = () => {
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState([]);
 
-  // State برای قوانین
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
   const [rulesLoading, setRulesLoading] = useState(false);
+  const [screenshotFile, setScreenshotFile] = useState(null); // Base64 string
+  const [removeScreenshot, setRemoveScreenshot] = useState(false);
 
-  // لیست کامل نمادها (همانند قبل)
+  // تنظیمات آپلود تصویر
+  const [screenshotSettings, setScreenshotSettings] = useState({
+    show_upload: true,
+    max_size_mb: 5,
+    max_width: 2000,
+    max_height: 2000,
+  });
+
+  // ===== state برای مودال نمایش تصویر بزرگ =====
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImageSrc, setModalImageSrc] = useState(null);
+
   const symbols = [
     'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'USDCHF', 'NZDUSD',
     'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY', 'CADJPY', 'CHFJPY', 'NZDJPY',
@@ -74,9 +88,30 @@ const TradeEditForm = () => {
       'QNTUSD','EGLDUSD','KASUSD','TIAUSD','JUPUSD','ONDOUSD'].includes(s))
   };
 
-  // ============================================
-  // دریافت دسته‌بندی‌های کاربر
-  // ============================================
+  // ===== تبدیل فایل به Base64 =====
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // ===== توابع مودال تصویر =====
+  const openImageModal = (src) => {
+    if (src) {
+      setModalImageSrc(src);
+      setShowImageModal(true);
+    }
+  };
+
+  const closeImageModal = () => {
+    setShowImageModal(false);
+    setModalImageSrc(null);
+  };
+
+  // ===== useEffect ها =====
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -84,19 +119,22 @@ const TradeEditForm = () => {
         const groupsData = response.data.results || response.data || [];
         const userGroups = groupsData.filter(g => g.user_id === user?.id);
         setCategories(userGroups);
-        console.log('📁 Categories loaded:', userGroups);
       } catch (error) {
         console.error('Error loading categories:', error);
         setCategories([]);
       }
     };
-
     loadCategories();
   }, [user]);
 
-  // ============================================
-  // بارگذاری داده‌های ترید و قوانین
-  // ============================================
+  useEffect(() => {
+    const loadScreenshotSettings = async () => {
+      const settings = await SystemSettingsService.getScreenshotSettings();
+      setScreenshotSettings(settings);
+    };
+    loadScreenshotSettings();
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -105,15 +143,16 @@ const TradeEditForm = () => {
         const trade = tradeResponse.data;
         console.log('📊 Trade loaded:', trade);
 
-        if (!trade.group) {
-          console.warn('⚠️ Trade has no group!');
+        if (trade.group && typeof trade.group === 'object' && trade.group.id) {
+          trade.group_id = trade.group.id;
+        } else if (typeof trade.group === 'number') {
+          trade.group_id = trade.group;
+        } else {
+          trade.group_id = null;
         }
 
         setTradeData(trade);
 
-        // ============================================
-        // بارگذاری قوانین و تنظیم checkedRules
-        // ============================================
         setRulesLoading(true);
         try {
           const rulesResponse = await RuleService.getRules();
@@ -121,11 +160,9 @@ const TradeEditForm = () => {
             const rulesList = rulesResponse.data;
             setRules(rulesList);
 
-            // دریافت قوانین بررسی‌شده از ترید
             const tradeRuleChecks = trade.rule_checks_detail || [];
             const checkedRuleIds = new Set(tradeRuleChecks.filter(r => r.is_checked).map(r => r.rule_id));
 
-            // مقداردهی checkedRules
             const initialChecked = rulesList.map(rule => ({
               id: rule.id,
               checked: checkedRuleIds.has(rule.id)
@@ -154,26 +191,20 @@ const TradeEditForm = () => {
     }
   }, [id, navigate, showToast]);
 
-  // ============================================
-  // تغییرات فرم
-  // ============================================
+  // ===== توابع تغییرات =====
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
       setTradeData(prev => ({ ...prev, [name]: value.toUpperCase() }));
     } else if (name === 'group') {
-      const groupId = parseInt(value) || null;
-      console.log('📁 Group selected:', groupId);
-      setTradeData(prev => ({ ...prev, [name]: groupId }));
+      const groupId = value ? parseInt(value, 10) : null;
+      setTradeData(prev => ({ ...prev, group: groupId, group_id: groupId }));
     } else {
       setTradeData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
     setErrors(prev => prev.filter(err => !err.includes(name)));
   };
 
-  // ============================================
-  // تغییر وضعیت بررسی قانون
-  // ============================================
   const handleRuleCheck = (ruleId) => {
     setCheckedRules(prev =>
       prev.map(item =>
@@ -182,30 +213,98 @@ const TradeEditForm = () => {
     );
   };
 
-  // ============================================
-  // اعتبارسنجی
-  // ============================================
+  // ===== تغییر فایل با کنترل کامل =====
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!screenshotSettings.show_upload) {
+      showToast('❌ امکان آپلود تصویر غیرفعال است.', 'warning');
+      e.target.value = '';
+      return;
+    }
+
+    const maxSizeMB = screenshotSettings.max_size_mb || 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      showToast(`❌ حجم فایل نباید بیشتر از ${maxSizeMB} مگابایت باشد.`, 'error');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const maxW = screenshotSettings.max_width || 2000;
+      const maxH = screenshotSettings.max_height || 2000;
+
+      if (img.width > maxW || img.height > maxH) {
+        showToast(`❌ ابعاد تصویر باید کمتر از ${maxW}x${maxH} پیکسل باشد.`, 'error');
+        e.target.value = '';
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error('Error checking image dimensions:', error);
+    }
+
+    try {
+      const base64 = await fileToBase64(file);
+      setScreenshotFile(base64);
+      setRemoveScreenshot(false);
+      console.log('📸 File converted to Base64, length:', base64.length);
+    } catch (error) {
+      console.error('❌ Error converting file to Base64:', error);
+      showToast('❌ خطا در خواندن فایل', 'error');
+    }
+  };
+
+  const handleRemoveScreenshot = () => {
+    setRemoveScreenshot(true);
+    setScreenshotFile(null);
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = '';
+  };
+
+  // ===== اعتبارسنجی =====
   const validateForm = () => {
     const validationErrors = [];
     if (!tradeData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
     if (!tradeData.trade_date) validationErrors.push('لطفاً تاریخ معامله را وارد کنید');
     if (!tradeData.trade_type) validationErrors.push('لطفاً نوع ترید را انتخاب کنید');
-    if (!tradeData.group) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
-    if (!tradeData.entry_price || parseFloat(tradeData.entry_price) <= 0) validationErrors.push('لطفاً قیمت ورود را وارد کنید');
-    if (!tradeData.close_price || parseFloat(tradeData.close_price) <= 0) validationErrors.push('لطفاً قیمت خروج را وارد کنید');
-    if (tradeData.profit && isNaN(parseFloat(tradeData.profit))) validationErrors.push('مقدار سود/زیان باید عدد باشد');
+
+    const groupId = tradeData.group_id || tradeData.group;
+    if (!groupId) validationErrors.push('لطفاً دسته‌بندی را انتخاب کنید');
+
+    if (!tradeData.entry_price || parseFloat(tradeData.entry_price) <= 0) {
+      validationErrors.push('لطفاً قیمت ورود را وارد کنید');
+    }
+    if (!tradeData.close_price || parseFloat(tradeData.close_price) <= 0) {
+      validationErrors.push('لطفاً قیمت خروج را وارد کنید');
+    }
+    if (tradeData.profit && isNaN(parseFloat(tradeData.profit))) {
+      validationErrors.push('مقدار سود/زیان باید عدد باشد');
+    }
     if (tradeData.execution_quality_score) {
       const score = parseInt(tradeData.execution_quality_score);
-      if (isNaN(score) || score < 1 || score > 10) validationErrors.push('امتیاز کیفیت اجرا باید بین ۱ تا ۱۰ باشد');
+      if (isNaN(score) || score < 1 || score > 10) {
+        validationErrors.push('امتیاز کیفیت اجرا باید بین ۱ تا ۱۰ باشد');
+      }
     }
-    if (tradeData.risk_reward_ratio && parseFloat(tradeData.risk_reward_ratio) <= 0) validationErrors.push('نسبت ریسک به ریوارد باید بزرگتر از صفر باشد');
+    if (tradeData.risk_reward_ratio && parseFloat(tradeData.risk_reward_ratio) <= 0) {
+      validationErrors.push('نسبت ریسک به ریوارد باید بزرگتر از صفر باشد');
+    }
     setErrors(validationErrors);
     return validationErrors.length === 0;
   };
 
-  // ============================================
-  // ذخیره تغییرات
-  // ============================================
+  // ===== ارسال فرم =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -220,15 +319,64 @@ const TradeEditForm = () => {
       tradeData.day_of_week = days[date.getDay()];
       tradeData.month = date.getMonth() + 1;
 
-      const submitData = {
+      let groupId = tradeData.group_id || tradeData.group;
+      if (groupId && typeof groupId === 'object') {
+        groupId = groupId.id || null;
+      }
+      if (groupId && typeof groupId !== 'number') {
+        groupId = parseInt(groupId, 10) || null;
+      }
+      if (!groupId) {
+        setErrors(['لطفاً دسته‌بندی را انتخاب کنید']);
+        setSaving(false);
+        return;
+      }
+
+      const payload = {
         ...tradeData,
-        group: parseInt(tradeData.group) || null,
-        rule_checks: checkedRules.filter(r => r.checked).map(r => r.id)
+        group: groupId,
+        group_id: groupId,
+        rule_checks: checkedRules.filter(r => r.checked).map(r => r.id),
       };
 
-      console.log('📤 Submitting trade data:', submitData);
+      // مدیریت تصویر
+      if (screenshotFile) {
+        payload.screenshot = screenshotFile;
+      } else if (removeScreenshot) {
+        payload.screenshot = '';
+      } else {
+        if (!tradeData.screenshot) {
+          delete payload.screenshot;
+        }
+      }
 
-      await RealApiService.updateTrade(id, submitData);
+      // حذف فیلدهای اضافی
+      delete payload.group_name;
+      delete payload.group_icon;
+      delete payload.timeframes;
+      delete payload.emotions;
+      delete payload.checklist_items;
+      delete payload.rule_compliance;
+      delete payload.rule_checks_detail;
+
+      // حذف فیلدهای خالی (فقط اختیاری)
+      const optionalFields = [
+        'time_ny', 'stop_loss', 'take_profit_1', 'take_profit_2', 'take_profit_3',
+        'risk_usd', 'risk_percent', 'risk_reward_ratio', 'profit', 'tp_sl_hit',
+        'mistake_weight', 'dominant_feeling', 'weekly_profile_note', 'retirement_model',
+        'checklist_extra', 'reaction_to_profit', 'emotion_after_losses', 'mistake_code',
+        'fvg', 'order_block', 'bos', 'choch', 'mss', 'liquidity_sweep', 'poi',
+        'demand_zone', 'supply_zone'
+      ];
+      optionalFields.forEach(field => {
+        if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
+          delete payload[field];
+        }
+      });
+
+      console.log('📤 Submitting payload:', payload);
+
+      await RealApiService.updateTrade(id, payload);
 
       showToast('✅ ترید با موفقیت ویرایش شد!', 'success');
 
@@ -241,12 +389,9 @@ const TradeEditForm = () => {
       }
     } catch (error) {
       console.error('Error updating trade:', error);
-      if (error.response && error.response.data) {
-        console.error('Server error details:', error.response.data);
-        const errorMsg = error.response.data.group
-          ? `خطا در فیلد دسته‌بندی: ${error.response.data.group.join(', ')}`
-          : 'خطا در ذخیره تغییرات';
-        showToast(`❌ ${errorMsg}`, 'error');
+      if (error.response?.data) {
+        const errorMessages = Object.values(error.response.data).flat().join('\n');
+        showToast(`❌ خطا: ${errorMessages}`, 'error');
       } else {
         showToast('❌ خطا در ذخیره تغییرات', 'error');
       }
@@ -255,9 +400,7 @@ const TradeEditForm = () => {
     }
   };
 
-  // ============================================
-  // بازگشت
-  // ============================================
+  // ===== بقیه توابع و رندر مراحل =====
   const handleBack = () => {
     const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
     if (fromDashboard) {
@@ -268,18 +411,15 @@ const TradeEditForm = () => {
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 9));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 10));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  // ============================================
-  // Step 1: شناسه و تاریخ
-  // ============================================
   const renderStep1 = () => (
     <div className="form-step">
       <h3>📅 شناسه و تاریخ</h3>
       <div className="form-row">
         <div className="form-group">
-          <label>تاریخ معامله</label>
+          <label>تاریخ معامله <span style={{ color: 'red' }}>(اجباری)</span></label>
           <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
         </div>
         <div className="form-group">
@@ -290,70 +430,68 @@ const TradeEditForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 2: جلسه و نماد
-  // ============================================
-  const renderStep2 = () => (
-    <div className="form-step">
-      <h3>📈 جلسه و نماد</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>نماد معاملاتی</label>
-          <select name="symbol" value={tradeData.symbol || ''} onChange={handleChange} required>
-            <option value="">انتخاب نماد</option>
-            {Object.entries(symbolGroups).map(([group, items]) => (
-              <optgroup key={group} label={group}>
-                {items.map(s => <option key={s} value={s}>{s}</option>)}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>نوع ترید</label>
-          <select name="trade_type" value={tradeData.trade_type || 'Buy'} onChange={handleChange}>
-            <option value="Buy">خرید (Buy)</option>
-            <option value="Sell">فروش (Sell)</option>
-          </select>
-        </div>
-      </div>
-      <div className="form-row">
-        <div className="form-group">
-          <label>نوع جلسه</label>
-          <select name="session_type" value={tradeData.session_type || 'High Pro'} onChange={handleChange}>
-            <option value="High Pro">حرفه‌ای (High Pro)</option>
-            <option value="Low Pro">مبتدی (Low Pro)</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label>دسته‌بندی <span className="required">*</span></label>
-          <select
-            name="group"
-            value={tradeData.group || ''}
-            onChange={handleChange}
-            required
-          >
-            <option value="">انتخاب دسته‌بندی</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>
-                {cat.icon || '📁'} {cat.group_name}
-              </option>
-            ))}
-          </select>
-          {!tradeData.group && (
-            <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>
-          )}
-        </div>
-      </div>
-      <div className="form-group">
-        <label>یادداشت پروفایل هفتگی</label>
-        <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
-      </div>
-    </div>
-  );
+  const renderStep2 = () => {
+    let groupValue = '';
+    if (tradeData.group_id) {
+      groupValue = tradeData.group_id;
+    } else if (tradeData.group && typeof tradeData.group === 'object') {
+      groupValue = tradeData.group.id || '';
+    } else if (typeof tradeData.group === 'number') {
+      groupValue = tradeData.group;
+    } else {
+      groupValue = tradeData.group || '';
+    }
 
-  // ============================================
-  // Step 3: وضعیت روحی و ذهنی
-  // ============================================
+    return (
+      <div className="form-step">
+        <h3>📈 جلسه و نماد</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
+            <select name="symbol" value={tradeData.symbol || ''} onChange={handleChange} required>
+              <option value="">انتخاب نماد</option>
+              {Object.entries(symbolGroups).map(([group, items]) => (
+                <optgroup key={group} label={group}>
+                  {items.map(s => <option key={s} value={s}>{s}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>نوع ترید <span style={{ color: 'red' }}>(اجباری)</span></label>
+            <select name="trade_type" value={tradeData.trade_type || 'Buy'} onChange={handleChange}>
+              <option value="Buy">خرید (Buy)</option><option value="Sell">فروش (Sell)</option>
+            </select>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>نوع جلسه</label>
+            <select name="session_type" value={tradeData.session_type || 'High Pro'} onChange={handleChange}>
+              <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>دسته‌بندی <span style={{ color: 'red' }}>(اجباری)</span></label>
+            <select name="group" value={groupValue} onChange={handleChange} required>
+              <option value="">انتخاب دسته‌بندی</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.icon || '📁'} {cat.group_name}
+                </option>
+              ))}
+            </select>
+            {!groupValue && <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>}
+          </div>
+        </div>
+        <div className="form-group">
+          <label>یادداشت پروفایل هفتگی</label>
+          <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
+        </div>
+      </div>
+    );
+  };
+
   const renderStep3 = () => {
     const emotions = [
       { key: 'focus', label: 'تمرکز' }, { key: 'calm', label: 'آرامش' }, { key: 'excited', label: 'هیجان' },
@@ -396,9 +534,6 @@ const TradeEditForm = () => {
     );
   };
 
-  // ============================================
-  // Step 4: برنامه و بایاس
-  // ============================================
   const renderStep4 = () => {
     const timeframes = [
       { key: 'timeframe_d', label: 'D1' }, { key: 'timeframe_h4', label: 'H4' },
@@ -466,63 +601,124 @@ const TradeEditForm = () => {
     );
   };
 
-  // ============================================
-  // Step 5: جزئیات اجرا
-  // ============================================
   const renderStep5 = () => (
     <div className="form-step">
       <h3>💰 جزئیات اجرای معامله</h3>
       <div className="form-row">
-        <div className="form-group"><label>قیمت ورود</label><input type="number" name="entry_price" value={tradeData.entry_price || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
-        <div className="form-group"><label>حد ضرر (SL)</label><input type="number" name="stop_loss" value={tradeData.stop_loss || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
+        <div className="form-group">
+          <label>قیمت ورود <span style={{ color: 'red' }}>(اجباری)</span></label>
+          <input type="number" name="entry_price" value={tradeData.entry_price || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
+        </div>
+        <div className="form-group">
+          <label>حد ضرر (SL)</label>
+          <input type="number" name="stop_loss" value={tradeData.stop_loss || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
+        </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>حد سود اول (TP1)</label><input type="number" name="take_profit_1" value={tradeData.take_profit_1 || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
-        <div className="form-group"><label>حد سود دوم (TP2)</label><input type="number" name="take_profit_2" value={tradeData.take_profit_2 || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
+        <div className="form-group">
+          <label>حد سود اول (TP1)</label>
+          <input type="number" name="take_profit_1" value={tradeData.take_profit_1 || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
+        </div>
+        <div className="form-group">
+          <label>حد سود دوم (TP2)</label>
+          <input type="number" name="take_profit_2" value={tradeData.take_profit_2 || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
+        </div>
       </div>
-      <div className="form-group"><label>حد سود سوم (TP3)</label><input type="number" name="take_profit_3" value={tradeData.take_profit_3 || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
+      <div className="form-group">
+        <label>حد سود سوم (TP3)</label>
+        <input type="number" name="take_profit_3" value={tradeData.take_profit_3 || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
+      </div>
       <div className="form-row">
-        <div className="form-group"><label>مقدار ریسک به دلار</label><input type="number" name="risk_usd" value={tradeData.risk_usd || ''} onChange={handleChange} step="0.01" placeholder="0.00" /></div>
-        <div className="form-group"><label>درصد ریسک از کل سرمایه</label><input type="number" name="risk_percent" value={tradeData.risk_percent || ''} onChange={handleChange} step="0.01" placeholder="0.00" /></div>
+        <div className="form-group">
+          <label>مقدار ریسک به دلار</label>
+          <input type="number" name="risk_usd" value={tradeData.risk_usd || ''} onChange={handleChange} step="0.01" placeholder="0.00" />
+        </div>
+        <div className="form-group">
+          <label>درصد ریسک از کل سرمایه</label>
+          <input type="number" name="risk_percent" value={tradeData.risk_percent || ''} onChange={handleChange} step="0.01" placeholder="0.00" />
+        </div>
       </div>
-      <div className="form-group"><label>نسبت ریسک به ریوارد (R:R)</label><input type="number" name="risk_reward_ratio" value={tradeData.risk_reward_ratio || ''} onChange={handleChange} step="0.01" placeholder="مثلاً 2.0" /></div>
+      <div className="form-group">
+        <label>نسبت ریسک به ریوارد (R:R)</label>
+        <input type="number" name="risk_reward_ratio" value={tradeData.risk_reward_ratio || ''} onChange={handleChange} step="0.01" placeholder="مثلاً 2.0" />
+      </div>
     </div>
   );
 
-  // ============================================
-  // Step 6: نتیجه معامله
-  // ============================================
   const renderStep6 = () => (
     <div className="form-step">
       <h3>📊 نتیجه معامله</h3>
       <div className="form-row">
-        <div className="form-group"><label>قیمت بسته‌شدن</label><input type="number" name="close_price" value={tradeData.close_price || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" /></div>
-        <div className="form-group"><label>حد خورده شده</label><select name="tp_sl_hit" value={tradeData.tp_sl_hit || ''} onChange={handleChange}><option value="">انتخاب کنید</option><option value="TP1">TP1</option><option value="TP2">TP2</option><option value="TP3">TP3</option><option value="SL">SL</option><option value="BE">BE</option></select></div>
+        <div className="form-group">
+          <label>قیمت بسته‌شدن <span style={{ color: 'red' }}>(اجباری)</span></label>
+          <input type="number" name="close_price" value={tradeData.close_price || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
+        </div>
+        <div className="form-group">
+          <label>حد خورده شده</label>
+          <select name="tp_sl_hit" value={tradeData.tp_sl_hit || ''} onChange={handleChange}>
+            <option value="">انتخاب کنید</option>
+            <option value="TP1">TP1</option>
+            <option value="TP2">TP2</option>
+            <option value="TP3">TP3</option>
+            <option value="SL">SL</option>
+            <option value="BE">BE</option>
+          </select>
+        </div>
       </div>
-      <div className="form-group"><label>سود یا زیان نهایی (دلار)</label><input type="number" name="profit" value={tradeData.profit || ''} onChange={handleChange} step="0.01" placeholder="0.00" /></div>
+      <div className="form-group">
+        <label>سود یا زیان نهایی (دلار)</label>
+        <input type="number" name="profit" value={tradeData.profit || ''} onChange={handleChange} step="0.01" placeholder="0.00" />
+      </div>
     </div>
   );
 
-  // ============================================
-  // Step 7: احساسات و بازبینی
-  // ============================================
   const renderStep7 = () => (
     <div className="form-step">
       <h3>🔄 احساسات و بازبینی</h3>
       <div className="form-row">
-        <div className="form-group"><label>استرس قبل معامله</label><select name="pre_trade_stress" value={tradeData.pre_trade_stress || 'متوسط'} onChange={handleChange}><option value="کم">کم</option><option value="متوسط">متوسط</option><option value="زیاد">زیاد</option></select></div>
-        <div className="form-group"><label>کنترل هیجان هنگام ورود</label><select name="entry_emotion_control" value={tradeData.entry_emotion_control || 'متوسط'} onChange={handleChange}><option value="بله">بله</option><option value="خیر">خیر</option><option value="متوسط">متوسط</option></select></div>
+        <div className="form-group">
+          <label>استرس قبل معامله</label>
+          <select name="pre_trade_stress" value={tradeData.pre_trade_stress || 'متوسط'} onChange={handleChange}>
+            <option value="کم">کم</option><option value="متوسط">متوسط</option><option value="زیاد">زیاد</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>کنترل هیجان هنگام ورود</label>
+          <select name="entry_emotion_control" value={tradeData.entry_emotion_control || 'متوسط'} onChange={handleChange}>
+            <option value="بله">بله</option><option value="خیر">خیر</option><option value="متوسط">متوسط</option>
+          </select>
+        </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label>واکنش به سود</label><input type="text" name="reaction_to_profit" value={tradeData.reaction_to_profit || ''} onChange={handleChange} placeholder="مثلاً: محتاطانه، شتابزده..." /></div>
-        <div className="form-group"><label>مدیریت انتظار</label><select name="expectation_management" value={tradeData.expectation_management || 'متوسط'} onChange={handleChange}><option value="ضعیف">ضعیف</option><option value="متوسط">متوسط</option><option value="خوب">خوب</option></select></div>
+        <div className="form-group">
+          <label>واکنش به سود</label>
+          <input type="text" name="reaction_to_profit" value={tradeData.reaction_to_profit || ''} onChange={handleChange} placeholder="مثلاً: محتاطانه، شتابزده..." />
+        </div>
+        <div className="form-group">
+          <label>مدیریت انتظار</label>
+          <select name="expectation_management" value={tradeData.expectation_management || 'متوسط'} onChange={handleChange}>
+            <option value="ضعیف">ضعیف</option><option value="متوسط">متوسط</option><option value="خوب">خوب</option>
+          </select>
+        </div>
       </div>
-      <div className="form-group"><label>کنترل احساسات پس از ضرر</label><textarea name="emotion_after_losses" value={tradeData.emotion_after_losses || ''} onChange={handleChange} placeholder="اگر ضرر قبلی در روز داشتید، کنترل احساسات چگونه بود؟" rows="2" /></div>
+      <div className="form-group">
+        <label>کنترل احساسات پس از ضرر</label>
+        <textarea name="emotion_after_losses" value={tradeData.emotion_after_losses || ''} onChange={handleChange} placeholder="اگر ضرر قبلی در روز داشتید، کنترل احساسات چگونه بود؟" rows="2" />
+      </div>
       <div className="form-row">
-        <div className="form-group"><label>کد اشتباه</label><input type="text" name="mistake_code" value={tradeData.mistake_code || ''} onChange={handleChange} placeholder="مثلاً: ورود زودهنگام" /></div>
-        <div className="form-group"><label>وزن اشتباه (0.1 تا 0.9)</label><input type="number" name="mistake_weight" value={tradeData.mistake_weight || ''} onChange={handleChange} step="0.1" min="0.1" max="0.9" placeholder="0.5" /></div>
+        <div className="form-group">
+          <label>کد اشتباه</label>
+          <input type="text" name="mistake_code" value={tradeData.mistake_code || ''} onChange={handleChange} placeholder="مثلاً: ورود زودهنگام" />
+        </div>
+        <div className="form-group">
+          <label>وزن اشتباه (0.1 تا 0.9)</label>
+          <input type="number" name="mistake_weight" value={tradeData.mistake_weight || ''} onChange={handleChange} step="0.1" min="0.1" max="0.9" placeholder="0.5" />
+        </div>
       </div>
-      <div className="form-group"><label>امتیاز کیفیت اجرا (۱-۱۰)</label><input type="number" name="execution_quality_score" value={tradeData.execution_quality_score || 5} onChange={handleChange} min="1" max="10" placeholder="5" /></div>
+      <div className="form-group">
+        <label>امتیاز کیفیت اجرا (۱-۱۰)</label>
+        <input type="number" name="execution_quality_score" value={tradeData.execution_quality_score || 5} onChange={handleChange} min="1" max="10" placeholder="5" />
+      </div>
       <div className="checkbox-grid">
         <div className="checkbox-group"><input type="checkbox" name="stop_loss_adherence" checked={tradeData.stop_loss_adherence || false} onChange={handleChange} /><label>پایبندی به حد ضرر</label></div>
         <div className="checkbox-group"><input type="checkbox" name="strategy_adherence" checked={tradeData.strategy_adherence || false} onChange={handleChange} /><label>پایبندی به استراتژی</label></div>
@@ -536,9 +732,6 @@ const TradeEditForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 8: تحلیل ICT
-  // ============================================
   const renderICTStep = () => (
     <div className="form-step">
       <h3>📊 تحلیل ICT</h3>
@@ -562,9 +755,6 @@ const TradeEditForm = () => {
     </div>
   );
 
-  // ============================================
-  // Step 9: قوانین معاملاتی
-  // ============================================
   const renderRulesStep = () => {
     if (rulesLoading) {
       return (
@@ -655,9 +845,97 @@ const TradeEditForm = () => {
     );
   };
 
-  // ============================================
-  // رندر بر اساس مرحله
-  // ============================================
+  // ===== رندر مرحله ۱۰ (تصویر) با مودال سفارشی =====
+  const renderStep10 = () => {
+    const currentImage = tradeData?.screenshot;
+    const imageUrl = currentImage && !removeScreenshot
+      ? (currentImage.startsWith('http') || currentImage.startsWith('data:'))
+          ? currentImage
+          : `http://localhost:8000${currentImage}`
+      : null;
+
+    const maxSize = screenshotSettings.max_size_mb || 5;
+    const maxW = screenshotSettings.max_width || 2000;
+    const maxH = screenshotSettings.max_height || 2000;
+
+    return (
+      <div className="form-step">
+        <h3>🖼️ تصویر چارت</h3>
+        {screenshotSettings.show_upload ? (
+          <>
+            <div className="form-group">
+              <label>تصویر فعلی</label>
+              {imageUrl ? (
+                <div className="current-image-preview">
+                  <img
+                    src={imageUrl}
+                    alt="چارت فعلی"
+                    className="thumbnail-image"
+                    onClick={() => openImageModal(imageUrl)}
+                    style={{ cursor: 'pointer', maxWidth: '200px', maxHeight: '150px', objectFit: 'contain' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-remove-image"
+                    onClick={handleRemoveScreenshot}
+                    title="حذف تصویر"
+                  >
+                    🗑️ حذف تصویر
+                  </button>
+                </div>
+              ) : (
+                <p className="no-image-message">هیچ تصویری آپلود نشده است</p>
+              )}
+            </div>
+            <div className="form-group">
+              <label>آپلود تصویر جدید (اختیاری)</label>
+              <input type="file" accept="image/*" onChange={handleFileChange} />
+              {screenshotFile && (
+                <div className="file-preview">
+                  <img
+                    src={screenshotFile}
+                    alt="پیش‌نمایش چارت جدید"
+                    className="thumbnail-image"
+                    onClick={() => openImageModal(screenshotFile)}
+                    style={{ cursor: 'pointer', maxWidth: '200px', maxHeight: '150px', objectFit: 'contain' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-remove-file"
+                    onClick={() => {
+                      setScreenshotFile(null);
+                      document.querySelector('input[type="file"]').value = '';
+                    }}
+                    title="لغو انتخاب فایل"
+                  >
+                    ✕ حذف
+                  </button>
+                </div>
+              )}
+              <small className="hint-text">
+                📌 حداکثر حجم: {maxSize} مگابایت &nbsp;|&nbsp;
+                حداکثر ابعاد: {maxW}×{maxH} پیکسل &nbsp;|&nbsp;
+                فرمت‌های مجاز: JPG, PNG, GIF, WebP
+              </small>
+            </div>
+          </>
+        ) : (
+          <p className="upload-disabled-message">⛔ بخش آپلود تصویر توسط ادمین غیرفعال شده است.</p>
+        )}
+
+        {/* ===== مودال نمایش تصویر بزرگ ===== */}
+        {showImageModal && modalImageSrc && (
+          <div className="image-modal-overlay" onClick={closeImageModal}>
+            <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="image-modal-close" onClick={closeImageModal}>✕</button>
+              <img src={modalImageSrc} alt="تصویر بزرگ چارت" className="image-modal-img" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderStep = () => {
     switch(currentStep) {
       case 1: return renderStep1();
@@ -669,6 +947,7 @@ const TradeEditForm = () => {
       case 7: return renderStep7();
       case 8: return renderICTStep();
       case 9: return renderRulesStep();
+      case 10: return renderStep10();
       default: return null;
     }
   };
@@ -697,26 +976,37 @@ const TradeEditForm = () => {
       )}
 
       <div className="step-indicator">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(step => (
-          <div key={step} className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`} onClick={() => setCurrentStep(step)}>{step}</div>
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(step => (
+          <div
+            key={step}
+            className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`}
+            onClick={() => setCurrentStep(step)}
+          >
+            {step}
+          </div>
         ))}
       </div>
 
       <div className="step-labels">
-        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span><span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span><span>قوانین</span>
+        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span>
+        <span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span>
+        <span>قوانین</span><span>تصویر</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="form-content">{renderStep()}</div>
-
         <div className="form-actions">
           {currentStep > 1 && (
-            <button type="button" className="btn-prev" onClick={prevStep} disabled={saving}>← قبلی</button>
+            <button type="button" className="btn-prev" onClick={prevStep} disabled={saving}>
+              ← قبلی
+            </button>
           )}
-          {currentStep < 9 && (
-            <button type="button" className="btn-next" onClick={nextStep} disabled={saving}>بعدی →</button>
+          {currentStep < 10 && (
+            <button type="button" className="btn-next" onClick={nextStep} disabled={saving}>
+              بعدی →
+            </button>
           )}
-          {currentStep === 9 && (
+          {currentStep === 10 && (
             <button type="submit" className="btn-submit" disabled={saving}>
               {saving ? '⏳ در حال ذخیره...' : '💾 ذخیره تغییرات'}
             </button>

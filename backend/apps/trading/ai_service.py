@@ -3,8 +3,9 @@
 import json
 import requests
 import logging
+import re
 from datetime import datetime
-from django.db.models import Avg, Count, Sum, Q
+from django.db.models import Avg, Count, Sum, Q, Max, Min
 from django.conf import settings
 from .models import Trade, AIConsultation, AIPromptVersion
 from apps.accounts.models import User
@@ -22,93 +23,205 @@ class AIService:
 
     # ===== تنظیمات سرویس‌های قیمت =====
     LIVE_PRICE_PROVIDER = getattr(settings, 'LIVE_PRICE_PROVIDER', 'none')
-
-    # Alpha Vantage
     ALPHA_VANTAGE_API_KEY = getattr(settings, 'ALPHA_VANTAGE_API_KEY', '')
-
-    # Twelve Data
     TWELVEDATA_API_KEY = getattr(settings, 'TWELVEDATA_API_KEY', '')
     TWELVEDATA_BASE_URL = getattr(settings, 'TWELVEDATA_BASE_URL', 'https://api.twelvedata.com')
-
-    # Finnhub
     FINNHUB_API_KEY = getattr(settings, 'FINNHUB_API_KEY', '')
     FINNHUB_BASE_URL = getattr(settings, 'FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
 
     @classmethod
-    def get_user_analytics(cls, user, symbol=None):
-        """استخراج داده‌های تحلیلی کاربر برای استفاده در پرامپت"""
+    def get_user_detailed_analytics(cls, user, symbol=None, user_input=None):
+        """
+        استخراج داده‌های تحلیلی دقیق کاربر برای استفاده در پرامپت
+        شامل مقایسه با تریدهای مشابه و تحلیل الگوهای رفتاری
+        """
         trades = Trade.objects.filter(user=user, is_deleted=False)
 
         total_trades = trades.count()
         if total_trades == 0:
             return None
 
+        # ===== آمار کلی =====
         win_count = trades.filter(profit__gt=0).count()
         loss_count = trades.filter(profit__lt=0).count()
+        breakeven_count = trades.filter(profit=0).count()
         total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
         avg_quality = \
         trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_profit_per_trade = trades.aggregate(avg=Avg('profit'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / abs(total_loss)) if total_loss and abs(total_loss) > 0 else 0
 
+        # ===== آمار نماد =====
         symbol_trades = trades.filter(symbol=symbol) if symbol else None
         symbol_stats = None
         if symbol_trades and symbol_trades.count() > 0:
-            symbol_win_count = symbol_trades.filter(profit__gt=0).count()
+            symbol_win = symbol_trades.filter(profit__gt=0).count()
             symbol_stats = {
                 'count': symbol_trades.count(),
-                'win_rate': (symbol_win_count / symbol_trades.count() * 100),
+                'win_rate': (symbol_win / symbol_trades.count() * 100) if symbol_trades.count() > 0 else 0,
                 'total_profit': symbol_trades.aggregate(total=Sum('profit'))['total'] or 0,
                 'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
                               'avg'] or 0,
+                'avg_quality': symbol_trades.filter(execution_quality_score__isnull=False).aggregate(
+                    avg=Avg('execution_quality_score'))['avg'] or 0,
+                'avg_profit': symbol_trades.aggregate(avg=Avg('profit'))['avg'] or 0,
+                'win_count': symbol_win,
+                'loss_count': symbol_trades.filter(profit__lt=0).count(),
             }
 
+        # ===== آمار روز هفته =====
         today = datetime.now()
         day_of_week = today.strftime('%A')
         day_trades = trades.filter(day_of_week=day_of_week)
         day_stats = None
         if day_trades and day_trades.count() > 0:
-            day_win_count = day_trades.filter(profit__gt=0).count()
+            day_win = day_trades.filter(profit__gt=0).count()
             day_stats = {
                 'count': day_trades.count(),
-                'win_rate': (day_win_count / day_trades.count() * 100),
+                'win_rate': (day_win / day_trades.count() * 100) if day_trades.count() > 0 else 0,
                 'total_profit': day_trades.aggregate(total=Sum('profit'))['total'] or 0,
+                'avg_rr': day_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                              'avg'] or 0,
+                'win_count': day_win,
+                'loss_count': day_trades.filter(profit__lt=0).count(),
             }
 
-        last_emotion = trades.exclude(dominant_feeling='').values('dominant_feeling').last()
+        # ===== آمار احساسات غالب =====
+        emotion_aggregated = {}
+        all_emotions = trades.exclude(dominant_feeling='').values_list('dominant_feeling', flat=True)
+        for em in all_emotions:
+            emotion_aggregated[em] = emotion_aggregated.get(em, 0) + 1
+
+        most_common_emotion = max(emotion_aggregated.items(), key=lambda x: x[1])[0] if emotion_aggregated else None
+
         emotion_stats = None
-        if last_emotion and last_emotion.get('dominant_feeling'):
-            emotion = last_emotion['dominant_feeling']
-            emotion_trades = trades.filter(dominant_feeling=emotion)
+        if most_common_emotion:
+            emotion_trades = trades.filter(dominant_feeling=most_common_emotion)
             if emotion_trades.count() > 0:
-                emotion_win_count = emotion_trades.filter(profit__gt=0).count()
+                emotion_win = emotion_trades.filter(profit__gt=0).count()
                 emotion_stats = {
-                    'emotion': emotion,
+                    'emotion': most_common_emotion,
                     'count': emotion_trades.count(),
-                    'win_rate': (emotion_win_count / emotion_trades.count() * 100),
+                    'win_rate': (emotion_win / emotion_trades.count() * 100) if emotion_trades.count() > 0 else 0,
                     'total_profit': emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
+                    'avg_rr':
+                        emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                            'avg'] or 0,
                 }
 
+        # ===== آمار احساس فعلی کاربر (از ورودی) =====
+        current_emotion = user_input.get('emotion') if user_input else None
+        current_emotion_stats = None
+        if current_emotion:
+            current_emotion_trades = trades.filter(dominant_feeling=current_emotion)
+            if current_emotion_trades.count() > 0:
+                ce_win = current_emotion_trades.filter(profit__gt=0).count()
+                current_emotion_stats = {
+                    'emotion': current_emotion,
+                    'count': current_emotion_trades.count(),
+                    'win_rate': (
+                                ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
+                    'total_profit': current_emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
+                }
+
+        # ===== آمار پایبندی به چک‌لیست =====
         smt_rate = 0
         key_levels_rate = 0
+        checklist_compliance = 0
         if total_trades > 0:
             smt_rate = (trades.filter(smt_confirmed=True).count() / total_trades * 100)
             key_levels_rate = (trades.filter(key_levels_reviewed=True).count() / total_trades * 100)
+            checklist_items = ['smt_confirmed', 'key_levels_reviewed', 'bond_dxy_support', 'weekly_news_printed',
+                               'zero_hour_identified', 'asian_range_identified', 'london_range_identified',
+                               'judas_lo_identified']
+            total_checks = sum(1 for t in trades for item in checklist_items if getattr(t, item, False))
+            checklist_compliance = (
+                        total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
 
+        # ===== بهترین ساعت معاملاتی =====
         hour_stats = None
         if total_trades > 0:
             hourly = trades.exclude(time_ny__isnull=True).values('time_ny__hour').annotate(
                 count=Count('id'),
-                win_rate=Count('id', filter=Q(profit__gt=0)) * 100.0 / Count('id')
+                win_rate=Count('id', filter=Q(profit__gt=0)) * 100.0 / Count('id'),
+                total_profit=Sum('profit')
             ).order_by('-win_rate').first()
             if hourly:
                 hour_stats = {
                     'hour': int(hourly['time_ny__hour']),
                     'win_rate': round(hourly['win_rate'], 1),
+                    'total_profit': round(hourly['total_profit'] or 0, 2),
                 }
+
+        # ===== بهترین استراتژی =====
+        strategy_trades = trades.exclude(strategy_type__isnull=True).exclude(strategy_type='')
+        strategy_stats = None
+        if strategy_trades.count() > 0:
+            best_strategy = strategy_trades.values('strategy_type').annotate(
+                count=Count('id'),
+                win_rate=Count('id', filter=Q(profit__gt=0)) * 100.0 / Count('id'),
+                total_profit=Sum('profit')
+            ).order_by('-win_rate').first()
+            if best_strategy:
+                strategy_stats = {
+                    'best': best_strategy['strategy_type'],
+                    'win_rate': round(best_strategy['win_rate'], 1),
+                    'total_profit': round(best_strategy['total_profit'] or 0, 2),
+                    'count': best_strategy['count'],
+                }
+
+        # ===== بهترین جلسه =====
+        session_trades = trades.exclude(session_type__isnull=True).exclude(session_type='')
+        session_stats = None
+        if session_trades.count() > 0:
+            best_session = session_trades.values('session_type').annotate(
+                count=Count('id'),
+                win_rate=Count('id', filter=Q(profit__gt=0)) * 100.0 / Count('id'),
+                total_profit=Sum('profit')
+            ).order_by('-win_rate').first()
+            if best_session:
+                session_stats = {
+                    'best': best_session['session_type'],
+                    'win_rate': round(best_session['win_rate'], 1),
+                    'total_profit': round(best_session['total_profit'] or 0, 2),
+                    'count': best_session['count'],
+                }
+
+        # ===== تریدهای مشابه (مقایسه) =====
+        similar_trades = None
+        if symbol and symbol_trades and symbol_trades.count() > 0 and user_input:
+            entry = user_input.get('entry_price')
+            direction = user_input.get('direction')
+            if entry:
+                entry_float = float(entry)
+                similar = symbol_trades.filter(
+                    trade_type=direction,
+                    entry_price__gte=entry_float * 0.85,
+                    entry_price__lte=entry_float * 1.15
+                )
+                if similar.count() > 0:
+                    similar_win = similar.filter(profit__gt=0).count()
+                    similar_loss = similar.filter(profit__lt=0).count()
+                    similar_breakeven = similar.filter(profit=0).count()
+                    similar_trades = {
+                        'count': similar.count(),
+                        'win_rate': (similar_win / similar.count() * 100) if similar.count() > 0 else 0,
+                        'win_count': similar_win,
+                        'loss_count': similar_loss,
+                        'breakeven_count': similar_breakeven,
+                        'avg_profit': similar.aggregate(avg=Avg('profit'))['avg'] or 0,
+                        'avg_rr':
+                            similar.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                                'avg'] or 0,
+                        'avg_quality': similar.filter(execution_quality_score__isnull=False).aggregate(
+                            avg=Avg('execution_quality_score'))['avg'] or 0,
+                        'max_profit': similar.aggregate(max=Max('profit'))['max'] or 0,
+                        'min_profit': similar.aggregate(min=Min('profit'))['min'] or 0,
+                    }
 
         return {
             'total_trades': total_trades,
@@ -117,28 +230,38 @@ class AIService:
             'profit_factor': round(profit_factor, 2),
             'avg_rr': round(avg_rr, 2),
             'avg_quality': round(avg_quality, 1),
+            'avg_profit_per_trade': round(avg_profit_per_trade, 2),
+            'win_count': win_count,
+            'loss_count': loss_count,
+            'breakeven_count': breakeven_count,
             'symbol_stats': symbol_stats,
             'day_stats': day_stats,
             'emotion_stats': emotion_stats,
+            'current_emotion_stats': current_emotion_stats,
+            'most_common_emotion': most_common_emotion,
             'smt_rate': round(smt_rate, 1),
             'key_levels_rate': round(key_levels_rate, 1),
+            'checklist_compliance': round(checklist_compliance, 1),
             'hour_stats': hour_stats,
+            'strategy_stats': strategy_stats,
+            'session_stats': session_stats,
+            'similar_trades': similar_trades,
         }
 
     @classmethod
     def build_prompt(cls, user_analytics, user_input):
-        """ساخت پرامپت برای ارسال به Ollama"""
+        """ساخت پرامپت پیشرفته با تأکید بر تحلیل داده‌های واقعی کاربر"""
         best_prompt = AIPromptVersion.objects.filter(status='active').order_by('-performance_score').first()
         if not best_prompt:
             best_prompt = AIPromptVersion.objects.filter(version='default').first()
             if not best_prompt:
                 best_prompt = AIPromptVersion.objects.create(
                     version='default',
-                    prompt_template=cls.get_default_prompt_template(),
+                    prompt_template=cls.get_advanced_prompt_template(),
                     status='active'
                 )
 
-        analytics_text = cls._format_analytics(user_analytics)
+        analytics_text = cls._format_analytics_for_prompt(user_analytics)
         user_condition_text = cls._format_user_conditions(user_input)
 
         prompt = best_prompt.prompt_template.format(
@@ -150,121 +273,259 @@ class AIService:
         return prompt
 
     @classmethod
-    def _format_analytics(cls, analytics):
+    def _format_analytics_for_prompt(cls, analytics):
+        """فرمت‌سازی داده‌های تحلیلی برای پرامپت با جزئیات بیشتر"""
         if not analytics:
             return "کاربر هنوز سابقه معاملاتی ثبت نکرده است."
 
         lines = []
-        lines.append(f"- کل تریدها: {analytics['total_trades']}")
+        lines.append("📊 **خلاصه عملکرد کلی شما:**")
+        lines.append(
+            f"- کل تریدها: {analytics['total_trades']} (سود: {analytics['win_count']} | زیان: {analytics['loss_count']} | مساوی: {analytics['breakeven_count']})")
         lines.append(f"- نرخ برد کلی: {analytics['win_rate']}%")
         lines.append(f"- سود کل: ${analytics['total_profit']}")
-        lines.append(f"- فاکتور سود: {analytics['profit_factor']}")
-        lines.append(f"- میانگین R:R: {analytics['avg_rr']}")
+        lines.append(f"- میانگین سود هر ترید: ${analytics['avg_profit_per_trade']}")
+        lines.append(f"- فاکتور سود (نسبت سود به زیان): {analytics['profit_factor']}")
+        lines.append(f"- میانگین نسبت ریسک به ریوارد (R:R): {analytics['avg_rr']}")
         lines.append(f"- میانگین کیفیت اجرا: {analytics['avg_quality']}/۱۰")
 
         if analytics.get('symbol_stats'):
             s = analytics['symbol_stats']
+            lines.append("")
+            lines.append(f"📈 **عملکرد شما در نماد {analytics.get('symbol', 'این نماد')}:**")
+            lines.append(f"- تعداد ترید: {s['count']}")
+            lines.append(f"- نرخ برد: {s['win_rate']:.1f}% (سود: {s['win_count']} | زیان: {s['loss_count']})")
+            lines.append(f"- سود کل: ${s['total_profit']}")
+            lines.append(f"- میانگین سود هر ترید: ${s['avg_profit']:.2f}")
+            lines.append(f"- میانگین R:R: {s['avg_rr']:.2f}")
+
+        if analytics.get('similar_trades'):
+            sim = analytics['similar_trades']
+            lines.append("")
+            lines.append(f"🔍 **مقایسه با تریدهای مشابه شما (قیمت نزدیک به {analytics.get('symbol', 'این نماد')}):**")
+            lines.append(f"- تعداد تریدهای مشابه: {sim['count']}")
             lines.append(
-                f"- عملکرد این نماد: {s['count']} ترید، نرخ برد {s['win_rate']:.1f}%، سود ${s['total_profit']}")
+                f"- نرخ برد: {sim['win_rate']:.1f}% (سود: {sim['win_count']} | زیان: {sim['loss_count']} | مساوی: {sim['breakeven_count']})")
+            lines.append(f"- میانگین سود: ${sim['avg_profit']:.2f}")
+            lines.append(f"- بیشترین سود: ${sim.get('max_profit', 0):.2f}")
+            lines.append(f"- بیشترین زیان: ${sim.get('min_profit', 0):.2f}")
+            lines.append(f"- میانگین R:R: {sim['avg_rr']:.2f}")
+            lines.append(f"- میانگین کیفیت اجرا: {sim.get('avg_quality', 0):.1f}/۱۰")
+
+            if sim['win_rate'] > 60:
+                lines.append(
+                    f"✅ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله پتانسیل خوبی دارد.")
+            elif sim['win_rate'] > 40:
+                lines.append(
+                    f"⚠️ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، احتیاط توصیه می‌شود.")
+            else:
+                lines.append(
+                    f"❌ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله ریسک بالایی دارد.")
 
         if analytics.get('day_stats'):
             d = analytics['day_stats']
-            lines.append(
-                f"- عملکرد امروز (همان روز هفته): {d['count']} ترید، نرخ برد {d['win_rate']:.1f}%، سود ${d['total_profit']}")
+            lines.append("")
+            lines.append(f"📅 **عملکرد شما در روزهای مشابه ({datetime.now().strftime('%A')}):**")
+            lines.append(f"- تعداد ترید: {d['count']}")
+            lines.append(f"- نرخ برد: {d['win_rate']:.1f}% (سود: {d['win_count']} | زیان: {d['loss_count']})")
+            lines.append(f"- سود کل: ${d['total_profit']}")
 
         if analytics.get('emotion_stats'):
             e = analytics['emotion_stats']
-            lines.append(
-                f"- عملکرد با احساس {e['emotion']}: {e['count']} ترید، نرخ برد {e['win_rate']:.1f}%، سود ${e['total_profit']}")
+            lines.append("")
+            lines.append(f"🧠 **عملکرد شما در حالت احساسی غالب ({e['emotion']}):**")
+            lines.append(f"- تعداد ترید: {e['count']}")
+            lines.append(f"- نرخ برد: {e['win_rate']:.1f}%")
+            lines.append(f"- سود کل: ${e['total_profit']}")
 
-        lines.append(f"- پایبندی به SMT: {analytics.get('smt_rate', 0)}%")
-        lines.append(f"- پایبندی به سطوح کلیدی: {analytics.get('key_levels_rate', 0)}%")
+        if analytics.get('current_emotion_stats'):
+            ce = analytics['current_emotion_stats']
+            lines.append("")
+            lines.append(f"🎯 **عملکرد شما با احساس فعلی ({ce['emotion']}):**")
+            lines.append(f"- تعداد ترید: {ce['count']}")
+            lines.append(f"- نرخ برد: {ce['win_rate']:.1f}%")
+            lines.append(f"- سود کل: ${ce['total_profit']}")
+
+        if analytics.get('strategy_stats'):
+            st = analytics['strategy_stats']
+            lines.append("")
+            lines.append(f"📋 **بهترین استراتژی شما:**")
+            lines.append(f"- نوع: {st['best']}")
+            lines.append(f"- نرخ برد: {st['win_rate']}%")
+            lines.append(f"- سود کل: ${st['total_profit']}")
+            lines.append(f"- تعداد ترید: {st['count']}")
 
         if analytics.get('hour_stats'):
             h = analytics['hour_stats']
-            lines.append(f"- بهترین ساعت معاملاتی: {h['hour']}:۰۰ با نرخ برد {h['win_rate']}%")
+            lines.append("")
+            lines.append(f"⏰ **بهترین ساعت معاملاتی شما:**")
+            lines.append(f"- ساعت: {h['hour']}:۰۰")
+            lines.append(f"- نرخ برد: {h['win_rate']}%")
+            lines.append(f"- سود کل: ${h['total_profit']}")
+
+        lines.append("")
+        lines.append("📊 **پایبندی به قوانین معاملاتی:**")
+        lines.append(f"- پایبندی به SMT: {analytics.get('smt_rate', 0)}%")
+        lines.append(f"- پایبندی به سطوح کلیدی: {analytics.get('key_levels_rate', 0)}%")
+        lines.append(f"- پایبندی کلی به چک‌لیست: {analytics.get('checklist_compliance', 0)}%")
+
+        if analytics.get('most_common_emotion'):
+            lines.append(f"- احساس غالب شما در معاملات: {analytics['most_common_emotion']}")
 
         return "\n".join(lines)
 
     @classmethod
     def _format_user_conditions(cls, user_input):
+        """فرمت‌سازی شرایط فعلی کاربر"""
         lines = []
-        lines.append(f"- نماد: {user_input.get('symbol', 'نامشخص')}")
-        lines.append(f"- جهت: {user_input.get('direction', 'نامشخص')}")
-        lines.append(f"- قیمت فعلی: {user_input.get('entry_price', 'نامشخص')}")
+        lines.append(f"- **نماد معاملاتی:** {user_input.get('symbol', 'نامشخص')}")
+        lines.append(f"- **جهت معامله:** {user_input.get('direction', 'نامشخص')}")
+        lines.append(f"- **قیمت ورود:** {user_input.get('entry_price', 'نامشخص')}")
 
         if user_input.get('stop_loss'):
-            lines.append(f"- حد ضرر: {user_input['stop_loss']}")
+            lines.append(f"- **حد ضرر:** {user_input['stop_loss']}")
+            sl = float(user_input['stop_loss'])
+            entry = float(user_input.get('entry_price', 1))
+            risk_pips = abs(sl - entry)
+            lines.append(f"  - فاصله حد ضرر تا ورود: {risk_pips:.4f}")
         if user_input.get('take_profit'):
-            lines.append(f"- حد سود: {user_input['take_profit']}")
+            lines.append(f"- **حد سود:** {user_input['take_profit']}")
+            tp = float(user_input['take_profit'])
+            entry = float(user_input.get('entry_price', 1))
+            reward_pips = abs(tp - entry)
+            lines.append(f"  - فاصله حد سود تا ورود: {reward_pips:.4f}")
 
-        # ✅ هشدار قیمت
+        if user_input.get('stop_loss') and user_input.get('take_profit') and user_input.get('entry_price'):
+            entry = float(user_input['entry_price'])
+            sl = float(user_input['stop_loss'])
+            tp = float(user_input['take_profit'])
+            risk = abs(entry - sl)
+            reward = abs(tp - entry)
+            if risk > 0:
+                rr = reward / risk
+                lines.append(f"- **نسبت R:R محاسبه‌شده:** {rr:.2f}")
+
+        if user_input.get('volume'):
+            lines.append(f"- **حجم معامله (لات):** {user_input['volume']}")
+
+        if user_input.get('risk_percent'):
+            lines.append(f"- **درصد ریسک از سرمایه:** {user_input['risk_percent']}%")
+
+        if user_input.get('session_type'):
+            lines.append(f"- **نوع جلسه:** {user_input['session_type']}")
+
+        if user_input.get('strategy_type'):
+            lines.append(f"- **نوع استراتژی:** {user_input['strategy_type']}")
+
+        if user_input.get('timeframes'):
+            lines.append(f"- **تایم‌فریم‌های استفاده‌شده:** {user_input['timeframes']}")
+
         if user_input.get('price_warning'):
-            lines.append(f"- ⚠️ هشدار: {user_input['price_warning']}")
+            lines.append(f"- ⚠️ **هشدار قیمت:** {user_input['price_warning']}")
 
         market_condition = user_input.get('market_condition')
         if market_condition:
             condition_map = {'trending': 'رونددار', 'ranging': 'رنج', 'neutral': 'خنثی', 'volatile': 'پرنوسان'}
-            lines.append(f"- وضعیت بازار: {condition_map.get(market_condition, market_condition)}")
+            lines.append(f"- **وضعیت بازار:** {condition_map.get(market_condition, market_condition)}")
 
         emotion = user_input.get('emotion')
         if emotion:
             emotion_map = {'calm': 'آرام', 'excited': 'هیجان', 'fear': 'ترس', 'greed': 'طمع',
                            'patient': 'صبر', 'stress': 'استرس', 'confident': 'بااعتمادبه‌نفس', 'uncertain': 'مردد'}
-            lines.append(f"- احساسات فعلی: {emotion_map.get(emotion, emotion)}")
+            lines.append(f"- **احساسات فعلی:** {emotion_map.get(emotion, emotion)}")
 
         if user_input.get('time_ny'):
-            lines.append(f"- ساعت (به وقت نیویورک): {user_input['time_ny']}")
+            lines.append(f"- **ساعت (به وقت نیویورک):** {user_input['time_ny']}")
 
         if user_input.get('user_question'):
-            lines.append(f"- سوال کاربر: {user_input['user_question']}")
+            lines.append(f"- **سوال کاربر:** {user_input['user_question']}")
 
         return "\n".join(lines)
 
     @classmethod
-    def get_default_prompt_template(cls):
+    def get_advanced_prompt_template(cls):
         return """
-شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
-به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+شما یک مشاور معاملاتی حرفه‌ای و تحلیلگر ارشد بازارهای مالی با بیش از ۱۵ سال تجربه هستید.
+شما باید بر اساس **داده‌های واقعی تاریخچه معاملاتی کاربر** و **شرایط فعلی**، تحلیلی عمیق و کاربردی ارائه دهید.
+پاسخ شما باید به‌گونه‌ای باشد که کاربر بتواند از آن برای تصمیم‌گیری بهتر استفاده کند.
 
-📊 داده‌های تاریخچه کاربر:
+**مهم:** شما باید از داده‌های تاریخی کاربر برای نتیجه‌گیری استفاده کنید و تحلیل خود را بر اساس آن‌ها بنا کنید.
+
+---
+
+📊 **داده‌های تاریخچه کاربر (از معاملات واقعی):**
 {analytics}
 
-📝 شرایط فعلی کاربر:
+📝 **شرایط فعلی کاربر برای معامله جدید:**
 {user_conditions}
 
-🔍 لطفاً تحلیل زیر را ارائه دهید:
+---
 
-۱. امتیاز اعتبار (۰-۱۰۰) برای این ترید با توضیح مختصر
+🔍 **تحلیل جامع خود را بر اساس موارد زیر ارائه دهید:**
 
-۲. نقاط قوت این تصمیم (حداقل ۲ مورد، بر اساس داده‌های کاربر)
+**۱. امتیاز اعتبار (۰-۱۰۰)**
+- بر اساس شباهت این معامله به معاملات موفق قبلی کاربر محاسبه کنید.
+- به مواردی مانند: نماد، جهت، محدوده قیمت، نوع استراتژی، احساسات مشابه توجه کنید.
+- توضیح دهید چرا این امتیاز را داده‌اید.
 
-۳. هشدارها و نقاط ضعف (حداقل ۲ مورد، بر اساس داده‌های کاربر)
+**۲. نقاط قوت این تصمیم (حداقل ۳ مورد)**
+- بر اساس داده‌های تاریخچه کاربر، چه عواملی این معامله را تقویت می‌کنند؟
+- اگر تریدهای مشابه قبلی موفق بوده‌اند، به آن اشاره کنید.
+- به پایبندی کاربر به قوانین و استراتژی اشاره کنید.
 
-۴. پیشنهاد عملی برای مدیریت معامله (مشخص و قابل اجرا)
+**۳. هشدارها و نقاط ضعف (حداقل ۳ مورد)**
+- بر اساس الگوهای رفتاری کاربر، چه ریسک‌هایی وجود دارد؟
+- آیا احساسات فعلی کاربر در گذشته باعث ضرر شده است؟
+- نسبت R:R محاسبه‌شده را ارزیابی کنید.
 
-۵. یک نکته انگیزشی یا آموزشی مرتبط با شرایط کاربر
+**۴. پیشنهاد عملی برای مدیریت معامله**
+- **حد ضرر پیشنهادی:** بر اساس تحلیل تکنیکال و داده‌های کاربر
+- **حد سود پیشنهادی:** بر اساس سطوح کلیدی و نسبت ریسک به ریوارد مناسب
+- **اندازه پوزیشن:** بر اساس تاریخچه کاربر و میزان ریسک‌پذیری او
+- **زمان‌بندی:** بهترین زمان برای ورود/خروج بر اساس ساعت‌های موفق کاربر
 
-سوال کاربر: {user_question}
+**۵. تحلیل روانشناختی**
+- احساسات فعلی کاربر را با عملکرد گذشته‌اش مقایسه کنید.
+- آیا این احساسات در گذشته باعث ضرر شده‌اند؟
+- توصیه‌های عملی برای مدیریت احساسات ارائه دهید.
 
-پاسخ خود را به صورت زیر ساختار دهید:
-امتیاز: [عدد]
+**۶. یک نکته انگیزشی یا آموزشی**
+- بر اساس شرایط کاربر، یک نکته کاربردی و انگیزشی ارائه دهید.
+
+---
+
+**سوال کاربر:** {user_question}
+
+---
+
+**نکته بسیار مهم:** پاسخ خود را دقیقاً به صورت زیر ساختار دهید. از عناوین مشخص استفاده کنید:
+
+امتیاز: [عدد ۰-۱۰۰] – [دلیل مختصر بر اساس داده‌های کاربر]
+
 نقاط قوت:
-- [مورد ۱]
-- [مورد ۲]
+- [مورد ۱ با ارجاع به داده‌های کاربر]
+- [مورد ۲ با ارجاع به داده‌های کاربر]
+- [مورد ۳ با ارجاع به داده‌های کاربر]
+
 هشدارها:
-- [مورد ۱]
-- [مورد ۲]
-پیشنهاد: [پیشنهاد عملی]
-نکته: [نکته آموزشی]
+- [مورد ۱ با ارجاع به داده‌های کاربر]
+- [مورد ۲ با ارجاع به داده‌های کاربر]
+- [مورد ۳ با ارجاع به داده‌های کاربر]
+
+پیشنهاد:
+- حد ضرر: [مقدار پیشنهادی با دلیل]
+- حد سود: [مقدار پیشنهادی با دلیل]
+- اندازه پوزیشن: [پیشنهاد بر اساس تاریخچه کاربر]
+- زمان‌بندی: [پیشنهاد بر اساس بهترین ساعت‌های معاملاتی کاربر]
+
+تحلیل روانشناختی: [تحلیل کامل بر اساس داده‌های احساسی کاربر]
+
+نکته: [نکته آموزشی یا انگیزشی مرتبط با شرایط کاربر]
 """
 
     @classmethod
     def call_ollama(cls, prompt, model=None):
-        """
-        ارسال درخواست به Ollama و دریافت پاسخ (غیراستریم)
-        model: نام مدل انتخابی توسط کاربر (اختیاری)
-        """
+        """ارسال درخواست به Ollama و دریافت پاسخ (غیراستریم)"""
         model = model or cls.OLLAMA_MODEL
         try:
             payload = {
@@ -272,33 +533,42 @@ class AIService:
                 "prompt": prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.7,
-                    "max_tokens": 800,
+                    "temperature": 0.6,
+                    "max_tokens": 2000,
                 }
             }
 
-            response = requests.post(cls.OLLAMA_URL, json=payload, timeout=120)
+            response = requests.post(cls.OLLAMA_URL, json=payload, timeout=180)
             response.raise_for_status()
 
             result = response.json()
-            return result.get('response', '')
+            response_text = result.get('response', '')
+
+            if not response_text or len(response_text.strip()) < 30:
+                return cls._get_empty_response_error()
+
+            return response_text
 
         except requests.exceptions.Timeout:
             logger.error("Ollama timeout")
-            return "⏰ متأسفانه زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید."
+            return cls._get_connection_error_response("⏰ زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید.")
         except requests.exceptions.ConnectionError:
             logger.error("Ollama connection error")
-            return "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست."
+            return cls._get_connection_error_response(
+                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Ollama HTTP error: {str(e)}")
+            if "404" in str(e):
+                return cls._get_connection_error_response(
+                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
+            return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
         except Exception as e:
             logger.error(f"Ollama error: {str(e)}")
-            return f"❌ خطا در ارتباط با سرویس AI: {str(e)}"
+            return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
 
     @classmethod
     def call_ollama_stream(cls, prompt, model=None):
-        """
-        ارسال درخواست به Ollama با استریم و بازگرداندن ژنراتور
-        model: نام مدل انتخابی توسط کاربر (اختیاری)
-        """
+        """ارسال درخواست به Ollama با استریم"""
         model = model or cls.OLLAMA_MODEL
         try:
             payload = {
@@ -306,352 +576,300 @@ class AIService:
                 "prompt": prompt,
                 "stream": True,
                 "options": {
-                    "temperature": 0.7,
-                    "max_tokens": 800,
+                    "temperature": 0.6,
+                    "max_tokens": 2000,
                 }
             }
 
             response = requests.post(cls.OLLAMA_URL, json=payload, stream=True, timeout=300)
             response.raise_for_status()
 
+            has_content = False
             for line in response.iter_lines():
                 if line:
                     try:
                         data = json.loads(line.decode('utf-8'))
-                        if 'response' in data:
+                        if 'response' in data and data['response']:
+                            has_content = True
                             yield data['response']
                         if data.get('done', False):
                             break
                     except json.JSONDecodeError:
                         continue
 
+            if not has_content:
+                yield cls._get_empty_response_error()
+
         except requests.exceptions.Timeout:
-            yield "⏰ متأسفانه زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید."
+            yield cls._get_connection_error_response("⏰ زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید.")
         except requests.exceptions.ConnectionError:
-            yield "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست."
+            yield cls._get_connection_error_response(
+                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Ollama HTTP error: {str(e)}")
+            if "404" in str(e):
+                yield cls._get_connection_error_response(
+                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
+            yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
         except Exception as e:
             logger.error(f"Ollama error: {str(e)}")
-            yield f"❌ خطا در ارتباط با سرویس AI: {str(e)}"
+            yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
+
+    @classmethod
+    def _get_connection_error_response(cls, message):
+        """ساخت پاسخ خطای اتصال با ساختار قابل parse"""
+        return f"""
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+{message}
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+"""
+
+    @classmethod
+    def _get_empty_response_error(cls):
+        """ساخت پاسخ خطای پاسخ خالی"""
+        return """
+❌ پاسخ نامعتبر از سرویس هوش مصنوعی
+
+سرویس AI پاسخی ارسال نکرده است. لطفاً دوباره تلاش کنید.
+
+امتیاز: ۰ – پاسخ نامعتبر
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ پاسخ AI نامعتبر است
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً دوباره تلاش کنید. در صورت تکرار، با پشتیبانی تماس بگیرید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+"""
 
     @classmethod
     def parse_ai_response(cls, response_text):
+        """Parse پاسخ AI و استخراج اطلاعات ساختاریافته با بهبود تشخیص بخش‌ها"""
         result = {
-            'score': 50,
+            'score': 0,
             'strengths': [],
             'warnings': [],
             'suggestion': 'پیشنهادی موجود نیست.',
             'tip': 'همیشه به مدیریت ریسک توجه کنید.',
+            'psychology': 'تحلیل روانشناختی موجود نیست.',
+            'suggested_sl': None,
+            'suggested_tp': None,
+            'suggested_position': None,
+            'suggested_timing': None,
+            'is_connection_error': False,
         }
+
+        # بررسی خطای اتصال
+        if '❌ خطای اتصال به سرویس هوش مصنوعی' in response_text or '❌ پاسخ نامعتبر از سرویس هوش مصنوعی' in response_text:
+            result['is_connection_error'] = True
+            result['score'] = 0
+            result['warnings'] = ['⚠️ سرویس هوش مصنوعی در دسترس نیست']
+            result['suggestion'] = 'لطفاً اتصال به Ollama را بررسی کنید.'
+            return result
+
+        if not response_text or not response_text.strip():
+            return result
 
         try:
             lines = response_text.strip().split('\n')
+            current_section = None
+            section_content = []
 
-            for line in lines:
-                if 'امتیاز:' in line or 'امتیاز :' in line:
-                    parts = line.split(':')
+            for i, line in enumerate(lines):
+                line = line.strip()
+                if not line:
+                    continue
+
+                # ===== تشخیص بخش‌ها با الگوهای مختلف =====
+                if re.search(r'امتیاز\s*:', line, re.IGNORECASE):
+                    parts = line.split(':', 1)
                     if len(parts) > 1:
-                        score_text = parts[1].strip()
-                        score_num = ''.join([c for c in score_text if c.isdigit()])
-                        if score_num:
-                            result['score'] = min(100, max(0, int(score_num)))
-                    break
-
-            strengths_section = False
-            for line in lines:
-                if 'نقاط قوت:' in line or 'نقاط قوت :' in line:
-                    strengths_section = True
+                        score_part = parts[1].strip()
+                        score_match = re.search(r'(\d+)', score_part)
+                        if score_match:
+                            result['score'] = min(100, max(0, int(score_match.group(1))))
+                    current_section = 'score'
                     continue
-                if strengths_section:
-                    if 'هشدارها:' in line or 'هشدارها :' in line or 'پیشنهاد:' in line or 'نکته:' in line:
-                        strengths_section = False
-                    elif line.strip().startswith('-') or line.strip().startswith('•'):
-                        result['strengths'].append(line.strip().lstrip('-• '))
 
-            warnings_section = False
-            for line in lines:
-                if 'هشدارها:' in line or 'هشدارها :' in line:
-                    warnings_section = True
+                if re.search(r'نقاط\s*قوت\s*:', line, re.IGNORECASE):
+                    current_section = 'strengths'
+                    section_content = []
                     continue
-                if warnings_section:
-                    if 'پیشنهاد:' in line or 'پیشنهاد :' in line or 'نکته:' in line:
-                        warnings_section = False
-                    elif line.strip().startswith('-') or line.strip().startswith('•'):
-                        result['warnings'].append(line.strip().lstrip('-• '))
 
-            for i, line in enumerate(lines):
-                if 'پیشنهاد:' in line or 'پیشنهاد :' in line:
-                    suggestion_text = line.split(':', 1)[1].strip()
-                    for j in range(i + 1, min(i + 5, len(lines))):
-                        if 'نکته:' in lines[j] or 'نکته :' in lines[j]:
-                            break
-                        if lines[j].strip() and not lines[j].strip().startswith('-'):
-                            suggestion_text += ' ' + lines[j].strip()
-                    result['suggestion'] = suggestion_text
-                    break
+                if re.search(r'هشدارها\s*:', line, re.IGNORECASE):
+                    current_section = 'warnings'
+                    section_content = []
+                    continue
 
-            for i, line in enumerate(lines):
-                if 'نکته:' in line or 'نکته :' in line:
-                    tip_text = line.split(':', 1)[1].strip()
-                    for j in range(i + 1, min(i + 5, len(lines))):
-                        if lines[j].strip() and not lines[j].strip().startswith('-'):
-                            tip_text += ' ' + lines[j].strip()
-                    result['tip'] = tip_text
-                    break
+                if re.search(r'پیشنهاد\s*:', line, re.IGNORECASE):
+                    current_section = 'suggestion'
+                    section_content = []
+                    # اگر در همان خط متن وجود دارد
+                    if ':' in line and len(line.split(':', 1)[1].strip()) > 1:
+                        suggestion_text = line.split(':', 1)[1].strip()
+                        if suggestion_text and len(suggestion_text) > 5:
+                            result['suggestion'] = suggestion_text
+                    continue
 
-            if result['tip'] == 'همیشه به مدیریت ریسک توجه کنید.' and response_text:
-                sentences = response_text.split('.')
-                if len(sentences) > 1:
-                    last_sentence = sentences[-2].strip() if len(sentences) >= 2 else sentences[-1].strip()
-                    if len(last_sentence) > 10:
-                        result['tip'] = last_sentence
+                if re.search(r'تحلیل\s*روانشناختی\s*:', line, re.IGNORECASE):
+                    current_section = 'psychology'
+                    section_content = []
+                    if ':' in line and len(line.split(':', 1)[1].strip()) > 1:
+                        psych_text = line.split(':', 1)[1].strip()
+                        if psych_text and len(psych_text) > 5:
+                            result['psychology'] = psych_text
+                    continue
+
+                if re.search(r'نکته\s*:', line, re.IGNORECASE):
+                    current_section = 'tip'
+                    section_content = []
+                    if ':' in line and len(line.split(':', 1)[1].strip()) > 1:
+                        tip_text = line.split(':', 1)[1].strip()
+                        if tip_text and len(tip_text) > 5:
+                            result['tip'] = tip_text
+                    continue
+
+                # ===== جمع‌آوری محتوای هر بخش =====
+                if current_section == 'strengths':
+                    if line.startswith('-') or line.startswith('•') or re.match(r'^\d+\.', line):
+                        item = re.sub(r'^[-•\d.]+', '', line).strip()
+                        if item and len(item) > 3:
+                            result['strengths'].append(item)
+                    elif section_content and len(line) > 5:
+                        # ادامه متن قبلی
+                        if result['strengths']:
+                            result['strengths'][-1] += ' ' + line
+
+                elif current_section == 'warnings':
+                    if line.startswith('-') or line.startswith('•') or re.match(r'^\d+\.', line):
+                        item = re.sub(r'^[-•\d.]+', '', line).strip()
+                        if item and len(item) > 3:
+                            result['warnings'].append(item)
+                    elif section_content and len(line) > 5:
+                        if result['warnings']:
+                            result['warnings'][-1] += ' ' + line
+
+                elif current_section == 'suggestion':
+                    if line.startswith('-') or line.startswith('•') or re.match(r'^\d+\.', line):
+                        clean_line = re.sub(r'^[-•\d.]+', '', line).strip()
+                        if 'حد ضرر' in line or 'حد ضرر:' in line:
+                            val = clean_line.split(':', 1)[1].strip() if ':' in clean_line else clean_line
+                            result['suggested_sl'] = val
+                        elif 'حد سود' in line or 'حد سود:' in line:
+                            val = clean_line.split(':', 1)[1].strip() if ':' in clean_line else clean_line
+                            result['suggested_tp'] = val
+                        elif 'اندازه پوزیشن' in line or 'پوزیشن' in line:
+                            val = clean_line.split(':', 1)[1].strip() if ':' in clean_line else clean_line
+                            result['suggested_position'] = val
+                        elif 'زمان‌بندی' in line or 'زمان' in line:
+                            val = clean_line.split(':', 1)[1].strip() if ':' in clean_line else clean_line
+                            result['suggested_timing'] = val
+                        else:
+                            if clean_line and len(clean_line) > 3:
+                                if result['suggestion'] == 'پیشنهادی موجود نیست.':
+                                    result['suggestion'] = clean_line
+                                else:
+                                    result['suggestion'] += ' ' + clean_line
+                    elif len(line) > 5 and not line.startswith('تحلیل') and not line.startswith('نکته'):
+                        if result['suggestion'] == 'پیشنهادی موجود نیست.':
+                            result['suggestion'] = line
+                        else:
+                            result['suggestion'] += ' ' + line
+
+                elif current_section == 'psychology':
+                    if len(line) > 5 and not line.startswith('نکته'):
+                        if result['psychology'] == 'تحلیل روانشناختی موجود نیست.':
+                            result['psychology'] = line
+                        else:
+                            result['psychology'] += ' ' + line
+
+                elif current_section == 'tip':
+                    if len(line) > 5 and not line.startswith('تحلیل'):
+                        if result['tip'] == 'همیشه به مدیریت ریسک توجه کنید.':
+                            result['tip'] = line
+                        else:
+                            result['tip'] += ' ' + line
+
+            # ===== اگر هیچ داده‌ای استخراج نشد، از کل متن برای استخراج اولیه استفاده کن =====
+            if not result['strengths'] and not result['warnings'] and len(response_text) > 100:
+                # استخراج جملات کلیدی
+                sentences = re.split(r'[.!\n]', response_text)
+                for sent in sentences[:15]:
+                    sent = sent.strip()
+                    if len(sent) < 10:
+                        continue
+                    if 'قوت' in sent or 'مزیت' in sent or 'خوب' in sent or 'موفق' in sent:
+                        if len(result['strengths']) < 5:
+                            result['strengths'].append(sent[:120])
+                    elif 'هشدار' in sent or 'خطر' in sent or 'ضعف' in sent or 'ریسک' in sent:
+                        if len(result['warnings']) < 5:
+                            result['warnings'].append(sent[:120])
+                    elif 'پیشنهاد' in sent or 'توصیه' in sent or 'بهتر' in sent or 'مناسب' in sent:
+                        if result['suggestion'] == 'پیشنهادی موجود نیست.':
+                            result['suggestion'] = sent[:150]
+
+            # ===== اگر امتیاز صفر است و محتوایی وجود دارد، امتیاز را از متن تشخیص بده =====
+            if result['score'] == 0 and (result['strengths'] or result['warnings'] or len(response_text) > 50):
+                # تشخیص از کلمات کلیدی
+                text_lower = response_text.lower()
+                if 'عالی' in text_lower or 'بسیار خوب' in text_lower:
+                    result['score'] = 75
+                elif 'خوب' in text_lower or 'مناسب' in text_lower:
+                    result['score'] = 65
+                elif 'متوسط' in text_lower:
+                    result['score'] = 50
+                elif 'ضعیف' in text_lower or 'نامناسب' in text_lower:
+                    result['score'] = 25
+                elif 'خطر' in text_lower or 'هشدار' in text_lower:
+                    result['score'] = 35
+                else:
+                    result['score'] = 45
 
         except Exception as e:
             logger.error(f"Error parsing AI response: {str(e)}")
+            # در صورت خطای parsing، از متن کامل به عنوان پیشنهاد استفاده کن
+            if len(response_text) > 50:
+                result['suggestion'] = response_text[:200]
 
         return result
 
-    # ============================================
-    # دریافت قیمت لحظه‌ای با انتخاب provider
-    # ============================================
-    @classmethod
-    def get_live_price(cls, symbol):
-        """
-        دریافت قیمت لحظه‌ای از سرویس انتخاب‌شده توسط ادمین
-        اگر provider برابر 'none' باشد، قیمت دریافت نمی‌شود
-        """
-        provider = cls.LIVE_PRICE_PROVIDER.lower()
-
-        # ✅ اگر provider برابر 'none' باشد، قیمت دریافت نمی‌شود
-        if provider == 'none':
-            logger.info("ℹ️ دریافت قیمت لحظه‌ای غیرفعال است (LIVE_PRICE_PROVIDER=none)")
-            return None
-
-        if provider == 'twelvedata':
-            return cls._get_price_from_twelvedata(symbol)
-        elif provider == 'finnhub':
-            return cls._get_price_from_finnhub(symbol)
-        elif provider == 'alphavantage':
-            return cls._get_price_from_alphavantage(symbol)
-        else:
-            logger.warning(f"⚠️ Provider '{provider}' نامعتبر است. قیمت لحظه‌ای دریافت نمی‌شود.")
-            return None
-
-    # ============================================
-    # پیاده‌سازی سرویس‌ها
-    # ============================================
-    @classmethod
-    def _get_price_from_twelvedata(cls, symbol):
-        """دریافت قیمت از Twelve Data"""
-        if not cls.TWELVEDATA_API_KEY:
-            logger.warning("⚠️ Twelve Data API Key تنظیم نشده است")
-            return None
-
-        try:
-            formatted_symbol = cls._format_symbol_for_twelvedata(symbol)
-
-            url = f"{cls.TWELVEDATA_BASE_URL}/price"
-            params = {
-                'symbol': formatted_symbol,
-                'apikey': cls.TWELVEDATA_API_KEY,
-            }
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-
-            if 'price' in data and data['price']:
-                return float(data['price'])
-            else:
-                logger.warning(f"⚠️ Twelve Data: قیمت برای {symbol} یافت نشد. پاسخ: {data}")
-                return None
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Twelve Data error: {str(e)}")
-            return None
-        except Exception as e:
-            logger.error(f"❌ Twelve Data error: {str(e)}")
-            return None
-
-    @classmethod
-    def _get_price_from_finnhub(cls, symbol):
-        """دریافت قیمت از Finnhub"""
-        if not cls.FINNHUB_API_KEY:
-            logger.warning("⚠️ Finnhub API Key تنظیم نشده است")
-            return None
-
-        try:
-            formatted_symbol = cls._format_symbol_for_finnhub(symbol)
-
-            url = f"{cls.FINNHUB_BASE_URL}/quote"
-            params = {
-                'symbol': formatted_symbol,
-                'token': cls.FINNHUB_API_KEY,
-            }
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-
-            if 'c' in data and data['c']:
-                return float(data['c'])
-            else:
-                logger.warning(f"⚠️ Finnhub: قیمت برای {symbol} یافت نشد. پاسخ: {data}")
-                return None
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Finnhub error: {str(e)}")
-            return None
-        except Exception as e:
-            logger.error(f"❌ Finnhub error: {str(e)}")
-            return None
-
-    @classmethod
-    def _get_price_from_alphavantage(cls, symbol):
-        """دریافت قیمت از Alpha Vantage (همان متد قبلی)"""
-        if not cls.ALPHA_VANTAGE_API_KEY:
-            logger.warning("⚠️ Alpha Vantage API Key تنظیم نشده است")
-            return None
-
-        try:
-            if symbol in ['XAUUSD', 'XAGUSD', 'XPDUSD', 'XPTUSD']:
-                return cls._get_commodity_price_av(symbol)
-            if symbol in ['USOIL', 'UKOIL']:
-                return cls._get_oil_price_av(symbol)
-
-            from_symbol, to_symbol = cls._parse_symbol_av(symbol)
-            if not from_symbol or not to_symbol:
-                return None
-
-            url = "https://www.alphavantage.co/query"
-            params = {
-                'function': 'CURRENCY_EXCHANGE_RATE',
-                'from_currency': from_symbol,
-                'to_currency': to_symbol,
-                'apikey': cls.ALPHA_VANTAGE_API_KEY
-            }
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            if 'Realtime Currency Exchange Rate' in data:
-                price = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
-                return float(price)
-            else:
-                if 'Information' in data:
-                    logger.warning(f"⚠️ Alpha Vantage rate limit: {data['Information']}")
-                else:
-                    logger.error(f"❌ Alpha Vantage error: {data.get('Note', 'Unknown error')}")
-                return None
-
-        except Exception as e:
-            logger.error(f"❌ Alpha Vantage error: {str(e)}")
-            return None
-
-    # ===== متدهای کمکی =====
-    @classmethod
-    def _format_symbol_for_twelvedata(cls, symbol):
-        """تبدیل نماد به فرمت Twelve Data (مثلاً EURUSD -> EUR/USD)"""
-        if '/' in symbol:
-            return symbol
-        if symbol.endswith('USD') and len(symbol) > 3:
-            base = symbol[:-3]
-            return f"{base}/USD"
-        if len(symbol) == 6:
-            return f"{symbol[:3]}/{symbol[3:]}"
-        return symbol
-
-    @classmethod
-    def _format_symbol_for_finnhub(cls, symbol):
-        """تبدیل نماد به فرمت Finnhub"""
-        if len(symbol) == 6:
-            return f"OANDA:{symbol}"
-        if symbol.endswith('USD'):
-            return f"BINANCE:{symbol}"
-        if symbol in ['XAUUSD', 'XAGUSD', 'XPDUSD', 'XPTUSD']:
-            return f"OANDA:{symbol}"
-        return symbol
-
-    @classmethod
-    def _parse_symbol_av(cls, symbol):
-        """تبدیل نماد به from_currency و to_currency برای Alpha Vantage"""
-        if symbol.endswith('USD'):
-            return symbol[:-3], 'USD'
-        if symbol == 'EURUSD':
-            return 'EUR', 'USD'
-        if symbol == 'GBPUSD':
-            return 'GBP', 'USD'
-        if symbol == 'USDJPY':
-            return 'USD', 'JPY'
-        if symbol == 'BTCUSD':
-            return 'BTC', 'USD'
-        if symbol == 'ETHUSD':
-            return 'ETH', 'USD'
-        if len(symbol) == 6:
-            return symbol[:3], symbol[3:]
-        return None, None
-
-    @classmethod
-    def _get_commodity_price_av(cls, symbol):
-        """دریافت قیمت کامودیتی از Alpha Vantage"""
-        try:
-            commodity_map = {
-                'XAUUSD': 'XAU',
-                'XAGUSD': 'XAG',
-                'XPDUSD': 'XPD',
-                'XPTUSD': 'XPT'
-            }
-            commodity = commodity_map.get(symbol, symbol)
-            url = "https://www.alphavantage.co/query"
-            params = {
-                'function': 'CURRENCY_EXCHANGE_RATE',
-                'from_currency': commodity,
-                'to_currency': 'USD',
-                'apikey': cls.ALPHA_VANTAGE_API_KEY
-            }
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            if 'Realtime Currency Exchange Rate' in data:
-                price = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
-                return float(price)
-            return None
-        except Exception as e:
-            logger.error(f"❌ Commodity price error: {str(e)}")
-            return None
-
-    @classmethod
-    def _get_oil_price_av(cls, symbol):
-        """دریافت قیمت نفت از Alpha Vantage"""
-        try:
-            function = 'WTI' if symbol == 'USOIL' else 'BRENT'
-            url = "https://www.alphavantage.co/query"
-            params = {
-                'function': function,
-                'apikey': cls.ALPHA_VANTAGE_API_KEY
-            }
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            if 'data' in data and len(data['data']) > 0:
-                return float(data['data'][0]['value'])
-            return None
-        except Exception as e:
-            logger.error(f"❌ Oil price error: {str(e)}")
-            return None
-
-    # ============================================
-    # اعتبارسنجی قیمت با قیمت لحظه‌ای (اصلاح‌شده)
-    # ============================================
     @classmethod
     def validate_prices_with_live(cls, user_input):
-        """
-        اعتبارسنجی قیمت‌های وارد شده با قیمت لحظه‌ای
-        اگر provider برابر 'none' باشد، هشدار عدم دسترسی داده می‌شود
-        """
+        """اعتبارسنجی قیمت‌های وارد شده با قیمت لحظه‌ای"""
         symbol = user_input.get('symbol')
         entry_price = user_input.get('entry_price')
 
         if not symbol or not entry_price:
             return True, ""
 
-        # ✅ اگر قیمت لحظه‌ای غیرفعال است، پیام مناسب برگردان
         if cls.LIVE_PRICE_PROVIDER.lower() == 'none':
             return True, "ℹ️ دریافت قیمت لحظه‌ای غیرفعال است. لطفاً قیمت را خودتان بررسی کنید."
 
@@ -669,31 +887,9 @@ class AIService:
 
         return True, f"✅ قیمت وارد شده با قیمت لحظه‌ای ({live_price:.4f}) منطبق است."
 
-    # ============================================
-    # تست اتصال به سرویس قیمت (جدید)
-    # ============================================
-    @classmethod
-    def test_connection(cls, symbol='EURUSD'):
-        """
-        تست اتصال به provider فعال و دریافت قیمت برای یک نماد نمونه
-        بازگشت: (success, message, price)
-        """
-        provider = cls.LIVE_PRICE_PROVIDER.lower()
-
-        # ✅ اگر provider برابر 'none' باشد
-        if provider == 'none':
-            return False, "ℹ️ دریافت قیمت لحظه‌ای غیرفعال است (LIVE_PRICE_PROVIDER=none). برای فعال‌سازی، مقدار را به twelvedata, finnhub یا alphavantage تغییر دهید.", None
-
-        price = cls.get_live_price(symbol)
-
-        if price is not None:
-            return True, f"✅ اتصال به {provider} موفق. قیمت {symbol}: {price}", price
-        else:
-            return False, f"❌ اتصال به {provider} ناموفق. لطفاً کلید API و تنظیمات را بررسی کنید.", None
-
     @classmethod
     def validate_trade_logic(cls, user_input):
-        """اعتبارسنجی منطق معامله (قوانین بدیهی)"""
+        """اعتبارسنجی منطق معامله"""
         direction = user_input.get('direction')
         entry_price = user_input.get('entry_price')
         stop_loss = user_input.get('stop_loss')
@@ -744,9 +940,6 @@ class AIService:
                     info.append(f'🎯 نسبت R:R عالی! ({rr:.2f})')
                 else:
                     info.append(f'📊 نسبت R:R: {rr:.2f}')
-            else:
-                if not errors:
-                    warnings.append('⚠️ محاسبه R:R نامعتبر است. لطفاً مقادیر را بررسی کنید.')
 
         market_condition = user_input.get('market_condition')
         if market_condition == 'volatile':
@@ -759,16 +952,170 @@ class AIService:
             'is_valid': len(errors) == 0
         }
 
+    # ===== متدهای دریافت قیمت لحظه‌ای =====
+    @classmethod
+    def get_live_price(cls, symbol):
+        provider = cls.LIVE_PRICE_PROVIDER.lower()
+        if provider == 'none':
+            return None
+        if provider == 'twelvedata':
+            return cls._get_price_from_twelvedata(symbol)
+        elif provider == 'finnhub':
+            return cls._get_price_from_finnhub(symbol)
+        elif provider == 'alphavantage':
+            return cls._get_price_from_alphavantage(symbol)
+        else:
+            logger.warning(f"⚠️ Provider '{provider}' نامعتبر است.")
+            return None
+
+    @classmethod
+    def _get_price_from_twelvedata(cls, symbol):
+        if not cls.TWELVEDATA_API_KEY:
+            logger.warning("⚠️ Twelve Data API Key تنظیم نشده است")
+            return None
+        try:
+            formatted_symbol = cls._format_symbol_for_twelvedata(symbol)
+            url = f"{cls.TWELVEDATA_BASE_URL}/price"
+            params = {'symbol': formatted_symbol, 'apikey': cls.TWELVEDATA_API_KEY}
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if 'price' in data and data['price']:
+                return float(data['price'])
+            return None
+        except Exception as e:
+            logger.error(f"❌ Twelve Data error: {str(e)}")
+            return None
+
+    @classmethod
+    def _get_price_from_finnhub(cls, symbol):
+        if not cls.FINNHUB_API_KEY:
+            logger.warning("⚠️ Finnhub API Key تنظیم نشده است")
+            return None
+        try:
+            formatted_symbol = cls._format_symbol_for_finnhub(symbol)
+            url = f"{cls.FINNHUB_BASE_URL}/quote"
+            params = {'symbol': formatted_symbol, 'token': cls.FINNHUB_API_KEY}
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if 'c' in data and data['c']:
+                return float(data['c'])
+            return None
+        except Exception as e:
+            logger.error(f"❌ Finnhub error: {str(e)}")
+            return None
+
+    @classmethod
+    def _get_price_from_alphavantage(cls, symbol):
+        if not cls.ALPHA_VANTAGE_API_KEY:
+            logger.warning("⚠️ Alpha Vantage API Key تنظیم نشده است")
+            return None
+        try:
+            if symbol in ['XAUUSD', 'XAGUSD', 'XPDUSD', 'XPTUSD']:
+                return cls._get_commodity_price_av(symbol)
+            if symbol in ['USOIL', 'UKOIL']:
+                return cls._get_oil_price_av(symbol)
+            from_symbol, to_symbol = cls._parse_symbol_av(symbol)
+            if not from_symbol or not to_symbol:
+                return None
+            url = "https://www.alphavantage.co/query"
+            params = {
+                'function': 'CURRENCY_EXCHANGE_RATE',
+                'from_currency': from_symbol,
+                'to_currency': to_symbol,
+                'apikey': cls.ALPHA_VANTAGE_API_KEY
+            }
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if 'Realtime Currency Exchange Rate' in data:
+                price = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
+                return float(price)
+            return None
+        except Exception as e:
+            logger.error(f"❌ Alpha Vantage error: {str(e)}")
+            return None
+
+    @classmethod
+    def _format_symbol_for_twelvedata(cls, symbol):
+        if '/' in symbol:
+            return symbol
+        if symbol.endswith('USD') and len(symbol) > 3:
+            base = symbol[:-3]
+            return f"{base}/USD"
+        if len(symbol) == 6:
+            return f"{symbol[:3]}/{symbol[3:]}"
+        return symbol
+
+    @classmethod
+    def _format_symbol_for_finnhub(cls, symbol):
+        if len(symbol) == 6:
+            return f"OANDA:{symbol}"
+        if symbol.endswith('USD'):
+            return f"BINANCE:{symbol}"
+        if symbol in ['XAUUSD', 'XAGUSD', 'XPDUSD', 'XPTUSD']:
+            return f"OANDA:{symbol}"
+        return symbol
+
+    @classmethod
+    def _parse_symbol_av(cls, symbol):
+        if symbol.endswith('USD'):
+            return symbol[:-3], 'USD'
+        if len(symbol) == 6:
+            return symbol[:3], symbol[3:]
+        return None, None
+
+    @classmethod
+    def _get_commodity_price_av(cls, symbol):
+        try:
+            commodity_map = {'XAUUSD': 'XAU', 'XAGUSD': 'XAG', 'XPDUSD': 'XPD', 'XPTUSD': 'XPT'}
+            commodity = commodity_map.get(symbol, symbol)
+            url = "https://www.alphavantage.co/query"
+            params = {
+                'function': 'CURRENCY_EXCHANGE_RATE',
+                'from_currency': commodity,
+                'to_currency': 'USD',
+                'apikey': cls.ALPHA_VANTAGE_API_KEY
+            }
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if 'Realtime Currency Exchange Rate' in data:
+                price = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
+                return float(price)
+            return None
+        except Exception as e:
+            logger.error(f"❌ Commodity price error: {str(e)}")
+            return None
+
+    @classmethod
+    def _get_oil_price_av(cls, symbol):
+        try:
+            function = 'WTI' if symbol == 'USOIL' else 'BRENT'
+            url = "https://www.alphavantage.co/query"
+            params = {'function': function, 'apikey': cls.ALPHA_VANTAGE_API_KEY}
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if 'data' in data and len(data['data']) > 0:
+                return float(data['data'][0]['value'])
+            return None
+        except Exception as e:
+            logger.error(f"❌ Oil price error: {str(e)}")
+            return None
+
+    # ===== متدهای اصلی مشاوره =====
+
     @classmethod
     def get_consultation(cls, user, user_input):
-        # ✅ اعتبارسنجی قیمت با قیمت لحظه‌ای (هشدار)
+        """دریافت مشاوره کامل با تحلیل عمیق تاریخچه کاربر"""
+        # اعتبارسنجی قیمت
         is_valid, price_message = cls.validate_prices_with_live(user_input)
-
-        # اگر پیام هشدار وجود دارد، آن را به user_input اضافه کن
         if price_message and not price_message.startswith('✅'):
             user_input['price_warning'] = price_message
 
-        # ✅ اعتبارسنجی منطق معامله
+        # اعتبارسنجی منطق معامله
         validation = cls.validate_trade_logic(user_input)
         if not validation['is_valid']:
             return {
@@ -776,12 +1123,10 @@ class AIService:
                 'message': '\n'.join(validation['errors'])
             }
 
-        analytics = cls.get_user_analytics(user, user_input.get('symbol'))
+        analytics = cls.get_user_detailed_analytics(user, user_input.get('symbol'), user_input)
         prompt = cls.build_prompt(analytics, user_input)
 
-        # ✅ دریافت مدل انتخابی کاربر (اگر ارسال شده باشد)
         model = user_input.get('model') or None
-
         response_text = cls.call_ollama(prompt, model=model)
         parsed_response = cls.parse_ai_response(response_text)
 
@@ -796,7 +1141,13 @@ class AIService:
             emotion=user_input.get('emotion'),
             time_ny=user_input.get('time_ny'),
             user_question=user_input.get('user_question'),
-            ai_score=parsed_response['score'],
+            session_type=user_input.get('session_type'),
+            strategy_type=user_input.get('strategy_type'),
+            timeframes=user_input.get('timeframes'),
+            risk_percent=user_input.get('risk_percent'),
+            volume=user_input.get('volume'),
+            comparison_stats=analytics.get('similar_trades') if analytics else None,
+            ai_score=parsed_response.get('score', 0),
             ai_response=parsed_response,
             prompt_used=prompt,
         )
@@ -813,18 +1164,13 @@ class AIService:
 
     @classmethod
     def get_consultation_stream(cls, user, user_input):
-        """
-        دریافت مشاوره به صورت استریم (برای نمایش تدریجی به کاربر)
-        با اعتبارسنجی کامل قیمت و منطق معامله
-        """
-        # ✅ اعتبارسنجی قیمت با قیمت لحظه‌ای (هشدار)
+        """دریافت مشاوره به صورت استریم با تحلیل عمیق تاریخچه کاربر"""
+        # اعتبارسنجی قیمت
         is_valid, price_message = cls.validate_prices_with_live(user_input)
-
-        # اگر پیام هشدار وجود دارد، آن را به user_input اضافه کن
         if price_message and not price_message.startswith('✅'):
             user_input['price_warning'] = price_message
 
-        # ✅ اعتبارسنجی منطق معامله
+        # اعتبارسنجی منطق معامله
         validation = cls.validate_trade_logic(user_input)
         if not validation['is_valid']:
             return {
@@ -832,10 +1178,9 @@ class AIService:
                 'message': '\n'.join(validation['errors'])
             }
 
-        analytics = cls.get_user_analytics(user, user_input.get('symbol'))
+        analytics = cls.get_user_detailed_analytics(user, user_input.get('symbol'), user_input)
         prompt = cls.build_prompt(analytics, user_input)
 
-        # ✅ دریافت مدل انتخابی کاربر (اگر ارسال شده باشد)
         model = user_input.get('model') or None
 
         consultation = AIConsultation.objects.create(
@@ -849,6 +1194,12 @@ class AIService:
             emotion=user_input.get('emotion'),
             time_ny=user_input.get('time_ny'),
             user_question=user_input.get('user_question'),
+            session_type=user_input.get('session_type'),
+            strategy_type=user_input.get('strategy_type'),
+            timeframes=user_input.get('timeframes'),
+            risk_percent=user_input.get('risk_percent'),
+            volume=user_input.get('volume'),
+            comparison_stats=analytics.get('similar_trades') if analytics else None,
             ai_score=50,
             ai_response={},
             prompt_used=prompt,
@@ -856,12 +1207,20 @@ class AIService:
 
         def generate():
             full_response = ""
+            has_content = False
             for chunk in cls.call_ollama_stream(prompt, model=model):
                 full_response += chunk
+                has_content = True
                 yield chunk
 
+            if not has_content:
+                error_msg = cls._get_empty_response_error()
+                for line in error_msg.split('\n'):
+                    yield line + '\n'
+                full_response = error_msg
+
             parsed = cls.parse_ai_response(full_response)
-            consultation.ai_score = parsed['score']
+            consultation.ai_score = parsed.get('score', 0)
             consultation.ai_response = parsed
             consultation.save()
 
@@ -877,9 +1236,7 @@ class AIService:
 
 
 class AIFeedbackService:
-    """
-    سرویس مدیریت بازخوردهای AI
-    """
+    """سرویس مدیریت بازخوردهای AI"""
 
     @classmethod
     def save_feedback(cls, consultation_id, user, feedback_data):
@@ -895,7 +1252,6 @@ class AIFeedbackService:
             consultation.save()
 
             cls._update_prompt_performance(consultation)
-
             return consultation
 
         except AIConsultation.DoesNotExist:
@@ -920,7 +1276,7 @@ class AIFeedbackService:
             prompt_score = (feedback_score / 5 * 70) + trade_bonus
 
             total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (
-                        best_prompt.usage_count + 1)
+                    best_prompt.usage_count + 1)
             best_prompt.performance_score = max(0, min(100, total_score))
             best_prompt.save()
 
@@ -929,9 +1285,7 @@ class AIFeedbackService:
 
 
 class AIAnalyticsService:
-    """
-    سرویس آمار تحلیلی برای توسعه‌دهنده
-    """
+    """سرویس آمار تحلیلی برای توسعه‌دهنده"""
 
     @classmethod
     def get_admin_dashboard(cls):

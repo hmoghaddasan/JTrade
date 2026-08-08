@@ -27,8 +27,6 @@ const SystemSettingsService = {
 
   /**
    * دریافت یک تنظیم خاص با کلید
-   * @param {string} key - کلید تنظیم
-   * @param {any} defaultValue - مقدار پیش‌فرض در صورت عدم وجود
    */
   async getSetting(key, defaultValue = null) {
     try {
@@ -64,6 +62,26 @@ const SystemSettingsService = {
       return {
         success: false,
         error: error.message || 'خطا در به‌روزرسانی تنظیم',
+      };
+    }
+  },
+
+  /**
+   * دریافت تنظیمات آپلود تصویر
+   */
+  async getScreenshotSettings() {
+    try {
+      const response = await apiService.get('/system/screenshot-settings/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching screenshot settings:', error);
+      // مقادیر پیش‌فرض در صورت خطا
+      return {
+        show_upload: true,
+        max_size_mb: 5,
+        max_width: 2000,
+        max_height: 2000,
+        image_quality: 85,
       };
     }
   },

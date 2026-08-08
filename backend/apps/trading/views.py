@@ -144,12 +144,12 @@ class TradeGroupDeleteView(APIView):
 
 
 # ============================================
-# تریدها - با پشتیبانی از آپلود تصویر
+# تریدها - با پشتیبانی از آپلود تصویر (هر دو حالت JSON و FormData)
 # ============================================
 class TradeListCreateView(generics.ListCreateAPIView):
-    """لیست و ایجاد تریدها - با پشتیبانی از آپلود فایل"""
+    """لیست و ایجاد تریدها - با پشتیبانی از آپلود فایل و Base64"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription, CanTrade]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]  # ✅ پشتیبانی از آپلود فایل
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -193,23 +193,24 @@ class TradeListCreateView(generics.ListCreateAPIView):
             from rest_framework import serializers
             raise serializers.ValidationError({'group_id': 'دسته‌بندی انتخاب شده معتبر نیست'})
 
-        # بررسی محدودیت ترید
-        try:
-            subscription = UserSubscription.objects.filter(
-                user=user,
-                is_active=True
-            ).latest('created_at')
+        # بررسی محدودیت ترید - فقط برای کاربران غیرادمین
+        if not user.is_admin:
+            try:
+                subscription = UserSubscription.objects.filter(
+                    user=user,
+                    is_active=True
+                ).latest('created_at')
 
-            if not subscription.can_trade():
+                if not subscription.can_trade():
+                    from rest_framework import serializers
+                    raise serializers.ValidationError({
+                        'limit': f'محدودیت ترید شما به پایان رسیده است. ({subscription.trades_limit} ترید)'
+                    })
+            except UserSubscription.DoesNotExist:
                 from rest_framework import serializers
                 raise serializers.ValidationError({
-                    'limit': f'محدودیت ترید شما به پایان رسیده است. ({subscription.trades_limit} ترید)'
+                    'subscription': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
                 })
-        except UserSubscription.DoesNotExist:
-            from rest_framework import serializers
-            raise serializers.ValidationError({
-                'subscription': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
-            })
 
         # دریافت قوانین بررسی‌شده (ممکن است به‌صورت JSON رشته باشد)
         rule_checks = self.request.data.get('rule_checks', [])
@@ -219,8 +220,33 @@ class TradeListCreateView(generics.ListCreateAPIView):
             except json.JSONDecodeError:
                 rule_checks = []
 
-        # ✅ دریافت تصویر از درخواست (اگر وجود داشته باشد)
-        screenshot = self.request.FILES.get('screenshot') if hasattr(self.request, 'FILES') else None
+        # ✅ دریافت تصویر - فقط اگر آپلود فعال باشد
+        screenshot = None
+        if settings.SHOW_SCREENSHOT_UPLOAD:
+            if hasattr(self.request, 'FILES') and self.request.FILES.get('screenshot'):
+                screenshot = self.request.FILES.get('screenshot')
+                print("📸 Screenshot received from FILES")
+            elif self.request.data.get('screenshot'):
+                screenshot = self.request.data.get('screenshot')
+                print("📸 Screenshot received from data (Base64)")
+            else:
+                print("⚠️ No screenshot received")
+        else:
+            print("ℹ️ Screenshot upload is disabled by admin")
+
+        # لاگ برای دیباگ
+        print("=" * 60)
+        print("📥 TradeListCreateView.perform_create:")
+        print(f"   - group_id: {group_id}")
+        print(f"   - rule_checks: {rule_checks}")
+        print(f"   - screenshot type: {type(screenshot)}")
+        if screenshot and isinstance(screenshot, str):
+            print(f"   - screenshot length: {len(screenshot)}")
+        print("=" * 60)
+
+        # ✅ حذف rule_checks از validated_data تا تداخل ایجاد نشود
+        if hasattr(serializer, 'validated_data') and 'rule_checks' in serializer.validated_data:
+            serializer.validated_data.pop('rule_checks')
 
         # ذخیره ترید با تصویر
         trade = serializer.save(user=user, group=group, screenshot=screenshot)
@@ -248,20 +274,58 @@ class TradeDetailView(generics.RetrieveAPIView):
 
 
 class TradeUpdateView(generics.UpdateAPIView):
-    """به‌روزرسانی ترید - با پشتیبانی از آپلود فایل"""
+    """به‌روزرسانی ترید - با پشتیبانی از آپلود فایل و Base64"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
     serializer_class = TradeUpdateSerializer
-    parser_classes = [MultiPartParser, FormParser, JSONParser]  # ✅ پشتیبانی از آپلود فایل
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         return Trade.objects.filter(user=self.request.user, is_deleted=False).select_related('group')
 
-    def perform_update(self, serializer):
-        """ذخیره تصویر در صورت وجود"""
-        # ✅ دریافت تصویر از درخواست (اگر وجود داشته باشد)
-        screenshot = self.request.FILES.get('screenshot') if hasattr(self.request, 'FILES') else None
+    def update(self, request, *args, **kwargs):
+        """Override متد update برای لاگ کردن خطاهای اعتبارسنجی"""
+        print("=" * 60)
+        print("📥 Received data in TradeUpdateView.update:")
+        print(f"   - request.data: {request.data}")
+        print(f"   - request.FILES: {request.FILES}")
+        print(f"   - screenshot from data: {request.data.get('screenshot', 'NOT FOUND')}")
+        print("=" * 60)
 
-        # دریافت قوانین بررسی‌شده (ممکن است به‌صورت JSON رشته باشد)
+        # دریافت serializer
+        serializer = self.get_serializer(data=request.data, partial=True)
+
+        # اعتبارسنجی دستی و لاگ کردن خطاها
+        if not serializer.is_valid():
+            print("❌ Validation errors:")
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # اگر اعتبارسنجی موفق بود، به‌روزرسانی را انجام بده
+        return super().update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        """ذخیره تصویر در صورت وجود (از هر دو منبع)"""
+        print("✅ Validation passed, performing update...")
+
+        # ✅ دریافت تصویر - فقط اگر آپلود فعال باشد
+        screenshot = None
+        if settings.SHOW_SCREENSHOT_UPLOAD:
+            if hasattr(self.request, 'FILES') and self.request.FILES.get('screenshot'):
+                screenshot = self.request.FILES.get('screenshot')
+                print("📸 Screenshot received from FILES (update)")
+            elif self.request.data.get('screenshot') is not None:
+                screenshot = self.request.data.get('screenshot')
+                print("📸 Screenshot received from data (Base64) (update)")
+            else:
+                print("⚠️ No screenshot in update request")
+        else:
+            print("ℹ️ Screenshot upload is disabled by admin (update)")
+
+        # لاگ برای دیباگ
+        if screenshot and isinstance(screenshot, str):
+            print(f"   - screenshot length: {len(screenshot)}")
+
+        # دریافت قوانین بررسی‌شده
         rule_checks = self.request.data.get('rule_checks', [])
         if isinstance(rule_checks, str):
             try:
@@ -269,18 +333,20 @@ class TradeUpdateView(generics.UpdateAPIView):
             except json.JSONDecodeError:
                 rule_checks = []
 
-        # ذخیره ترید با تصویر (اگر تصویر جدید ارسال شده باشد)
-        if screenshot:
+        # ✅ حذف rule_checks از validated_data تا تداخل ایجاد نشود
+        if hasattr(serializer, 'validated_data') and 'rule_checks' in serializer.validated_data:
+            serializer.validated_data.pop('rule_checks')
+
+        # ذخیره ترید
+        if screenshot is not None:
             serializer.save(screenshot=screenshot)
         else:
             serializer.save()
 
-        # بروزرسانی بررسی قوانین (حذف و ایجاد مجدد)
+        # بروزرسانی بررسی قوانین
         if rule_checks:
             trade = serializer.instance
-            # حذف بررسی‌های قبلی
             TradeRuleCheck.objects.filter(trade=trade).delete()
-            # ایجاد بررسی‌های جدید
             for rule_id in rule_checks:
                 try:
                     rule = TradingRule.objects.get(id=rule_id, user=self.request.user, is_active=True)
@@ -1139,6 +1205,9 @@ class AvailableModelsView(APIView):
 # ============================================
 # مشاوره AI (غیراستریم)
 # ============================================
+# backend/apps/trading/views.py
+# فقط بخش AIConsultationView و AIConsultationStreamView اصلاح شده است
+
 class AIConsultationView(APIView):
     """دریافت مشاوره هوشمند از AI"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
@@ -1181,6 +1250,7 @@ class AIConsultationView(APIView):
                 'id': consultation.id,
                 'score': consultation.ai_score,
                 'response': consultation.ai_response,
+                'comparison_stats': consultation.comparison_stats,
                 'created_at': consultation.created_at,
                 'remaining_consultations': remaining,
             }, status=status.HTTP_201_CREATED)
@@ -1191,11 +1261,82 @@ class AIConsultationView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class AIConsultationStreamView(APIView):
+    """دریافت مشاوره هوشمند از AI به صورت استریم"""
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
+
+    def post(self, request):
+        serializer = AIConsultationInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription = UserSubscription.objects.filter(
+                user=request.user,
+                is_active=True
+            ).latest('created_at')
+
+            if not subscription.can_consult_ai():
+                return Response({
+                    'error': 'limit_reached',
+                    'message': f'محدودیت مشاوره AI شما به پایان رسیده است. ({subscription.ai_consultations_limit} مشاوره)'
+                }, status=status.HTTP_403_FORBIDDEN)
+        except UserSubscription.DoesNotExist:
+            return Response({
+                'error': 'no_subscription',
+                'message': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            result = AIService.get_consultation_stream(request.user, serializer.validated_data)
+
+            if isinstance(result, dict) and 'error' in result:
+                return Response({
+                    'error': result['error'],
+                    'message': result.get('message', '')
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if isinstance(result, tuple) and len(result) == 2:
+                consultation, generator = result
+            else:
+                return Response({
+                    'error': 'invalid_response',
+                    'message': 'پاسخ نامعتبر از سرویس AI'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            def stream_generator():
+                for chunk in generator():
+                    yield chunk
+
+            response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
+            response['X-Consultation-ID'] = str(consultation.id)
+            return response
+
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # ============================================
 # مشاوره AI با استریم (اصلاح‌شده)
 # ============================================
+# backend/apps/trading/views.py
+# فقط بخش‌های مربوط به AIConsultationStreamView اصلاح شده است
+
+# ============================================
+# مشاوره AI با استریم (اصلاح‌شده با CORS)
+# ============================================
+# backend/apps/trading/views.py
+# فقط بخش مربوط به AIConsultationStreamView اصلاح شده است
+# بقیه فایل بدون تغییر باقی می‌ماند
+
+# ============================================
+# مشاوره AI با استریم (اصلاح‌شده با CORS)
+# ============================================
 class AIConsultationStreamView(APIView):
-    """دریافت مشاوره هوشمند از AI به صورت استریم"""
+    """
+    دریافت مشاوره هوشمند از AI به صورت استریم با پشتیبانی کامل CORS
+    """
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def post(self, request):
@@ -1243,13 +1384,31 @@ class AIConsultationStreamView(APIView):
                     yield chunk
 
             response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
+
+            # ===== افزودن هدرهای CORS به صورت دستی =====
+            # این کار ضروری است زیرا StreamingHttpResponse به‌طور خودکار CORS را اضافه نمی‌کند
+            response['Access-Control-Allow-Origin'] = '*'
+            response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+            response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
+            response['Access-Control-Expose-Headers'] = 'X-Consultation-ID, X-Total-Time'
             response['X-Consultation-ID'] = str(consultation.id)
+
             return response
 
         except Exception as e:
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # ===== پشتیبانی از درخواست OPTIONS (preflight) =====
+    def options(self, request, *args, **kwargs):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
+        response['Access-Control-Max-Age'] = '86400'  # 24 ساعت کش
+        return response
+
 
 
 class AIConsultationHistoryView(APIView):

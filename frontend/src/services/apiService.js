@@ -4,51 +4,41 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
+// ایجاد نمونه axios
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 120000, // ✅ افزایش timeout به ۱۲۰ ثانیه
 });
 
 // ============================================
-// Interceptor برای اضافه کردن توکن به هدر
+// Interceptor برای اضافه کردن توکن و مدیریت هدر
 // ============================================
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
-    console.log('🔑 Token from localStorage:', token ? 'Exists' : 'Not found');
-
     if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('✅ Token added to headers');
-    } else {
-      console.warn('⚠️ No valid token found');
     }
 
-    console.log('📤 Request URL:', config.url);
-    console.log('📤 Request Headers:', config.headers);
+    // اگر داده از نوع FormData است، هدر Content-Type را حذف کن تا axios خودش تنظیم کند
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
 
     return config;
   },
-  (error) => {
-    console.error('❌ Request interceptor error:', error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // ============================================
-// Interceptor برای مدیریت خطاها
+// Interceptor برای مدیریت خطاها و refresh token
 // ============================================
 apiClient.interceptors.response.use(
-  (response) => {
-    console.log('✅ Response received:', response.status, response.config.url);
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    console.error('❌ Response error:', error.response?.status, error.response?.data);
-
     const originalRequest = error.config;
 
     if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
@@ -56,22 +46,16 @@ apiClient.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        console.log('🔄 Trying to refresh token...');
-
         if (refreshToken) {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
-            refresh: refreshToken
+            refresh: refreshToken,
           });
-
           const { access } = response.data;
           localStorage.setItem('accessToken', access);
-          console.log('✅ Token refreshed successfully');
-
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        console.error('❌ Refresh token error:', refreshError);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         window.location.href = '/login';

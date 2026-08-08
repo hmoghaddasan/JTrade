@@ -36,7 +36,7 @@ TRIAL_TRADES_LIMIT = 10
 TRIAL_AI_CONSULTATIONS_LIMIT = 5
 
 # ============================================
-# ✅ تنظیمات لاگ - اصلاح شده برای فیلتر کردن خطاهای 404
+# ✅ تنظیمات لاگ
 # ============================================
 LOGGING = {
     'version': 1,
@@ -74,10 +74,9 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        # ✅ اضافه شده: فیلتر کردن خطاهای 404 و درخواست‌های غیرمجاز
         'django.request': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',  # فقط خطاهای جدی (5xx) را نشان بده
+            'level': 'ERROR',
             'propagate': False,
         },
         'django.security': {
@@ -117,7 +116,7 @@ INSTALLED_APPS = [
 # Middleware
 # ============================================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # ✅ در بالاترین سطح
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -221,7 +220,7 @@ OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3.1:8b')
 OLLAMA_AVAILABLE_MODELS = os.environ.get('OLLAMA_AVAILABLE_MODELS', 'llama3.1:8b,mistral:7b,deepseek-r1:7b')
 
 # ============================================
-# تنظیمات CORS
+# ✅ تنظیمات CORS (کامل و صحیح)
 # ============================================
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -230,7 +229,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+# ✅ در حالت DEBUG همه origins را مجاز کن (برای راحتی توسعه)
+CORS_ALLOW_ALL_ORIGINS = True  # این خط باعث می‌شود همه درخواست‌ها از هر origin پذیرفته شوند
+
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
@@ -252,7 +253,17 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-consultation-id',
+    'x-total-time',
+    'cache-control',
 ]
+
+CORS_EXPOSE_HEADERS = [
+    'x-consultation-id',
+    'x-total-time',
+]
+
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 ساعت
 
 # ============================================
 # تنظیمات REST Framework
@@ -271,6 +282,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
     ),
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
@@ -324,16 +337,12 @@ FINNHUB_BASE_URL = os.environ.get('FINNHUB_BASE_URL', 'https://finnhub.io/api/v1
 ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY', '')
 
 # ============================================
-# ✅ تنظیمات آپلود تصویر (جدید)
+# ✅ تنظیمات آپلود تصویر
 # ============================================
-# حداکثر ابعاد تصویر (پیکسل)
 MAX_IMAGE_WIDTH = int(os.environ.get('MAX_IMAGE_WIDTH', 2000))
 MAX_IMAGE_HEIGHT = int(os.environ.get('MAX_IMAGE_HEIGHT', 2000))
-# کیفیت تصویر (۱-۱۰۰)
 IMAGE_QUALITY = int(os.environ.get('IMAGE_QUALITY', 85))
-# حداکثر حجم فایل (مگابایت)
 MAX_IMAGE_SIZE_MB = int(os.environ.get('MAX_IMAGE_SIZE_MB', 5))
-# نمایش/مخفی‌سازی بخش آپلود تصویر در فرم ثبت ترید
 SHOW_SCREENSHOT_UPLOAD = os.environ.get('SHOW_SCREENSHOT_UPLOAD', 'True') == 'True'
 
 # ============================================

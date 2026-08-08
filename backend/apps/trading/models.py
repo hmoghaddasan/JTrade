@@ -289,9 +289,8 @@ class Trade(models.Model):
     # ============================================
     # ✅ فیلد جدید: تصویر چارت
     # ============================================
-    screenshot = models.ImageField(
+    screenshot = models.TextField(
         'تصویر چارت',
-        upload_to=screenshot_upload_path,
         blank=True,
         null=True,
         help_text='آپلود تصویر چارت معامله (حداکثر ۵ مگابایت)'
@@ -533,9 +532,58 @@ class AIConsultation(models.Model):
     time_ny = models.TimeField(null=True, blank=True, help_text="ساعت به وقت نیویورک")
     user_question = models.TextField(null=True, blank=True)
 
+    # ===== فیلدهای جدید (اضافه شده برای مشاوره پیشرفته) =====
+    session_type = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=[
+            ('High Pro', 'حرفه‌ای'),
+            ('Low Pro', 'مبتدی'),
+        ],
+        help_text="نوع جلسه معاملاتی"
+    )
+    strategy_type = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        choices=[
+            ('LTP', 'LTP'),
+            ('ITP', 'ITP'),
+            ('STP', 'STP'),
+        ],
+        help_text="نوع استراتژی"
+    )
+    timeframes = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="تایم‌فریم‌های استفاده‌شده (مثلاً: D1, H4, H1)"
+    )
+    risk_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="درصد ریسک از کل سرمایه"
+    )
+    volume = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="حجم معامله (لات)"
+    )
+    comparison_stats = models.JSONField(
+        null=True,
+        blank=True,
+        default=dict,
+        help_text="آمار مقایسه با تریدهای مشابه"
+    )
+
     # ===== خروجی AI =====
     ai_score = models.IntegerField(help_text="امتیاز اعتبار ۰-۱۰۰")
-    ai_response = models.JSONField(default=dict, help_text="تحلیل کامل AI شامل strengths, warnings, suggestion, tip")
+    ai_response = models.JSONField(default=dict, help_text="تحلیل کامل AI شامل strengths, warnings, suggestion, tip, psychology")
     prompt_used = models.TextField(null=True, blank=True, help_text="پرامپت ارسال‌شده به AI")
 
     # ===== وضعیت و پیگیری =====
@@ -573,6 +621,11 @@ class AIConsultation(models.Model):
             'warnings': self.ai_response.get('warnings', []),
             'suggestion': self.ai_response.get('suggestion', ''),
             'tip': self.ai_response.get('tip', ''),
+            'psychology': self.ai_response.get('psychology', ''),
+            'suggested_sl': self.ai_response.get('suggested_sl', None),
+            'suggested_tp': self.ai_response.get('suggested_tp', None),
+            'suggested_position': self.ai_response.get('suggested_position', None),
+            'suggested_timing': self.ai_response.get('suggested_timing', None),
         }
 
     def get_feedback_display(self):

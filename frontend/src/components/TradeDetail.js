@@ -264,12 +264,12 @@ const TradeDetail = () => {
           </div>
         </div>
 
-        <!-- بخش ۷: تصویر چارت (جدید) -->
+        <!-- بخش ۷: تصویر چارت (اصلاح شده با src مستقیم) -->
         ${trade.screenshot ? `
         <div class="section">
           <div class="section-title">🖼️ تصویر چارت</div>
           <div class="section-body" style="text-align: center;">
-            <img src="${trade.screenshot.startsWith('http') ? trade.screenshot : 'http://localhost:8000' + trade.screenshot}" 
+            <img src="${trade.screenshot}" 
                  alt="چارت ${trade.symbol}" 
                  style="max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
           </div>
@@ -323,7 +323,7 @@ const TradeDetail = () => {
       'اشتباهات ثبت شد', 'کیفیت اجرا', 'FVG', 'Order Block', 'BOS',
       'CHOCH', 'MSS', 'Liquidity Sweep', 'POI', 'Demand Zone', 'Supply Zone',
       'دسته‌بندی', 'تاریخ ایجاد', 'تاریخ بروزرسانی',
-      'تصویر چارت'  // ✅ اضافه شد
+      'تصویر چارت'
     ];
 
     let csvContent = BOM + headers.join(',') + '\n';
@@ -411,7 +411,7 @@ const TradeDetail = () => {
       categoryName,
       trade.created_at || '',
       trade.updated_at || '',
-      trade.screenshot || ''  // ✅ اضافه شد
+      trade.screenshot || ''
     ];
 
     csvContent += row.join(',') + '\n';
@@ -436,7 +436,7 @@ const TradeDetail = () => {
     { id: 'review', label: '🔄 بازبینی' },
     { id: 'ict', label: '📊 ICT' },
     { id: 'rules', label: '📋 قوانین' },
-    { id: 'screenshot', label: '🖼️ چارت' },  // ✅ جدید
+    { id: 'screenshot', label: '🖼️ چارت' },
   ];
 
   // ============================================
@@ -636,7 +636,7 @@ const TradeDetail = () => {
   };
 
   // ============================================
-  // ✅ رندر تب تصویر چارت (جدید)
+  // ✅ رندر تب تصویر چارت (با ImageZoom)
   // ============================================
   const renderScreenshot = () => {
     if (!trade.screenshot) {
@@ -648,9 +648,8 @@ const TradeDetail = () => {
       );
     }
 
-    const imageUrl = trade.screenshot.startsWith('http')
-      ? trade.screenshot
-      : `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:8000'}${trade.screenshot}`;
+    // تصویر مستقیماً Base64 است، نیازی به ساخت URL نیست
+    const imageUrl = trade.screenshot;
 
     return (
       <div className="detail-section">
@@ -674,7 +673,7 @@ const TradeDetail = () => {
       case 'review': return renderReview();
       case 'ict': return renderICT();
       case 'rules': return renderRules();
-      case 'screenshot': return renderScreenshot();  // ✅ جدید
+      case 'screenshot': return renderScreenshot();
       default: return null;
     }
   };

@@ -1,3 +1,5 @@
+# backend/trading_journal/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -6,11 +8,8 @@ from django.http import JsonResponse
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from django.contrib import admin
-from django.urls import path, include
-from django.http import JsonResponse
 
-# API Documentation
+# مستندات API
 schema_view = get_schema_view(
     openapi.Info(
         title="Trading Journal API",
@@ -33,50 +32,31 @@ def health_check(request):
     })
 
 
-from django.contrib import admin
-from django.urls import path, include
-from django.http import JsonResponse
-
-
-
 urlpatterns = [
+    # مدیریت و احراز هویت
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.accounts.urls')),
+
+    # ترید و اشتراک
     path('api/trading/', include('apps.trading.urls')),
     path('api/subscription/', include('apps.subscriptions.urls')),
 
-    # ✅ اصلاح مسیر - از api/messages/ به جای api/messaging/
-    # ✅ اصلاح مسیر - استفاده از 'messages' به جای 'messaging'
+    # پیام‌رسانی و ادمین
     path('api/messages/', include('apps.messaging.urls')),
     path('api/admin/', include('apps.admin_panel.urls')),
+
+    # تنظیمات سیستم
     path('api/system/', include('apps.accounts.system_urls')),
-    path('health/', health_check, name='health_check'),
-    path('admin/', admin.site.urls),
-    path('api/auth/', include('apps.accounts.urls')),
-    path('api/trading/', include('apps.trading.urls')),
-    path('api/subscription/', include('apps.subscriptions.urls')),
-    path('api/messages/', include('apps.messaging.urls')),
-    path('api/admin/', include('apps.admin_panel.urls')),
-    path('api/system/', include('apps.accounts.system_urls')),
+
+    # سلامت سنجی
     path('health/', health_check, name='health_check'),
 
-    # ✅ اضافه کردن مسیر WebSocket
-    path('admin/', admin.site.urls),
-    path('api/auth/', include('apps.accounts.urls')),
-    path('api/trading/', include('apps.trading.urls')),
-    path('api/subscription/', include('apps.subscriptions.urls')),
-    path('api/messages/', include('apps.messaging.urls')),
-    path('api/admin/', include('apps.admin_panel.urls')),
-    path('api/system/', include('apps.accounts.system_urls')),
-    path('health/', health_check, name='health_check'),
-
-    # Admin
+    # مستندات API
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-    # API Routes
 ]
 
+# در حالت DEBUG، مسیرهای فایل‌های مدیا و استاتیک را اضافه کن
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

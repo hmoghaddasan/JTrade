@@ -1003,3 +1003,360 @@
 .dark .field-hint {
   color: #aaa;
 }
+/* ============================================
+   استایل‌های جدید برای نمودارها و بخش‌های اضافه
+   ============================================ */
+
+/* ===== کانتینر نمودارها ===== */
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 992px) {
+  .charts-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .charts-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+
+.chart-box:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.dark .chart-box {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.chart-box h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a237e;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.dark .chart-box h4 {
+  color: #7986cb;
+}
+
+/* ===== جزییات پیشنهاد ===== */
+.suggestion-detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .suggestion-detail {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.suggestion-detail .detail-label {
+  color: #666;
+}
+
+.dark .suggestion-detail .detail-label {
+  color: #aaa;
+}
+
+.suggestion-detail .detail-value {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.dark .suggestion-detail .detail-value {
+  color: #66bb6a;
+}
+
+/* ===== تحلیل روانشناختی ===== */
+.result-psychology {
+  margin-bottom: 16px;
+}
+
+.result-psychology h4 {
+  font-size: 14px;
+  margin: 0 0 6px 0;
+  color: #1a237e;
+}
+
+.dark .result-psychology h4 {
+  color: #7986cb;
+}
+
+.result-psychology p {
+  margin: 0;
+  padding: 12px 16px;
+  background: #f3e5f5;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #4a148c;
+  line-height: 1.8;
+}
+
+.dark .result-psychology p {
+  background: rgba(74, 20, 140, 0.2);
+  color: #ce93d8;
+}
+
+/* ===== مقایسه با تریدهای مشابه ===== */
+.result-comparison {
+  margin-bottom: 16px;
+}
+
+.result-comparison h4 {
+  font-size: 14px;
+  margin: 0 0 10px 0;
+  color: #1a237e;
+}
+
+.dark .result-comparison h4 {
+  color: #7986cb;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .comparison-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.comparison-item {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.dark .comparison-item {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comparison-item .label {
+  display: block;
+  font-size: 11px;
+  color: #888;
+}
+
+.dark .comparison-item .label {
+  color: #aaa;
+}
+
+.comparison-item .value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.dark .comparison-item .value {
+  color: #e0e0e0;
+}
+
+.comparison-item .value.positive {
+  color: #2e7d32;
+}
+
+.dark .comparison-item .value.positive {
+  color: #66bb6a;
+}
+
+.comparison-item .value.negative {
+  color: #c62828;
+}
+
+.dark .comparison-item .value.negative {
+  color: #ef5350;
+}
+
+/* ===== دکمه چاپ ===== */
+.btn-secondary {
+  padding: 10px 20px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 8px;
+  color: #1a237e;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-secondary:hover {
+  background: #c5cae9;
+  transform: translateY(-1px);
+}
+
+.dark .btn-secondary {
+  background: #3d3d5c;
+  color: #b0b0d0;
+}
+
+.dark .btn-secondary:hover {
+  background: #4d4d6c;
+}
+
+/* ===== هدر دکمه‌ها ===== */
+.header-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===== استایل مودال خطا ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.dark .modal-content {
+  background: #2d2d44;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dark .modal-header {
+  border-bottom-color: #3d3d5c;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a237e;
+}
+
+.dark .modal-header h3 {
+  color: #7986cb;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+  transition: all 0.2s;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.dark .modal-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e0e0e0;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dark .modal-footer {
+  border-top-color: #3d3d5c;
+}
+
+.btn-submit-feedback {
+  padding: 10px 24px;
+  background: #1a237e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-submit-feedback:hover {
+  background: #0d47a1;
+  transform: scale(1.02);
+}
+
+.dark .btn-submit-feedback {
+  background: #3949ab;
+}
+
+.dark .btn-submit-feedback:hover {
+  background: #1a237e;
+}
+
+/* ===== اطلاعات باقیمانده ===== */
+.remaining-info {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(26, 35, 126, 0.06);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1a237e;
+  text-align: center;
+}
+
+.dark .remaining-info {
+  background: rgba(26, 35, 126, 0.15);
+  color: #7986cb;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
