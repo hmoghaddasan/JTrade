@@ -37,7 +37,45 @@ from apps.subscriptions.models import UserSubscription
 from django.conf import settings
 
 
-# ============================================
+# backend/apps/trading/views.py
+# فقط بخش اضافه‌شده برای LivePriceView نمایش داده می‌شود.
+# کل فایل views.py بسیار طولانی است، بنابراین فقط کلاس جدید را اضافه کنید.
+
+# backend/apps/trading/views.py
+# اضافه کنید در انتهای فایل، قبل از ExportTradePDFView
+
+class LivePriceView(APIView):
+    """
+    دریافت قیمت لحظه‌ای یک نماد از سرویس‌های تنظیم‌شده
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, symbol):
+        from .ai_service import AIService
+
+        # گرفتن قیمت با متد موجود در ai_service
+        price = AIService.get_live_price(symbol)
+
+        if price is None:
+            # اگر قیمت وجود نداشت، خطای ۴۰۴ با توضیح
+            return Response(
+                {
+                    'error': 'قیمت لحظه‌ای در دسترس نیست',
+                    'symbol': symbol,
+                    'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'none'),
+                    'message': 'لطفاً تنظیمات سرویس قیمت را بررسی کنید.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response({
+            'symbol': symbol,
+            'price': price,
+            'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'unknown'),
+            'timestamp': datetime.now().isoformat(),
+        })
+
+        # ============================================
 # جفت ارزها
 # ============================================
 class CurrencyPairListView(generics.ListAPIView):
@@ -1208,6 +1246,9 @@ class AvailableModelsView(APIView):
 # backend/apps/trading/views.py
 # فقط بخش AIConsultationView و AIConsultationStreamView اصلاح شده است
 
+# backend/apps/trading/views.py
+# فقط بخش‌های اصلاح‌شده نمایش داده می‌شود. کل فایل را در ادامه کامل خواهم داد.
+
 class AIConsultationView(APIView):
     """دریافت مشاوره هوشمند از AI"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
@@ -1262,7 +1303,7 @@ class AIConsultationView(APIView):
 
 
 class AIConsultationStreamView(APIView):
-    """دریافت مشاوره هوشمند از AI به صورت استریم"""
+    """دریافت مشاوره هوشمند از AI به صورت استریم با پشتیبانی کامل CORS"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def post(self, request):
@@ -1270,6 +1311,7 @@ class AIConsultationStreamView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # بررسی محدودیت مشاوره
         try:
             subscription = UserSubscription.objects.filter(
                 user=request.user,
@@ -1309,13 +1351,31 @@ class AIConsultationStreamView(APIView):
                     yield chunk
 
             response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
+
+            # ===== افزودن هدرهای CORS =====
+            response['Access-Control-Allow-Origin'] = '*'
+            response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+            response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
+            response['Access-Control-Expose-Headers'] = 'X-Consultation-ID, X-Total-Time'
             response['X-Consultation-ID'] = str(consultation.id)
+
             return response
 
         except Exception as e:
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # ===== پشتیبانی از درخواست OPTIONS (preflight) =====
+    def options(self, request, *args, **kwargs):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
+        response['Access-Control-Max-Age'] = '86400'
+        return response
+
+
 
 # ============================================
 # مشاوره AI با استریم (اصلاح‌شده)

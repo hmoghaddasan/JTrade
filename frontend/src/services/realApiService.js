@@ -8,12 +8,10 @@ import axios from 'axios';
 if (typeof window !== 'undefined' && window.WebSocket) {
   const OriginalWebSocket = window.WebSocket;
   window.WebSocket = function(url, protocols) {
-    // اگر URL به /ws ختم می‌شود، اتصال را متوقف کن
     if (url && (url.includes('/ws') || url.includes('ws://'))) {
       console.warn('⚠️ WebSocket connection blocked:', url);
-      // یک WebSocket ساختگی برگردان که هیچ کاری نمی‌کند
       return {
-        readyState: 3, // CLOSED
+        readyState: 3,
         close: () => {},
         send: () => {},
         addEventListener: () => {},
@@ -26,7 +24,6 @@ if (typeof window !== 'undefined' && window.WebSocket) {
     }
     return new OriginalWebSocket(url, protocols);
   };
-  // کپی کردن static properties
   Object.assign(window.WebSocket, OriginalWebSocket);
   window.WebSocket.CONNECTING = 0;
   window.WebSocket.OPEN = 1;
@@ -69,6 +66,16 @@ class RealApiService {
     return headers;
   }
 
+  
+async getLivePrice(symbol) {
+  try {
+    const response = await this.request(`/trading/live-price/${symbol}/`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error fetching live price:', error);
+    throw error;
+  }
+}
   // ============================================
   // درخواست پایه
   // ============================================
@@ -244,6 +251,20 @@ class RealApiService {
   }
 
   // ============================================
+  // ✅ دریافت قیمت لحظه‌ای یک نماد (جدید)
+  // ============================================
+
+  async getLivePrice(symbol) {
+    try {
+      const response = await this.request(`/trading/live-price/${symbol}/`);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching live price:', error);
+      throw error;
+    }
+  }
+
+  // ============================================
   // ✅ دریافت نسخه فعلی نرم‌افزار (جدید)
   // ============================================
 
@@ -394,7 +415,6 @@ class RealApiService {
   // ============================================
 
   connectWebSocket() {
-    // کاملاً غیرفعال - هیچ اتصالی برقرار نمی‌شود
     return null;
   }
 }

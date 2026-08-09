@@ -4,7 +4,7 @@ import apiClient from './apiService';
 
 const AI_SERVICE = {
   /**
-   * دریافت مشاوره هوشمند از AI
+   * دریافت مشاوره هوشمند از AI (غیراستریم)
    * @param {Object} data - داده‌های ورودی شامل:
    *   symbol, direction, entry_price, stop_loss, take_profit,
    *   market_condition, emotion, time_ny, user_question,
@@ -28,70 +28,96 @@ const AI_SERVICE = {
    * دریافت مشاوره با استریم (برای نمایش تدریجی به کاربر)
    * @param {Object} data - داده‌های ورودی (همانند consultAI)
    * @param {Function} onChunk - تابع callback برای هر بخش از پاسخ
-   * @returns {Promise} Promise که پس از اتمام کامل استریم resolve می‌شود
+   * @returns {Promise<{consultationId: string|null}>} - شناسه مشاوره
    */
-// frontend/src/services/aiService.js
+  async getConsultationStream(data, onChunk) {
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+    const token = localStorage.getItem('accessToken');
 
-async getConsultationStream(data, onChunk) {
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-  const token = localStorage.getItem('accessToken');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 300000);
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/trading/ai-consult-stream/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : '',
-      },
-      body: JSON.stringify(data),
-      signal: AbortSignal.timeout(300000), // ✅ ۵ دقیقه timeout
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/trading/ai-consult-stream/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify(data),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      let errorMessage = `HTTP error! status: ${response.status}`;
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.message || errorData.error || errorMessage;
-      } catch {
-        // اگر پاسخ JSON نبود
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        let errorMessage = `خطای سرور (${response.status})`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          const text = await response.text();
+          if (text) errorMessage = text;
+        }
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        throw error;
       }
-      throw new Error(errorMessage);
-    }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+      // ✅ دریافت consultationId از هدر
+      const consultationId = response.headers.get('X-Consultation-ID');
+      console.log('📥 Consultation ID from header:', consultationId);
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      for (const line of lines) {
-        if (line.trim()) {
-          try {
-            const data = JSON.parse(line);
-            if (data.response) {
-              onChunk(data.response);
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const data = JSON.parse(line);
+              if (data.response) {
+                onChunk(data.response);
+              }
+            } catch {
+              onChunk(line);
             }
-          } catch {
-            onChunk(line);
           }
         }
       }
-    }
 
-    return;
-  } catch (error) {
-    console.error('Stream error:', error);
-    // اگر خطا timeout باشد، پیام مناسب اضافه می‌کنیم
-    if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
-      error.message = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید. لطفاً دوباره تلاش کنید.';
+      // ✅ برگرداندن consultationId
+      return { consultationId };
+
+    } catch (error) {
+      if (error.name === 'AbortError' || error.code === 20) {
+        const timeoutError = new Error(
+          '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید. لطفاً دوباره تلاش کنید.'
+        );
+        timeoutError.name = 'TimeoutError';
+        throw timeoutError;
+      }
+
+      console.error('Stream error:', error);
+
+      if (!error.message || error.message === 'Failed to fetch') {
+        const networkError = new Error(
+          '🔌 اتصال به سرویس هوش مصنوعی برقرار نشد. لطفاً اتصال اینترنت و وضعیت سرور را بررسی کنید.'
+        );
+        networkError.name = 'ConnectionError';
+        throw networkError;
+      }
+
+      throw error;
     }
-    throw error;
-  }
-},
+  },
+
   /**
    * دریافت تاریخچه مشاوره‌های کاربر با pagination
    * @param {number} page - شماره صفحه

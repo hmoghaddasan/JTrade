@@ -116,7 +116,7 @@ INSTALLED_APPS = [
 # Middleware
 # ============================================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # ✅ در بالاترین سطح
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -229,8 +229,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
 ]
 
-# ✅ در حالت DEBUG همه origins را مجاز کن (برای راحتی توسعه)
-CORS_ALLOW_ALL_ORIGINS = True  # این خط باعث می‌شود همه درخواست‌ها از هر origin پذیرفته شوند
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -263,7 +262,7 @@ CORS_EXPOSE_HEADERS = [
     'x-total-time',
 ]
 
-CORS_PREFLIGHT_MAX_AGE = 86400  # 24 ساعت
+CORS_PREFLIGHT_MAX_AGE = 86400
 
 # ============================================
 # تنظیمات REST Framework

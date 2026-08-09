@@ -48,8 +48,7 @@ class AIService:
         total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = \
-        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
         avg_profit_per_trade = trades.aggregate(avg=Avg('profit'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
@@ -64,10 +63,8 @@ class AIService:
                 'count': symbol_trades.count(),
                 'win_rate': (symbol_win / symbol_trades.count() * 100) if symbol_trades.count() > 0 else 0,
                 'total_profit': symbol_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
-                              'avg'] or 0,
-                'avg_quality': symbol_trades.filter(execution_quality_score__isnull=False).aggregate(
-                    avg=Avg('execution_quality_score'))['avg'] or 0,
+                'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
+                'avg_quality': symbol_trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0,
                 'avg_profit': symbol_trades.aggregate(avg=Avg('profit'))['avg'] or 0,
                 'win_count': symbol_win,
                 'loss_count': symbol_trades.filter(profit__lt=0).count(),
@@ -84,8 +81,7 @@ class AIService:
                 'count': day_trades.count(),
                 'win_rate': (day_win / day_trades.count() * 100) if day_trades.count() > 0 else 0,
                 'total_profit': day_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                'avg_rr': day_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
-                              'avg'] or 0,
+                'avg_rr': day_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
                 'win_count': day_win,
                 'loss_count': day_trades.filter(profit__lt=0).count(),
             }
@@ -108,9 +104,7 @@ class AIService:
                     'count': emotion_trades.count(),
                     'win_rate': (emotion_win / emotion_trades.count() * 100) if emotion_trades.count() > 0 else 0,
                     'total_profit': emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                    'avg_rr':
-                        emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
-                            'avg'] or 0,
+                    'avg_rr': emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
                 }
 
         # ===== آمار احساس فعلی کاربر (از ورودی) =====
@@ -123,8 +117,7 @@ class AIService:
                 current_emotion_stats = {
                     'emotion': current_emotion,
                     'count': current_emotion_trades.count(),
-                    'win_rate': (
-                                ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
+                    'win_rate': (ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
                     'total_profit': current_emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
                 }
 
@@ -139,8 +132,7 @@ class AIService:
                                'zero_hour_identified', 'asian_range_identified', 'london_range_identified',
                                'judas_lo_identified']
             total_checks = sum(1 for t in trades for item in checklist_items if getattr(t, item, False))
-            checklist_compliance = (
-                        total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
+            checklist_compliance = (total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
 
         # ===== بهترین ساعت معاملاتی =====
         hour_stats = None
@@ -214,11 +206,8 @@ class AIService:
                         'loss_count': similar_loss,
                         'breakeven_count': similar_breakeven,
                         'avg_profit': similar.aggregate(avg=Avg('profit'))['avg'] or 0,
-                        'avg_rr':
-                            similar.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
-                                'avg'] or 0,
-                        'avg_quality': similar.filter(execution_quality_score__isnull=False).aggregate(
-                            avg=Avg('execution_quality_score'))['avg'] or 0,
+                        'avg_rr': similar.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
+                        'avg_quality': similar.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0,
                         'max_profit': similar.aggregate(max=Max('profit'))['max'] or 0,
                         'min_profit': similar.aggregate(min=Min('profit'))['min'] or 0,
                     }
@@ -280,8 +269,7 @@ class AIService:
 
         lines = []
         lines.append("📊 **خلاصه عملکرد کلی شما:**")
-        lines.append(
-            f"- کل تریدها: {analytics['total_trades']} (سود: {analytics['win_count']} | زیان: {analytics['loss_count']} | مساوی: {analytics['breakeven_count']})")
+        lines.append(f"- کل تریدها: {analytics['total_trades']} (سود: {analytics['win_count']} | زیان: {analytics['loss_count']} | مساوی: {analytics['breakeven_count']})")
         lines.append(f"- نرخ برد کلی: {analytics['win_rate']}%")
         lines.append(f"- سود کل: ${analytics['total_profit']}")
         lines.append(f"- میانگین سود هر ترید: ${analytics['avg_profit_per_trade']}")
@@ -304,8 +292,7 @@ class AIService:
             lines.append("")
             lines.append(f"🔍 **مقایسه با تریدهای مشابه شما (قیمت نزدیک به {analytics.get('symbol', 'این نماد')}):**")
             lines.append(f"- تعداد تریدهای مشابه: {sim['count']}")
-            lines.append(
-                f"- نرخ برد: {sim['win_rate']:.1f}% (سود: {sim['win_count']} | زیان: {sim['loss_count']} | مساوی: {sim['breakeven_count']})")
+            lines.append(f"- نرخ برد: {sim['win_rate']:.1f}% (سود: {sim['win_count']} | زیان: {sim['loss_count']} | مساوی: {sim['breakeven_count']})")
             lines.append(f"- میانگین سود: ${sim['avg_profit']:.2f}")
             lines.append(f"- بیشترین سود: ${sim.get('max_profit', 0):.2f}")
             lines.append(f"- بیشترین زیان: ${sim.get('min_profit', 0):.2f}")
@@ -313,14 +300,11 @@ class AIService:
             lines.append(f"- میانگین کیفیت اجرا: {sim.get('avg_quality', 0):.1f}/۱۰")
 
             if sim['win_rate'] > 60:
-                lines.append(
-                    f"✅ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله پتانسیل خوبی دارد.")
+                lines.append(f"✅ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله پتانسیل خوبی دارد.")
             elif sim['win_rate'] > 40:
-                lines.append(
-                    f"⚠️ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، احتیاط توصیه می‌شود.")
+                lines.append(f"⚠️ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، احتیاط توصیه می‌شود.")
             else:
-                lines.append(
-                    f"❌ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله ریسک بالایی دارد.")
+                lines.append(f"❌ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله ریسک بالایی دارد.")
 
         if analytics.get('day_stats'):
             d = analytics['day_stats']
@@ -443,85 +427,91 @@ class AIService:
         return "\n".join(lines)
 
     @classmethod
+    # backend/apps/trading/ai_service.py
+    # فقط بخش‌های اصلاح‌شده نمایش داده می‌شود. کل فایل را در ادامه کامل می‌دهم.
+
+    @classmethod
     def get_advanced_prompt_template(cls):
         return """
-شما یک مشاور معاملاتی حرفه‌ای و تحلیلگر ارشد بازارهای مالی با بیش از ۱۵ سال تجربه هستید.
-شما باید بر اساس **داده‌های واقعی تاریخچه معاملاتی کاربر** و **شرایط فعلی**، تحلیلی عمیق و کاربردی ارائه دهید.
-پاسخ شما باید به‌گونه‌ای باشد که کاربر بتواند از آن برای تصمیم‌گیری بهتر استفاده کند.
+    شما یک مشاور معاملاتی حرفه‌ای و تحلیلگر ارشد بازارهای مالی با بیش از ۱۵ سال تجربه هستید.
+    شما باید بر اساس **داده‌های واقعی تاریخچه معاملاتی کاربر** و **شرایط فعلی**، تحلیلی عمیق و کاربردی ارائه دهید.
+    پاسخ شما باید به‌گونه‌ای باشد که کاربر بتواند از آن برای تصمیم‌گیری بهتر استفاده کند.
 
-**مهم:** شما باید از داده‌های تاریخی کاربر برای نتیجه‌گیری استفاده کنید و تحلیل خود را بر اساس آن‌ها بنا کنید.
+    **مهم:** شما باید از داده‌های تاریخی کاربر برای نتیجه‌گیری استفاده کنید و تحلیل خود را بر اساس آن‌ها بنا کنید.
 
----
+    ---
 
-📊 **داده‌های تاریخچه کاربر (از معاملات واقعی):**
-{analytics}
+    📊 **داده‌های تاریخچه کاربر (از معاملات واقعی):**
+    {analytics}
 
-📝 **شرایط فعلی کاربر برای معامله جدید:**
-{user_conditions}
+    📝 **شرایط فعلی کاربر برای معامله جدید:**
+    {user_conditions}
 
----
+    ---
 
-🔍 **تحلیل جامع خود را بر اساس موارد زیر ارائه دهید:**
+    🔍 **تحلیل جامع خود را بر اساس موارد زیر ارائه دهید:**
 
-**۱. امتیاز اعتبار (۰-۱۰۰)**
-- بر اساس شباهت این معامله به معاملات موفق قبلی کاربر محاسبه کنید.
-- به مواردی مانند: نماد، جهت، محدوده قیمت، نوع استراتژی، احساسات مشابه توجه کنید.
-- توضیح دهید چرا این امتیاز را داده‌اید.
+    **۱. امتیاز اعتبار (۰-۱۰۰)**
+    - بر اساس شباهت این معامله به معاملات موفق قبلی کاربر محاسبه کنید.
+    - به مواردی مانند: نماد، جهت، محدوده قیمت، نوع استراتژی، احساسات مشابه توجه کنید.
+    - توضیح دهید چرا این امتیاز را داده‌اید.
 
-**۲. نقاط قوت این تصمیم (حداقل ۳ مورد)**
-- بر اساس داده‌های تاریخچه کاربر، چه عواملی این معامله را تقویت می‌کنند؟
-- اگر تریدهای مشابه قبلی موفق بوده‌اند، به آن اشاره کنید.
-- به پایبندی کاربر به قوانین و استراتژی اشاره کنید.
+    **۲. نقاط قوت این تصمیم (حداقل ۳ مورد)**
+    - بر اساس داده‌های تاریخچه کاربر، چه عواملی این معامله را تقویت می‌کنند؟
+    - اگر تریدهای مشابه قبلی موفق بوده‌اند، به آن اشاره کنید.
+    - به پایبندی کاربر به قوانین و استراتژی اشاره کنید.
 
-**۳. هشدارها و نقاط ضعف (حداقل ۳ مورد)**
-- بر اساس الگوهای رفتاری کاربر، چه ریسک‌هایی وجود دارد؟
-- آیا احساسات فعلی کاربر در گذشته باعث ضرر شده است؟
-- نسبت R:R محاسبه‌شده را ارزیابی کنید.
+    **۳. هشدارها و نقاط ضعف (حداقل ۳ مورد)**
+    - بر اساس الگوهای رفتاری کاربر، چه ریسک‌هایی وجود دارد؟
+    - آیا احساسات فعلی کاربر در گذشته باعث ضرر شده است؟
+    - نسبت R:R محاسبه‌شده را ارزیابی کنید.
 
-**۴. پیشنهاد عملی برای مدیریت معامله**
-- **حد ضرر پیشنهادی:** بر اساس تحلیل تکنیکال و داده‌های کاربر
-- **حد سود پیشنهادی:** بر اساس سطوح کلیدی و نسبت ریسک به ریوارد مناسب
-- **اندازه پوزیشن:** بر اساس تاریخچه کاربر و میزان ریسک‌پذیری او
-- **زمان‌بندی:** بهترین زمان برای ورود/خروج بر اساس ساعت‌های موفق کاربر
+    **۴. پیشنهاد عملی برای مدیریت معامله**
+    - **حد ضرر پیشنهادی:** بر اساس تحلیل تکنیکال و داده‌های کاربر
+    - **حد سود پیشنهادی:** بر اساس سطوح کلیدی و نسبت ریسک به ریوارد مناسب
+    - **اندازه پوزیشن:** بر اساس تاریخچه کاربر و میزان ریسک‌پذیری او
+    - **زمان‌بندی:** بهترین زمان برای ورود/خروج بر اساس ساعت‌های موفق کاربر
 
-**۵. تحلیل روانشناختی**
-- احساسات فعلی کاربر را با عملکرد گذشته‌اش مقایسه کنید.
-- آیا این احساسات در گذشته باعث ضرر شده‌اند؟
-- توصیه‌های عملی برای مدیریت احساسات ارائه دهید.
+    **۵. تحلیل روانشناختی**
+    - احساسات فعلی کاربر را با عملکرد گذشته‌اش مقایسه کنید.
+    - آیا این احساسات در گذشته باعث ضرر شده‌اند؟
+    - توصیه‌های عملی برای مدیریت احساسات ارائه دهید.
 
-**۶. یک نکته انگیزشی یا آموزشی**
-- بر اساس شرایط کاربر، یک نکته کاربردی و انگیزشی ارائه دهید.
+    **۶. یک نکته انگیزشی یا آموزشی**
+    - بر اساس شرایط کاربر، یک نکته کاربردی و انگیزشی ارائه دهید.
 
----
+    ---
 
-**سوال کاربر:** {user_question}
+    **سوال کاربر:** {user_question}
 
----
+    ---
 
-**نکته بسیار مهم:** پاسخ خود را دقیقاً به صورت زیر ساختار دهید. از عناوین مشخص استفاده کنید:
+    **⚠️ ساختار پاسخ (بسیار مهم - دقیقاً به همین شکل بنویسید):**
 
-امتیاز: [عدد ۰-۱۰۰] – [دلیل مختصر بر اساس داده‌های کاربر]
+    **امتیاز:** [عدد ۰-۱۰۰] – [دلیل مختصر بر اساس داده‌های کاربر]
 
-نقاط قوت:
-- [مورد ۱ با ارجاع به داده‌های کاربر]
-- [مورد ۲ با ارجاع به داده‌های کاربر]
-- [مورد ۳ با ارجاع به داده‌های کاربر]
+    **نقاط قوت:**
+    - [مورد ۱ با ارجاع به داده‌های کاربر]
+    - [مورد ۲ با ارجاع به داده‌های کاربر]
+    - [مورد ۳ با ارجاع به داده‌های کاربر]
 
-هشدارها:
-- [مورد ۱ با ارجاع به داده‌های کاربر]
-- [مورد ۲ با ارجاع به داده‌های کاربر]
-- [مورد ۳ با ارجاع به داده‌های کاربر]
+    **هشدارها:**
+    - [مورد ۱ با ارجاع به داده‌های کاربر]
+    - [مورد ۲ با ارجاع به داده‌های کاربر]
+    - [مورد ۳ با ارجاع به داده‌های کاربر]
 
-پیشنهاد:
-- حد ضرر: [مقدار پیشنهادی با دلیل]
-- حد سود: [مقدار پیشنهادی با دلیل]
-- اندازه پوزیشن: [پیشنهاد بر اساس تاریخچه کاربر]
-- زمان‌بندی: [پیشنهاد بر اساس بهترین ساعت‌های معاملاتی کاربر]
+    **پیشنهاد:**
+    - حد ضرر: [مقدار پیشنهادی با دلیل]
+    - حد سود: [مقدار پیشنهادی با دلیل]
+    - اندازه پوزیشن: [پیشنهاد بر اساس تاریخچه کاربر]
+    - زمان‌بندی: [پیشنهاد بر اساس بهترین ساعت‌های معاملاتی کاربر]
 
-تحلیل روانشناختی: [تحلیل کامل بر اساس داده‌های احساسی کاربر]
+    **تحلیل روانشناختی:** [تحلیل کامل بر اساس داده‌های احساسی کاربر]
 
-نکته: [نکته آموزشی یا انگیزشی مرتبط با شرایط کاربر]
-"""
+    **نکته:** [نکته آموزشی یا انگیزشی مرتبط با شرایط کاربر]
+
+    **توجه:** هر بخش را دقیقاً با همان عنوان (به صورت **bold**) و با یک خط فاصله از بخش قبلی جدا کنید. جملات هر بخش را کامل و با نقطه تمام کنید.
+    """
 
     @classmethod
     def call_ollama(cls, prompt, model=None):
@@ -554,13 +544,11 @@ class AIService:
             return cls._get_connection_error_response("⏰ زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید.")
         except requests.exceptions.ConnectionError:
             logger.error("Ollama connection error")
-            return cls._get_connection_error_response(
-                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
+            return cls._get_connection_error_response("🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
         except requests.exceptions.HTTPError as e:
             logger.error(f"Ollama HTTP error: {str(e)}")
             if "404" in str(e):
-                return cls._get_connection_error_response(
-                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
+                return cls._get_connection_error_response(f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
             return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
         except Exception as e:
             logger.error(f"Ollama error: {str(e)}")
@@ -603,13 +591,11 @@ class AIService:
         except requests.exceptions.Timeout:
             yield cls._get_connection_error_response("⏰ زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید.")
         except requests.exceptions.ConnectionError:
-            yield cls._get_connection_error_response(
-                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
+            yield cls._get_connection_error_response("🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
         except requests.exceptions.HTTPError as e:
             logger.error(f"Ollama HTTP error: {str(e)}")
             if "404" in str(e):
-                yield cls._get_connection_error_response(
-                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
+                yield cls._get_connection_error_response(f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
             yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
         except Exception as e:
             logger.error(f"Ollama error: {str(e)}")
@@ -671,8 +657,8 @@ class AIService:
 """
 
     @classmethod
-    def parse_ai_response(cls, response_text):
-        """Parse پاسخ AI و استخراج اطلاعات ساختاریافته با بهبود تشخیص بخش‌ها"""
+    def parse_ai_response(cls, response_text, analytics=None, user_input=None):
+        """Parse پاسخ AI و استخراج اطلاعات ساختاریافته با بهبود تشخیص بخش‌ها و Fallback"""
         result = {
             'score': 0,
             'strengths': [],
@@ -859,7 +845,120 @@ class AIService:
             if len(response_text) > 50:
                 result['suggestion'] = response_text[:200]
 
+        # ===== Fallback برای بخش‌های خالی =====
+        if result.get('psychology') == 'تحلیل روانشناختی موجود نیست.' or not result.get('psychology'):
+            result['psychology'] = cls._generate_psychological_fallback(analytics, user_input)
+
+        if result.get('suggestion') == 'پیشنهادی موجود نیست.' or not result.get('suggestion'):
+            result['suggestion'] = cls._generate_suggestion_fallback(analytics, user_input)
+
+        # اگر امتیاز صفر است ولی بخش‌های دیگر پر هستند، تخمین بزن
+        if result['score'] == 0 and (result['strengths'] or result['warnings']):
+            result['score'] = 50  # مقدار متوسط
+
         return result
+
+    # ===== متدهای Fallback برای تحلیل روانشناختی و پیشنهاد عملی =====
+
+    @classmethod
+    def _generate_psychological_fallback(cls, analytics, user_input):
+        """
+        تولید تحلیل روانشناختی خودکار بر اساس داده‌های کاربر
+        """
+        emotion = user_input.get('emotion') if user_input else None
+        if not emotion:
+            return "تحلیل روانشناختی موجود نیست."
+
+        # دریافت عملکرد با احساس مشابه از analytics
+        emotion_stats = analytics.get('current_emotion_stats') if analytics else None
+        if emotion_stats and emotion_stats.get('count', 0) > 0:
+            win_rate = emotion_stats.get('win_rate', 0)
+            count = emotion_stats.get('count', 0)
+            if win_rate >= 60:
+                return f"✅ شما در حالت '{emotion}' عملکرد خوبی داشته‌اید (نرخ برد {win_rate:.1f}% در {count} ترید). این احساس برای شما مفید بوده است. سعی کنید این حالت را حفظ کنید."
+            elif win_rate >= 40:
+                return f"⚖️ شما در حالت '{emotion}' عملکرد متوسطی داشته‌اید (نرخ برد {win_rate:.1f}% در {count} ترید). سعی کنید با تمرکز بیشتر و مدیریت احساسات، عملکرد خود را بهبود دهید."
+            else:
+                return f"⚠️ شما در حالت '{emotion}' عملکرد ضعیفی داشته‌اید (نرخ برد {win_rate:.1f}% در {count} ترید). توصیه می‌شود قبل از معامله، آرامش خود را بازیابی کنید و از تصمیمات عجولانه بپرهیزید."
+        else:
+            return f"ℹ️ شما سابقه‌ای در حالت '{emotion}' ندارید. به احساسات خود توجه کنید و از تصمیمات عجولانه بپرهیزید. احساس '{emotion}' می‌تواند بر کیفیت تصمیم‌گیری تأثیر بگذارد."
+
+    @classmethod
+    def _generate_suggestion_fallback(cls, analytics, user_input):
+        """
+        تولید پیشنهاد عملی خودکار بر اساس داده‌های ورودی و تاریخچه کاربر
+        """
+        if not user_input:
+            return "پیشنهادی موجود نیست. لطفاً داده‌های خود را تکمیل کنید."
+
+        entry = user_input.get('entry_price')
+        sl = user_input.get('stop_loss')
+        tp = user_input.get('take_profit')
+        risk_percent = user_input.get('risk_percent')
+        volume = user_input.get('volume')
+
+        suggestions = []
+
+        # محاسبه R:R
+        if entry and sl and tp:
+            try:
+                entry = float(entry)
+                sl = float(sl)
+                tp = float(tp)
+                risk = abs(entry - sl)
+                reward = abs(tp - entry)
+                if risk > 0:
+                    rr = reward / risk
+                    if rr < 1:
+                        suggestions.append(f"⚠️ نسبت R:R شما ({rr:.2f}) کمتر از ۱ است. پیشنهاد می‌شود حد سود را به {entry + (risk * 2):.4f} افزایش دهید (R:R=2).")
+                    elif rr < 2:
+                        suggestions.append(f"📊 نسبت R:R شما ({rr:.2f}) قابل قبول است. برای بهبود، می‌توانید حد سود را به {entry + (risk * 2.5):.4f} افزایش دهید (R:R=2.5).")
+                    else:
+                        suggestions.append(f"✅ نسبت R:R شما ({rr:.2f}) عالی است. همین سطح را حفظ کنید.")
+            except:
+                pass
+
+        # پیشنهاد اندازه پوزیشن
+        if risk_percent:
+            try:
+                risk_percent = float(risk_percent)
+                if risk_percent > 2:
+                    suggestions.append(f"⚠️ درصد ریسک شما ({risk_percent}%) بالاست. پیشنهاد می‌شود حجم معامله را کاهش دهید تا ریسک به ۱-۲٪ برسد.")
+                elif risk_percent < 0.5:
+                    suggestions.append(f"📊 درصد ریسک شما ({risk_percent}%) پایین است. می‌توانید حجم معامله را افزایش دهید تا ریسک به حدود ۱٪ برسد.")
+                else:
+                    suggestions.append(f"✅ درصد ریسک شما ({risk_percent}%) در محدوده مناسب است.")
+            except:
+                pass
+
+        # استفاده از بهترین ساعت معاملاتی از analytics
+        if analytics and analytics.get('hour_stats'):
+            hour = analytics['hour_stats'].get('hour')
+            if hour is not None:
+                suggestions.append(f"⏰ بهترین ساعت معاملاتی شما {hour}:۰۰ است. سعی کنید معاملات خود را در این ساعت انجام دهید.")
+
+        # استفاده از بهترین استراتژی
+        if analytics and analytics.get('strategy_stats'):
+            best_strategy = analytics['strategy_stats'].get('best')
+            if best_strategy:
+                suggestions.append(f"📋 بهترین استراتژی شما {best_strategy} است. استفاده از این استراتژی می‌تواند شانس موفقیت را افزایش دهد.")
+
+        # استفاده از مقایسه تریدهای مشابه
+        if analytics and analytics.get('similar_trades'):
+            sim = analytics['similar_trades']
+            if sim.get('count', 0) > 0:
+                win_rate = sim.get('win_rate', 0)
+                if win_rate >= 60:
+                    suggestions.append(f"📈 بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، این معامله پتانسیل خوبی دارد.")
+                elif win_rate >= 40:
+                    suggestions.append(f"⚠️ بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، احتیاط توصیه می‌شود.")
+                else:
+                    suggestions.append(f"❌ بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، این معامله ریسک بالایی دارد.")
+
+        if not suggestions:
+            return "پیشنهادی موجود نیست. لطفاً داده‌های خود را تکمیل کنید."
+
+        return "\n".join(suggestions)
 
     @classmethod
     def validate_prices_with_live(cls, user_input):
@@ -1128,7 +1227,7 @@ class AIService:
 
         model = user_input.get('model') or None
         response_text = cls.call_ollama(prompt, model=model)
-        parsed_response = cls.parse_ai_response(response_text)
+        parsed_response = cls.parse_ai_response(response_text, analytics, user_input)
 
         consultation = AIConsultation.objects.create(
             user=user,
@@ -1219,7 +1318,7 @@ class AIService:
                     yield line + '\n'
                 full_response = error_msg
 
-            parsed = cls.parse_ai_response(full_response)
+            parsed = cls.parse_ai_response(full_response, analytics, user_input)
             consultation.ai_score = parsed.get('score', 0)
             consultation.ai_response = parsed
             consultation.save()
@@ -1275,8 +1374,7 @@ class AIFeedbackService:
 
             prompt_score = (feedback_score / 5 * 70) + trade_bonus
 
-            total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (
-                    best_prompt.usage_count + 1)
+            total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (best_prompt.usage_count + 1)
             best_prompt.performance_score = max(0, min(100, total_score))
             best_prompt.save()
 

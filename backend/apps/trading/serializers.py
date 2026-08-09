@@ -397,7 +397,7 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"خطا در پردازش تصویر: {str(e)}")
 
 
-# ===== سریالایزرهای دیگر (بدون تغییر) =====
+# ===== سریالایزرهای دیگر =====
 class TradingRuleSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='get_category_label', read_only=True)
 
@@ -427,13 +427,11 @@ class AIConsultationInputSerializer(serializers.Serializer):
     time_ny = serializers.TimeField(required=False, allow_null=True)
     user_question = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     model = serializers.CharField(max_length=50, required=False, allow_null=True, allow_blank=True)
-    # ===== فیلدهای جدید =====
     session_type = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
     strategy_type = serializers.CharField(max_length=10, required=False, allow_null=True, allow_blank=True)
     timeframes = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
     risk_percent = serializers.DecimalField(max_digits=5, decimal_places=2, required=False, allow_null=True)
     volume = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
-
 
 
 class AIConsultationResponseSerializer(serializers.Serializer):
@@ -455,6 +453,8 @@ class AIConsultationSerializer(serializers.ModelSerializer):
             'id', 'user', 'user_name', 'trade', 'trade_id', 'trade_symbol',
             'symbol', 'direction', 'entry_price', 'stop_loss', 'take_profit',
             'market_condition', 'emotion', 'time_ny', 'user_question',
+            'session_type', 'strategy_type', 'timeframes', 'risk_percent', 'volume',
+            'comparison_stats',  # ✅ اضافه شد
             'ai_score', 'ai_response',
             'is_followed', 'trade_result',
             'feedback_score', 'feedback_helpfulness', 'feedback_comment', 'feedback_given_at',

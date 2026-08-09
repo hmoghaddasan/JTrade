@@ -103,6 +103,10 @@ urlpatterns = [
     path('admin/ai/prompts/<int:pk>/', views.AIPromptVersionDetailView.as_view(), name='ai_prompt_detail'),
 
     # ============================================
+    # ✅ قیمت لحظه‌ای (جدید)
+    # ============================================
+    path('live-price/<str:symbol>/', views.LivePriceView.as_view(), name='live_price'),
+    # ============================================
     # خروجی‌ها
     # ============================================
     path('export/pdf/<int:pk>/', views.ExportTradePDFView.as_view(), name='export_pdf'),
