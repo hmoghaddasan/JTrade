@@ -31,6 +31,7 @@ const Dashboard = () => {
     const loadData = async () => {
       setLoading(true);
       try {
+        // ✅ دریافت تمام تریدها با page_size=1000 (مقدار پیش‌فرض در realApiService تنظیم شده)
         const tradesRes = await RealApiService.getTrades();
         setTrades(tradesRes.data.results || []);
 

@@ -7,7 +7,12 @@ from django.conf import settings
 
 def screenshot_upload_path(instance, filename):
     """مسیر ذخیره‌سازی تصویر چارت"""
-    return f'trades/user_{instance.user.id}/{filename}'
+    # استخراج پسوند فایل
+    ext = filename.split('.')[-1] if '.' in filename else 'jpg'
+    # ایجاد نام یکتا با استفاده از timestamp
+    import time
+    timestamp = int(time.time() * 1000)
+    return f'trades/user_{instance.user.id}/{timestamp}.{ext}'
 
 
 class CurrencyPair(models.Model):
@@ -287,13 +292,15 @@ class Trade(models.Model):
     supply_zone = models.CharField('Supply Zone', max_length=50, blank=True, null=True)
 
     # ============================================
-    # ✅ فیلد جدید: تصویر چارت
+    # ✅ فیلد جدید: تصویر چارت (تغییر به ImageField)
     # ============================================
-    screenshot = models.TextField(
+    screenshot = models.ImageField(
         'تصویر چارت',
+        upload_to=screenshot_upload_path,
         blank=True,
         null=True,
-        help_text='آپلود تصویر چارت معامله (حداکثر ۵ مگابایت)'
+        max_length=500,
+        help_text='تصویر چارت معامله (حداکثر ۵ مگابایت)'
     )
 
     # ============================================
@@ -585,6 +592,14 @@ class AIConsultation(models.Model):
     ai_score = models.IntegerField(help_text="امتیاز اعتبار ۰-۱۰۰")
     ai_response = models.JSONField(default=dict, help_text="تحلیل کامل AI شامل strengths, warnings, suggestion, tip, psychology")
     prompt_used = models.TextField(null=True, blank=True, help_text="پرامپت ارسال‌شده به AI")
+
+    # ===== ✅ فیلد جدید: مدل AI استفاده‌شده =====
+    model_used = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="نام مدل هوش مصنوعی استفاده‌شده (مثلاً llama3.1:8b)"
+    )
 
     # ===== وضعیت و پیگیری =====
     is_followed = models.CharField(max_length=10, choices=FOLLOW_STATUS_CHOICES, null=True, blank=True)

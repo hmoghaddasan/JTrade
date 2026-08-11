@@ -21,7 +21,6 @@ class AIService:
     OLLAMA_URL = getattr(settings, 'OLLAMA_URL', 'http://localhost:11434/api/generate')
     OLLAMA_MODEL = getattr(settings, 'OLLAMA_MODEL', 'llama3.1:8b')
 
-    # ===== تنظیمات سرویس‌های قیمت =====
     LIVE_PRICE_PROVIDER = getattr(settings, 'LIVE_PRICE_PROVIDER', 'none')
     ALPHA_VANTAGE_API_KEY = getattr(settings, 'ALPHA_VANTAGE_API_KEY', '')
     TWELVEDATA_API_KEY = getattr(settings, 'TWELVEDATA_API_KEY', '')
@@ -31,17 +30,13 @@ class AIService:
 
     @classmethod
     def get_user_detailed_analytics(cls, user, symbol=None, user_input=None):
-        """
-        استخراج داده‌های تحلیلی دقیق کاربر برای استفاده در پرامپت
-        شامل مقایسه با تریدهای مشابه و تحلیل الگوهای رفتاری
-        """
+        """استخراج داده‌های تحلیلی دقیق کاربر"""
         trades = Trade.objects.filter(user=user, is_deleted=False)
 
         total_trades = trades.count()
         if total_trades == 0:
             return None
 
-        # ===== آمار کلی =====
         win_count = trades.filter(profit__gt=0).count()
         loss_count = trades.filter(profit__lt=0).count()
         breakeven_count = trades.filter(profit=0).count()
@@ -54,7 +49,7 @@ class AIService:
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / abs(total_loss)) if total_loss and abs(total_loss) > 0 else 0
 
-        # ===== آمار نماد =====
+        # آمار نماد
         symbol_trades = trades.filter(symbol=symbol) if symbol else None
         symbol_stats = None
         if symbol_trades and symbol_trades.count() > 0:
@@ -70,7 +65,7 @@ class AIService:
                 'loss_count': symbol_trades.filter(profit__lt=0).count(),
             }
 
-        # ===== آمار روز هفته =====
+        # آمار روز هفته
         today = datetime.now()
         day_of_week = today.strftime('%A')
         day_trades = trades.filter(day_of_week=day_of_week)
@@ -86,7 +81,7 @@ class AIService:
                 'loss_count': day_trades.filter(profit__lt=0).count(),
             }
 
-        # ===== آمار احساسات غالب =====
+        # آمار احساسات
         emotion_aggregated = {}
         all_emotions = trades.exclude(dominant_feeling='').values_list('dominant_feeling', flat=True)
         for em in all_emotions:
@@ -107,7 +102,6 @@ class AIService:
                     'avg_rr': emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
                 }
 
-        # ===== آمار احساس فعلی کاربر (از ورودی) =====
         current_emotion = user_input.get('emotion') if user_input else None
         current_emotion_stats = None
         if current_emotion:
@@ -121,7 +115,7 @@ class AIService:
                     'total_profit': current_emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
                 }
 
-        # ===== آمار پایبندی به چک‌لیست =====
+        # پایبندی
         smt_rate = 0
         key_levels_rate = 0
         checklist_compliance = 0
@@ -134,7 +128,7 @@ class AIService:
             total_checks = sum(1 for t in trades for item in checklist_items if getattr(t, item, False))
             checklist_compliance = (total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
 
-        # ===== بهترین ساعت معاملاتی =====
+        # بهترین ساعت
         hour_stats = None
         if total_trades > 0:
             hourly = trades.exclude(time_ny__isnull=True).values('time_ny__hour').annotate(
@@ -149,7 +143,7 @@ class AIService:
                     'total_profit': round(hourly['total_profit'] or 0, 2),
                 }
 
-        # ===== بهترین استراتژی =====
+        # بهترین استراتژی
         strategy_trades = trades.exclude(strategy_type__isnull=True).exclude(strategy_type='')
         strategy_stats = None
         if strategy_trades.count() > 0:
@@ -166,7 +160,7 @@ class AIService:
                     'count': best_strategy['count'],
                 }
 
-        # ===== بهترین جلسه =====
+        # بهترین جلسه
         session_trades = trades.exclude(session_type__isnull=True).exclude(session_type='')
         session_stats = None
         if session_trades.count() > 0:
@@ -183,7 +177,7 @@ class AIService:
                     'count': best_session['count'],
                 }
 
-        # ===== تریدهای مشابه (مقایسه) =====
+        # تریدهای مشابه
         similar_trades = None
         if symbol and symbol_trades and symbol_trades.count() > 0 and user_input:
             entry = user_input.get('entry_price')
@@ -239,7 +233,6 @@ class AIService:
 
     @classmethod
     def build_prompt(cls, user_analytics, user_input):
-        """ساخت پرامپت پیشرفته با تأکید بر تحلیل داده‌های واقعی کاربر"""
         best_prompt = AIPromptVersion.objects.filter(status='active').order_by('-performance_score').first()
         if not best_prompt:
             best_prompt = AIPromptVersion.objects.filter(version='default').first()
@@ -263,7 +256,6 @@ class AIService:
 
     @classmethod
     def _format_analytics_for_prompt(cls, analytics):
-        """فرمت‌سازی داده‌های تحلیلی برای پرامپت با جزئیات بیشتر"""
         if not analytics:
             return "کاربر هنوز سابقه معاملاتی ثبت نکرده است."
 
@@ -360,7 +352,6 @@ class AIService:
 
     @classmethod
     def _format_user_conditions(cls, user_input):
-        """فرمت‌سازی شرایط فعلی کاربر"""
         lines = []
         lines.append(f"- **نماد معاملاتی:** {user_input.get('symbol', 'نامشخص')}")
         lines.append(f"- **جهت معامله:** {user_input.get('direction', 'نامشخص')}")
@@ -425,10 +416,6 @@ class AIService:
             lines.append(f"- **سوال کاربر:** {user_input['user_question']}")
 
         return "\n".join(lines)
-
-    @classmethod
-    # backend/apps/trading/ai_service.py
-    # فقط بخش‌های اصلاح‌شده نمایش داده می‌شود. کل فایل را در ادامه کامل می‌دهم.
 
     @classmethod
     def get_advanced_prompt_template(cls):
@@ -515,7 +502,6 @@ class AIService:
 
     @classmethod
     def call_ollama(cls, prompt, model=None):
-        """ارسال درخواست به Ollama و دریافت پاسخ (غیراستریم)"""
         model = model or cls.OLLAMA_MODEL
         try:
             payload = {
@@ -556,7 +542,6 @@ class AIService:
 
     @classmethod
     def call_ollama_stream(cls, prompt, model=None):
-        """ارسال درخواست به Ollama با استریم"""
         model = model or cls.OLLAMA_MODEL
         try:
             payload = {
@@ -603,7 +588,6 @@ class AIService:
 
     @classmethod
     def _get_connection_error_response(cls, message):
-        """ساخت پاسخ خطای اتصال با ساختار قابل parse"""
         return f"""
 ❌ خطای اتصال به سرویس هوش مصنوعی
 
@@ -633,7 +617,6 @@ class AIService:
 
     @classmethod
     def _get_empty_response_error(cls):
-        """ساخت پاسخ خطای پاسخ خالی"""
         return """
 ❌ پاسخ نامعتبر از سرویس هوش مصنوعی
 
@@ -658,7 +641,6 @@ class AIService:
 
     @classmethod
     def parse_ai_response(cls, response_text, analytics=None, user_input=None):
-        """Parse پاسخ AI و استخراج اطلاعات ساختاریافته با بهبود تشخیص بخش‌ها و Fallback"""
         result = {
             'score': 0,
             'strengths': [],
@@ -673,7 +655,6 @@ class AIService:
             'is_connection_error': False,
         }
 
-        # بررسی خطای اتصال
         if '❌ خطای اتصال به سرویس هوش مصنوعی' in response_text or '❌ پاسخ نامعتبر از سرویس هوش مصنوعی' in response_text:
             result['is_connection_error'] = True
             result['score'] = 0
@@ -694,7 +675,6 @@ class AIService:
                 if not line:
                     continue
 
-                # ===== تشخیص بخش‌ها با الگوهای مختلف =====
                 if re.search(r'امتیاز\s*:', line, re.IGNORECASE):
                     parts = line.split(':', 1)
                     if len(parts) > 1:
@@ -718,7 +698,6 @@ class AIService:
                 if re.search(r'پیشنهاد\s*:', line, re.IGNORECASE):
                     current_section = 'suggestion'
                     section_content = []
-                    # اگر در همان خط متن وجود دارد
                     if ':' in line and len(line.split(':', 1)[1].strip()) > 1:
                         suggestion_text = line.split(':', 1)[1].strip()
                         if suggestion_text and len(suggestion_text) > 5:
@@ -743,14 +722,12 @@ class AIService:
                             result['tip'] = tip_text
                     continue
 
-                # ===== جمع‌آوری محتوای هر بخش =====
                 if current_section == 'strengths':
                     if line.startswith('-') or line.startswith('•') or re.match(r'^\d+\.', line):
                         item = re.sub(r'^[-•\d.]+', '', line).strip()
                         if item and len(item) > 3:
                             result['strengths'].append(item)
                     elif section_content and len(line) > 5:
-                        # ادامه متن قبلی
                         if result['strengths']:
                             result['strengths'][-1] += ' ' + line
 
@@ -804,9 +781,7 @@ class AIService:
                         else:
                             result['tip'] += ' ' + line
 
-            # ===== اگر هیچ داده‌ای استخراج نشد، از کل متن برای استخراج اولیه استفاده کن =====
             if not result['strengths'] and not result['warnings'] and len(response_text) > 100:
-                # استخراج جملات کلیدی
                 sentences = re.split(r'[.!\n]', response_text)
                 for sent in sentences[:15]:
                     sent = sent.strip()
@@ -822,9 +797,7 @@ class AIService:
                         if result['suggestion'] == 'پیشنهادی موجود نیست.':
                             result['suggestion'] = sent[:150]
 
-            # ===== اگر امتیاز صفر است و محتوایی وجود دارد، امتیاز را از متن تشخیص بده =====
             if result['score'] == 0 and (result['strengths'] or result['warnings'] or len(response_text) > 50):
-                # تشخیص از کلمات کلیدی
                 text_lower = response_text.lower()
                 if 'عالی' in text_lower or 'بسیار خوب' in text_lower:
                     result['score'] = 75
@@ -841,35 +814,26 @@ class AIService:
 
         except Exception as e:
             logger.error(f"Error parsing AI response: {str(e)}")
-            # در صورت خطای parsing، از متن کامل به عنوان پیشنهاد استفاده کن
             if len(response_text) > 50:
                 result['suggestion'] = response_text[:200]
 
-        # ===== Fallback برای بخش‌های خالی =====
         if result.get('psychology') == 'تحلیل روانشناختی موجود نیست.' or not result.get('psychology'):
             result['psychology'] = cls._generate_psychological_fallback(analytics, user_input)
 
         if result.get('suggestion') == 'پیشنهادی موجود نیست.' or not result.get('suggestion'):
             result['suggestion'] = cls._generate_suggestion_fallback(analytics, user_input)
 
-        # اگر امتیاز صفر است ولی بخش‌های دیگر پر هستند، تخمین بزن
         if result['score'] == 0 and (result['strengths'] or result['warnings']):
-            result['score'] = 50  # مقدار متوسط
+            result['score'] = 50
 
         return result
 
-    # ===== متدهای Fallback برای تحلیل روانشناختی و پیشنهاد عملی =====
-
     @classmethod
     def _generate_psychological_fallback(cls, analytics, user_input):
-        """
-        تولید تحلیل روانشناختی خودکار بر اساس داده‌های کاربر
-        """
         emotion = user_input.get('emotion') if user_input else None
         if not emotion:
             return "تحلیل روانشناختی موجود نیست."
 
-        # دریافت عملکرد با احساس مشابه از analytics
         emotion_stats = analytics.get('current_emotion_stats') if analytics else None
         if emotion_stats and emotion_stats.get('count', 0) > 0:
             win_rate = emotion_stats.get('win_rate', 0)
@@ -885,9 +849,6 @@ class AIService:
 
     @classmethod
     def _generate_suggestion_fallback(cls, analytics, user_input):
-        """
-        تولید پیشنهاد عملی خودکار بر اساس داده‌های ورودی و تاریخچه کاربر
-        """
         if not user_input:
             return "پیشنهادی موجود نیست. لطفاً داده‌های خود را تکمیل کنید."
 
@@ -899,7 +860,6 @@ class AIService:
 
         suggestions = []
 
-        # محاسبه R:R
         if entry and sl and tp:
             try:
                 entry = float(entry)
@@ -918,7 +878,6 @@ class AIService:
             except:
                 pass
 
-        # پیشنهاد اندازه پوزیشن
         if risk_percent:
             try:
                 risk_percent = float(risk_percent)
@@ -931,19 +890,16 @@ class AIService:
             except:
                 pass
 
-        # استفاده از بهترین ساعت معاملاتی از analytics
         if analytics and analytics.get('hour_stats'):
             hour = analytics['hour_stats'].get('hour')
             if hour is not None:
                 suggestions.append(f"⏰ بهترین ساعت معاملاتی شما {hour}:۰۰ است. سعی کنید معاملات خود را در این ساعت انجام دهید.")
 
-        # استفاده از بهترین استراتژی
         if analytics and analytics.get('strategy_stats'):
             best_strategy = analytics['strategy_stats'].get('best')
             if best_strategy:
                 suggestions.append(f"📋 بهترین استراتژی شما {best_strategy} است. استفاده از این استراتژی می‌تواند شانس موفقیت را افزایش دهد.")
 
-        # استفاده از مقایسه تریدهای مشابه
         if analytics and analytics.get('similar_trades'):
             sim = analytics['similar_trades']
             if sim.get('count', 0) > 0:
@@ -962,7 +918,6 @@ class AIService:
 
     @classmethod
     def validate_prices_with_live(cls, user_input):
-        """اعتبارسنجی قیمت‌های وارد شده با قیمت لحظه‌ای"""
         symbol = user_input.get('symbol')
         entry_price = user_input.get('entry_price')
 
@@ -988,7 +943,6 @@ class AIService:
 
     @classmethod
     def validate_trade_logic(cls, user_input):
-        """اعتبارسنجی منطق معامله"""
         direction = user_input.get('direction')
         entry_price = user_input.get('entry_price')
         stop_loss = user_input.get('stop_loss')
@@ -1051,7 +1005,6 @@ class AIService:
             'is_valid': len(errors) == 0
         }
 
-    # ===== متدهای دریافت قیمت لحظه‌ای =====
     @classmethod
     def get_live_price(cls, symbol):
         provider = cls.LIVE_PRICE_PROVIDER.lower()
@@ -1208,13 +1161,10 @@ class AIService:
 
     @classmethod
     def get_consultation(cls, user, user_input):
-        """دریافت مشاوره کامل با تحلیل عمیق تاریخچه کاربر"""
-        # اعتبارسنجی قیمت
         is_valid, price_message = cls.validate_prices_with_live(user_input)
         if price_message and not price_message.startswith('✅'):
             user_input['price_warning'] = price_message
 
-        # اعتبارسنجی منطق معامله
         validation = cls.validate_trade_logic(user_input)
         if not validation['is_valid']:
             return {
@@ -1226,6 +1176,13 @@ class AIService:
         prompt = cls.build_prompt(analytics, user_input)
 
         model = user_input.get('model') or None
+
+        # 🔍 دریافت و لاگ مدل
+        model_value = user_input.get('model')
+        if model_value == '':
+            model_value = None
+        print(f"🔍 [get_consultation] model_used received: {model_value}")
+
         response_text = cls.call_ollama(prompt, model=model)
         parsed_response = cls.parse_ai_response(response_text, analytics, user_input)
 
@@ -1246,6 +1203,7 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
+            model_used=model_value,  # ✅ مقداردهی
             ai_score=parsed_response.get('score', 0),
             ai_response=parsed_response,
             prompt_used=prompt,
@@ -1263,13 +1221,10 @@ class AIService:
 
     @classmethod
     def get_consultation_stream(cls, user, user_input):
-        """دریافت مشاوره به صورت استریم با تحلیل عمیق تاریخچه کاربر"""
-        # اعتبارسنجی قیمت
         is_valid, price_message = cls.validate_prices_with_live(user_input)
         if price_message and not price_message.startswith('✅'):
             user_input['price_warning'] = price_message
 
-        # اعتبارسنجی منطق معامله
         validation = cls.validate_trade_logic(user_input)
         if not validation['is_valid']:
             return {
@@ -1281,6 +1236,12 @@ class AIService:
         prompt = cls.build_prompt(analytics, user_input)
 
         model = user_input.get('model') or None
+
+        # 🔍 دریافت و لاگ مدل
+        model_value = user_input.get('model')
+        if model_value == '':
+            model_value = None
+        print(f"🔍 [get_consultation_stream] model_used received: {model_value}")
 
         consultation = AIConsultation.objects.create(
             user=user,
@@ -1299,6 +1260,7 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
+            model_used=model_value,  # ✅ مقداردهی
             ai_score=50,
             ai_response={},
             prompt_used=prompt,
@@ -1335,8 +1297,6 @@ class AIService:
 
 
 class AIFeedbackService:
-    """سرویس مدیریت بازخوردهای AI"""
-
     @classmethod
     def save_feedback(cls, consultation_id, user, feedback_data):
         try:
@@ -1383,8 +1343,6 @@ class AIFeedbackService:
 
 
 class AIAnalyticsService:
-    """سرویس آمار تحلیلی برای توسعه‌دهنده"""
-
     @classmethod
     def get_admin_dashboard(cls):
         from datetime import datetime, timedelta

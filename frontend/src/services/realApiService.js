@@ -66,7 +66,7 @@ class RealApiService {
     return headers;
   }
 
-  
+
 async getLivePrice(symbol) {
   try {
     const response = await this.request(`/trading/live-price/${symbol}/`);
@@ -200,8 +200,10 @@ async getLivePrice(symbol) {
   // ============================================
 
   async getTrades(params = {}) {
+    // ✅ افزایش page_size به ۱۰۰۰ برای دریافت تمام تریدها در یک درخواست
+    const defaultParams = { page_size: 1000, ...params };
     return this.request('/trading/trades/', {
-      params
+      params: defaultParams
     });
   }
 

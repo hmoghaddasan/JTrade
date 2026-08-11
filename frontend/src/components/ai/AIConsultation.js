@@ -55,6 +55,18 @@ const AIConsultation = () => {
   const [consultationId, setConsultationId] = useState(null);
   const [comparisonStats, setComparisonStats] = useState(null);
   const [consultationDetail, setConsultationDetail] = useState(null);
+  const [selectedModel, setSelectedModel] = useState('');
+
+  // ===== Stateهای مربوط به بازخورد =====
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackForm, setFeedbackForm] = useState({
+    is_followed: 'full',
+    trade_result: 'win',
+    feedback_score: 3,
+    feedback_helpfulness: 'somewhat_helpful',
+    feedback_comment: '',
+  });
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -68,7 +80,7 @@ const AIConsultation = () => {
   const [livePrice, setLivePrice] = useState(null);
   const [priceWarning, setPriceWarning] = useState(null);
   const [livePriceLoading, setLivePriceLoading] = useState(false);
-  const [livePriceStatus, setLivePriceStatus] = useState('idle'); // idle | loading | success | error | network_error | not_found
+  const [livePriceStatus, setLivePriceStatus] = useState('idle');
 
   const [errorModal, setErrorModal] = useState({
     open: false,
@@ -238,7 +250,7 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // تابع پردازش JSON پاسخ AI (برای ai_response از دیتابیس)
+  // تابع پردازش JSON پاسخ AI
   // ============================================
   const processAIResponse = (aiResponse, livePriceData, entryPrice) => {
     console.log('📥 processAIResponse - Input JSON:', JSON.stringify(aiResponse, null, 2));
@@ -338,7 +350,7 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // ✅ تابع پردازش متن استریم (نسخه نهایی و کامل)
+  // تابع پردازش متن استریم
   // ============================================
   const processStreamText = (text, livePriceData, entryPrice) => {
     console.log('📥 processStreamText - Input text length:', text?.length || 0);
@@ -375,7 +387,7 @@ const AIConsultation = () => {
       price_warning: null,
     };
 
-    // ===== 1. استخراج امتیاز (با چندین الگوی مختلف) =====
+    // ===== 1. استخراج امتیاز =====
     let scoreMatch = text.match(/\*\*امتیاز\s*اعتبار\s*[:]\*\*\s*(\d+)/i);
     if (!scoreMatch) {
       scoreMatch = text.match(/امتیاز\s*اعتبار\s*[:]\s*(\d+)/i);
@@ -404,17 +416,10 @@ const AIConsultation = () => {
       console.log('✅ استخراج امتیاز (تخمینی از کلمات کلیدی):', result.score);
     }
 
-    // ===== 2. استخراج نقاط قوت (با چندین الگوی مختلف) =====
+    // ===== 2. استخراج نقاط قوت =====
     let strengthsMatch = text.match(/\*\*نقاط\s*قوت\s*[:]\*\*\s*([\s\S]*?)(?=\*\*هشدارها\s*[:]\*\*|$)/i);
     if (!strengthsMatch) {
       strengthsMatch = text.match(/نقاط\s*قوت\s*[:]\s*([\s\S]*?)(?=\s*هشدارها\s*[:]|$)/i);
-    }
-    if (!strengthsMatch) {
-      // برای حالت "پoints قوت" که در لاگ دیده شد
-      strengthsMatch = text.match(/\*\*پoints\s*قوت\s*[:]\*\*\s*([\s\S]*?)(?=\*\*هشدارها\s*[:]\*\*|$)/i);
-    }
-    if (!strengthsMatch) {
-      strengthsMatch = text.match(/پoints\s*قوت\s*[:]\s*([\s\S]*?)(?=\s*هشدارها\s*[:]|$)/i);
     }
     if (strengthsMatch) {
       const strengthsText = strengthsMatch[1].trim();
@@ -499,10 +504,8 @@ const AIConsultation = () => {
         console.log('✅ استخراج تحلیل روانشناختی:', result.psychology.substring(0, 100) + '...');
       }
     } else {
-      // اگر مستقیماً "تحلیل روانشناختی" وجود نداشت، از کلمات کلیدی استفاده کن
       const lowerText = text.toLowerCase();
       if (lowerText.includes('احساس') || lowerText.includes('روان') || lowerText.includes('استرس') || lowerText.includes('آرامش')) {
-        // تلاش برای استخراج جملات مرتبط با احساسات
         const emotionSentences = text.match(/[^.!?]*(احساس|روان|استرس|آرامش|ترس|طمع|هیجان)[^.!?]*[.!?]/gi);
         if (emotionSentences) {
           result.psychology = translateEmotion(emotionSentences.join(' '));
@@ -516,7 +519,6 @@ const AIConsultation = () => {
       result.price_warning = generateStandardPriceWarning(entryPrice, livePriceData);
     }
 
-    // اگر هیچ داده‌ای استخراج نشد، از داده‌های پیش‌فرض استفاده کن
     if (result.strengths.length === 0 && result.warnings.length === 0 && result.suggestion === 'پیشنهادی موجود نیست.') {
       console.warn('⚠️ هیچ داده‌ای از متن استریم استخراج نشد، استفاده از داده‌های پیش‌فرض');
       return processAIResponse(
@@ -538,7 +540,7 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // تابع تبدیل **...** به <strong>...</strong> برای React
+  // تابع تبدیل **...** به <strong>...</strong>
   // ============================================
   const formatBold = (text) => {
     if (!text) return text;
@@ -619,7 +621,7 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // بارگذاری لیست مدل‌های AI
+  // بارگذاری لیست مدل‌های AI (با تنظیم پیش‌فرض)
   // ============================================
   useEffect(() => {
     const loadModels = async () => {
@@ -628,17 +630,28 @@ const AIConsultation = () => {
         const response = await RealApiService.getAvailableModels();
         if (Array.isArray(response.data) && response.data.length > 0) {
           setAvailableModels(response.data);
+          // ✅ تنظیم اولین مدل به‌عنوان پیش‌فرض
+          if (!formData.model) {
+            setFormData(prev => ({ ...prev, model: response.data[0] }));
+          }
         } else {
           setAvailableModels(['llama3.1:8b']);
+          if (!formData.model) {
+            setFormData(prev => ({ ...prev, model: 'llama3.1:8b' }));
+          }
         }
       } catch (error) {
         console.error('❌ Error loading models:', error);
         setAvailableModels(['llama3.1:8b']);
+        if (!formData.model) {
+          setFormData(prev => ({ ...prev, model: 'llama3.1:8b' }));
+        }
       } finally {
         setModelsLoading(false);
       }
     };
     loadModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ============================================
@@ -668,10 +681,13 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // تغییرات فرم
+  // تغییرات فرم (با لاگ برای model)
   // ============================================
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'model') {
+      console.log('🔍 Model selected in handleChange:', value);
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -719,7 +735,7 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // ✅ تابع دریافت قیمت لحظه‌ای با مدیریت خطاهای مختلف
+  // تابع دریافت قیمت لحظه‌ای
   // ============================================
   const fetchLivePrice = async (symbol) => {
     if (!symbol) return null;
@@ -736,7 +752,6 @@ const AIConsultation = () => {
       }
     } catch (error) {
       console.error('❌ Error fetching live price:', error);
-      // تشخیص نوع خطا
       if (error.message?.includes('Network Error') || error.message?.includes('Failed to fetch')) {
         setLivePriceStatus('network_error');
       } else if (error.response?.status === 404) {
@@ -755,10 +770,12 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // دریافت مشاوره با استریم (نسخه نهایی)
+  // دریافت مشاوره با استریم
   // ============================================
   const handleConsult = async (e) => {
     e.preventDefault();
+
+    console.log('🔍 formData.model before request:', formData.model);
 
     if (!formData.symbol) {
       setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً نماد معاملاتی را انتخاب کنید.' });
@@ -809,7 +826,6 @@ const AIConsultation = () => {
           setPriceWarning(standardWarning);
         }
       } else {
-        // خطا در دریافت قیمت
         if (livePriceStatus === 'network_error') {
           setPriceWarning('⚠️ خطا در اتصال به اینترنت. لطفاً اتصال خود را بررسی کنید.');
         } else if (livePriceStatus === 'not_found') {
@@ -866,7 +882,7 @@ const AIConsultation = () => {
         emotion: formData.emotion || null,
         time_ny: formData.time_ny || null,
         user_question: formData.user_question || null,
-        model: formData.model || null,
+        model: formData.model || null,  // ← مقدار model از فرم گرفته می‌شود
         session_type: formData.session_type || null,
         strategy_type: formData.strategy_type || null,
         timeframes: formData.timeframes || null,
@@ -874,7 +890,9 @@ const AIConsultation = () => {
         volume: formData.volume ? parseFloat(formData.volume) : null,
       };
 
-      // ✅ دریافت مشاوره با استریم و استخراج consultationId
+      console.log('📤 requestData.model:', requestData.model);
+
+      // دریافت مشاوره با استریم
       const result = await AIService.getConsultationStream(
         requestData,
         (chunk) => {
@@ -891,30 +909,24 @@ const AIConsultation = () => {
 
       stopProgressTimers();
 
-      // ✅ لاگ کامل متن استریم
       console.log('📥 === FULL_TEXT (Stream) ===');
       console.log(fullText);
       console.log('📥 === END FULL_TEXT ===');
 
-      // ✅ استخراج consultationId از نتیجه
       const consultationId = result?.consultationId;
       setConsultationId(consultationId);
       console.log('📥 === CONSULTATION_ID ===', consultationId);
 
-      // ✅ اولویت اول: استفاده از متن استریم (fullText)
       let parsedResult = null;
-      let comparisonStatsData = null;
-
       if (fullText && fullText.trim().length > 50) {
         parsedResult = processStreamText(fullText, fetchedLivePrice, formData.entry_price);
         console.log('✅ Using stream text (fullText) as primary source:', parsedResult);
       }
 
-      // ✅ اگر consultationId موجود است، ai_response را از دیتابیس دریافت کن
       if (consultationId) {
         try {
-          const detailResponse = await AIService.getConsultationDetail(consultationId);
-          const detailData = detailResponse.data;
+          console.log('📥 Fetching detail for consultation ID:', consultationId);
+          const detailData = await AIService.getConsultationDetail(consultationId);
           setConsultationDetail(detailData);
 
           if (detailData) {
@@ -953,21 +965,33 @@ const AIConsultation = () => {
             }
 
             if (detailData.comparison_stats) {
-              comparisonStatsData = detailData.comparison_stats;
-              setComparisonStats(comparisonStatsData);
+              setComparisonStats(detailData.comparison_stats);
               console.log('📥 === COMPARISON_STATS FROM DATABASE ===');
-              console.log(JSON.stringify(comparisonStatsData, null, 2));
+              console.log(JSON.stringify(detailData.comparison_stats, null, 2));
               console.log('📥 === END COMPARISON_STATS ===');
+            } else if (detailData.internal_analytics) {
+              setComparisonStats(detailData.internal_analytics);
+              console.log('📥 === USING INTERNAL_ANALYTICS AS FALLBACK ===');
+              console.log(JSON.stringify(detailData.internal_analytics, null, 2));
+              console.log('📥 === END INTERNAL_ANALYTICS ===');
+            }
+
+            if (detailData.feedback_score) {
+              setFeedbackSubmitted(true);
+            } else {
+              setFeedbackSubmitted(false);
             }
           } else {
             console.warn('⚠️ detailData is undefined or null');
           }
         } catch (detailError) {
-          console.error('Error fetching consultation detail:', detailError);
+          console.error('❌ Error fetching consultation detail:', detailError);
+          setComparisonStats(null);
         }
+      } else {
+        console.warn('⚠️ No consultationId received from stream');
       }
 
-      // اگر هنوز parsedResult تنظیم نشده، از داده‌های پیش‌فرض استفاده کن
       if (!parsedResult) {
         parsedResult = processAIResponse(
           {
@@ -984,7 +1008,6 @@ const AIConsultation = () => {
         console.log('⚠️ Using default data');
       }
 
-      // اضافه کردن قیمت لحظه‌ای
       if (fetchedLivePrice) {
         parsedResult.live_price = fetchedLivePrice;
       }
@@ -992,7 +1015,6 @@ const AIConsultation = () => {
         parsedResult.price_warning = fetchedPriceWarning;
       }
 
-      // ✅ لاگ نهایی خروجی پردازش‌شده
       console.log('📥 === FINAL PARSED RESULT ===');
       console.log(JSON.stringify(parsedResult, null, 2));
       console.log('📥 === END FINAL PARSED RESULT ===');
@@ -1078,6 +1100,7 @@ const AIConsultation = () => {
       risk_percent: '',
       volume: '',
     });
+    setSelectedModel('');
     setResult(null);
     setStreamingText('');
     setLivePrice(null);
@@ -1085,6 +1108,7 @@ const AIConsultation = () => {
     setLivePriceStatus('idle');
     setConsultationDetail(null);
     setExpandedChart(null);
+    setFeedbackSubmitted(false);
     stopProgressTimers();
     setProgress(0);
     setElapsedTime(0);
@@ -1101,7 +1125,7 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // چاپ گزارش کامل (با بخش تحلیل داخلی)
+  // چاپ گزارش کامل
   // ============================================
   const handlePrintReport = () => {
     if (!result) return;
@@ -1163,7 +1187,6 @@ const AIConsultation = () => {
       ? `<div class="detail-row"><span class="label-text">اندازه پوزیشن پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_position)}</span></div>`
       : '';
 
-    // ===== تحلیل داخلی (با استفاده از comparisonStats) =====
     const internalAnalysisHtml = comparisonStats ? `
       <div class="section">
         <div class="section-title">📊 تحلیل داخلی از تاریخچه شما</div>
@@ -1181,8 +1204,7 @@ const AIConsultation = () => {
       </div>
     ` : '';
 
-    const htmlContent = `
-      <!DOCTYPE html>
+    const htmlContent = `<!DOCTYPE html>
       <html dir="rtl" lang="fa">
       <head>
         <meta charset="UTF-8">
@@ -1398,6 +1420,59 @@ const AIConsultation = () => {
   };
 
   // ============================================
+  // توابع مربوط به بازخورد
+  // ============================================
+  const handleOpenFeedback = () => {
+    if (!consultationId) {
+      showToast('❌ شناسه مشاوره یافت نشد', 'error');
+      return;
+    }
+    setFeedbackForm({
+      is_followed: 'full',
+      trade_result: 'win',
+      feedback_score: 3,
+      feedback_helpfulness: 'somewhat_helpful',
+      feedback_comment: '',
+    });
+    setShowFeedbackModal(true);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowFeedbackModal(false);
+  };
+
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedbackForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!consultationId) {
+      showToast('❌ شناسه مشاوره یافت نشد', 'error');
+      return;
+    }
+
+    try {
+      await AIService.submitFeedback(consultationId, feedbackForm);
+      showToast('✅ بازخورد با موفقیت ثبت شد', 'success');
+      setShowFeedbackModal(false);
+      setFeedbackSubmitted(true);
+
+      if (consultationId) {
+        try {
+          const detailData = await AIService.getConsultationDetail(consultationId);
+          setConsultationDetail(detailData);
+        } catch (error) {
+          console.error('Error refreshing consultation detail:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      showToast('❌ خطا در ثبت بازخورد', 'error');
+    }
+  };
+
+  // ============================================
   // رندر راهنما
   // ============================================
   const renderGuide = () => (
@@ -1431,7 +1506,7 @@ const AIConsultation = () => {
   );
 
   // ============================================
-  // رندر نتیجه نهایی (با تحلیل داخلی و tooltip)
+  // رندر نتیجه نهایی (با بخش بازخورد)
   // ============================================
   const renderResult = () => {
     if (!result) return null;
@@ -1528,7 +1603,6 @@ const AIConsultation = () => {
       <div id="ai-result" className="result-section">
         <h3>🤖 تحلیل هوشمند</h3>
 
-        {/* ===== نمایش قیمت لحظه‌ای ===== */}
         {livePriceDisplay ? (
           <div className="live-price-display">
             <div className="price-item">
@@ -1654,7 +1728,6 @@ const AIConsultation = () => {
           renderCard('📖 نکته آموزشی', response.tip, 'text')
         )}
 
-        {/* ===== ✅ تحلیل داخلی از تاریخچه شما ===== */}
         {comparisonStats && (
           <div className="result-card internal-analysis">
             <h4>📊 تحلیل داخلی از تاریخچه شما</h4>
@@ -1699,6 +1772,59 @@ const AIConsultation = () => {
           </div>
         )}
 
+        {/* ===== ✅ بخش بازخورد ===== */}
+        <div className="feedback-section">
+          <h4>📝 بازخورد</h4>
+          {consultationDetail?.feedback_score ? (
+            <div className="feedback-status">
+              <div className="feedback-info">
+                <span className="feedback-label">امتیاز شما:</span>
+                <span className="feedback-value">{consultationDetail.feedback_score}/۵</span>
+              </div>
+              <div className="feedback-info">
+                <span className="feedback-label">پیروی از پیشنهاد:</span>
+                <span className="feedback-value">
+                  {consultationDetail.is_followed === 'full' ? 'کاملاً' :
+                   consultationDetail.is_followed === 'partial' ? 'تا حدی' :
+                   consultationDetail.is_followed === 'none' ? 'خیر' : '—'}
+                </span>
+              </div>
+              {consultationDetail.trade_result && (
+                <div className="feedback-info">
+                  <span className="feedback-label">نتیجه معامله:</span>
+                  <span className="feedback-value">
+                    {consultationDetail.trade_result === 'win' ? '🟢 سود' :
+                     consultationDetail.trade_result === 'loss' ? '🔴 زیان' :
+                     consultationDetail.trade_result === 'breakeven' ? '🟡 مساوی' : '—'}
+                  </span>
+                </div>
+              )}
+              {consultationDetail.feedback_comment && (
+                <div className="feedback-info">
+                  <span className="feedback-label">نظر شما:</span>
+                  <span className="feedback-value">{consultationDetail.feedback_comment}</span>
+                </div>
+              )}
+              <div className="feedback-done-badge">
+                ✅ بازخورد ثبت شده
+              </div>
+            </div>
+          ) : (
+            <div className="feedback-actions">
+              <p className="feedback-hint">
+                پس از بسته شدن معامله، بازخورد خود را ثبت کنید تا سیستم بتواند تحلیل‌های بهتری ارائه دهد.
+              </p>
+              <button
+                className="btn-feedback"
+                onClick={handleOpenFeedback}
+                disabled={!consultationId}
+              >
+                ⭐ ثبت بازخورد
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="result-actions">
           <button className="btn-secondary" onClick={handleReset}>↩️ بازگشت به فرم</button>
           <button className="btn-secondary" onClick={handlePrintReport}>🖨️ چاپ گزارش کامل</button>
@@ -1738,7 +1864,6 @@ const AIConsultation = () => {
         <div className="form-section">
           <h3>📝 شرایط فعلی خود را وارد کنید</h3>
           <form onSubmit={handleConsult}>
-            {/* ===== فرم ===== */}
             <div className="form-row">
               <div className="form-group">
                 <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
@@ -1916,6 +2041,105 @@ const AIConsultation = () => {
 
         {renderResult()}
       </div>
+
+      {/* ===== مودال بازخورد ===== */}
+      {showFeedbackModal && (
+        <div className="modal-overlay" onClick={handleCloseFeedback}>
+          <div className="modal-content feedback-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📝 ثبت بازخورد</h3>
+              <button className="modal-close" onClick={handleCloseFeedback}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="feedback-info">
+                <p><strong>نماد:</strong> {formData.symbol}</p>
+                <p><strong>جهت:</strong> {formData.direction === 'Buy' ? 'خرید' : 'فروش'}</p>
+                <p><strong>تاریخ:</strong> {new Date().toLocaleDateString('fa-IR')}</p>
+                <p><strong>امتیاز AI:</strong> {result?.score || 0}/۱۰۰</p>
+              </div>
+
+              <div className="feedback-form">
+                <div className="form-group">
+                  <label>آیا از پیشنهاد AI پیروی کردید؟</label>
+                  <select
+                    name="is_followed"
+                    value={feedbackForm.is_followed}
+                    onChange={handleFeedbackChange}
+                  >
+                    <option value="full">کاملاً</option>
+                    <option value="partial">تا حدی</option>
+                    <option value="none">خیر</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>نتیجه معامله چه بود؟</label>
+                  <select
+                    name="trade_result"
+                    value={feedbackForm.trade_result}
+                    onChange={handleFeedbackChange}
+                  >
+                    <option value="win">سود</option>
+                    <option value="loss">زیان</option>
+                    <option value="breakeven">مساوی</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>پیشنهاد AI چقدر به شما کمک کرد؟</label>
+                  <select
+                    name="feedback_helpfulness"
+                    value={feedbackForm.feedback_helpfulness}
+                    onChange={handleFeedbackChange}
+                  >
+                    <option value="very_helpful">بسیار مفید</option>
+                    <option value="somewhat_helpful">نسبتاً مفید</option>
+                    <option value="little_helpful">کم‌فایده</option>
+                    <option value="not_helpful">بی‌فایده</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>امتیاز شما به این مشاوره (۱-۵)</label>
+                  <div className="star-rating">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        className={`star-btn ${feedbackForm.feedback_score >= star ? 'active' : ''}`}
+                        onClick={() => setFeedbackForm(prev => ({ ...prev, feedback_score: star }))}
+                      >
+                        ⭐
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>نظر شما (اختیاری)</label>
+                  <textarea
+                    name="feedback_comment"
+                    value={feedbackForm.feedback_comment}
+                    onChange={handleFeedbackChange}
+                    placeholder="نظر خود را در مورد این مشاوره بنویسید..."
+                    rows="3"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCloseFeedback}>
+                انصراف
+              </button>
+              <button className="btn-submit-feedback" onClick={handleSubmitFeedback}>
+                💾 ثبت بازخورد
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {errorModal.open && (
         <div className="modal-overlay" onClick={closeErrorModal}>

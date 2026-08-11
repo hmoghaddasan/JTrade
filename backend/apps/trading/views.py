@@ -37,45 +37,7 @@ from apps.subscriptions.models import UserSubscription
 from django.conf import settings
 
 
-# backend/apps/trading/views.py
-# فقط بخش اضافه‌شده برای LivePriceView نمایش داده می‌شود.
-# کل فایل views.py بسیار طولانی است، بنابراین فقط کلاس جدید را اضافه کنید.
-
-# backend/apps/trading/views.py
-# اضافه کنید در انتهای فایل، قبل از ExportTradePDFView
-
-class LivePriceView(APIView):
-    """
-    دریافت قیمت لحظه‌ای یک نماد از سرویس‌های تنظیم‌شده
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, symbol):
-        from .ai_service import AIService
-
-        # گرفتن قیمت با متد موجود در ai_service
-        price = AIService.get_live_price(symbol)
-
-        if price is None:
-            # اگر قیمت وجود نداشت، خطای ۴۰۴ با توضیح
-            return Response(
-                {
-                    'error': 'قیمت لحظه‌ای در دسترس نیست',
-                    'symbol': symbol,
-                    'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'none'),
-                    'message': 'لطفاً تنظیمات سرویس قیمت را بررسی کنید.'
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        return Response({
-            'symbol': symbol,
-            'price': price,
-            'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'unknown'),
-            'timestamp': datetime.now().isoformat(),
-        })
-
-        # ============================================
+# ============================================
 # جفت ارزها
 # ============================================
 class CurrencyPairListView(generics.ListAPIView):
@@ -258,36 +220,13 @@ class TradeListCreateView(generics.ListCreateAPIView):
             except json.JSONDecodeError:
                 rule_checks = []
 
-        # ✅ دریافت تصویر - فقط اگر آپلود فعال باشد
-        screenshot = None
-        if settings.SHOW_SCREENSHOT_UPLOAD:
-            if hasattr(self.request, 'FILES') and self.request.FILES.get('screenshot'):
-                screenshot = self.request.FILES.get('screenshot')
-                print("📸 Screenshot received from FILES")
-            elif self.request.data.get('screenshot'):
-                screenshot = self.request.data.get('screenshot')
-                print("📸 Screenshot received from data (Base64)")
-            else:
-                print("⚠️ No screenshot received")
-        else:
-            print("ℹ️ Screenshot upload is disabled by admin")
-
-        # لاگ برای دیباگ
-        print("=" * 60)
-        print("📥 TradeListCreateView.perform_create:")
-        print(f"   - group_id: {group_id}")
-        print(f"   - rule_checks: {rule_checks}")
-        print(f"   - screenshot type: {type(screenshot)}")
-        if screenshot and isinstance(screenshot, str):
-            print(f"   - screenshot length: {len(screenshot)}")
-        print("=" * 60)
-
         # ✅ حذف rule_checks از validated_data تا تداخل ایجاد نشود
         if hasattr(serializer, 'validated_data') and 'rule_checks' in serializer.validated_data:
             serializer.validated_data.pop('rule_checks')
 
-        # ذخیره ترید با تصویر
-        trade = serializer.save(user=user, group=group, screenshot=screenshot)
+        # ✅ ذخیره ترید بدون ارسال مستقیم screenshot (از validated_data استفاده می‌شود)
+        # screenshot توسط validate_screenshot در سریالایزر به ContentFile تبدیل شده و در validated_data موجود است
+        trade = serializer.save(user=user, group=group)
 
         # ثبت بررسی قوانین
         for rule_id in rule_checks:
@@ -342,26 +281,8 @@ class TradeUpdateView(generics.UpdateAPIView):
         return super().update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
-        """ذخیره تصویر در صورت وجود (از هر دو منبع)"""
+        """ذخیره تصویر در صورت وجود (از validated_data استفاده می‌شود)"""
         print("✅ Validation passed, performing update...")
-
-        # ✅ دریافت تصویر - فقط اگر آپلود فعال باشد
-        screenshot = None
-        if settings.SHOW_SCREENSHOT_UPLOAD:
-            if hasattr(self.request, 'FILES') and self.request.FILES.get('screenshot'):
-                screenshot = self.request.FILES.get('screenshot')
-                print("📸 Screenshot received from FILES (update)")
-            elif self.request.data.get('screenshot') is not None:
-                screenshot = self.request.data.get('screenshot')
-                print("📸 Screenshot received from data (Base64) (update)")
-            else:
-                print("⚠️ No screenshot in update request")
-        else:
-            print("ℹ️ Screenshot upload is disabled by admin (update)")
-
-        # لاگ برای دیباگ
-        if screenshot and isinstance(screenshot, str):
-            print(f"   - screenshot length: {len(screenshot)}")
 
         # دریافت قوانین بررسی‌شده
         rule_checks = self.request.data.get('rule_checks', [])
@@ -375,11 +296,9 @@ class TradeUpdateView(generics.UpdateAPIView):
         if hasattr(serializer, 'validated_data') and 'rule_checks' in serializer.validated_data:
             serializer.validated_data.pop('rule_checks')
 
-        # ذخیره ترید
-        if screenshot is not None:
-            serializer.save(screenshot=screenshot)
-        else:
-            serializer.save()
+        # ✅ ذخیره ترید بدون ارسال مستقیم screenshot (از validated_data استفاده می‌شود)
+        # screenshot توسط validate_screenshot در سریالایزر به ContentFile تبدیل شده و در validated_data موجود است
+        trade = serializer.save()
 
         # بروزرسانی بررسی قوانین
         if rule_checks:
@@ -720,8 +639,7 @@ class AnalyticsView(APIView):
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         total_loss_abs = abs(total_loss)
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = \
-        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / total_loss_abs) if total_loss_abs > 0 else (999 if total_profit > 0 else 0)
@@ -963,7 +881,6 @@ class EmotionalPnLView(APIView):
                 'message': 'هیچ تریدی برای تحلیل وجود ندارد'
             })
 
-        # لیست احساسات ممکن (بر اساس فیلدهای موجود در مدل)
         emotion_mapping = {
             'آرامش': 'calm',
             'تمرکز': 'focus',
@@ -981,13 +898,11 @@ class EmotionalPnLView(APIView):
             'قناعت': 'contentment',
         }
 
-        # احساسات منفی برای محاسبه Emotional P&L Ratio
         negative_emotions = ['ترس', 'طمع', 'هیجان', 'FOMO', 'استرس']
 
         result = []
         total_abs_pnl = 0
 
-        # محاسبه آمار برای هر احساس
         for emotion_fa, emotion_en in emotion_mapping.items():
             emotion_trades = trades.filter(dominant_feeling=emotion_fa)
             count = emotion_trades.count()
@@ -1020,14 +935,12 @@ class EmotionalPnLView(APIView):
                 'is_negative': emotion_fa in negative_emotions,
             })
 
-        # محاسبه impact
         for item in result:
             if total_abs_pnl > 0:
                 item['impact'] = round(abs(item['total_pnl']) / total_abs_pnl * 100, 1)
             else:
                 item['impact'] = 0
 
-        # محاسبه Emotional P&L Ratio
         negative_loss = sum(item['total_pnl'] for item in result
                             if item['is_negative'] and item['total_pnl'] < 0)
         total_loss_all = sum(item['total_pnl'] for item in result if item['total_pnl'] < 0)
@@ -1036,7 +949,6 @@ class EmotionalPnLView(APIView):
         if total_loss_all < 0:
             emotional_ratio = round(abs(negative_loss) / abs(total_loss_all) * 100, 1)
 
-        # تعیین وضعیت با پیام‌های جدید
         if emotional_ratio < 30:
             status = 'good'
             status_text = '✅ عملکرد عالی – کمتر از ۳۰٪ ضررهای شما ناشی از احساسات منفی است. کنترل روانی بالایی دارید.'
@@ -1169,7 +1081,6 @@ class RulesReportView(APIView):
             if count > 0:
                 rules_by_category[category[1]] = count
 
-        # محاسبه پایبندی کلی
         total_checks = 0
         total_checked = 0
         rules_stats = []
@@ -1181,7 +1092,6 @@ class RulesReportView(APIView):
             total_checks += total
             total_checked += checked
 
-            # محاسبه عملکرد تریدهایی که قانون رعایت شده vs نشده
             checked_trades = checks.filter(is_checked=True).values_list('trade_id', flat=True)
             unchecked_trades = checks.filter(is_checked=False).values_list('trade_id', flat=True)
 
@@ -1203,7 +1113,6 @@ class RulesReportView(APIView):
 
         overall_compliance = round((total_checked / total_checks * 100), 1) if total_checks > 0 else 0
 
-        # پایبندی به تفکیک دسته‌بندی
         compliance_by_category = {}
         for category, label in TradingRule.RULE_CATEGORIES:
             cat_rules = rules.filter(category=category[0])
@@ -1243,12 +1152,6 @@ class AvailableModelsView(APIView):
 # ============================================
 # مشاوره AI (غیراستریم)
 # ============================================
-# backend/apps/trading/views.py
-# فقط بخش AIConsultationView و AIConsultationStreamView اصلاح شده است
-
-# backend/apps/trading/views.py
-# فقط بخش‌های اصلاح‌شده نمایش داده می‌شود. کل فایل را در ادامه کامل خواهم داد.
-
 class AIConsultationView(APIView):
     """دریافت مشاوره هوشمند از AI"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
@@ -1311,7 +1214,6 @@ class AIConsultationStreamView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # بررسی محدودیت مشاوره
         try:
             subscription = UserSubscription.objects.filter(
                 user=request.user,
@@ -1352,7 +1254,6 @@ class AIConsultationStreamView(APIView):
 
             response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
 
-            # ===== افزودن هدرهای CORS =====
             response['Access-Control-Allow-Origin'] = '*'
             response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
             response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
@@ -1366,7 +1267,6 @@ class AIConsultationStreamView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # ===== پشتیبانی از درخواست OPTIONS (preflight) =====
     def options(self, request, *args, **kwargs):
         response = Response()
         response['Access-Control-Allow-Origin'] = '*'
@@ -1374,101 +1274,6 @@ class AIConsultationStreamView(APIView):
         response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
         response['Access-Control-Max-Age'] = '86400'
         return response
-
-
-
-# ============================================
-# مشاوره AI با استریم (اصلاح‌شده)
-# ============================================
-# backend/apps/trading/views.py
-# فقط بخش‌های مربوط به AIConsultationStreamView اصلاح شده است
-
-# ============================================
-# مشاوره AI با استریم (اصلاح‌شده با CORS)
-# ============================================
-# backend/apps/trading/views.py
-# فقط بخش مربوط به AIConsultationStreamView اصلاح شده است
-# بقیه فایل بدون تغییر باقی می‌ماند
-
-# ============================================
-# مشاوره AI با استریم (اصلاح‌شده با CORS)
-# ============================================
-class AIConsultationStreamView(APIView):
-    """
-    دریافت مشاوره هوشمند از AI به صورت استریم با پشتیبانی کامل CORS
-    """
-    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
-
-    def post(self, request):
-        serializer = AIConsultationInputSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # بررسی محدودیت مشاوره
-        try:
-            subscription = UserSubscription.objects.filter(
-                user=request.user,
-                is_active=True
-            ).latest('created_at')
-
-            if not subscription.can_consult_ai():
-                return Response({
-                    'error': 'limit_reached',
-                    'message': f'محدودیت مشاوره AI شما به پایان رسیده است. ({subscription.ai_consultations_limit} مشاوره)'
-                }, status=status.HTTP_403_FORBIDDEN)
-        except UserSubscription.DoesNotExist:
-            return Response({
-                'error': 'no_subscription',
-                'message': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
-            }, status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            result = AIService.get_consultation_stream(request.user, serializer.validated_data)
-
-            if isinstance(result, dict) and 'error' in result:
-                return Response({
-                    'error': result['error'],
-                    'message': result.get('message', '')
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            if isinstance(result, tuple) and len(result) == 2:
-                consultation, generator = result
-            else:
-                return Response({
-                    'error': 'invalid_response',
-                    'message': 'پاسخ نامعتبر از سرویس AI'
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            def stream_generator():
-                for chunk in generator():
-                    yield chunk
-
-            response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
-
-            # ===== افزودن هدرهای CORS به صورت دستی =====
-            # این کار ضروری است زیرا StreamingHttpResponse به‌طور خودکار CORS را اضافه نمی‌کند
-            response['Access-Control-Allow-Origin'] = '*'
-            response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-            response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
-            response['Access-Control-Expose-Headers'] = 'X-Consultation-ID, X-Total-Time'
-            response['X-Consultation-ID'] = str(consultation.id)
-
-            return response
-
-        except Exception as e:
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    # ===== پشتیبانی از درخواست OPTIONS (preflight) =====
-    def options(self, request, *args, **kwargs):
-        response = Response()
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
-        response['Access-Control-Max-Age'] = '86400'  # 24 ساعت کش
-        return response
-
 
 
 class AIConsultationHistoryView(APIView):
@@ -1662,3 +1467,36 @@ class ExportTradeExcelView(APIView):
         response = HttpResponse(output.getvalue(), content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="trades_export.csv"'
         return response
+
+
+# ============================================
+# ✅ دریافت قیمت لحظه‌ای
+# ============================================
+class LivePriceView(APIView):
+    """
+    دریافت قیمت لحظه‌ای یک نماد از سرویس‌های تنظیم‌شده
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, symbol):
+        from .ai_service import AIService
+
+        price = AIService.get_live_price(symbol)
+
+        if price is None:
+            return Response(
+                {
+                    'error': 'قیمت لحظه‌ای در دسترس نیست',
+                    'symbol': symbol,
+                    'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'none'),
+                    'message': 'لطفاً تنظیمات سرویس قیمت را بررسی کنید.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response({
+            'symbol': symbol,
+            'price': price,
+            'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'unknown'),
+            'timestamp': datetime.now().isoformat(),
+        })

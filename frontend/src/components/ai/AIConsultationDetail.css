@@ -312,3 +312,375 @@
   font-size: 48px;
   margin-bottom: 10px;
 }
+/* frontend/src/components/ai/AIConsultationDetail.css */
+
+.ai-consultation-detail {
+  padding: 20px 30px;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.ai-consultation-detail.light {
+  background-color: #f5f7fa;
+  color: #1a1a2e;
+}
+
+.ai-consultation-detail.dark {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(26, 35, 126, 0.2);
+  margin-bottom: 20px;
+}
+
+.detail-header h2 {
+  font-size: 24px;
+  margin: 0;
+  color: #1a237e;
+}
+
+.dark .detail-header h2 {
+  color: #7986cb;
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background: #e8eaf6;
+  border: none;
+  border-radius: 8px;
+  color: #1a237e;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-back:hover {
+  background: #c5cae9;
+}
+
+.dark .btn-back {
+  background: #2d2d44;
+  color: #e0e0e0;
+}
+
+.dark .btn-back:hover {
+  background: #3d3d5c;
+}
+
+.detail-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .detail-summary {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #888;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.summary-value.buy {
+  color: #2e7d32;
+}
+
+.summary-value.sell {
+  color: #c62828;
+}
+
+.summary-value.score-high {
+  color: #2e7d32;
+}
+
+.summary-value.score-medium {
+  color: #f57c00;
+}
+
+.summary-value.score-low {
+  color: #c62828;
+}
+
+.detail-grid {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .detail-grid {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.dark .detail-row {
+  border-bottom-color: #3d3d5c;
+}
+
+.detail-row .label {
+  color: #666;
+  font-size: 14px;
+}
+
+.dark .detail-row .label {
+  color: #aaa;
+}
+
+.detail-row .value {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.detail-row .value.positive {
+  color: #2e7d32;
+}
+
+.detail-row .value.negative {
+  color: #c62828;
+}
+
+.detail-ai-response {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .detail-ai-response {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.detail-ai-response h3 {
+  margin: 0 0 12px 0;
+  color: #1a237e;
+  font-size: 16px;
+}
+
+.dark .detail-ai-response h3 {
+  color: #7986cb;
+}
+
+.response-section {
+  margin-bottom: 12px;
+}
+
+.response-section h4 {
+  font-size: 14px;
+  margin: 0 0 4px 0;
+}
+
+.response-section ul {
+  margin: 0;
+  padding-right: 20px;
+  font-size: 14px;
+  color: #555;
+}
+
+.dark .response-section ul {
+  color: #bbb;
+}
+
+.response-section ul li {
+  margin-bottom: 4px;
+}
+
+.response-section.warnings ul li {
+  color: #c62828;
+}
+
+.dark .response-section.warnings ul li {
+  color: #ef5350;
+}
+
+.response-section.suggestion p,
+.response-section.tip p,
+.response-section.psychology p {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.response-section.suggestion p {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.dark .response-section.suggestion p {
+  background: rgba(13, 71, 161, 0.2);
+  color: #64b5f6;
+}
+
+.response-section.tip p {
+  background: #fff8e1;
+  color: #e65100;
+  font-style: italic;
+}
+
+.dark .response-section.tip p {
+  background: rgba(230, 81, 0, 0.15);
+  color: #ffa726;
+}
+
+.response-section.psychology p {
+  background: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.dark .response-section.psychology p {
+  background: rgba(106, 27, 154, 0.2);
+  color: #ce93d8;
+}
+
+.response-item {
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.response-item strong {
+  color: #1a237e;
+}
+
+.dark .response-item strong {
+  color: #7986cb;
+}
+
+.detail-feedback {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .detail-feedback {
+  background: #2d2d44;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.detail-feedback h3 {
+  margin: 0 0 12px 0;
+  color: #1a237e;
+  font-size: 16px;
+}
+
+.dark .detail-feedback h3 {
+  color: #7986cb;
+}
+
+.feedback-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feedback-row {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.feedback-label {
+  color: #666;
+  min-width: 80px;
+}
+
+.dark .feedback-label {
+  color: #aaa;
+}
+
+.feedback-value {
+  font-weight: 600;
+}
+
+.no-feedback {
+  color: #888;
+  font-size: 14px;
+}
+
+.ai-detail-loading,
+.ai-detail-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.ai-detail-loading .loading-spinner {
+  font-size: 48px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ai-detail-error .error-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 20px;
+}
+
+@media (max-width: 768px) {
+  .ai-consultation-detail {
+    padding: 12px 16px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .detail-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

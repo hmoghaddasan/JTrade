@@ -5,7 +5,9 @@ import imghdr
 from io import BytesIO
 from PIL import Image
 from django.conf import settings
+from django.core.files.base import ContentFile
 from rest_framework import serializers
+from django.db.models import Sum, Avg, Count, Q
 from .models import CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion, AIConsultationAnalytics, TradingRule, TradeRuleCheck
 
 
@@ -37,6 +39,7 @@ class TradeListSerializer(serializers.ModelSerializer):
     timeframes = serializers.SerializerMethodField()
     emotions = serializers.SerializerMethodField()
     rule_compliance = serializers.SerializerMethodField()
+    screenshot = serializers.SerializerMethodField()  # ✅ برگرداندن URL کامل تصویر
 
     class Meta:
         model = Trade
@@ -94,6 +97,15 @@ class TradeListSerializer(serializers.ModelSerializer):
             'percentage': round((checked / total * 100), 1) if total > 0 else 0
         }
 
+    def get_screenshot(self, obj):
+        """برگرداندن URL کامل تصویر"""
+        if obj.screenshot:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.screenshot.url)
+            return obj.screenshot.url
+        return None
+
 
 class TradeDetailSerializer(serializers.ModelSerializer):
     group_name = serializers.CharField(source='group.group_name', read_only=True, default=None)
@@ -103,6 +115,7 @@ class TradeDetailSerializer(serializers.ModelSerializer):
     checklist_items = serializers.SerializerMethodField()
     rule_compliance = serializers.SerializerMethodField()
     rule_checks_detail = serializers.SerializerMethodField()
+    screenshot = serializers.SerializerMethodField()  # ✅ برگرداندن URL کامل تصویر
 
     class Meta:
         model = Trade
@@ -138,6 +151,15 @@ class TradeDetailSerializer(serializers.ModelSerializer):
             'is_checked': check.is_checked,
         } for check in checks]
 
+    def get_screenshot(self, obj):
+        """برگرداندن URL کامل تصویر"""
+        if obj.screenshot:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.screenshot.url)
+            return obj.screenshot.url
+        return None
+
 
 class TradeCreateSerializer(serializers.ModelSerializer):
     rule_checks = serializers.ListField(
@@ -165,50 +187,41 @@ class TradeCreateSerializer(serializers.ModelSerializer):
 
     def validate_screenshot(self, value):
         """
-        کنترل کامل تصویر: فعال‌سازی، حجم، ابعاد، فرمت، resize و بهینه‌سازی
+        تبدیل Base64 به فایل و ذخیره در سیستم فایل
         """
-        # 1️⃣ بررسی فعال بودن آپلود
         if not settings.SHOW_SCREENSHOT_UPLOAD:
             return None
-
         if value is None:
             return None
-
         if isinstance(value, (dict, list)):
             return None
-
         if not isinstance(value, str):
             try:
                 value = str(value)
             except:
                 return None
-
         if value.strip() == '':
             return None
 
-        # استخراج داده Base64 (حذف header)
+        # استخراج داده Base64
         if ',' in value:
             header, base64_data = value.split(',', 1)
-            if 'image' not in header:
+            if 'image' not in header.lower():
                 raise serializers.ValidationError("فرمت فایل معتبر نیست. فقط تصاویر مجاز هستند.")
         else:
             base64_data = value
 
-        # 2️⃣ بررسی حجم (حداکثر از .env)
         try:
+            # بررسی حجم
             size_in_bytes = len(base64_data) * 3 // 4
             size_in_mb = size_in_bytes / (1024 * 1024)
-
             if size_in_mb > settings.MAX_IMAGE_SIZE_MB:
                 raise serializers.ValidationError(
                     f"حجم تصویر باید کمتر از {settings.MAX_IMAGE_SIZE_MB} مگابایت باشد. "
                     f"(حجم فعلی: {size_in_mb:.2f} MB)"
                 )
-        except Exception as e:
-            raise serializers.ValidationError(f"خطا در بررسی حجم تصویر: {str(e)}")
 
-        # 3️⃣ بررسی فرمت و ابعاد
-        try:
+            # دیکد کردن Base64
             image_data = base64.b64decode(base64_data)
 
             # تشخیص فرمت تصویر
@@ -219,21 +232,17 @@ class TradeCreateSerializer(serializers.ModelSerializer):
                     "فقط JPEG, PNG, GIF, WebP مجاز هستند."
                 )
 
-            # باز کردن تصویر با Pillow
+            # پردازش با Pillow
             image = Image.open(BytesIO(image_data))
             original_width, original_height = image.size
 
-            # 4️⃣ کنترل ابعاد و resize در صورت نیاز
+            # تغییر اندازه در صورت نیاز
             max_w = settings.MAX_IMAGE_WIDTH
             max_h = settings.MAX_IMAGE_HEIGHT
-
             if original_width > max_w or original_height > max_h:
-                # نسبت‌های ابعاد را حفظ کن
                 image.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
-                new_width, new_height = image.size
-                print(f"🔄 تصویر از {original_width}x{original_height} به {new_width}x{new_height} تغییر اندازه داد.")
 
-            # 5️⃣ ذخیره مجدد با کیفیت بهینه
+            # ذخیره در buffer
             buffer = BytesIO()
             save_format = image.format or 'JPEG'
             if save_format.upper() == 'JPEG':
@@ -242,26 +251,39 @@ class TradeCreateSerializer(serializers.ModelSerializer):
                 image.save(buffer, format=save_format, optimize=True)
 
             buffer.seek(0)
-            new_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-            # بازسازی header
-            mime_type = f"image/{image_format.lower()}"
-            if image_format.lower() == 'jpeg':
-                mime_type = 'image/jpeg'
-            new_value = f"data:{mime_type};base64,{new_base64}"
+            # تعیین نام فایل
+            import time
+            timestamp = int(time.time() * 1000)
+            ext = image_format.lower()
+            if ext == 'jpeg':
+                ext = 'jpg'
+            filename = f"screenshot_{timestamp}.{ext}"
 
-            # بستن تصویر
+            # ایجاد فایل ContentFile
+            content_file = ContentFile(buffer.getvalue(), name=filename)
             image.close()
 
-            # لاگ موفقیت
-            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(new_base64) * 3 // 4 / (1024*1024):.2f} MB")
-
-            return new_value
+            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(buffer.getvalue()) / (1024*1024):.2f} MB")
+            return content_file
 
         except base64.binascii.Error:
             raise serializers.ValidationError("داده Base64 نامعتبر است.")
         except Exception as e:
             raise serializers.ValidationError(f"خطا در پردازش تصویر: {str(e)}")
+
+    def to_representation(self, instance):
+        """override to_representation برای نمایش URL تصویر در خروجی"""
+        ret = super().to_representation(instance)
+        if instance.screenshot:
+            request = self.context.get('request')
+            if request:
+                ret['screenshot'] = request.build_absolute_uri(instance.screenshot.url)
+            else:
+                ret['screenshot'] = instance.screenshot.url
+        else:
+            ret['screenshot'] = None
+        return ret
 
     def validate_rule_checks(self, value):
         if value is None:
@@ -307,51 +329,40 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
         return super().to_internal_value(mutable_data)
 
     def validate_screenshot(self, value):
-        """همان کنترل کامل مانند TradeCreateSerializer"""
-        # 1️⃣ بررسی فعال بودن آپلود
+        """
+        تبدیل Base64 به فایل و ذخیره در سیستم فایل (همانند TradeCreateSerializer)
+        """
         if not settings.SHOW_SCREENSHOT_UPLOAD:
             return None
-
         if value is None:
             return None
-
         if isinstance(value, (dict, list)):
             return None
-
         if not isinstance(value, str):
             try:
                 value = str(value)
             except:
                 return None
-
         if value.strip() == '':
             return None
 
-        # استخراج داده Base64
         if ',' in value:
             header, base64_data = value.split(',', 1)
-            if 'image' not in header:
+            if 'image' not in header.lower():
                 raise serializers.ValidationError("فرمت فایل معتبر نیست. فقط تصاویر مجاز هستند.")
         else:
             base64_data = value
 
-        # 2️⃣ بررسی حجم
         try:
             size_in_bytes = len(base64_data) * 3 // 4
             size_in_mb = size_in_bytes / (1024 * 1024)
-
             if size_in_mb > settings.MAX_IMAGE_SIZE_MB:
                 raise serializers.ValidationError(
                     f"حجم تصویر باید کمتر از {settings.MAX_IMAGE_SIZE_MB} مگابایت باشد. "
                     f"(حجم فعلی: {size_in_mb:.2f} MB)"
                 )
-        except Exception as e:
-            raise serializers.ValidationError(f"خطا در بررسی حجم تصویر: {str(e)}")
 
-        # 3️⃣ بررسی فرمت و ابعاد
-        try:
             image_data = base64.b64decode(base64_data)
-
             image_format = imghdr.what(None, image_data)
             if image_format not in ['jpeg', 'png', 'gif', 'webp']:
                 raise serializers.ValidationError(
@@ -364,11 +375,8 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
 
             max_w = settings.MAX_IMAGE_WIDTH
             max_h = settings.MAX_IMAGE_HEIGHT
-
             if original_width > max_w or original_height > max_h:
                 image.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
-                new_width, new_height = image.size
-                print(f"🔄 تصویر از {original_width}x{original_height} به {new_width}x{new_height} تغییر اندازه داد.")
 
             buffer = BytesIO()
             save_format = image.format or 'JPEG'
@@ -378,23 +386,37 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
                 image.save(buffer, format=save_format, optimize=True)
 
             buffer.seek(0)
-            new_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-            mime_type = f"image/{image_format.lower()}"
-            if image_format.lower() == 'jpeg':
-                mime_type = 'image/jpeg'
-            new_value = f"data:{mime_type};base64,{new_base64}"
+            import time
+            timestamp = int(time.time() * 1000)
+            ext = image_format.lower()
+            if ext == 'jpeg':
+                ext = 'jpg'
+            filename = f"screenshot_{timestamp}.{ext}"
 
+            content_file = ContentFile(buffer.getvalue(), name=filename)
             image.close()
 
-            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(new_base64) * 3 // 4 / (1024*1024):.2f} MB")
-
-            return new_value
+            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(buffer.getvalue()) / (1024*1024):.2f} MB")
+            return content_file
 
         except base64.binascii.Error:
             raise serializers.ValidationError("داده Base64 نامعتبر است.")
         except Exception as e:
             raise serializers.ValidationError(f"خطا در پردازش تصویر: {str(e)}")
+
+    def to_representation(self, instance):
+        """override to_representation برای نمایش URL تصویر در خروجی"""
+        ret = super().to_representation(instance)
+        if instance.screenshot:
+            request = self.context.get('request')
+            if request:
+                ret['screenshot'] = request.build_absolute_uri(instance.screenshot.url)
+            else:
+                ret['screenshot'] = instance.screenshot.url
+        else:
+            ret['screenshot'] = None
+        return ret
 
 
 # ===== سریالایزرهای دیگر =====
@@ -446,6 +468,7 @@ class AIConsultationSerializer(serializers.ModelSerializer):
     trade_id = serializers.IntegerField(source='trade.id', read_only=True, allow_null=True)
     trade_symbol = serializers.CharField(source='trade.symbol', read_only=True, allow_null=True)
     user_name = serializers.CharField(source='user.full_name', read_only=True, allow_null=True)
+    internal_analytics = serializers.SerializerMethodField()
 
     class Meta:
         model = AIConsultation
@@ -454,13 +477,58 @@ class AIConsultationSerializer(serializers.ModelSerializer):
             'symbol', 'direction', 'entry_price', 'stop_loss', 'take_profit',
             'market_condition', 'emotion', 'time_ny', 'user_question',
             'session_type', 'strategy_type', 'timeframes', 'risk_percent', 'volume',
-            'comparison_stats',  # ✅ اضافه شد
-            'ai_score', 'ai_response',
+            'comparison_stats',
+            'ai_score', 'ai_response', 'prompt_used', 'model_used',  # ✅ model_used اضافه شد
             'is_followed', 'trade_result',
             'feedback_score', 'feedback_helpfulness', 'feedback_comment', 'feedback_given_at',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at',
+            'internal_analytics',
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'feedback_given_at']
+
+    def get_internal_analytics(self, obj):
+        user = obj.user
+        trades = Trade.objects.filter(user=user, is_deleted=False)
+
+        if not trades.exists():
+            return None
+
+        total_trades = trades.count()
+        winning_trades = trades.filter(profit__gt=0)
+        win_rate = round((winning_trades.count() / total_trades * 100), 1) if total_trades > 0 else 0
+
+        total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
+        avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
+
+        best_strategy_data = trades.values('strategy_type').annotate(
+            wins=Count('id', filter=Q(profit__gt=0))
+        ).order_by('-wins').first()
+        best_strategy = best_strategy_data['strategy_type'] if best_strategy_data and best_strategy_data.get('strategy_type') else None
+
+        best_hour_data = None
+        if trades.filter(time_ny__isnull=False).exists():
+            from django.db.models.functions import ExtractHour
+            best_hour_data = trades.filter(time_ny__isnull=False).annotate(
+                hour=ExtractHour('time_ny')
+            ).values('hour').annotate(
+                total=Sum('profit')
+            ).order_by('-total').first()
+        best_hour = int(best_hour_data['hour']) if best_hour_data else None
+
+        most_common_emotion = trades.exclude(dominant_feeling__isnull=True).exclude(dominant_feeling='').values('dominant_feeling').annotate(
+            cnt=Count('id')
+        ).order_by('-cnt').first()
+        emotion = most_common_emotion['dominant_feeling'] if most_common_emotion else None
+
+        return {
+            'total_trades': total_trades,
+            'win_rate': win_rate,
+            'total_profit': round(total_profit, 2),
+            'avg_rr': round(avg_rr, 2),
+            'best_strategy': best_strategy,
+            'best_hour': best_hour,
+            'most_common_emotion': emotion,
+        }
 
 
 class AIConsultationFeedbackSerializer(serializers.Serializer):

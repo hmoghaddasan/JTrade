@@ -21,7 +21,6 @@ const AIConsultationHistory = () => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
 
-  // فرم بازخورد
   const [feedbackForm, setFeedbackForm] = useState({
     is_followed: 'full',
     trade_result: 'win',
@@ -30,15 +29,13 @@ const AIConsultationHistory = () => {
     feedback_comment: '',
   });
 
-  // ============================================
-  // بارگذاری تاریخچه
-  // ============================================
+  // ✅ بدون ارسال pageSize، از مقدار پیش‌فرض (۱۰۰۰) استفاده می‌کند
   const loadHistory = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await AIService.getHistory({ page, page_size: 20 });
-      setConsultations(response.data.results || []);
-      setTotalPages(response.data.total_pages || 1);
+      const response = await AIService.getHistory(page);
+      setConsultations(response.results || []);
+      setTotalPages(response.total_pages || 1);
       setCurrentPage(page);
     } catch (error) {
       console.error('Error loading consultation history:', error);
@@ -52,9 +49,6 @@ const AIConsultationHistory = () => {
     loadHistory();
   }, []);
 
-  // ============================================
-  // باز کردن مودال بازخورد
-  // ============================================
   const handleOpenFeedback = (consultation) => {
     setSelectedConsultation(consultation);
     setFeedbackForm({
@@ -67,17 +61,11 @@ const AIConsultationHistory = () => {
     setShowFeedbackModal(true);
   };
 
-  // ============================================
-  // تغییرات فرم بازخورد
-  // ============================================
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
     setFeedbackForm(prev => ({ ...prev, [name]: value }));
   };
 
-  // ============================================
-  // ثبت بازخورد
-  // ============================================
   const handleSubmitFeedback = async () => {
     if (!selectedConsultation) return;
 
@@ -85,7 +73,6 @@ const AIConsultationHistory = () => {
       await AIService.submitFeedback(selectedConsultation.id, feedbackForm);
       showToast('✅ بازخورد با موفقیت ثبت شد', 'success');
       setShowFeedbackModal(false);
-      // بارگذاری مجدد تاریخچه
       loadHistory(currentPage);
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -93,9 +80,6 @@ const AIConsultationHistory = () => {
     }
   };
 
-  // ============================================
-  // فرمت تاریخ
-  // ============================================
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     try {
@@ -106,9 +90,6 @@ const AIConsultationHistory = () => {
     }
   };
 
-  // ============================================
-  // نمایش وضعیت بازخورد
-  // ============================================
   const getFeedbackStatus = (consultation) => {
     if (consultation.feedback_score) {
       return (
@@ -127,9 +108,6 @@ const AIConsultationHistory = () => {
     );
   };
 
-  // ============================================
-  // نمایش نتیجه معامله
-  // ============================================
   const getTradeResult = (result) => {
     const map = {
       'win': '🟢 سود',
@@ -140,9 +118,6 @@ const AIConsultationHistory = () => {
     return map[result] || '—';
   };
 
-  // ============================================
-  // نمایش وضعیت پیروی
-  // ============================================
   const getFollowStatus = (status) => {
     const map = {
       'full': '✅ کامل',
@@ -152,9 +127,6 @@ const AIConsultationHistory = () => {
     return map[status] || '—';
   };
 
-  // ============================================
-  // تابع کمکی برای دریافت نمایش خوانا از احساسات
-  // ============================================
   const getEmotionDisplay = (emotion) => {
     const map = {
       'calm': 'آرام',
@@ -169,9 +141,6 @@ const AIConsultationHistory = () => {
     return map[emotion] || emotion;
   };
 
-  // ============================================
-  // تابع کمکی برای دریافت نمایش خوانا از وضعیت بازار
-  // ============================================
   const getMarketConditionDisplay = (condition) => {
     const map = {
       'trending': 'رونددار',
@@ -182,9 +151,6 @@ const AIConsultationHistory = () => {
     return map[condition] || condition;
   };
 
-  // ============================================
-  // رندر اصلی
-  // ============================================
   if (loading) {
     return (
       <div className="ai-history-loading">
@@ -285,7 +251,6 @@ const AIConsultationHistory = () => {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="pagination">
           <button
@@ -308,7 +273,6 @@ const AIConsultationHistory = () => {
         </div>
       )}
 
-      {/* ===== مودال بازخورد ===== */}
       {showFeedbackModal && selectedConsultation && (
         <div className="modal-overlay" onClick={() => setShowFeedbackModal(false)}>
           <div className="modal-content feedback-modal" onClick={(e) => e.stopPropagation()}>
