@@ -478,13 +478,16 @@ class AIConsultationSerializer(serializers.ModelSerializer):
             'market_condition', 'emotion', 'time_ny', 'user_question',
             'session_type', 'strategy_type', 'timeframes', 'risk_percent', 'volume',
             'comparison_stats',
-            'ai_score', 'ai_response', 'prompt_used', 'model_used',  # ✅ model_used اضافه شد
+            'ai_score', 'ai_response', 'prompt_used', 'model_used',
+            'status',
+            'live_price', 'price_warning', 'price_diff_percent',  # ✅ جدید
+            'internal_analytics',  # ✅ جدید
             'is_followed', 'trade_result',
             'feedback_score', 'feedback_helpfulness', 'feedback_comment', 'feedback_given_at',
             'created_at', 'updated_at',
-            'internal_analytics',
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'feedback_given_at']
+
 
     def get_internal_analytics(self, obj):
         user = obj.user

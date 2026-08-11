@@ -216,10 +216,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ============================================
 # تنظیمات AI (Ollama)
 # ============================================
-OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434/api/generate')
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://127.0.0.1:11434/api/generate')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3.1:8b')
 OLLAMA_AVAILABLE_MODELS = os.environ.get('OLLAMA_AVAILABLE_MODELS', 'llama3.1:8b,mistral:7b,deepseek-r1:7b')
-
+OLLAMA_TIMEOUT = int(os.environ.get('OLLAMA_TIMEOUT', 600))  # ✅ جدید - زمان انتظار به ثانیه
 # ============================================
 # ✅ تنظیمات CORS (کامل و صحیح)
 # ============================================

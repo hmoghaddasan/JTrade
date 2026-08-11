@@ -1,0 +1,164 @@
+/* frontend/src/components/ai/ConsultationCompletedBanner.css */
+
+.completed-banner-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  pointer-events: none;
+}
+
+.completed-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 700px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  animation: slideDown 0.4s ease;
+  border-right: 6px solid #2e7d32;
+}
+
+.completed-banner.success {
+  background: #e8f5e9;
+  border-right-color: #2e7d32;
+}
+
+.completed-banner.error {
+  background: #ffebee;
+  border-right-color: #c62828;
+}
+
+.dark .completed-banner.success {
+  background: #1b3a1b;
+  border-right-color: #4caf50;
+}
+
+.dark .completed-banner.error {
+  background: #3d1a1a;
+  border-right-color: #ef5350;
+}
+
+.banner-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.banner-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.banner-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1a1a2e;
+}
+
+.dark .banner-title {
+  color: #e0e0e0;
+}
+
+.banner-message {
+  font-size: 14px;
+  color: #555;
+}
+
+.dark .banner-message {
+  color: #bbb;
+}
+
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.banner-btn-view {
+  padding: 6px 16px;
+  background: #1a237e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.banner-btn-view:hover {
+  background: #0d1b5e;
+  transform: scale(1.02);
+}
+
+.dark .banner-btn-view {
+  background: #3949ab;
+}
+
+.dark .banner-btn-view:hover {
+  background: #1a237e;
+}
+
+.banner-btn-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+  padding: 0 4px;
+  transition: all 0.2s;
+}
+
+.banner-btn-close:hover {
+  color: #333;
+}
+
+.dark .banner-btn-close {
+  color: #aaa;
+}
+
+.dark .banner-btn-close:hover {
+  color: #fff;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .completed-banner {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .banner-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .banner-title {
+    font-size: 14px;
+  }
+  .banner-message {
+    font-size: 13px;
+  }
+}

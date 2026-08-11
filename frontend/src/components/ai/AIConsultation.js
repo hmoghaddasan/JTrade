@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useConsultation } from '../../contexts/ConsultationContext'; // ✅ اضافه شده
 import AIService from '../../services/aiService';
 import RealApiService from '../../services/realApiService';
 import {
@@ -44,6 +45,7 @@ const AIConsultation = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const {addConsultation, hasActiveConsultation } = useConsultation(); // ✅ اضافه شد
 
   const [loading, setLoading] = useState(false);
   const [consulting, setConsulting] = useState(false);
@@ -56,7 +58,6 @@ const AIConsultation = () => {
   const [comparisonStats, setComparisonStats] = useState(null);
   const [consultationDetail, setConsultationDetail] = useState(null);
   const [selectedModel, setSelectedModel] = useState('');
-
   // ===== Stateهای مربوط به بازخورد =====
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackForm, setFeedbackForm] = useState({
@@ -630,7 +631,6 @@ const AIConsultation = () => {
         const response = await RealApiService.getAvailableModels();
         if (Array.isArray(response.data) && response.data.length > 0) {
           setAvailableModels(response.data);
-          // ✅ تنظیم اولین مدل به‌عنوان پیش‌فرض
           if (!formData.model) {
             setFormData(prev => ({ ...prev, model: response.data[0] }));
           }
@@ -770,7 +770,7 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // دریافت مشاوره با استریم
+  // ✅ دریافت مشاوره (نسخه ناهمگام جدید)
   // ============================================
   const handleConsult = async (e) => {
     e.preventDefault();
@@ -843,36 +843,9 @@ const AIConsultation = () => {
       setPriceWarning(warning);
     }
 
-    // ایجاد المان برای نمایش استریم
-    const streamingDiv = document.createElement('div');
-    streamingDiv.id = 'streaming-response';
-    streamingDiv.style.cssText = `
-      padding: 14px 18px;
-      background: ${isDark ? '#2d2d44' : '#f5f5f5'};
-      border-radius: 8px;
-      white-space: pre-wrap;
-      font-size: 14px;
-      line-height: 1.8;
-      min-height: 80px;
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid ${isDark ? '#444' : '#ddd'};
-      margin-bottom: 16px;
-      color: ${isDark ? '#e0e0e0' : '#333'};
-      font-family: inherit;
-    `;
-
-    const resultContainer = document.getElementById('ai-result');
-    if (resultContainer) {
-      const oldEl = document.getElementById('streaming-response');
-      if (oldEl) oldEl.remove();
-      resultContainer.prepend(streamingDiv);
-    }
-
-    let fullText = '';
-
     try {
-      const requestData = {
+      // ✅ استفاده از متد جدید startConsultation
+      const response = await AIService.startConsultation({
         symbol: formData.symbol,
         direction: formData.direction,
         entry_price: parseFloat(formData.entry_price),
@@ -882,173 +855,58 @@ const AIConsultation = () => {
         emotion: formData.emotion || null,
         time_ny: formData.time_ny || null,
         user_question: formData.user_question || null,
-        model: formData.model || null,  // ← مقدار model از فرم گرفته می‌شود
+        model: formData.model || null,
         session_type: formData.session_type || null,
         strategy_type: formData.strategy_type || null,
         timeframes: formData.timeframes || null,
         risk_percent: formData.risk_percent ? parseFloat(formData.risk_percent) : null,
         volume: formData.volume ? parseFloat(formData.volume) : null,
-      };
+      });
 
-      console.log('📤 requestData.model:', requestData.model);
+      console.log('📥 Consultation started:', response);
 
-      // دریافت مشاوره با استریم
-      const result = await AIService.getConsultationStream(
-        requestData,
-        (chunk) => {
-          fullText += chunk;
-          const el = document.getElementById('streaming-response');
-          if (el) {
-            el.innerText = fullText;
-            el.scrollTop = el.scrollHeight;
-          }
-          setProgress(95);
-          setCurrentStage(4);
-        }
-      );
+      const { consultation_id, status, message } = response;
 
-      stopProgressTimers();
+      if (consultation_id) {
+        // ✅ افزودن به لیست فعال مشاوره‌ها (برای ویجت)
+          console.log(`➕ [AIConsultation] Calling addConsultation with ${consultation_id}`);
+        addConsultation(consultation_id, formData.symbol);
 
-      console.log('📥 === FULL_TEXT (Stream) ===');
-      console.log(fullText);
-      console.log('📥 === END FULL_TEXT ===');
+        showToast('🧠 مشاوره در حال پردازش است. می‌توانید به کارهای دیگر بپردازید.', 'info');
 
-      const consultationId = result?.consultationId;
-      setConsultationId(consultationId);
-      console.log('📥 === CONSULTATION_ID ===', consultationId);
+        // هدایت کاربر به داشبورد یا صفحه قبلی
+        navigate('/dashboard');
 
-      let parsedResult = null;
-      if (fullText && fullText.trim().length > 50) {
-        parsedResult = processStreamText(fullText, fetchedLivePrice, formData.entry_price);
-        console.log('✅ Using stream text (fullText) as primary source:', parsedResult);
-      }
-
-      if (consultationId) {
+        // به‌روزرسانی وضعیت اشتراک
         try {
-          console.log('📥 Fetching detail for consultation ID:', consultationId);
-          const detailData = await AIService.getConsultationDetail(consultationId);
-          setConsultationDetail(detailData);
-
-          if (detailData) {
-            console.log('📥 === DETAIL_DATA FROM DATABASE ===');
-            console.log(JSON.stringify(detailData, null, 2));
-            console.log('📥 === END DETAIL_DATA ===');
-
-            if (detailData.ai_response) {
-              console.log('📥 === AI_RESPONSE FROM DATABASE ===');
-              console.log(JSON.stringify(detailData.ai_response, null, 2));
-              console.log('📥 === END AI_RESPONSE ===');
-
-              const aiParsed = processAIResponse(
-                detailData.ai_response,
-                fetchedLivePrice,
-                formData.entry_price
-              );
-              if (aiParsed.strengths.length > 0 || aiParsed.warnings.length > 0) {
-                if (aiParsed.psychology && aiParsed.psychology !== 'تحلیل روانشناختی موجود نیست.') {
-                  parsedResult.psychology = aiParsed.psychology;
-                }
-                if (aiParsed.suggestion && aiParsed.suggestion !== 'پیشنهادی موجود نیست.') {
-                  parsedResult.suggestion = aiParsed.suggestion;
-                }
-                if (aiParsed.score > 0) {
-                  parsedResult.score = aiParsed.score;
-                }
-                if (aiParsed.strengths.length > parsedResult.strengths.length) {
-                  parsedResult.strengths = aiParsed.strengths;
-                }
-                if (aiParsed.warnings.length > parsedResult.warnings.length) {
-                  parsedResult.warnings = aiParsed.warnings;
-                }
-                console.log('✅ Enhanced with ai_response from database:', parsedResult);
-              }
-            }
-
-            if (detailData.comparison_stats) {
-              setComparisonStats(detailData.comparison_stats);
-              console.log('📥 === COMPARISON_STATS FROM DATABASE ===');
-              console.log(JSON.stringify(detailData.comparison_stats, null, 2));
-              console.log('📥 === END COMPARISON_STATS ===');
-            } else if (detailData.internal_analytics) {
-              setComparisonStats(detailData.internal_analytics);
-              console.log('📥 === USING INTERNAL_ANALYTICS AS FALLBACK ===');
-              console.log(JSON.stringify(detailData.internal_analytics, null, 2));
-              console.log('📥 === END INTERNAL_ANALYTICS ===');
-            }
-
-            if (detailData.feedback_score) {
-              setFeedbackSubmitted(true);
-            } else {
-              setFeedbackSubmitted(false);
-            }
-          } else {
-            console.warn('⚠️ detailData is undefined or null');
+          const subResponse = await RealApiService.getSubscriptionStatus();
+          setSubscriptionStatus(subResponse.data);
+          if (subResponse.data.remaining_ai_consultations <= 0) {
+            setLimitReached(true);
           }
-        } catch (detailError) {
-          console.error('❌ Error fetching consultation detail:', detailError);
-          setComparisonStats(null);
+        } catch (subError) {
+          console.error('Error updating subscription status:', subError);
         }
+
       } else {
-        console.warn('⚠️ No consultationId received from stream');
-      }
-
-      if (!parsedResult) {
-        parsedResult = processAIResponse(
-          {
-            score: 50,
-            strengths: ['نقاط قوتی یافت نشد'],
-            warnings: ['هشدار خاصی وجود ندارد'],
-            suggestion: 'پیشنهادی موجود نیست.',
-            tip: 'همیشه به مدیریت ریسک توجه کنید.',
-            psychology: 'تحلیل روانشناختی موجود نیست.'
-          },
-          fetchedLivePrice,
-          formData.entry_price
-        );
-        console.log('⚠️ Using default data');
-      }
-
-      if (fetchedLivePrice) {
-        parsedResult.live_price = fetchedLivePrice;
-      }
-      if (fetchedPriceWarning && !parsedResult.price_warning) {
-        parsedResult.price_warning = fetchedPriceWarning;
-      }
-
-      console.log('📥 === FINAL PARSED RESULT ===');
-      console.log(JSON.stringify(parsedResult, null, 2));
-      console.log('📥 === END FINAL PARSED RESULT ===');
-
-      setResult({ score: parsedResult.score, response: parsedResult });
-
-      if (parsedResult.score > 0) {
-        showToast('✅ تحلیل با موفقیت انجام شد', 'success');
-      } else {
-        showToast('⚠️ تحلیل کامل نشد. لطفاً دوباره تلاش کنید.', 'warning');
-      }
-
-      const subResponse = await RealApiService.getSubscriptionStatus();
-      const data = subResponse.data;
-      setSubscriptionStatus(data);
-      if (data.remaining_ai_consultations <= 0) {
-        setLimitReached(true);
+        showToast('⚠️ خطا در شروع مشاوره', 'error');
       }
 
     } catch (error) {
-      console.error('Error getting consultation:', error);
+      console.error('Error starting consultation:', error);
       stopProgressTimers();
 
-      let errorMessage = '❌ خطا در دریافت مشاوره';
-      let errorTitle = '❌ خطا در دریافت مشاوره';
+      let errorMessage = '❌ خطا در شروع مشاوره';
+      let errorTitle = '❌ خطا';
       let errorDetails = null;
 
       if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
         setIsTimeout(true);
         errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
-        errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nاین ممکن است به دلیل سنگین بودن مدل یا کندی سیستم باشد.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.\n💡 نکته: می‌توانید مدل سبک‌تری مانند \'mistral:7b\' را انتخاب کنید.';
+        errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
       } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
         errorTitle = '🔌 خطای اتصال به AI';
-        errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}\nلطفاً موارد زیر را بررسی کنید:\n1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)\n2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)\n3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)`;
+        errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
       } else if (error.response?.data) {
         const data = error.response.data;
         if (data.message) errorMessage = data.message;
@@ -2025,8 +1883,28 @@ const AIConsultation = () => {
             )}
 
             <div className="form-actions">
-              <button type="submit" className="btn-consult" disabled={consulting || limitReached || (subscriptionStatus?.remaining_ai_consultations !== undefined && subscriptionStatus.remaining_ai_consultations <= 0)}>
-                {consulting ? <><span className="spinner">⏳</span> در حال تحلیل...</> : (limitReached || (subscriptionStatus?.remaining_ai_consultations !== undefined && subscriptionStatus.remaining_ai_consultations <= 0)) ? '⛔ محدودیت مشاوره به پایان رسیده' : '🔍 دریافت تحلیل'}
+              <button
+                type="submit"
+                className="btn-consult"
+                disabled={
+                  consulting ||
+                  limitReached ||
+                  hasActiveConsultation ||  // ✅ غیرفعال در صورت وجود مشاوره فعال
+                  (subscriptionStatus?.remaining_ai_consultations !== undefined &&
+                    subscriptionStatus.remaining_ai_consultations <= 0)
+                }
+              >
+                {consulting ? (
+                  <><span className="spinner">⏳</span> در حال تحلیل...</>
+                ) : hasActiveConsultation ? (
+                  '⏳ مشاوره در حال انجام است...'
+                ) : (limitReached ||
+                  (subscriptionStatus?.remaining_ai_consultations !== undefined &&
+                    subscriptionStatus.remaining_ai_consultations <= 0)) ? (
+                  '⛔ محدودیت مشاوره به پایان رسیده'
+                ) : (
+                  '🔍 دریافت تحلیل'
+                )}
               </button>
               <button type="button" className="btn-reset" onClick={handleReset} disabled={consulting}>🗑️ پاک کردن فرم</button>
             </div>

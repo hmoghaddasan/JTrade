@@ -15,6 +15,7 @@ const AI_SERVICE = {
     }
   },
 
+  // ✅ متد قدیمی استریم (برای سازگاری نگه داشته شده)
   async getConsultationStream(data, onChunk) {
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
     const token = localStorage.getItem('accessToken');
@@ -103,13 +104,34 @@ const AI_SERVICE = {
     }
   },
 
-  // ✅ افزایش page_size به ۱۰۰۰ برای دریافت تمام مشاوره‌ها
+  // ✅ متد جدید: شروع مشاوره ناهمگام (جایگزین استریم)
+  async startConsultation(data) {
+    try {
+      const response = await apiClient.post('/trading/ai-consult-stream/', data);
+      return response.data; // { consultation_id, status, message }
+    } catch (error) {
+      console.error('Error starting consultation:', error);
+      throw error;
+    }
+  },
+
+  // ✅ متد جدید: دریافت وضعیت مشاوره (برای پولینگ)
+  async getConsultationStatus(id) {
+    try {
+      const response = await apiClient.get(`/trading/ai-consult/${id}/status/`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching consultation status:', error);
+      throw error;
+    }
+  },
+
   async getHistory(page = 1, pageSize = 1000) {
     try {
       const response = await apiClient.get('/trading/ai-consult-history/', {
         params: { page, page_size: pageSize },
       });
-      return response.data; // { results, count, page, page_size, total_pages }
+      return response.data;
     } catch (error) {
       console.error('Error fetching AI consultation history:', error);
       throw error;

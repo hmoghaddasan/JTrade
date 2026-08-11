@@ -71,14 +71,19 @@ urlpatterns = [
     path('ai/models/', views.AvailableModelsView.as_view(), name='ai_models'),
 
     # ============================================
-    # مشاوره AI (غیراستریم)
+    # مشاوره AI (غیراستریم - همزمان)
     # ============================================
     path('ai-consult/', views.AIConsultationView.as_view(), name='ai_consult'),
 
     # ============================================
-    # مشاوره AI با استریم (برای نمایش تدریجی)
+    # مشاوره AI با استریم (نسخه ناهمگام جدید)
     # ============================================
     path('ai-consult-stream/', views.AIConsultationStreamView.as_view(), name='ai_consult_stream'),
+
+    # ============================================
+    # ✅ وضعیت مشاوره (برای پولینگ)
+    # ============================================
+    path('ai-consult/<int:pk>/status/', views.AIConsultationStatusView.as_view(), name='ai_consult_status'),
 
     # ============================================
     # تاریخچه مشاوره‌ها
@@ -106,9 +111,11 @@ urlpatterns = [
     # ✅ قیمت لحظه‌ای (جدید)
     # ============================================
     path('live-price/<str:symbol>/', views.LivePriceView.as_view(), name='live_price'),
+
     # ============================================
     # خروجی‌ها
     # ============================================
     path('export/pdf/<int:pk>/', views.ExportTradePDFView.as_view(), name='export_pdf'),
     path('export/excel/', views.ExportTradeExcelView.as_view(), name='export_excel'),
+    path('ai-consult/<int:pk>/status/', views.AIConsultationStatusView.as_view(), name='ai_consult_status'),
 ]

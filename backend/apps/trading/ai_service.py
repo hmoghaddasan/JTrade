@@ -1,12 +1,14 @@
 # backend/apps/trading/ai_service.py
 
 import json
+import decimal
 import requests
 import logging
 import re
 from datetime import datetime
 from django.db.models import Avg, Count, Sum, Q, Max, Min
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from .models import Trade, AIConsultation, AIPromptVersion
 from apps.accounts.models import User
 
@@ -20,6 +22,7 @@ class AIService:
 
     OLLAMA_URL = getattr(settings, 'OLLAMA_URL', 'http://localhost:11434/api/generate')
     OLLAMA_MODEL = getattr(settings, 'OLLAMA_MODEL', 'llama3.1:8b')
+    OLLAMA_TIMEOUT = getattr(settings, 'OLLAMA_TIMEOUT', 600)
 
     LIVE_PRICE_PROVIDER = getattr(settings, 'LIVE_PRICE_PROVIDER', 'none')
     ALPHA_VANTAGE_API_KEY = getattr(settings, 'ALPHA_VANTAGE_API_KEY', '')
@@ -27,6 +30,19 @@ class AIService:
     TWELVEDATA_BASE_URL = getattr(settings, 'TWELVEDATA_BASE_URL', 'https://api.twelvedata.com')
     FINNHUB_API_KEY = getattr(settings, 'FINNHUB_API_KEY', '')
     FINNHUB_BASE_URL = getattr(settings, 'FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
+
+    @classmethod
+    def _convert_decimals(cls, data):
+        """
+        تبدیل بازگشتی تمام مقادیر Decimal به float در ساختار داده.
+        """
+        if isinstance(data, decimal.Decimal):
+            return float(data)
+        elif isinstance(data, dict):
+            return {k: cls._convert_decimals(v) for k, v in data.items()}
+        elif isinstance(data, (list, tuple)):
+            return [cls._convert_decimals(item) for item in data]
+        return data
 
     @classmethod
     def get_user_detailed_analytics(cls, user, symbol=None, user_input=None):
@@ -43,7 +59,8 @@ class AIService:
         total_profit = trades.aggregate(total=Sum('profit'))['total'] or 0
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = \
+        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
         avg_profit_per_trade = trades.aggregate(avg=Avg('profit'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
@@ -58,8 +75,10 @@ class AIService:
                 'count': symbol_trades.count(),
                 'win_rate': (symbol_win / symbol_trades.count() * 100) if symbol_trades.count() > 0 else 0,
                 'total_profit': symbol_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
-                'avg_quality': symbol_trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0,
+                'avg_rr': symbol_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                              'avg'] or 0,
+                'avg_quality': symbol_trades.filter(execution_quality_score__isnull=False).aggregate(
+                    avg=Avg('execution_quality_score'))['avg'] or 0,
                 'avg_profit': symbol_trades.aggregate(avg=Avg('profit'))['avg'] or 0,
                 'win_count': symbol_win,
                 'loss_count': symbol_trades.filter(profit__lt=0).count(),
@@ -76,7 +95,8 @@ class AIService:
                 'count': day_trades.count(),
                 'win_rate': (day_win / day_trades.count() * 100) if day_trades.count() > 0 else 0,
                 'total_profit': day_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                'avg_rr': day_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
+                'avg_rr': day_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                              'avg'] or 0,
                 'win_count': day_win,
                 'loss_count': day_trades.filter(profit__lt=0).count(),
             }
@@ -99,7 +119,9 @@ class AIService:
                     'count': emotion_trades.count(),
                     'win_rate': (emotion_win / emotion_trades.count() * 100) if emotion_trades.count() > 0 else 0,
                     'total_profit': emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
-                    'avg_rr': emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
+                    'avg_rr':
+                        emotion_trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                            'avg'] or 0,
                 }
 
         current_emotion = user_input.get('emotion') if user_input else None
@@ -111,7 +133,8 @@ class AIService:
                 current_emotion_stats = {
                     'emotion': current_emotion,
                     'count': current_emotion_trades.count(),
-                    'win_rate': (ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
+                    'win_rate': (
+                                ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
                     'total_profit': current_emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
                 }
 
@@ -126,7 +149,8 @@ class AIService:
                                'zero_hour_identified', 'asian_range_identified', 'london_range_identified',
                                'judas_lo_identified']
             total_checks = sum(1 for t in trades for item in checklist_items if getattr(t, item, False))
-            checklist_compliance = (total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
+            checklist_compliance = (
+                        total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
 
         # بهترین ساعت
         hour_stats = None
@@ -200,13 +224,16 @@ class AIService:
                         'loss_count': similar_loss,
                         'breakeven_count': similar_breakeven,
                         'avg_profit': similar.aggregate(avg=Avg('profit'))['avg'] or 0,
-                        'avg_rr': similar.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0,
-                        'avg_quality': similar.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0,
+                        'avg_rr':
+                            similar.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))[
+                                'avg'] or 0,
+                        'avg_quality': similar.filter(execution_quality_score__isnull=False).aggregate(
+                            avg=Avg('execution_quality_score'))['avg'] or 0,
                         'max_profit': similar.aggregate(max=Max('profit'))['max'] or 0,
                         'min_profit': similar.aggregate(min=Min('profit'))['min'] or 0,
                     }
 
-        return {
+        result = {
             'total_trades': total_trades,
             'win_rate': round(win_rate, 1),
             'total_profit': round(total_profit, 2),
@@ -230,6 +257,38 @@ class AIService:
             'session_stats': session_stats,
             'similar_trades': similar_trades,
         }
+
+        # تبدیل تمام مقادیر Decimal به float قبل از بازگشت
+        return cls._convert_decimals(result)
+
+    @classmethod
+    def _fetch_live_price_data(cls, user_input):
+        """دریافت قیمت لحظه‌ای و محاسبه تفاوت"""
+        live_price = None
+        price_warning = None
+        price_diff_percent = None
+        entry_price = user_input.get('entry_price')
+
+        if entry_price:
+            try:
+                live_price = cls.get_live_price(user_input.get('symbol'))
+                if live_price:
+                    entry = float(entry_price)
+                    diff = ((entry - live_price) / live_price) * 100
+                    if diff > 999999:  # اگر بیشتر از ۹۹۹۹۹۹ باشد
+                        diff = 999999
+                    elif diff < -999999:
+                        diff = -999999
+                    price_diff_percent = round(diff, 2)
+                    if abs(diff) > 20:
+                        price_warning = f"⚠️ قیمت وارد شده ({entry}) بیش از ۲۰% با قیمت لحظه‌ای ({live_price:.4f}) تفاوت دارد."
+                    elif abs(diff) > 10:
+                        price_warning = f"⚠️ قیمت وارد شده ({entry}) حدود {abs(diff):.1f}% با قیمت لحظه‌ای ({live_price:.4f}) تفاوت دارد."
+                    else:
+                        price_warning = f"✅ قیمت وارد شده با قیمت لحظه‌ای ({live_price:.4f}) منطبق است."
+            except Exception as e:
+                logger.error(f"Error fetching live price: {str(e)}")
+        return live_price, price_warning, price_diff_percent
 
     @classmethod
     def build_prompt(cls, user_analytics, user_input):
@@ -261,7 +320,8 @@ class AIService:
 
         lines = []
         lines.append("📊 **خلاصه عملکرد کلی شما:**")
-        lines.append(f"- کل تریدها: {analytics['total_trades']} (سود: {analytics['win_count']} | زیان: {analytics['loss_count']} | مساوی: {analytics['breakeven_count']})")
+        lines.append(
+            f"- کل تریدها: {analytics['total_trades']} (سود: {analytics['win_count']} | زیان: {analytics['loss_count']} | مساوی: {analytics['breakeven_count']})")
         lines.append(f"- نرخ برد کلی: {analytics['win_rate']}%")
         lines.append(f"- سود کل: ${analytics['total_profit']}")
         lines.append(f"- میانگین سود هر ترید: ${analytics['avg_profit_per_trade']}")
@@ -284,7 +344,8 @@ class AIService:
             lines.append("")
             lines.append(f"🔍 **مقایسه با تریدهای مشابه شما (قیمت نزدیک به {analytics.get('symbol', 'این نماد')}):**")
             lines.append(f"- تعداد تریدهای مشابه: {sim['count']}")
-            lines.append(f"- نرخ برد: {sim['win_rate']:.1f}% (سود: {sim['win_count']} | زیان: {sim['loss_count']} | مساوی: {sim['breakeven_count']})")
+            lines.append(
+                f"- نرخ برد: {sim['win_rate']:.1f}% (سود: {sim['win_count']} | زیان: {sim['loss_count']} | مساوی: {sim['breakeven_count']})")
             lines.append(f"- میانگین سود: ${sim['avg_profit']:.2f}")
             lines.append(f"- بیشترین سود: ${sim.get('max_profit', 0):.2f}")
             lines.append(f"- بیشترین زیان: ${sim.get('min_profit', 0):.2f}")
@@ -292,11 +353,14 @@ class AIService:
             lines.append(f"- میانگین کیفیت اجرا: {sim.get('avg_quality', 0):.1f}/۱۰")
 
             if sim['win_rate'] > 60:
-                lines.append(f"✅ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله پتانسیل خوبی دارد.")
+                lines.append(
+                    f"✅ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله پتانسیل خوبی دارد.")
             elif sim['win_rate'] > 40:
-                lines.append(f"⚠️ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، احتیاط توصیه می‌شود.")
+                lines.append(
+                    f"⚠️ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، احتیاط توصیه می‌شود.")
             else:
-                lines.append(f"❌ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله ریسک بالایی دارد.")
+                lines.append(
+                    f"❌ **نتیجه‌گیری**: بر اساس {sim['count']} ترید مشابه با نرخ برد {sim['win_rate']:.1f}%، این معامله ریسک بالایی دارد.")
 
         if analytics.get('day_stats'):
             d = analytics['day_stats']
@@ -502,7 +566,10 @@ class AIService:
 
     @classmethod
     def call_ollama(cls, prompt, model=None):
+        """فراخوانی همزمان Ollama با تایم‌اوت پویا از settings"""
         model = model or cls.OLLAMA_MODEL
+        timeout = cls.OLLAMA_TIMEOUT
+        logger.info(f"🔄 Calling Ollama with model: {model}, url: {cls.OLLAMA_URL}, timeout: {timeout}s")
         try:
             payload = {
                 "model": model,
@@ -514,35 +581,42 @@ class AIService:
                 }
             }
 
-            response = requests.post(cls.OLLAMA_URL, json=payload, timeout=180)
+            response = requests.post(cls.OLLAMA_URL, json=payload, timeout=timeout)
             response.raise_for_status()
 
             result = response.json()
             response_text = result.get('response', '')
+            logger.info(f"✅ Ollama response received, length: {len(response_text)}")
 
             if not response_text or len(response_text.strip()) < 30:
                 return cls._get_empty_response_error()
 
             return response_text
 
-        except requests.exceptions.Timeout:
-            logger.error("Ollama timeout")
-            return cls._get_connection_error_response("⏰ زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید.")
-        except requests.exceptions.ConnectionError:
-            logger.error("Ollama connection error")
-            return cls._get_connection_error_response("🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
+        except requests.exceptions.Timeout as e:
+            logger.error(f"⏰ Ollama timeout after {timeout} seconds: {str(e)}")
+            return cls._get_connection_error_response(
+                f"⏰ زمان پاسخگویی به پایان رسید (بیش از {timeout} ثانیه). لطفاً دوباره تلاش کنید.")
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"🔌 Ollama connection error: {str(e)}")
+            return cls._get_connection_error_response(
+                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست و آدرس صحیح است.")
         except requests.exceptions.HTTPError as e:
-            logger.error(f"Ollama HTTP error: {str(e)}")
+            logger.error(f"❌ Ollama HTTP error: {str(e)}")
             if "404" in str(e):
-                return cls._get_connection_error_response(f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
+                return cls._get_connection_error_response(
+                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
             return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
         except Exception as e:
-            logger.error(f"Ollama error: {str(e)}")
+            logger.error(f"❌ Ollama error: {str(e)}")
             return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
 
     @classmethod
     def call_ollama_stream(cls, prompt, model=None):
+        """فراخوانی استریم Ollama با تایم‌اوت پویا از settings"""
         model = model or cls.OLLAMA_MODEL
+        timeout = cls.OLLAMA_TIMEOUT
+        logger.info(f"🔄 Calling Ollama (stream) with model: {model}, url: {cls.OLLAMA_URL}, timeout: {timeout}s")
         try:
             payload = {
                 "model": model,
@@ -554,7 +628,7 @@ class AIService:
                 }
             }
 
-            response = requests.post(cls.OLLAMA_URL, json=payload, stream=True, timeout=300)
+            response = requests.post(cls.OLLAMA_URL, json=payload, stream=True, timeout=timeout)
             response.raise_for_status()
 
             has_content = False
@@ -573,17 +647,22 @@ class AIService:
             if not has_content:
                 yield cls._get_empty_response_error()
 
-        except requests.exceptions.Timeout:
-            yield cls._get_connection_error_response("⏰ زمان پاسخگویی به پایان رسید. لطفاً دوباره تلاش کنید.")
-        except requests.exceptions.ConnectionError:
-            yield cls._get_connection_error_response("🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
+        except requests.exceptions.Timeout as e:
+            logger.error(f"⏰ Ollama stream timeout after {timeout} seconds: {str(e)}")
+            yield cls._get_connection_error_response(
+                f"⏰ زمان پاسخگویی به پایان رسید (بیش از {timeout} ثانیه). لطفاً دوباره تلاش کنید.")
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"🔌 Ollama connection error: {str(e)}")
+            yield cls._get_connection_error_response(
+                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
         except requests.exceptions.HTTPError as e:
-            logger.error(f"Ollama HTTP error: {str(e)}")
+            logger.error(f"❌ Ollama HTTP error: {str(e)}")
             if "404" in str(e):
-                yield cls._get_connection_error_response(f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
+                yield cls._get_connection_error_response(
+                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
             yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
         except Exception as e:
-            logger.error(f"Ollama error: {str(e)}")
+            logger.error(f"❌ Ollama error: {str(e)}")
             yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
 
     @classmethod
@@ -870,9 +949,11 @@ class AIService:
                 if risk > 0:
                     rr = reward / risk
                     if rr < 1:
-                        suggestions.append(f"⚠️ نسبت R:R شما ({rr:.2f}) کمتر از ۱ است. پیشنهاد می‌شود حد سود را به {entry + (risk * 2):.4f} افزایش دهید (R:R=2).")
+                        suggestions.append(
+                            f"⚠️ نسبت R:R شما ({rr:.2f}) کمتر از ۱ است. پیشنهاد می‌شود حد سود را به {entry + (risk * 2):.4f} افزایش دهید (R:R=2).")
                     elif rr < 2:
-                        suggestions.append(f"📊 نسبت R:R شما ({rr:.2f}) قابل قبول است. برای بهبود، می‌توانید حد سود را به {entry + (risk * 2.5):.4f} افزایش دهید (R:R=2.5).")
+                        suggestions.append(
+                            f"📊 نسبت R:R شما ({rr:.2f}) قابل قبول است. برای بهبود، می‌توانید حد سود را به {entry + (risk * 2.5):.4f} افزایش دهید (R:R=2.5).")
                     else:
                         suggestions.append(f"✅ نسبت R:R شما ({rr:.2f}) عالی است. همین سطح را حفظ کنید.")
             except:
@@ -882,9 +963,11 @@ class AIService:
             try:
                 risk_percent = float(risk_percent)
                 if risk_percent > 2:
-                    suggestions.append(f"⚠️ درصد ریسک شما ({risk_percent}%) بالاست. پیشنهاد می‌شود حجم معامله را کاهش دهید تا ریسک به ۱-۲٪ برسد.")
+                    suggestions.append(
+                        f"⚠️ درصد ریسک شما ({risk_percent}%) بالاست. پیشنهاد می‌شود حجم معامله را کاهش دهید تا ریسک به ۱-۲٪ برسد.")
                 elif risk_percent < 0.5:
-                    suggestions.append(f"📊 درصد ریسک شما ({risk_percent}%) پایین است. می‌توانید حجم معامله را افزایش دهید تا ریسک به حدود ۱٪ برسد.")
+                    suggestions.append(
+                        f"📊 درصد ریسک شما ({risk_percent}%) پایین است. می‌توانید حجم معامله را افزایش دهید تا ریسک به حدود ۱٪ برسد.")
                 else:
                     suggestions.append(f"✅ درصد ریسک شما ({risk_percent}%) در محدوده مناسب است.")
             except:
@@ -893,23 +976,28 @@ class AIService:
         if analytics and analytics.get('hour_stats'):
             hour = analytics['hour_stats'].get('hour')
             if hour is not None:
-                suggestions.append(f"⏰ بهترین ساعت معاملاتی شما {hour}:۰۰ است. سعی کنید معاملات خود را در این ساعت انجام دهید.")
+                suggestions.append(
+                    f"⏰ بهترین ساعت معاملاتی شما {hour}:۰۰ است. سعی کنید معاملات خود را در این ساعت انجام دهید.")
 
         if analytics and analytics.get('strategy_stats'):
             best_strategy = analytics['strategy_stats'].get('best')
             if best_strategy:
-                suggestions.append(f"📋 بهترین استراتژی شما {best_strategy} است. استفاده از این استراتژی می‌تواند شانس موفقیت را افزایش دهد.")
+                suggestions.append(
+                    f"📋 بهترین استراتژی شما {best_strategy} است. استفاده از این استراتژی می‌تواند شانس موفقیت را افزایش دهد.")
 
         if analytics and analytics.get('similar_trades'):
             sim = analytics['similar_trades']
             if sim.get('count', 0) > 0:
                 win_rate = sim.get('win_rate', 0)
                 if win_rate >= 60:
-                    suggestions.append(f"📈 بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، این معامله پتانسیل خوبی دارد.")
+                    suggestions.append(
+                        f"📈 بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، این معامله پتانسیل خوبی دارد.")
                 elif win_rate >= 40:
-                    suggestions.append(f"⚠️ بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، احتیاط توصیه می‌شود.")
+                    suggestions.append(
+                        f"⚠️ بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، احتیاط توصیه می‌شود.")
                 else:
-                    suggestions.append(f"❌ بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، این معامله ریسک بالایی دارد.")
+                    suggestions.append(
+                        f"❌ بر اساس {sim['count']} ترید مشابه با نرخ برد {win_rate:.1f}%، این معامله ریسک بالایی دارد.")
 
         if not suggestions:
             return "پیشنهادی موجود نیست. لطفاً داده‌های خود را تکمیل کنید."
@@ -1160,7 +1248,75 @@ class AIService:
     # ===== متدهای اصلی مشاوره =====
 
     @classmethod
+    def start_async_consultation(cls, user, user_input):
+        """
+        ایجاد رکورد مشاوره و راه‌اندازی پردازش پس‌زمینه.
+        برگرداندن consultation_id برای پولینگ.
+        """
+        from .tasks import start_consultation_task
+
+        # اعتبارسنجی قیمت
+        is_valid, price_message = cls.validate_prices_with_live(user_input)
+        if price_message and not price_message.startswith('✅'):
+            user_input['price_warning'] = price_message
+
+        # اعتبارسنجی منطق ترید
+        validation = cls.validate_trade_logic(user_input)
+        if not validation['is_valid']:
+            return {
+                'error': 'invalid_trade_logic',
+                'message': '\n'.join(validation['errors'])
+            }
+
+        # دریافت قیمت لحظه‌ای برای ذخیره
+        live_price, price_warning, price_diff_percent = cls._fetch_live_price_data(user_input)
+
+        # دریافت آنالیتیکس و تبدیل Decimal ها به float
+        analytics = cls.get_user_detailed_analytics(user, user_input.get('symbol'), user_input)
+        if analytics:
+            analytics = cls._convert_decimals(analytics)
+
+        # ایجاد رکورد مشاوره با فیلدهای جدید
+        consultation = AIConsultation.objects.create(
+            user=user,
+            symbol=user_input.get('symbol'),
+            direction=user_input.get('direction'),
+            entry_price=user_input.get('entry_price'),
+            stop_loss=user_input.get('stop_loss'),
+            take_profit=user_input.get('take_profit'),
+            market_condition=user_input.get('market_condition'),
+            emotion=user_input.get('emotion'),
+            time_ny=user_input.get('time_ny'),
+            user_question=user_input.get('user_question'),
+            session_type=user_input.get('session_type'),
+            strategy_type=user_input.get('strategy_type'),
+            timeframes=user_input.get('timeframes'),
+            risk_percent=user_input.get('risk_percent'),
+            volume=user_input.get('volume'),
+            comparison_stats=analytics.get('similar_trades') if analytics else None,
+            model_used=user_input.get('model') or cls.OLLAMA_MODEL,
+            status='pending',
+            ai_score=0,
+            ai_response={},
+            prompt_used='',
+            live_price=live_price,
+            price_warning=price_warning or user_input.get('price_warning'),
+            price_diff_percent=price_diff_percent,
+            internal_analytics=analytics,  # ذخیره کل analytics بدون Decimal
+        )
+
+        # راه‌اندازی تسک پس‌زمینه
+        start_consultation_task(consultation.id, user_input)
+
+        return {
+            'consultation_id': consultation.id,
+            'status': 'pending',
+            'message': 'مشاوره در حال پردازش است. لطفاً منتظر بمانید.'
+        }
+
+    @classmethod
     def get_consultation(cls, user, user_input):
+        """نسخه همزمان (برای سازگاری) - مستقیماً پردازش می‌کند"""
         is_valid, price_message = cls.validate_prices_with_live(user_input)
         if price_message and not price_message.startswith('✅'):
             user_input['price_warning'] = price_message
@@ -1173,11 +1329,13 @@ class AIService:
             }
 
         analytics = cls.get_user_detailed_analytics(user, user_input.get('symbol'), user_input)
+        if analytics:
+            analytics = cls._convert_decimals(analytics)
+
         prompt = cls.build_prompt(analytics, user_input)
 
         model = user_input.get('model') or None
 
-        # 🔍 دریافت و لاگ مدل
         model_value = user_input.get('model')
         if model_value == '':
             model_value = None
@@ -1203,10 +1361,15 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
-            model_used=model_value,  # ✅ مقداردهی
+            model_used=model_value,
+            status='completed',
             ai_score=parsed_response.get('score', 0),
             ai_response=parsed_response,
             prompt_used=prompt,
+            live_price=None,
+            price_warning=user_input.get('price_warning'),
+            price_diff_percent=None,
+            internal_analytics=analytics,
         )
 
         try:
@@ -1221,6 +1384,10 @@ class AIService:
 
     @classmethod
     def get_consultation_stream(cls, user, user_input):
+        """
+        نسخه استریم (برای سازگاری با نسخه قبلی)
+        این متد همچنان به‌صورت همزمان پردازش می‌کند و استریم برمی‌گرداند.
+        """
         is_valid, price_message = cls.validate_prices_with_live(user_input)
         if price_message and not price_message.startswith('✅'):
             user_input['price_warning'] = price_message
@@ -1233,11 +1400,13 @@ class AIService:
             }
 
         analytics = cls.get_user_detailed_analytics(user, user_input.get('symbol'), user_input)
+        if analytics:
+            analytics = cls._convert_decimals(analytics)
+
         prompt = cls.build_prompt(analytics, user_input)
 
         model = user_input.get('model') or None
 
-        # 🔍 دریافت و لاگ مدل
         model_value = user_input.get('model')
         if model_value == '':
             model_value = None
@@ -1260,10 +1429,15 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
-            model_used=model_value,  # ✅ مقداردهی
+            model_used=model_value,
+            status='pending',
             ai_score=50,
             ai_response={},
             prompt_used=prompt,
+            live_price=None,
+            price_warning=user_input.get('price_warning'),
+            price_diff_percent=None,
+            internal_analytics=analytics,
         )
 
         def generate():
@@ -1283,6 +1457,7 @@ class AIService:
             parsed = cls.parse_ai_response(full_response, analytics, user_input)
             consultation.ai_score = parsed.get('score', 0)
             consultation.ai_response = parsed
+            consultation.status = 'completed'
             consultation.save()
 
             try:
@@ -1334,7 +1509,8 @@ class AIFeedbackService:
 
             prompt_score = (feedback_score / 5 * 70) + trade_bonus
 
-            total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (best_prompt.usage_count + 1)
+            total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (
+                        best_prompt.usage_count + 1)
             best_prompt.performance_score = max(0, min(100, total_score))
             best_prompt.save()
 

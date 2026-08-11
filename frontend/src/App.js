@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocat
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { ConsultationProvider } from './contexts/ConsultationContext'; // ✅ اضافه شده
+import ConsultationProgressWidget from './components/ai/ConsultationProgressWidget'; // ✅ اضافه شده
 import SubscriptionRenewal from './components/auth/SubscriptionRenewal';
 import PaymentVerify from './components/PaymentVerify';
 import RealApiService from './services/realApiService';
@@ -34,6 +36,7 @@ import AnalyticsDashboard from './components/analytics/AnalyticsDashboard';
 import AIConsultation from './components/ai/AIConsultation';
 import AIConsultationHistory from './components/ai/AIConsultationHistory';
 import AIConsultationDetail from './components/ai/AIConsultationDetail';
+import ConsultationCompletedBanner from './components/ai/ConsultationCompletedBanner'; // ✅ جدید
 
 // Styles
 import './App.css';
@@ -45,9 +48,13 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
+          <ConsultationProvider>  {/* ✅ اضافه شده */}
+            <Router>
+              <AppRoutes />
+              <ConsultationProgressWidget />
+              <ConsultationCompletedBanner />
+            </Router>
+          </ConsultationProvider>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
@@ -79,18 +86,15 @@ function AppRoutes() {
         setSubscriptionStatus(status);
         setIsSubscriptionChecked(true);
 
-        // اگر کاربر ادمین است یا اشتراک فعال دارد
         if (status.is_admin || (status.has_subscription && !status.is_expired)) {
           setIsSubscriptionExpired(false);
         } else {
           setIsSubscriptionExpired(true);
         }
 
-        // اگر اشتراک منقضی شده و در صفحه‌های مجاز نیستیم، به پروفایل برو
         if (status.is_admin) {
           // ادمین دسترسی کامل دارد
         } else if (status.has_subscription && status.is_expired) {
-          // اشتراک منقضی شده
           if (location.pathname !== '/profile' && location.pathname !== '/subscription/renew') {
             navigate('/profile', { replace: true });
             setTimeout(() => {
@@ -98,7 +102,6 @@ function AppRoutes() {
             }, 500);
           }
         } else if (!status.has_subscription) {
-          // کاربر اشتراک ندارد (شاید آزمایشی تمام شده)
           if (location.pathname !== '/profile' && location.pathname !== '/subscription/renew') {
             navigate('/profile', { replace: true });
           }
@@ -122,22 +125,18 @@ function AppRoutes() {
     const isRenewPage = location.pathname === '/subscription/renew';
     const isProfilePage = location.pathname === '/profile';
 
-    // صفحاتی که نیاز به هدایت ندارند
     if (isPaymentPage || isRenewPage) {
       console.log('⏭️ Skipping redirect on payment/renew page');
       return;
     }
 
-    // اگر احراز هویت شده و بررسی اشتراک کامل شده است
     if (isAuthenticated && !loading && isSubscriptionChecked && !hasRedirected.current && !isAuthPage) {
-      // اگر ادمین یا اشتراک فعال دارد و منقضی نشده، به داشبورد برو
       if (subscriptionStatus?.is_admin ||
           (subscriptionStatus?.has_subscription && !subscriptionStatus?.is_expired)) {
         console.log('🔄 Redirecting to dashboard');
         hasRedirected.current = true;
         navigate('/dashboard', { replace: true });
       } else {
-        // در غیر این صورت، به پروفایل برو (اگر قبلاً آنجا نیست)
         if (!isProfilePage) {
           console.log('🔄 Redirecting to profile (no active subscription)');
           hasRedirected.current = true;

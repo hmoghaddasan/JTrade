@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useConsultation } from '../../contexts/ConsultationContext';
 import AIService from '../../services/aiService';
 import './AIConsultationHistory.css';
 
@@ -13,6 +14,7 @@ const AIConsultationHistory = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { activeConsultations } = useConsultation();
 
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,6 @@ const AIConsultationHistory = () => {
     feedback_comment: '',
   });
 
-  // ✅ بدون ارسال pageSize، از مقدار پیش‌فرض (۱۰۰۰) استفاده می‌کند
   const loadHistory = async (page = 1) => {
     setLoading(true);
     try {
@@ -90,44 +91,28 @@ const AIConsultationHistory = () => {
     }
   };
 
-  const getFeedbackStatus = (consultation) => {
-    if (consultation.feedback_score) {
-      return (
-        <span className="feedback-done">
-          ✅ امتیاز {consultation.feedback_score}/۵
-        </span>
-      );
-    }
-    return (
-      <button
-        className="btn-feedback"
-        onClick={() => handleOpenFeedback(consultation)}
-      >
-        ⭐ ثبت بازخورد
-      </button>
-    );
+  // ===== ترجمه فیلدها (مورد ۱۰) =====
+  const translateSessionType = (type) => {
+    const map = { 'High Pro': 'حرفه‌ای', 'Low Pro': 'مبتدی' };
+    return map[type] || type;
   };
 
-  const getTradeResult = (result) => {
+  const translateStrategyType = (type) => {
+    const map = { 'LTP': 'بلندمدت', 'ITP': 'میان‌مدت', 'STP': 'کوتاه‌مدت' };
+    return map[type] || type;
+  };
+
+  const translateMarketCondition = (condition) => {
     const map = {
-      'win': '🟢 سود',
-      'loss': '🔴 زیان',
-      'breakeven': '🟡 مساوی',
-      'open': '⏳ در انتظار',
+      'trending': 'رونددار',
+      'ranging': 'رنج',
+      'neutral': 'خنثی',
+      'volatile': 'پرنوسان'
     };
-    return map[result] || '—';
+    return map[condition] || condition;
   };
 
-  const getFollowStatus = (status) => {
-    const map = {
-      'full': '✅ کامل',
-      'partial': '⚡ تا حدی',
-      'none': '❌ خیر',
-    };
-    return map[status] || '—';
-  };
-
-  const getEmotionDisplay = (emotion) => {
+  const translateEmotion = (emotion) => {
     const map = {
       'calm': 'آرام',
       'excited': 'هیجان',
@@ -136,19 +121,30 @@ const AIConsultationHistory = () => {
       'patient': 'صبر',
       'stress': 'استرس',
       'confident': 'بااعتمادبه‌نفس',
-      'uncertain': 'مردد',
+      'uncertain': 'مردد'
     };
     return map[emotion] || emotion;
   };
 
-  const getMarketConditionDisplay = (condition) => {
-    const map = {
-      'trending': 'رونددار',
-      'ranging': 'رنج',
-      'neutral': 'خنثی',
-      'volatile': 'پرنوسان',
-    };
-    return map[condition] || condition;
+  const getFeedbackStatus = (consultation) => {
+    // مورد ۱۲: دکمه ثبت بازخورد در صورت ثبت نشدن
+    if (consultation.feedback_score) {
+      return <span className="feedback-done">✅ امتیاز {consultation.feedback_score}/۵</span>;
+    }
+    return (
+      <button className="btn-feedback" onClick={() => handleOpenFeedback(consultation)}>
+        ⭐ ثبت بازخورد
+      </button>
+    );
+  };
+
+  // ... سایر توابع کمکی ...
+
+  const hasActiveConsultation = activeConsultations.length > 0;
+
+  // ===== تابع چاپ (مورد ۱۱) =====
+  const handlePrint = () => {
+    window.print();
   };
 
   if (loading) {
@@ -168,9 +164,41 @@ const AIConsultationHistory = () => {
           <button className="btn-back" onClick={() => navigate('/dashboard')}>
             ↩️ بازگشت به داشبورد
           </button>
+          <button
+            className="btn-consult"
+            onClick={() => navigate('/ai-consultation')}
+            disabled={hasActiveConsultation}  // ✅ غیرفعال در صورت وجود مشاوره فعال
+          >
+            {hasActiveConsultation ? '⏳ مشاوره در حال انجام...' : '🧠 مشاوره جدید'}
+          </button>
           <span className="history-count">{consultations.length} مشاوره</span>
         </div>
       </div>
+
+      {/* مورد ۷: نمایش هشدار مشاوره فعال */}
+      {hasActiveConsultation && (
+        <div className="active-consultation-warning">
+          <span className="warning-icon">⏳</span>
+          <div className="warning-content">
+            <h4>یک مشاوره در حال پردازش است</h4>
+            <p>
+              مشاوره برای نماد {activeConsultations.map(c => c.symbol).join('، ')} در حال انجام است.
+              لطفاً منتظر بمانید تا تکمیل شود.
+            </p>
+            <div className="warning-progress">
+              {activeConsultations.map(c => (
+                <div key={c.id} className="progress-item">
+                  <span>{c.symbol}</span>
+                  <div className="progress-bar-wrapper">
+                    <div className="progress-bar" style={{ width: `${c.progress}%` }} />
+                  </div>
+                  <span>{c.progress}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {consultations.length === 0 ? (
         <div className="empty-history">
@@ -206,32 +234,35 @@ const AIConsultationHistory = () => {
                 </div>
 
                 <div className="item-conditions">
+                  {item.session_type && (
+                    <span className="condition-badge">📋 {translateSessionType(item.session_type)}</span>
+                  )}
+                  {item.strategy_type && (
+                    <span className="condition-badge">📊 {translateStrategyType(item.strategy_type)}</span>
+                  )}
                   {item.market_condition && (
-                    <span className="condition-badge">
-                      📊 {getMarketConditionDisplay(item.market_condition)}
-                    </span>
+                    <span className="condition-badge">📊 {translateMarketCondition(item.market_condition)}</span>
                   )}
                   {item.emotion && (
-                    <span className="emotion-badge">
-                      🧠 {getEmotionDisplay(item.emotion)}
-                    </span>
+                    <span className="emotion-badge">🧠 {translateEmotion(item.emotion)}</span>
                   )}
                   {item.user_question && (
-                    <span className="question-badge">
+                    <span className="question-badge" title={item.user_question}>
                       ❓ {item.user_question.substring(0, 50)}...
                     </span>
                   )}
                 </div>
 
+                {/* مورد ۱۲: دکمه ثبت بازخورد در صورت عدم ثبت */}
                 <div className="item-feedback">
                   {item.is_followed && (
                     <span className="follow-status">
-                      پیروی: {getFollowStatus(item.is_followed)}
+                      پیروی: {item.is_followed === 'full' ? '✅ کامل' : item.is_followed === 'partial' ? '⚡ تا حدی' : '❌ خیر'}
                     </span>
                   )}
                   {item.trade_result && (
                     <span className="trade-result">
-                      نتیجه: {getTradeResult(item.trade_result)}
+                      نتیجه: {item.trade_result === 'win' ? '🟢 سود' : item.trade_result === 'loss' ? '🔴 زیان' : '🟡 مساوی'}
                     </span>
                   )}
                   {getFeedbackStatus(item)}
@@ -253,26 +284,17 @@ const AIConsultationHistory = () => {
 
       {totalPages > 1 && (
         <div className="pagination">
-          <button
-            className="btn-page"
-            onClick={() => loadHistory(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
+          <button className="btn-page" onClick={() => loadHistory(currentPage - 1)} disabled={currentPage === 1}>
             قبلی
           </button>
-          <span className="page-info">
-            صفحه {currentPage} از {totalPages}
-          </span>
-          <button
-            className="btn-page"
-            onClick={() => loadHistory(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
+          <span className="page-info">صفحه {currentPage} از {totalPages}</span>
+          <button className="btn-page" onClick={() => loadHistory(currentPage + 1)} disabled={currentPage === totalPages}>
             بعدی
           </button>
         </div>
       )}
 
+      {/* مودال بازخورد */}
       {showFeedbackModal && selectedConsultation && (
         <div className="modal-overlay" onClick={() => setShowFeedbackModal(false)}>
           <div className="modal-content feedback-modal" onClick={(e) => e.stopPropagation()}>
@@ -280,7 +302,6 @@ const AIConsultationHistory = () => {
               <h3>📝 ثبت بازخورد</h3>
               <button className="modal-close" onClick={() => setShowFeedbackModal(false)}>✕</button>
             </div>
-
             <div className="modal-body">
               <div className="feedback-info">
                 <p><strong>نماد:</strong> {selectedConsultation.symbol}</p>
@@ -288,48 +309,33 @@ const AIConsultationHistory = () => {
                 <p><strong>تاریخ:</strong> {formatDate(selectedConsultation.created_at)}</p>
                 <p><strong>امتیاز AI:</strong> {selectedConsultation.ai_score}/۱۰۰</p>
               </div>
-
               <div className="feedback-form">
+                {/* ... فیلدهای فرم بازخورد ... */}
                 <div className="form-group">
                   <label>آیا از پیشنهاد AI پیروی کردید؟</label>
-                  <select
-                    name="is_followed"
-                    value={feedbackForm.is_followed}
-                    onChange={handleFeedbackChange}
-                  >
+                  <select name="is_followed" value={feedbackForm.is_followed} onChange={handleFeedbackChange}>
                     <option value="full">کاملاً</option>
                     <option value="partial">تا حدی</option>
                     <option value="none">خیر</option>
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label>نتیجه معامله چه بود؟</label>
-                  <select
-                    name="trade_result"
-                    value={feedbackForm.trade_result}
-                    onChange={handleFeedbackChange}
-                  >
+                  <select name="trade_result" value={feedbackForm.trade_result} onChange={handleFeedbackChange}>
                     <option value="win">سود</option>
                     <option value="loss">زیان</option>
                     <option value="breakeven">مساوی</option>
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label>پیشنهاد AI چقدر به شما کمک کرد؟</label>
-                  <select
-                    name="feedback_helpfulness"
-                    value={feedbackForm.feedback_helpfulness}
-                    onChange={handleFeedbackChange}
-                  >
+                  <select name="feedback_helpfulness" value={feedbackForm.feedback_helpfulness} onChange={handleFeedbackChange}>
                     <option value="very_helpful">بسیار مفید</option>
                     <option value="somewhat_helpful">نسبتاً مفید</option>
                     <option value="little_helpful">کم‌فایده</option>
                     <option value="not_helpful">بی‌فایده</option>
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label>امتیاز شما به این مشاوره (۱-۵)</label>
                   <div className="star-rating">
@@ -345,7 +351,6 @@ const AIConsultationHistory = () => {
                     ))}
                   </div>
                 </div>
-
                 <div className="form-group">
                   <label>نظر شما (اختیاری)</label>
                   <textarea
@@ -358,14 +363,9 @@ const AIConsultationHistory = () => {
                 </div>
               </div>
             </div>
-
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setShowFeedbackModal(false)}>
-                انصراف
-              </button>
-              <button className="btn-submit-feedback" onClick={handleSubmitFeedback}>
-                💾 ثبت بازخورد
-              </button>
+              <button className="btn-cancel" onClick={() => setShowFeedbackModal(false)}>انصراف</button>
+              <button className="btn-submit-feedback" onClick={handleSubmitFeedback}>💾 ثبت بازخورد</button>
             </div>
           </div>
         </div>

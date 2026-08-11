@@ -9,6 +9,7 @@ import RealApiService from '../services/realApiService';
 import SystemMessages from './SystemMessages';
 import PnLCalendar from './dashboard/PnLCalendar';
 import './Dashboard.css';
+import { useConsultation } from '../contexts/ConsultationContext'; // ✅ قبلاً اضافه شده بود
 
 // لیست ۵۰ آیکون برای دسته‌بندی‌ها
 const GROUP_ICONS = [
@@ -24,6 +25,9 @@ const Dashboard = () => {
   const { isDark, toggleTheme } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
+
+  // ✅ استفاده از ConsultationContext برای وضعیت مشاوره فعال
+  const { hasActiveConsultation } = useConsultation();
 
   // ===== State جدید برای نسخه =====
   const [appVersion, setAppVersion] = useState('1.0.0');
@@ -69,7 +73,6 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.warn('⚠️ Unable to fetch version, using fallback:', error);
-        // در صورت خطا، از متغیر محیطی استفاده کن (در صورت وجود)
         const envVersion = process.env.REACT_APP_VERSION;
         if (envVersion) {
           setAppVersion(envVersion);
@@ -555,8 +558,14 @@ const Dashboard = () => {
         <button className="action-btn warning" onClick={() => navigate('/reports')}>
           <span className="action-icon">📈</span><span>گزارش‌های پیشرفته</span>
         </button>
-        <button className="action-btn ai" onClick={() => navigate('/ai-consultation')}>
-          <span className="action-icon">🧠</span><span>مشاور AI</span>
+        {/* ✅ دکمه مشاوره AI – غیرفعال در صورت وجود مشاوره فعال */}
+        <button
+          className="action-btn ai"
+          onClick={() => navigate('/ai-consultation')}
+          disabled={hasActiveConsultation}
+        >
+          <span className="action-icon">🧠</span>
+          <span>{hasActiveConsultation ? '⏳ مشاوره در حال انجام...' : 'مشاور AI'}</span>
         </button>
         <button className="action-btn info" onClick={() => navigate('/profile')}>
           <span className="action-icon">👤</span><span>پروفایل</span>

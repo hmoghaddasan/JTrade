@@ -1,0 +1,337 @@
+/* frontend/src/components/ai/ConsultationProgressWidget.css */
+
+.consultation-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  max-height: 400px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e0e0e0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Vazir', Tahoma, sans-serif;
+  direction: rtl;
+}
+
+.dark .consultation-widget {
+  background: #2d2d44;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: #1a237e;
+  color: #fff;
+  cursor: default;
+}
+
+.dark .widget-header {
+  background: #0d1b5e;
+}
+
+.widget-icon {
+  font-size: 16px;
+  margin-left: 6px;
+}
+
+.widget-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.widget-badge {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.widget-body {
+  padding: 6px 10px;
+  overflow-y: auto;
+  max-height: 340px;
+}
+
+.widget-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dark .widget-item {
+  border-bottom-color: #444;
+}
+
+.widget-item:hover {
+  background: rgba(26, 35, 126, 0.05);
+}
+
+.dark .widget-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.widget-item:last-child {
+  border-bottom: none;
+}
+
+.item-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+
+.item-symbol {
+  font-weight: 600;
+}
+
+.item-time {
+  color: #888;
+  font-size: 11px;
+}
+
+.item-stage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #555;
+  margin: 2px 0;
+}
+
+.dark .item-stage {
+  color: #aaa;
+}
+
+.stage-emoji {
+  font-size: 14px;
+}
+
+.stage-label {
+  font-weight: 500;
+}
+
+.item-progress {
+  height: 3px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.dark .item-progress {
+  background: #444;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.item-status {
+  font-size: 11px;
+  color: #666;
+}
+
+.dark .item-status {
+  color: #aaa;
+}
+
+/* ===== Toasts ===== */
+.toast-container {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 350px;
+}
+
+.toast-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-right: 4px solid #1a237e;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: slideIn 0.3s ease;
+}
+
+.dark .toast-item {
+  background: #2d2d44;
+  color: #e0e0e0;
+  border-right-color: #1a237e;
+}
+
+.toast-item.success {
+  border-right-color: #2e7d32;
+}
+
+.toast-item.error {
+  border-right-color: #c62828;
+}
+
+.toast-icon {
+  font-size: 16px;
+  margin-left: 8px;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 13px;
+}
+
+.toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast-btn-view {
+  background: #1a237e;
+  color: #fff;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.toast-btn-view:hover {
+  background: #0d1b5e;
+}
+
+.dark .toast-btn-view {
+  background: #3949ab;
+}
+
+.dark .toast-btn-view:hover {
+  background: #1a237e;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.toast-close:hover {
+  color: #333;
+}
+
+.dark .toast-close:hover {
+  color: #fff;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .consultation-widget {
+    width: 240px;
+    bottom: 10px;
+    right: 10px;
+    max-height: 320px;
+  }
+  .toast-container {
+    bottom: 80px;
+    right: 10px;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .consultation-widget {
+    width: 200px;
+    bottom: 8px;
+    right: 8px;
+    max-height: 280px;
+    border-radius: 8px;
+  }
+  .widget-header {
+    padding: 6px 10px;
+  }
+  .widget-icon {
+    font-size: 14px;
+  }
+  .widget-title {
+    font-size: 11px;
+  }
+  .widget-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+  }
+  .widget-body {
+    max-height: 240px;
+    padding: 4px 6px;
+  }
+  .widget-item {
+    padding: 4px 0;
+  }
+  .item-info {
+    font-size: 10px;
+  }
+  .item-time {
+    font-size: 9px;
+  }
+  .item-stage {
+    font-size: 10px;
+  }
+  .stage-emoji {
+    font-size: 12px;
+  }
+  .stage-label {
+    font-size: 10px;
+  }
+  .item-status {
+    font-size: 9px;
+  }
+  .toast-container {
+    bottom: 70px;
+    right: 8px;
+    max-width: 240px;
+    gap: 6px;
+  }
+  .toast-item {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .toast-icon {
+    font-size: 14px;
+    margin-left: 4px;
+  }
+  .toast-message {
+    font-size: 11px;
+  }
+}

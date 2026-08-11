@@ -1,35 +1,73 @@
 /* frontend/src/components/ai/AIConsultation.css */
 
-/* ===== بخش‌های قبلی ===== */
+/* ============================================
+   متغیرهای رنگ (برای تم روشن/تاریک)
+   ============================================ */
+:root {
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-dark: #1a1a2e;
+  --bg-dark-card: #2d2d44;
+  --bg-dark-secondary: #1a1a2e;
+  --text-primary: #1a1a2e;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --border-color: #e0e0e0;
+  --border-dark: #444444;
+  --primary: #1a237e;
+  --primary-light: #0d47a1;
+  --primary-dark: #0d1b5e;
+  --success: #2e7d32;
+  --warning: #f57c00;
+  --danger: #c62828;
+  --info: #0d47a1;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.3s ease;
+}
+
+.dark {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #2d2d44;
+  --bg-card: #2d2d44;
+  --text-primary: #e0e0e0;
+  --text-secondary: #cccccc;
+  --text-muted: #aaaaaa;
+  --border-color: #444444;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   استایل‌های پایه
+   ============================================ */
 .ai-consultation {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Vazir', sans-serif;
+  font-family: 'Vazir', Tahoma, sans-serif;
   direction: rtl;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
-.ai-consultation.dark {
-  background: #1a1a2e;
-  color: #e0e0e0;
-}
-
-.ai-consultation.light {
-  background: #f8f9fa;
-  color: #1a1a2e;
-}
-
-/* ===== هدر ===== */
+/* ============================================
+   هدر
+   ============================================ */
 .ai-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #1a237e, #0d47a1);
-  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border-radius: var(--radius);
   color: #fff;
   margin-bottom: 24px;
+  gap: 12px;
 }
 
 .ai-header h2 {
@@ -40,36 +78,39 @@
 .header-buttons {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .header-buttons button {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   color: #fff;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .header-buttons button:hover {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
-/* ===== راهنما ===== */
+/* ============================================
+   راهنما (Guide)
+   ============================================ */
 .guide-section {
   background: rgba(26, 35, 126, 0.08);
-  border-radius: 12px;
+  border-radius: var(--radius);
   margin-bottom: 24px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   border: 1px solid rgba(26, 35, 126, 0.15);
 }
 
 .dark .guide-section {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .guide-header {
@@ -110,8 +151,14 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .guide-step {
@@ -121,17 +168,22 @@
   align-items: flex-start;
 }
 
+.guide-step:last-child {
+  margin-bottom: 0;
+}
+
 .step-number {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 28px;
   height: 28px;
-  background: #1a237e;
+  background: var(--primary);
   color: #fff;
   border-radius: 50%;
   font-size: 14px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .guide-step h4 {
@@ -142,12 +194,8 @@
 .guide-step p {
   margin: 0;
   font-size: 14px;
-  color: #555;
+  color: var(--text-muted);
   line-height: 1.6;
-}
-
-.dark .guide-step p {
-  color: #bbb;
 }
 
 .guide-step ul {
@@ -157,12 +205,8 @@
 
 .guide-step ul li {
   font-size: 13px;
-  color: #555;
+  color: var(--text-muted);
   line-height: 1.6;
-}
-
-.dark .guide-step ul li {
-  color: #bbb;
 }
 
 .guide-table {
@@ -174,36 +218,36 @@
 
 .guide-table th,
 .guide-table td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   padding: 6px 10px;
   text-align: center;
 }
 
 .dark .guide-table th,
 .dark .guide-table td {
-  border-color: #444;
+  border-color: var(--border-dark);
 }
 
 .guide-table th {
-  background: #e8eaf6;
+  background: rgba(26, 35, 126, 0.08);
   font-weight: 600;
 }
 
 .dark .guide-table th {
-  background: #2d2d44;
+  background: var(--bg-secondary);
 }
 
 .guide-tip {
   background: #fff8e1;
   padding: 12px 16px;
-  border-radius: 8px;
-  border-right: 4px solid #f57c00;
+  border-radius: var(--radius-sm);
+  border-right: 4px solid var(--warning);
   margin-top: 12px;
 }
 
 .dark .guide-tip {
   background: #2d2d1a;
-  border-color: #f57c00;
+  border-color: var(--warning);
 }
 
 .guide-tip ul {
@@ -211,14 +255,16 @@
   padding-right: 18px;
 }
 
-/* ===== محدودیت اشتراک ===== */
+/* ============================================
+   هشدار محدودیت اشتراک
+   ============================================ */
 .limit-warning {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
   background: #ffebee;
-  border-radius: 12px;
+  border-radius: var(--radius);
   border: 1px solid #ef9a9a;
   margin-bottom: 24px;
 }
@@ -230,11 +276,12 @@
 
 .warning-icon {
   font-size: 32px;
+  flex-shrink: 0;
 }
 
 .warning-content h4 {
   margin: 0 0 4px 0;
-  color: #c62828;
+  color: var(--danger);
 }
 
 .dark .warning-content h4 {
@@ -247,21 +294,23 @@
 }
 
 .btn-upgrade {
-  background: #c62828;
+  background: var(--danger);
   color: #fff;
   border: none;
   padding: 6px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 13px;
-  transition: background 0.3s ease;
+  transition: var(--transition);
 }
 
 .btn-upgrade:hover {
   background: #b71c1c;
 }
 
-/* ===== محتوای اصلی ===== */
+/* ============================================
+   محتوای اصلی (دو ستونی)
+   ============================================ */
 .ai-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -274,29 +323,22 @@
   }
 }
 
-/* ===== فرم ===== */
+/* ============================================
+   فرم
+   ============================================ */
 .form-section {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.dark .form-section {
-  background: #2d2d44;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow);
 }
 
 .form-section h3 {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 18px;
-  border-bottom: 2px solid #e8eaf6;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 10px;
-}
-
-.dark .form-section h3 {
-  border-bottom-color: #444;
 }
 
 .form-row {
@@ -321,38 +363,34 @@
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 4px;
-  color: #333;
-}
-
-.dark .form-group label {
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-family: inherit;
   background: #fff;
+  color: var(--text-primary);
   transition: border-color 0.3s ease;
 }
 
 .dark .form-group input,
 .dark .form-group select,
 .dark .form-group textarea {
-  background: #3d3d5c;
-  border-color: #555;
-  color: #e0e0e0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #1a237e;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
 }
 
@@ -362,41 +400,34 @@
 
 .field-hint {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 3px;
-}
-
-.dark .field-hint {
-  color: #aaa;
 }
 
 .full-width {
   grid-column: 1 / -1;
 }
 
-/* ===== نوار پیشرفت ===== */
+/* ============================================
+   نوار پیشرفت
+   ============================================ */
 .progress-container {
-  background: #f5f5f5;
-  border-radius: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
   padding: 16px 20px;
   margin: 16px 0;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   animation: pulseBorder 1.5s ease-in-out infinite;
 }
 
-.dark .progress-container {
-  background: #2d2d44;
-  border-color: #555;
-}
-
 @keyframes pulseBorder {
-  0%, 100% { border-color: #e0e0e0; }
-  50% { border-color: #1a237e; }
-}
-
-.dark @keyframes pulseBorder {
-  0%, 100% { border-color: #555; }
-  50% { border-color: #3f51b5; }
+  0%,
+  100% {
+    border-color: var(--border-color);
+  }
+  50% {
+    border-color: var(--primary);
+  }
 }
 
 .progress-header {
@@ -409,18 +440,14 @@
 .progress-label {
   font-weight: 600;
   font-size: 15px;
-  color: #333;
-}
-
-.dark .progress-label {
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 .progress-time {
   font-size: 15px;
   font-weight: 600;
-  color: #1a237e;
-  background: #e8eaf6;
+  color: var(--primary);
+  background: rgba(26, 35, 126, 0.1);
   padding: 2px 12px;
   border-radius: 20px;
   display: flex;
@@ -429,7 +456,7 @@
 }
 
 .dark .progress-time {
-  background: #3d3d5c;
+  background: var(--bg-secondary);
   color: #90caf9;
 }
 
@@ -440,35 +467,40 @@
 .progress-bar-wrapper {
   width: 100%;
   height: 8px;
-  background: #e0e0e0;
+  background: var(--border-color);
   border-radius: 10px;
   overflow: hidden;
   margin: 8px 0;
 }
 
-.dark .progress-bar-wrapper {
-  background: #444;
-}
-
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #1a237e, #42a5f5);
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
   border-radius: 10px;
   transition: width 0.2s ease;
-  position: relative;
 }
 
 .progress-bar.timeout {
-  background: linear-gradient(90deg, #c62828, #ef5350);
+  background: linear-gradient(90deg, var(--danger), #ef5350);
   animation: shake 0.5s ease;
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
+/* ============================================
+   مراحل (Stages)
+   ============================================ */
 .stages-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -499,13 +531,13 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #999;
-  transition: all 0.3s ease;
+  color: var(--text-muted);
+  transition: var(--transition);
   padding: 2px 0;
 }
 
 .stage-item.active {
-  color: #1a237e;
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -514,28 +546,28 @@
 }
 
 .stage-item.error {
-  color: #c62828;
+  color: var(--danger);
 }
 
 .stage-item.success {
-  color: #2e7d32;
+  color: var(--success);
 }
 
 .stage-item.loading {
-  color: #f57c00;
+  color: var(--warning);
 }
 
 .stage-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ddd;
-  transition: all 0.3s ease;
+  background: var(--border-color);
+  transition: var(--transition);
   flex-shrink: 0;
 }
 
 .stage-item.active .stage-dot {
-  background: #1a237e;
+  background: var(--primary);
   box-shadow: 0 0 8px rgba(26, 35, 126, 0.4);
 }
 
@@ -545,15 +577,15 @@
 }
 
 .stage-item.error .stage-dot {
-  background: #c62828;
+  background: var(--danger);
 }
 
 .stage-item.success .stage-dot {
-  background: #2e7d32;
+  background: var(--success);
 }
 
 .stage-item.loading .stage-dot {
-  background: #f57c00;
+  background: var(--warning);
 }
 
 .stage-label {
@@ -571,16 +603,14 @@
 .progress-hint {
   text-align: center;
   font-size: 13px;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 6px;
   min-height: 20px;
 }
 
-.dark .progress-hint {
-  color: #aaa;
-}
-
-/* ===== دکمه‌ها ===== */
+/* ============================================
+   دکمه‌های فرم
+   ============================================ */
 .form-actions {
   display: flex;
   gap: 12px;
@@ -589,15 +619,15 @@
 }
 
 .btn-consult {
-  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
   color: #fff;
   border: none;
   padding: 10px 28px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   flex: 1;
   min-width: 140px;
 }
@@ -614,23 +644,23 @@
 }
 
 .btn-reset {
-  background: #e0e0e0;
-  color: #333;
+  background: var(--border-color);
+  color: var(--text-secondary);
   border: none;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+}
+
+.btn-reset:hover:not(:disabled) {
+  background: #bdbdbd;
 }
 
 .dark .btn-reset {
   background: #444;
   color: #ccc;
-}
-
-.btn-reset:hover:not(:disabled) {
-  background: #bdbdbd;
 }
 
 .dark .btn-reset:hover:not(:disabled) {
@@ -640,70 +670,55 @@
 .remaining-info {
   margin-top: 12px;
   font-size: 14px;
-  color: #555;
+  color: var(--text-muted);
   text-align: center;
-  background: #e8eaf6;
+  background: rgba(26, 35, 126, 0.08);
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .dark .remaining-info {
-  background: #2d2d44;
-  color: #ccc;
+  background: var(--bg-secondary);
 }
 
-/* ===== نتیجه ===== */
+/* ============================================
+   نتیجه (Result)
+   ============================================ */
 .result-section {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.dark .result-section {
-  background: #2d2d44;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow);
 }
 
 .result-section h3 {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 18px;
-  border-bottom: 2px solid #e8eaf6;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 10px;
 }
 
-.dark .result-section h3 {
-  border-bottom-color: #444;
-}
-
-/* ===== کادرهای نتیجه (جدید) ===== */
+/* ============================================
+   کارت‌های نتیجه (Result Cards)
+   ============================================ */
 .result-card {
-  background: #f8f9fa;
+  background: var(--bg-primary);
   border-radius: 10px;
   padding: 16px 18px;
   margin-bottom: 14px;
-  border: 1px solid #eee;
-  transition: all 0.3s ease;
-}
-
-.dark .result-card {
-  background: #1a1a2e;
-  border-color: #444;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
 }
 
 .result-card:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-
-.dark .result-card:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow);
 }
 
 .result-card h4 {
   margin: 0 0 8px 0;
   font-size: 16px;
-  color: #1a237e;
+  color: var(--primary);
 }
 
 .dark .result-card h4 {
@@ -719,34 +734,30 @@
   margin-bottom: 6px;
   font-size: 14px;
   line-height: 1.7;
-  color: #333;
-}
-
-.dark .result-card ul li {
-  color: #ddd;
+  color: var(--text-secondary);
 }
 
 .result-card p {
   margin: 0;
   font-size: 14px;
   line-height: 1.8;
-  color: #333;
+  color: var(--text-secondary);
 }
 
-.dark .result-card p {
-  color: #ddd;
+.result-card strong {
+  color: var(--primary);
+}
+
+.dark .result-card strong {
+  color: #90caf9;
 }
 
 .result-card .detail-row {
   display: flex;
   justify-content: space-between;
   padding: 4px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   font-size: 14px;
-}
-
-.dark .result-card .detail-row {
-  border-bottom-color: #444;
 }
 
 .result-card .detail-row:last-child {
@@ -754,40 +765,30 @@
 }
 
 .result-card .detail-label {
-  color: #666;
+  color: var(--text-muted);
   font-weight: 500;
-}
-
-.dark .result-card .detail-label {
-  color: #aaa;
 }
 
 .result-card .detail-value {
   font-weight: 600;
-  color: #1a237e;
+  color: var(--primary);
 }
 
 .dark .result-card .detail-value {
   color: #90caf9;
 }
 
-.result-card strong {
-  color: #1a237e;
-}
-
-.dark .result-card strong {
-  color: #90caf9;
-}
-
-/* ===== تحلیل داخلی ===== */
+/* ============================================
+   تحلیل داخلی (Internal Analysis)
+   ============================================ */
 .result-card.internal-analysis {
-  background: #e8eaf6;
-  border-color: #c5cae9;
+  background: rgba(26, 35, 126, 0.06);
+  border-color: rgba(26, 35, 126, 0.15);
 }
 
 .dark .result-card.internal-analysis {
-  background: #1a1a3e;
-  border-color: #3d3d6c;
+  background: rgba(144, 202, 249, 0.05);
+  border-color: rgba(144, 202, 249, 0.1);
 }
 
 .analysis-grid {
@@ -811,63 +812,57 @@
 
 .analysis-item .label {
   font-size: 11px;
-  color: #888;
-}
-
-.dark .analysis-item .label {
-  color: #aaa;
+  color: var(--text-muted);
 }
 
 .analysis-item .value {
   font-size: 16px;
   font-weight: 700;
-  color: #1a237e;
-}
-
-.dark .analysis-item .value {
-  color: #90caf9;
+  color: var(--primary);
 }
 
 .analysis-item .value.positive {
-  color: #2e7d32;
+  color: var(--success);
+}
+
+.analysis-item .value.negative {
+  color: var(--danger);
 }
 
 .dark .analysis-item .value.positive {
   color: #81c784;
 }
 
-.analysis-item .value.negative {
-  color: #c62828;
-}
-
 .dark .analysis-item .value.negative {
   color: #ef9a9a;
 }
 
-/* ===== استایل‌های قبلی نتیجه ===== */
+/* ============================================
+   امتیاز نهایی (Score)
+   ============================================ */
 .result-score {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   margin-bottom: 16px;
   text-align: center;
 }
 
 .result-score.high {
   background: #e8f5e9;
-  border: 2px solid #2e7d32;
+  border: 2px solid var(--success);
 }
 
 .result-score.medium {
   background: #fff3e0;
-  border: 2px solid #f57c00;
+  border: 2px solid var(--warning);
 }
 
 .result-score.low {
   background: #ffebee;
-  border: 2px solid #c62828;
+  border: 2px solid var(--danger);
 }
 
 .dark .result-score.high {
@@ -890,22 +885,30 @@
   font-weight: 700;
 }
 
-.result-score.high .score-number { color: #2e7d32; }
-.result-score.medium .score-number { color: #f57c00; }
-.result-score.low .score-number { color: #c62828; }
+.result-score.high .score-number {
+  color: var(--success);
+}
+.result-score.medium .score-number {
+  color: var(--warning);
+}
+.result-score.low .score-number {
+  color: var(--danger);
+}
 
-.dark .result-score.high .score-number { color: #4caf50; }
-.dark .result-score.medium .score-number { color: #ff9800; }
-.dark .result-score.low .score-number { color: #ef5350; }
+.dark .result-score.high .score-number {
+  color: #4caf50;
+}
+.dark .result-score.medium .score-number {
+  color: #ff9800;
+}
+.dark .result-score.low .score-number {
+  color: #ef5350;
+}
 
 .score-label {
   font-size: 14px;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 4px;
-}
-
-.dark .score-label {
-  color: #aaa;
 }
 
 .score-text {
@@ -914,7 +917,9 @@
   margin-top: 4px;
 }
 
-/* ===== چارت‌ها ===== */
+/* ============================================
+   چارت‌ها (Charts)
+   ============================================ */
 .charts-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -936,36 +941,27 @@
 }
 
 .chart-box {
-  background: #f8f9fa;
-  border-radius: 12px;
+  background: var(--bg-primary);
+  border-radius: var(--radius);
   padding: 16px;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   position: relative;
   min-height: 200px;
 }
 
-.dark .chart-box {
-  background: #1a1a2e;
-  border-color: #444;
-}
-
 .chart-box:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   transform: translateY(-2px);
-}
-
-.dark .chart-box:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 .chart-box.expanded {
   grid-column: 1 / -1;
   min-height: 450px;
   z-index: 10;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-  border-color: #1a237e;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  border-color: var(--primary);
 }
 
 .dark .chart-box.expanded {
@@ -976,11 +972,7 @@
   margin: 0 0 12px 0;
   font-size: 14px;
   text-align: center;
-  color: #555;
-}
-
-.dark .chart-box h4 {
-  color: #aaa;
+  color: var(--text-muted);
 }
 
 .chart-wrapper {
@@ -992,7 +984,7 @@
 .chart-expand-hint {
   text-align: center;
   font-size: 11px;
-  color: #999;
+  color: var(--text-muted);
   margin-top: 6px;
   opacity: 0.6;
   transition: opacity 0.3s ease;
@@ -1002,22 +994,24 @@
   opacity: 1;
 }
 
-/* ===== نمایش قیمت لحظه‌ای ===== */
+/* ============================================
+   نمایش قیمت لحظه‌ای (Live Price)
+   ============================================ */
 .live-price-display {
   display: flex;
   align-items: center;
   gap: 20px;
   padding: 12px 18px;
-  background: #e8eaf6;
+  background: rgba(26, 35, 126, 0.06);
   border-radius: 10px;
   margin-bottom: 16px;
   flex-wrap: wrap;
-  border: 1px solid #c5cae9;
+  border: 1px solid rgba(26, 35, 126, 0.15);
 }
 
 .dark .live-price-display {
-  background: #2d2d44;
-  border-color: #444;
+  background: var(--bg-secondary);
+  border-color: var(--border-dark);
 }
 
 .live-price-display.error {
@@ -1038,17 +1032,13 @@
 }
 
 .live-price-display .price-item .label {
-  color: #666;
+  color: var(--text-muted);
   font-weight: 500;
-}
-
-.dark .live-price-display .price-item .label {
-  color: #aaa;
 }
 
 .live-price-display .price-item .value {
   font-weight: 700;
-  color: #1a237e;
+  color: var(--primary);
   font-size: 16px;
 }
 
@@ -1060,30 +1050,30 @@
   font-weight: 600;
   padding: 2px 10px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .dark .live-price-display .price-item .diff {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .live-price-display .price-item .diff.positive {
-  color: #2e7d32;
+  color: var(--success);
 }
 
 .live-price-display .price-item .diff.negative {
-  color: #c62828;
+  color: var(--danger);
 }
 
 .live-price-display .price-item .diff.warning {
-  color: #f57c00;
+  color: var(--warning);
 }
 
 .live-price-display .price-item.full-width {
   flex-basis: 100%;
 }
 
-.live-price-display .status-badge {
+.status-badge {
   padding: 2px 12px;
   border-radius: 20px;
   font-size: 13px;
@@ -1091,90 +1081,81 @@
   display: inline-block;
 }
 
-.live-price-display .status-badge.perfect {
+.status-badge.perfect {
   background: #e8f5e9;
-  color: #2e7d32;
+  color: var(--success);
 }
 
-.live-price-display .status-badge.good {
+.status-badge.good {
   background: #e8f5e9;
   color: #4caf50;
 }
 
-.live-price-display .status-badge.warning {
+.status-badge.warning {
   background: #fff3e0;
-  color: #f57c00;
+  color: var(--warning);
 }
 
-.live-price-display .status-badge.danger {
+.status-badge.danger {
   background: #ffe0b2;
   color: #e65100;
 }
 
-.live-price-display .status-badge.critical {
+.status-badge.critical {
   background: #ffebee;
-  color: #c62828;
+  color: var(--danger);
 }
 
-.dark .live-price-display .status-badge.perfect {
+.dark .status-badge.perfect {
   background: #1a2e1a;
   color: #81c784;
 }
 
-.dark .live-price-display .status-badge.good {
+.dark .status-badge.good {
   background: #1a2e1a;
   color: #81c784;
 }
 
-.dark .live-price-display .status-badge.warning {
+.dark .status-badge.warning {
   background: #2e2a1a;
   color: #ffb74d;
 }
 
-.dark .live-price-display .status-badge.danger {
+.dark .status-badge.danger {
   background: #2e1a0a;
   color: #ff8a65;
 }
 
-.dark .live-price-display .status-badge.critical {
+.dark .status-badge.critical {
   background: #2d1a1a;
   color: #ef9a9a;
 }
 
 .live-price-display .status-message {
   font-size: 13px;
-  color: #555;
+  color: var(--text-muted);
 }
 
-.dark .live-price-display .status-message {
-  color: #bbb;
-}
-
-/* ===== مراحل در نتیجه ===== */
+/* ============================================
+   مراحل در نتیجه
+   ============================================ */
 .stages-wrapper {
   margin-bottom: 16px;
   padding: 12px 16px;
-  background: #f5f5f5;
+  background: var(--bg-primary);
   border-radius: 10px;
-  border: 1px solid #eee;
-}
-
-.dark .stages-wrapper {
-  background: #2d2d44;
-  border-color: #444;
+  border: 1px solid var(--border-color);
 }
 
 .stages-wrapper h4 {
   margin: 0 0 8px 0;
   font-size: 14px;
-  color: #555;
+  color: var(--text-muted);
 }
 
-.dark .stages-wrapper h4 {
-  color: #aaa;
-}
-
-/* ===== خطای اتصال ===== */
+/* ============================================
+   خطای اتصال
+   ============================================ */
 .connection-error-banner {
   display: flex;
   align-items: center;
@@ -1197,7 +1178,7 @@
 
 .error-content h4 {
   margin: 0 0 4px 0;
-  color: #c62828;
+  color: var(--danger);
 }
 
 .dark .error-content h4 {
@@ -1207,14 +1188,12 @@
 .error-content p {
   margin: 0;
   font-size: 14px;
-  color: #555;
+  color: var(--text-muted);
 }
 
-.dark .error-content p {
-  color: #bbb;
-}
-
-/* ===== دکمه‌های نتیجه ===== */
+/* ============================================
+   دکمه‌های نتیجه
+   ============================================ */
 .result-actions {
   display: flex;
   gap: 12px;
@@ -1223,14 +1202,18 @@
 }
 
 .btn-secondary {
-  background: #e0e0e0;
-  color: #333;
+  background: var(--border-color);
+  color: var(--text-secondary);
   border: none;
   padding: 8px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+}
+
+.btn-secondary:hover {
+  background: #bdbdbd;
 }
 
 .dark .btn-secondary {
@@ -1238,39 +1221,240 @@
   color: #ccc;
 }
 
-.btn-secondary:hover {
-  background: #bdbdbd;
-}
-
 .dark .btn-secondary:hover {
   background: #555;
 }
 
 .btn-primary {
-  background: #1a237e;
+  background: var(--primary);
   color: #fff;
   border: none;
   padding: 8px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .btn-primary:hover {
-  background: #0d47a1;
+  background: var(--primary-light);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
 }
 
-/* ===== مودال ===== */
+/* ============================================
+   Tooltip راهنما
+   ============================================ */
+.help-tooltip {
+  position: relative;
+  display: inline-block;
+  margin-right: 4px;
+  cursor: help;
+}
+
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.help-tooltip:hover .help-icon {
+  background: var(--primary-light);
+}
+
+.help-content {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 320px;
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-size: 13px;
+  line-height: 1.6;
+  z-index: 1000;
+  text-align: right;
+  white-space: normal;
+  border: 1px solid var(--border-color);
+  pointer-events: none;
+}
+
+.dark .help-content {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-dark);
+}
+
+.help-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #fff;
+}
+
+.dark .help-content::after {
+  border-top-color: var(--bg-secondary);
+}
+
+.help-content div {
+  margin-bottom: 4px;
+}
+
+.help-content div:last-child {
+  margin-bottom: 0;
+}
+
+.help-indicator {
+  display: inline-block;
+  margin-right: 3px;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: help;
+}
+
+/* ============================================
+   بازخورد (Feedback)
+   ============================================ */
+.feedback-section {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+}
+
+.feedback-section h4 {
+  font-size: 16px;
+  margin: 0 0 12px 0;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dark .feedback-section h4 {
+  color: #7986cb;
+}
+
+.feedback-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 8px 0;
+}
+
+.feedback-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.feedback-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.feedback-value {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.feedback-done-badge {
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #e8f5e9;
+  color: var(--success);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  border: 1px solid #a5d6a7;
+}
+
+.dark .feedback-done-badge {
+  background: #1b3a2a;
+  color: #81c784;
+  border-color: #2e7d32;
+}
+
+.feedback-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.feedback-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.btn-feedback {
+  padding: 8px 18px;
+  background: linear-gradient(135deg, var(--warning), #e65100);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.btn-feedback:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
+}
+
+.btn-feedback:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dark .btn-feedback {
+  background: linear-gradient(135deg, #ef6c00, #bf360c);
+}
+
+.dark .btn-feedback:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(239, 108, 0, 0.4);
+}
+
+/* ============================================
+   مودال
+   ============================================ */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1280,29 +1464,34 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--bg-secondary);
   border-radius: 16px;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
 }
 
-.dark .modal-content {
-  background: #2d2d44;
-  color: #e0e0e0;
-}
-
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -1310,11 +1499,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.dark .modal-header {
-  border-bottom-color: #444;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
@@ -1327,16 +1512,12 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #888;
+  color: var(--text-muted);
   padding: 0 8px;
 }
 
 .modal-close:hover {
-  color: #333;
-}
-
-.dark .modal-close:hover {
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 .modal-body {
@@ -1345,30 +1526,158 @@
 
 .modal-footer {
   padding: 12px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
   text-align: left;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
-.dark .modal-footer {
-  border-top-color: #444;
+@media (max-width: 600px) {
+  .modal-footer {
+    flex-direction: column;
+  }
+  .modal-footer button {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   مودال بازخورد (Feedback Modal)
+   ============================================ */
+.feedback-modal .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.feedback-modal .feedback-info {
+  background: var(--bg-primary);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.feedback-modal .feedback-info p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.feedback-modal .feedback-info strong {
+  color: var(--primary);
+}
+
+.dark .feedback-modal .feedback-info strong {
+  color: #7986cb;
+}
+
+.feedback-form .form-group {
+  margin-bottom: 14px;
+}
+
+.feedback-form .form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.feedback-form .form-group select,
+.feedback-form .form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.feedback-form .form-group select:focus,
+.feedback-form .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
+}
+
+.star-rating {
+  display: flex;
+  gap: 4px;
+  direction: ltr;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #ccc;
+  transition: all 0.2s;
+  padding: 0 2px;
+}
+
+.star-btn.active {
+  color: var(--warning);
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+.dark .star-btn {
+  color: #555;
+}
+
+.dark .star-btn.active {
+  color: #ffa726;
 }
 
 .btn-submit-feedback {
-  background: #1a237e;
+  background: linear-gradient(135deg, var(--success), #1b5e20);
   color: #fff;
   border: none;
-  padding: 8px 24px;
-  border-radius: 8px;
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .btn-submit-feedback:hover {
-  background: #0d47a1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
 }
 
-/* ===== اسپینر ===== */
+.btn-cancel {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-cancel:hover {
+  background: #c5c5c5;
+}
+
+.dark .btn-cancel {
+  background: #3d3d5c;
+  color: var(--text-primary);
+}
+
+.dark .btn-cancel:hover {
+  background: #4d4d6c;
+}
+
+/* ============================================
+   اسپینر
+   ============================================ */
 .spinner {
   display: inline-block;
   animation: spin 1s linear infinite;
@@ -1376,21 +1685,26 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* ===== واکنش‌گرایی ===== */
-@media (max-width: 480px) {
+/* ============================================
+   واکنش‌گرایی (Responsive)
+   ============================================ */
+@media (max-width: 768px) {
   .ai-consultation {
-    padding: 12px;
+    padding: 16px;
   }
 
   .ai-header {
     flex-direction: column;
-    gap: 12px;
     text-align: center;
-    padding: 12px;
+    padding: 14px;
   }
 
   .ai-header h2 {
@@ -1398,13 +1712,17 @@
   }
 
   .header-buttons {
-    flex-wrap: wrap;
     justify-content: center;
   }
 
   .header-buttons button {
     font-size: 12px;
     padding: 6px 12px;
+  }
+
+  .form-section,
+  .result-section {
+    padding: 16px;
   }
 
   .btn-consult {
@@ -1425,8 +1743,66 @@
     font-size: 36px;
   }
 
+  .live-price-display {
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .modal-content {
+    max-width: 95%;
+    margin: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-consultation {
+    padding: 12px;
+  }
+
+  .ai-header h2 {
+    font-size: 18px;
+  }
+
+  .guide-content {
+    padding: 0 12px 16px;
+  }
+
+  .guide-step {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .step-number {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .form-row {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .result-card {
+    padding: 12px 14px;
+  }
+
+  .result-card h4 {
+    font-size: 14px;
+  }
+
+  .result-card ul li,
+  .result-card p {
+    font-size: 13px;
+  }
+
   .analysis-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+  }
+
+  .analysis-item .value {
+    font-size: 14px;
   }
 
   .stages-container {
@@ -1437,856 +1813,50 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .stage-item {
-    min-width: 40px;
-  }
-
   .stage-label {
     font-size: 10px;
   }
 
-  .live-price-display {
-    gap: 10px;
-    padding: 10px 14px;
+  .score-number {
+    font-size: 36px;
+  }
+
+  .score-text {
+    font-size: 14px;
+  }
+
+  .star-btn {
+    font-size: 22px;
+  }
+
+  .charts-container {
+    gap: 12px;
+  }
+
+  .chart-box {
+    padding: 12px;
+    min-height: 160px;
+  }
+
+  .chart-wrapper {
+    min-height: 140px;
+  }
+
+  .chart-box.expanded {
+    min-height: 300px;
   }
 }
-/* frontend/src/components/ai/AIConsultation.css */
-
-/* ===== کادرهای نتیجه ===== */
-.result-card {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 16px 18px;
-  margin-bottom: 14px;
-  border: 1px solid #eee;
-  transition: all 0.3s ease;
-}
-
-.dark .result-card {
-  background: #1a1a2e;
-  border-color: #444;
-}
-
-.result-card:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-
-.dark .result-card:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-}
-
-.result-card h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  color: #1a237e;
-}
-
-.dark .result-card h4 {
-  color: #90caf9;
-}
-
-.result-card ul {
-  margin: 4px 0 0 0;
-  padding-right: 20px;
-}
-
-.result-card ul li {
-  margin-bottom: 6px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #333;
-}
-
-.dark .result-card ul li {
-  color: #ddd;
-}
-
-.result-card p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.8;
-  color: #333;
-}
-
-.dark .result-card p {
-  color: #ddd;
-}
-
-.result-card strong {
-  color: #1a237e;
-}
-
-.dark .result-card strong {
-  color: #90caf9;
-}
-
-/* ===== تحلیل داخلی ===== */
-.result-card.internal-analysis {
-  background: #e8eaf6;
-  border-color: #c5cae9;
-}
-
-.dark .result-card.internal-analysis {
-  background: #1a1a3e;
-  border-color: #3d3d6c;
-}
-
-.analysis-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px 16px;
-  margin-top: 4px;
-}
-
-@media (max-width: 600px) {
-  .analysis-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.analysis-item {
-  display: flex;
-  flex-direction: column;
-  padding: 4px 0;
-}
-
-.analysis-item .label {
-  font-size: 11px;
-  color: #888;
-}
-
-.dark .analysis-item .label {
-  color: #aaa;
-}
-
-.analysis-item .value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a237e;
-}
-
-.dark .analysis-item .value {
-  color: #90caf9;
-}
-
-.analysis-item .value.positive {
-  color: #2e7d32;
-}
-
-.dark .analysis-item .value.positive {
-  color: #81c784;
-}
-
-.analysis-item .value.negative {
-  color: #c62828;
-}
-
-.dark .analysis-item .value.negative {
-  color: #ef9a9a;
-}
-
-/* ===== جزئیات پیشنهادی ===== */
-.suggestion-details {
-  margin-top: 4px;
-}
-
-.suggestion-details .detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
-
-.dark .suggestion-details .detail-row {
-  border-bottom-color: #444;
-}
-
-.suggestion-details .detail-row:last-child {
-  border-bottom: none;
-}
-
-.suggestion-details .detail-label {
-  color: #666;
-  font-weight: 500;
-}
-
-.dark .suggestion-details .detail-label {
-  color: #aaa;
-}
-
-.suggestion-details .detail-value {
-  font-weight: 600;
-  color: #1a237e;
-}
-
-.dark .suggestion-details .detail-value {
-  color: #90caf9;
-}
-/* frontend/src/components/ai/AIConsultation.css */
-
-/* ===== Tooltip راهنما ===== */
-.help-tooltip {
-  position: relative;
-  display: inline-block;
-  margin-right: 4px;
-  cursor: help;
-}
-
-.help-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #1a237e;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  user-select: none;
-  transition: background 0.2s;
-}
-
-.dark .help-icon {
-  background: #3f51b5;
-}
-
-.help-tooltip:hover .help-icon {
-  background: #0d47a1;
-}
-
-.dark .help-tooltip:hover .help-icon {
-  background: #5c6bc0;
-}
-
-.help-content {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  min-width: 220px;
-  max-width: 320px;
-  padding: 10px 14px;
-  background: #fff;
-  color: #1a1a2e;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-size: 13px;
-  line-height: 1.6;
-  z-index: 1000;
-  text-align: right;
-  white-space: normal;
-  border: 1px solid #e0e0e0;
-  pointer-events: none;
-}
-
-.dark .help-content {
-  background: #2d2d44;
-  color: #e0e0e0;
-  border-color: #444;
-}
-
-.help-content::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: #fff;
-}
-
-.dark .help-content::after {
-  border-top-color: #2d2d44;
-}
-
-.help-content div {
-  margin-bottom: 4px;
-}
-
-.help-content div:last-child {
-  margin-bottom: 0;
-}
-
-.help-indicator {
-  display: inline-block;
-  margin-right: 3px;
-  color: #1a237e;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: help;
-}
-
-.dark .help-indicator {
-  color: #7986cb;
-}
-/* ============================================
-   بخش بازخورد (Feedback)
-   ============================================ */
-.feedback-section {
-  margin-top: 20px;
-  padding: 16px 20px;
-  background: var(--card-bg, #fff);
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #e0e0e0);
-  transition: all 0.3s ease;
-}
-
-.dark .feedback-section {
-  background: #2d2d44;
-  border-color: #3d3d5c;
-}
-
-.feedback-section h4 {
-  font-size: 16px;
-  margin: 0 0 12px 0;
-  color: var(--text-primary, #1a237e);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dark .feedback-section h4 {
-  color: #7986cb;
-}
-
-.feedback-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 20px;
-  padding: 8px 0;
-}
-
-.feedback-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.feedback-label {
-  color: var(--text-secondary, #666);
-  font-weight: 500;
-}
-
-.dark .feedback-label {
-  color: #aaa;
-}
-
-.feedback-value {
-  font-weight: 600;
-  color: var(--text-primary, #333);
-}
-
-.dark .feedback-value {
-  color: #e0e0e0;
-}
-
-.feedback-done-badge {
+.consulting-notice {
   margin-top: 8px;
-  padding: 6px 14px;
-  background: #e8f5e9;
-  color: #2e7d32;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  display: inline-block;
-  border: 1px solid #a5d6a7;
-}
-
-.dark .feedback-done-badge {
-  background: #1b3a2a;
-  color: #81c784;
-  border-color: #2e7d32;
-}
-
-.feedback-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.feedback-hint {
-  font-size: 13px;
-  color: var(--text-secondary, #666);
-  margin: 0;
-  line-height: 1.5;
-}
-
-.dark .feedback-hint {
-  color: #aaa;
-}
-
-.btn-feedback {
-  padding: 8px 18px;
-  background: linear-gradient(135deg, #f57c00, #e65100);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: inherit;
-}
-
-.btn-feedback:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
-}
-
-.btn-feedback:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.dark .btn-feedback {
-  background: linear-gradient(135deg, #ef6c00, #bf360c);
-}
-
-.dark .btn-feedback:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(239, 108, 0, 0.4);
-}
-
-/* مودال بازخورد – تنظیمات اضافه */
-.feedback-modal .modal-body {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.feedback-modal .feedback-info {
-  background: var(--bg-secondary, #f5f7fa);
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.dark .feedback-modal .feedback-info {
-  background: #1a1a2e;
-}
-
-.feedback-modal .feedback-info p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.feedback-modal .feedback-info strong {
-  color: var(--text-primary, #1a237e);
-}
-
-.dark .feedback-modal .feedback-info strong {
-  color: #7986cb;
-}
-
-.feedback-form .form-group {
-  margin-bottom: 14px;
-}
-
-.feedback-form .form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 4px;
-  font-size: 14px;
-  color: var(--text-primary, #333);
-}
-
-.dark .feedback-form .form-group label {
-  color: #e0e0e0;
-}
-
-.feedback-form .form-group select,
-.feedback-form .form-group textarea {
-  width: 100%;
   padding: 8px 12px;
-  border: 1px solid var(--border-color, #ddd);
+  background: #e3f2fd;
   border-radius: 6px;
   font-size: 14px;
-  background: var(--input-bg, #fff);
-  color: var(--text-primary, #333);
-  font-family: inherit;
+  color: #0d47a1;
+  text-align: center;
 }
 
-.dark .feedback-form .form-group select,
-.dark .feedback-form .form-group textarea {
-  background: #1a1a2e;
-  border-color: #3d3d5c;
-  color: #e0e0e0;
-}
-
-.feedback-form .form-group select:focus,
-.feedback-form .form-group textarea:focus {
-  outline: none;
-  border-color: #1a237e;
-  box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
-}
-
-.dark .feedback-form .form-group select:focus,
-.dark .feedback-form .form-group textarea:focus {
-  border-color: #7986cb;
-  box-shadow: 0 0 0 2px rgba(121, 134, 203, 0.2);
-}
-
-.star-rating {
-  display: flex;
-  gap: 4px;
-  direction: ltr;
-}
-
-.star-btn {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #ccc;
-  transition: all 0.2s;
-  padding: 0 2px;
-}
-
-.star-btn.active {
-  color: #f57c00;
-}
-
-.star-btn:hover {
-  transform: scale(1.1);
-}
-
-.dark .star-btn {
-  color: #555;
-}
-
-.dark .star-btn.active {
-  color: #ffa726;
-}
-
-.feedback-modal .modal-footer .btn-submit-feedback {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  color: #fff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.feedback-modal .modal-footer .btn-submit-feedback:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
-}
-
-.feedback-modal .modal-footer .btn-cancel {
-  background: #e0e0e0;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #333;
-}
-
-.dark .feedback-modal .modal-footer .btn-cancel {
-  background: #3d3d5c;
-  color: #e0e0e0;
-}
-
-.feedback-modal .modal-footer .btn-cancel:hover {
-  background: #c5c5c5;
-}
-
-.dark .feedback-modal .modal-footer .btn-cancel:hover {
-  background: #4d4d6c;
-}
-/* ============================================
-   بخش بازخورد (Feedback)
-   ============================================ */
-.feedback-section {
-  margin-top: 20px;
-  padding: 16px 20px;
-  background: var(--card-bg, #fff);
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #e0e0e0);
-  transition: all 0.3s ease;
-}
-
-.dark .feedback-section {
-  background: #2d2d44;
-  border-color: #3d3d5c;
-}
-
-.feedback-section h4 {
-  font-size: 16px;
-  margin: 0 0 12px 0;
-  color: var(--text-primary, #1a237e);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dark .feedback-section h4 {
-  color: #7986cb;
-}
-
-.feedback-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 20px;
-  padding: 8px 0;
-}
-
-.feedback-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.feedback-label {
-  color: var(--text-secondary, #666);
-  font-weight: 500;
-}
-
-.dark .feedback-label {
-  color: #aaa;
-}
-
-.feedback-value {
-  font-weight: 600;
-  color: var(--text-primary, #333);
-}
-
-.dark .feedback-value {
-  color: #e0e0e0;
-}
-
-.feedback-done-badge {
-  margin-top: 8px;
-  padding: 6px 14px;
-  background: #e8f5e9;
-  color: #2e7d32;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  display: inline-block;
-  border: 1px solid #a5d6a7;
-}
-
-.dark .feedback-done-badge {
-  background: #1b3a2a;
-  color: #81c784;
-  border-color: #2e7d32;
-}
-
-.feedback-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.feedback-hint {
-  font-size: 13px;
-  color: var(--text-secondary, #666);
-  margin: 0;
-  line-height: 1.5;
-}
-
-.dark .feedback-hint {
-  color: #aaa;
-}
-
-.btn-feedback {
-  padding: 8px 18px;
-  background: linear-gradient(135deg, #f57c00, #e65100);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: inherit;
-}
-
-.btn-feedback:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
-}
-
-.btn-feedback:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.dark .btn-feedback {
-  background: linear-gradient(135deg, #ef6c00, #bf360c);
-}
-
-.dark .btn-feedback:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(239, 108, 0, 0.4);
-}
-
-/* مودال بازخورد – تنظیمات اضافه */
-.feedback-modal .modal-body {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.feedback-modal .feedback-info {
-  background: var(--bg-secondary, #f5f7fa);
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.dark .feedback-modal .feedback-info {
-  background: #1a1a2e;
-}
-
-.feedback-modal .feedback-info p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.feedback-modal .feedback-info strong {
-  color: var(--text-primary, #1a237e);
-}
-
-.dark .feedback-modal .feedback-info strong {
-  color: #7986cb;
-}
-
-.feedback-form .form-group {
-  margin-bottom: 14px;
-}
-
-.feedback-form .form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 4px;
-  font-size: 14px;
-  color: var(--text-primary, #333);
-}
-
-.dark .feedback-form .form-group label {
-  color: #e0e0e0;
-}
-
-.feedback-form .form-group select,
-.feedback-form .form-group textarea {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color, #ddd);
-  border-radius: 6px;
-  font-size: 14px;
-  background: var(--input-bg, #fff);
-  color: var(--text-primary, #333);
-  font-family: inherit;
-}
-
-.dark .feedback-form .form-group select,
-.dark .feedback-form .form-group textarea {
-  background: #1a1a2e;
-  border-color: #3d3d5c;
-  color: #e0e0e0;
-}
-
-.feedback-form .form-group select:focus,
-.feedback-form .form-group textarea:focus {
-  outline: none;
-  border-color: #1a237e;
-  box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
-}
-
-.dark .feedback-form .form-group select:focus,
-.dark .feedback-form .form-group textarea:focus {
-  border-color: #7986cb;
-  box-shadow: 0 0 0 2px rgba(121, 134, 203, 0.2);
-}
-
-.star-rating {
-  display: flex;
-  gap: 4px;
-  direction: ltr;
-}
-
-.star-btn {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #ccc;
-  transition: all 0.2s;
-  padding: 0 2px;
-}
-
-.star-btn.active {
-  color: #f57c00;
-}
-
-.star-btn:hover {
-  transform: scale(1.1);
-}
-
-.dark .star-btn {
-  color: #555;
-}
-
-.dark .star-btn.active {
-  color: #ffa726;
-}
-
-.feedback-modal .modal-footer .btn-submit-feedback {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  color: #fff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.feedback-modal .modal-footer .btn-submit-feedback:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
-}
-
-.feedback-modal .modal-footer .btn-cancel {
-  background: #e0e0e0;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #333;
-}
-
-.dark .feedback-modal .modal-footer .btn-cancel {
-  background: #3d3d5c;
-  color: #e0e0e0;
-}
-
-.feedback-modal .modal-footer .btn-cancel:hover {
-  background: #c5c5c5;
-}
-
-.dark .feedback-modal .modal-footer .btn-cancel:hover {
-  background: #4d4d6c;
+.dark .consulting-notice {
+  background: #1a2a4a;
+  color: #64b5f6;
 }

@@ -193,7 +193,6 @@ class TradeListCreateView(generics.ListCreateAPIView):
             from rest_framework import serializers
             raise serializers.ValidationError({'group_id': 'دسته‌بندی انتخاب شده معتبر نیست'})
 
-        # بررسی محدودیت ترید - فقط برای کاربران غیرادمین
         if not user.is_admin:
             try:
                 subscription = UserSubscription.objects.filter(
@@ -212,7 +211,6 @@ class TradeListCreateView(generics.ListCreateAPIView):
                     'subscription': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
                 })
 
-        # دریافت قوانین بررسی‌شده (ممکن است به‌صورت JSON رشته باشد)
         rule_checks = self.request.data.get('rule_checks', [])
         if isinstance(rule_checks, str):
             try:
@@ -220,15 +218,11 @@ class TradeListCreateView(generics.ListCreateAPIView):
             except json.JSONDecodeError:
                 rule_checks = []
 
-        # ✅ حذف rule_checks از validated_data تا تداخل ایجاد نشود
         if hasattr(serializer, 'validated_data') and 'rule_checks' in serializer.validated_data:
             serializer.validated_data.pop('rule_checks')
 
-        # ✅ ذخیره ترید بدون ارسال مستقیم screenshot (از validated_data استفاده می‌شود)
-        # screenshot توسط validate_screenshot در سریالایزر به ContentFile تبدیل شده و در validated_data موجود است
         trade = serializer.save(user=user, group=group)
 
-        # ثبت بررسی قوانین
         for rule_id in rule_checks:
             try:
                 rule = TradingRule.objects.get(id=rule_id, user=user, is_active=True)
@@ -260,7 +254,6 @@ class TradeUpdateView(generics.UpdateAPIView):
         return Trade.objects.filter(user=self.request.user, is_deleted=False).select_related('group')
 
     def update(self, request, *args, **kwargs):
-        """Override متد update برای لاگ کردن خطاهای اعتبارسنجی"""
         print("=" * 60)
         print("📥 Received data in TradeUpdateView.update:")
         print(f"   - request.data: {request.data}")
@@ -268,23 +261,18 @@ class TradeUpdateView(generics.UpdateAPIView):
         print(f"   - screenshot from data: {request.data.get('screenshot', 'NOT FOUND')}")
         print("=" * 60)
 
-        # دریافت serializer
         serializer = self.get_serializer(data=request.data, partial=True)
 
-        # اعتبارسنجی دستی و لاگ کردن خطاها
         if not serializer.is_valid():
             print("❌ Validation errors:")
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # اگر اعتبارسنجی موفق بود، به‌روزرسانی را انجام بده
         return super().update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
-        """ذخیره تصویر در صورت وجود (از validated_data استفاده می‌شود)"""
         print("✅ Validation passed, performing update...")
 
-        # دریافت قوانین بررسی‌شده
         rule_checks = self.request.data.get('rule_checks', [])
         if isinstance(rule_checks, str):
             try:
@@ -292,15 +280,11 @@ class TradeUpdateView(generics.UpdateAPIView):
             except json.JSONDecodeError:
                 rule_checks = []
 
-        # ✅ حذف rule_checks از validated_data تا تداخل ایجاد نشود
         if hasattr(serializer, 'validated_data') and 'rule_checks' in serializer.validated_data:
             serializer.validated_data.pop('rule_checks')
 
-        # ✅ ذخیره ترید بدون ارسال مستقیم screenshot (از validated_data استفاده می‌شود)
-        # screenshot توسط validate_screenshot در سریالایزر به ContentFile تبدیل شده و در validated_data موجود است
         trade = serializer.save()
 
-        # بروزرسانی بررسی قوانین
         if rule_checks:
             trade = serializer.instance
             TradeRuleCheck.objects.filter(trade=trade).delete()
@@ -1153,7 +1137,7 @@ class AvailableModelsView(APIView):
 # مشاوره AI (غیراستریم)
 # ============================================
 class AIConsultationView(APIView):
-    """دریافت مشاوره هوشمند از AI"""
+    """دریافت مشاوره هوشمند از AI (نسخه همزمان)"""
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def post(self, request):
@@ -1204,9 +1188,56 @@ class AIConsultationView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# backend/apps/trading/views.py
 
+# ... بقیه کدها بدون تغییر ...
+
+# ============================================
+# ✅ وضعیت مشاوره (برای پولینگ) – اضافه شده
+# ============================================
+class AIConsultationStatusView(APIView):
+    """
+    دریافت وضعیت یک مشاوره خاص (برای پولینگ)
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            consultation = AIConsultation.objects.get(id=pk, user=request.user)
+        except AIConsultation.DoesNotExist:
+            return Response(
+                {'error': 'مشاوره یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        response_data = {
+            'id': consultation.id,
+            'status': consultation.status,
+            'created_at': consultation.created_at,
+            'updated_at': consultation.updated_at,
+            'symbol': consultation.symbol,
+        }
+
+        if consultation.status == 'completed':
+            response_data['result'] = {
+                'score': consultation.ai_score,
+                'response': consultation.ai_response,
+                'comparison_stats': consultation.comparison_stats,
+            }
+        elif consultation.status == 'failed':
+            response_data['error'] = consultation.ai_response.get('error', 'خطای ناشناخته')
+
+        return Response(response_data)
+
+# ... بقیه کدها بدون تغییر ...
+# ============================================
+# ✅ مشاوره AI با استریم (نسخه ناهمگام جدید)
+# ============================================
 class AIConsultationStreamView(APIView):
-    """دریافت مشاوره هوشمند از AI به صورت استریم با پشتیبانی کامل CORS"""
+    """
+    شروع مشاوره به‌صورت ناهمگام – بلافاصله consultation_id را برمی‌گرداند.
+    کاربر می‌تواند با پولینگ وضعیت را بررسی کند.
+    """
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def post(self, request):
@@ -1232,7 +1263,8 @@ class AIConsultationStreamView(APIView):
             }, status=status.HTTP_403_FORBIDDEN)
 
         try:
-            result = AIService.get_consultation_stream(request.user, serializer.validated_data)
+            # شروع پردازش ناهمگام
+            result = AIService.start_async_consultation(request.user, serializer.validated_data)
 
             if isinstance(result, dict) and 'error' in result:
                 return Response({
@@ -1240,27 +1272,12 @@ class AIConsultationStreamView(APIView):
                     'message': result.get('message', '')
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            if isinstance(result, tuple) and len(result) == 2:
-                consultation, generator = result
-            else:
-                return Response({
-                    'error': 'invalid_response',
-                    'message': 'پاسخ نامعتبر از سرویس AI'
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            def stream_generator():
-                for chunk in generator():
-                    yield chunk
-
-            response = StreamingHttpResponse(stream_generator(), content_type='text/plain; charset=utf-8')
-
-            response['Access-Control-Allow-Origin'] = '*'
-            response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-            response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
-            response['Access-Control-Expose-Headers'] = 'X-Consultation-ID, X-Total-Time'
-            response['X-Consultation-ID'] = str(consultation.id)
-
-            return response
+            # برگرداندن consultation_id و وضعیت
+            return Response({
+                'consultation_id': result['consultation_id'],
+                'status': result['status'],
+                'message': result['message'],
+            }, status=status.HTTP_202_ACCEPTED)
 
         except Exception as e:
             return Response({
@@ -1276,6 +1293,47 @@ class AIConsultationStreamView(APIView):
         return response
 
 
+# ============================================
+# ✅ وضعیت مشاوره (برای پولینگ)
+# ============================================
+class AIConsultationStatusView(APIView):
+    """
+    دریافت وضعیت یک مشاوره خاص (برای پولینگ)
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            consultation = AIConsultation.objects.get(id=pk, user=request.user)
+        except AIConsultation.DoesNotExist:
+            return Response(
+                {'error': 'مشاوره یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        response_data = {
+            'id': consultation.id,
+            'status': consultation.status,
+            'created_at': consultation.created_at,
+            'updated_at': consultation.updated_at,
+            'symbol': consultation.symbol,
+        }
+
+        if consultation.status == 'completed':
+            response_data['result'] = {
+                'score': consultation.ai_score,
+                'response': consultation.ai_response,
+                'comparison_stats': consultation.comparison_stats,
+            }
+        elif consultation.status == 'failed':
+            response_data['error'] = consultation.ai_response.get('error', 'خطای ناشناخته')
+
+        return Response(response_data)
+
+
+# ============================================
+# تاریخچه و جزئیات مشاوره‌ها
+# ============================================
 class AIConsultationHistoryView(APIView):
     """دریافت تاریخچه مشاوره‌های کاربر"""
     permission_classes = [permissions.IsAuthenticated]
