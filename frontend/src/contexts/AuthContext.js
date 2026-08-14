@@ -23,7 +23,10 @@ export const AuthProvider = ({ children }) => {
 
     const checkAuth = async () => {
       console.log('🔍 Checking auth for the first time...');
-      const token = localStorage.getItem('accessToken');
+      let token = localStorage.getItem('accessToken');
+      if (!token) {
+        token = localStorage.getItem('token');
+      }
       console.log('🔍 Token exists:', !!token);
 
       if (!token) {
@@ -34,11 +37,12 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        // ✅ استفاده از getProfile
         const response = await RealApiService.getProfile();
         console.log('✅ User profile loaded:', response.data);
 
         if (response.data) {
+          // ✅ ذخیره اطلاعات کاربر در localStorage
+          localStorage.setItem('user', JSON.stringify(response.data));
           setUser(response.data);
           setIsAuthenticated(true);
           setPhoneNumber(response.data.phone_number || '');
@@ -47,7 +51,10 @@ export const AuthProvider = ({ children }) => {
         console.error('❌ Error loading user profile:', error);
         if (error.response?.status === 401 || error.response?.status === 403) {
           localStorage.removeItem('accessToken');
+          localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
+          localStorage.removeItem('refresh');
+          localStorage.removeItem('user');
           setUser(null);
           setIsAuthenticated(false);
           setPhoneNumber('');
@@ -109,7 +116,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // ============================================
-  // verifyCode - اصلاح شده
+  // verifyCode - اصلاح شده با ذخیره user
   // ============================================
   const verifyCode = useCallback(async (code) => {
     setLoading(true);
@@ -127,36 +134,45 @@ export const AuthProvider = ({ children }) => {
 
       const data = response.data;
 
-      // ✅ بررسی انواع پاسخ‌ها
       if (data.access && data.refresh) {
         // ذخیره توکن‌ها
         localStorage.setItem('accessToken', data.access);
+        localStorage.setItem('token', data.access);
         localStorage.setItem('refreshToken', data.refresh);
+        localStorage.setItem('refresh', data.refresh);
 
-        // ذخیره اطلاعات کاربر
+        // ✅ ذخیره اطلاعات کاربر در localStorage
         const userData = data.user || data;
+        localStorage.setItem('user', JSON.stringify(userData));
+
         setUser(userData);
         setIsAuthenticated(true);
         setPhoneNumber(userData.phone_number || phoneNumber);
 
-        console.log('✅ User authenticated, tokens stored');
+        console.log('✅ User authenticated, tokens and user stored');
         console.log('🔑 Access token saved:', data.access.substring(0, 20) + '...');
+        console.log('👤 User saved:', userData.phone_number);
 
         return { success: true };
       }
 
       if (data.success === true && data.access) {
         localStorage.setItem('accessToken', data.access);
+        localStorage.setItem('token', data.access);
         if (data.refresh) {
           localStorage.setItem('refreshToken', data.refresh);
+          localStorage.setItem('refresh', data.refresh);
         }
 
+        // ✅ ذخیره اطلاعات کاربر در localStorage
         const userData = data.user || data;
+        localStorage.setItem('user', JSON.stringify(userData));
+
         setUser(userData);
         setIsAuthenticated(true);
         setPhoneNumber(userData.phone_number || phoneNumber);
 
-        console.log('✅ User authenticated, tokens stored');
+        console.log('✅ User authenticated, tokens and user stored');
         return { success: true };
       }
 
@@ -187,7 +203,10 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('refresh');
+      localStorage.removeItem('user');
       setUser(null);
       setIsAuthenticated(false);
       setPhoneNumber('');
@@ -202,6 +221,10 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     if (userData?.phone_number) {
       setPhoneNumber(userData.phone_number);
+    }
+    // ✅ به‌روزرسانی localStorage
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
     }
   }, []);
 

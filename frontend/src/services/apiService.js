@@ -2,7 +2,8 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// ✅ اگر proxy در package.json وجود دارد، baseURL باید خالی باشد
+const API_BASE_URL = '';
 
 // ایجاد نمونه axios
 const apiClient = axios.create({
@@ -18,7 +19,12 @@ const apiClient = axios.create({
 // ============================================
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    // ✅ اصلاح: ابتدا 'token' و سپس 'accessToken' را بررسی می‌کنیم
+    let token = localStorage.getItem('token');
+    if (!token || token === 'undefined' || token === 'null') {
+      token = localStorage.getItem('accessToken');
+    }
+
     if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,6 +33,10 @@ apiClient.interceptors.request.use(
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
+
+    // ✅ دیباگ: آدرس نهایی را در کنسول نشان بده
+    console.log('🚀 Request URL:', config.baseURL + config.url);
+    console.log('🔑 Token:', token ? '✅ موجود' : '❌ ندارد');
 
     return config;
   },
@@ -45,19 +55,31 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        let refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken || refreshToken === 'undefined' || refreshToken === 'null') {
+          refreshToken = localStorage.getItem('refresh');
+        }
+
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
+          const response = await axios.post(`/api/auth/refresh/`, {
             refresh: refreshToken,
           });
           const { access } = response.data;
-          localStorage.setItem('accessToken', access);
+
+          if (access) {
+            localStorage.setItem('token', access);
+            localStorage.setItem('accessToken', access);
+          }
+
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
+        localStorage.removeItem('token');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('refresh');
+        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }
@@ -65,5 +87,8 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// ✅ برای دسترسی در کنسول (دیباگ)
+window.apiClient = apiClient;
 
 export default apiClient;

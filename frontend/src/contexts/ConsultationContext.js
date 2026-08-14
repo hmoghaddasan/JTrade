@@ -11,8 +11,9 @@ export const ConsultationProvider = ({ children }) => {
   const [activeConsultations, setActiveConsultations] = useState([]);
   const [completedConsultations, setCompletedConsultations] = useState([]);
   const [toastMessages, setToastMessages] = useState([]);
-  const intervalRef = useRef(null);
+  const pollingTimeoutRef = useRef(null);
   const activeConsultationsRef = useRef(activeConsultations);
+  const isPollingActiveRef = useRef(false);
 
   // به‌روزرسانی ref هر بار که activeConsultations تغییر می‌کند
   useEffect(() => {
@@ -87,7 +88,7 @@ export const ConsultationProvider = ({ children }) => {
   }, []);
 
   // ============================================
-  // dismissCompleted
+  // dismissCompleted (برای بنر)
   // ============================================
   const dismissCompleted = useCallback((consultationId) => {
     console.log(`📌 [dismissCompleted] Dismissing completed consultation ${consultationId}`);
@@ -102,51 +103,84 @@ export const ConsultationProvider = ({ children }) => {
   }, []);
 
   // ============================================
-  // ✅ تابع پولینگ (با استفاده از ref)
+  // ✅ تابع پولینگ با setTimeout بازگشتی (نسخه نهایی با مرحله‌بندی پویا)
   // ============================================
   const startPolling = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    // اگر در حال پولینگ هستیم، از شروع مجدد جلوگیری کن
+    if (isPollingActiveRef.current) {
+      console.log('⚠️ [startPolling] Polling already active, skipping');
+      return;
     }
 
-    console.log('🚀 [startPolling] Starting polling...');
+    console.log('🚀 [startPolling] Starting polling loop with recursive setTimeout...');
+    isPollingActiveRef.current = true;
 
-    intervalRef.current = setInterval(async () => {
-      console.log('⏳ [Polling] Interval tick');
+    const poll = async () => {
       const consultations = activeConsultationsRef.current;
-
-      if (consultations.length === 0) {
-        console.log('🛑 [Polling] No active consultations, clearing interval');
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        return;
-      }
 
       console.log(`⏳ [Polling] Checking ${consultations.length} consultations`);
 
-      for (const consultation of consultations) {
-        if (consultation.status === 'completed' || consultation.status === 'failed') {
-          console.log(`⏭️ [Polling] Consultation ${consultation.id} already final (${consultation.status})`);
-          continue;
-        }
+      // اگر مشاوره‌ای وجود ندارد، پولینگ را متوقف کن
+      if (consultations.length === 0) {
+        console.log('🛑 [Polling] No active consultations, stopping polling');
+        isPollingActiveRef.current = false;
+        pollingTimeoutRef.current = null;
+        return;
+      }
 
+      // فیلتر مشاوره‌هایی که هنوز نهایی نشده‌اند
+      const pendingConsultations = consultations.filter(
+        c => c.status !== 'completed' && c.status !== 'failed'
+      );
+
+      if (pendingConsultations.length === 0) {
+        console.log('⏭️ [Polling] All consultations are final, stopping polling');
+        isPollingActiveRef.current = false;
+        pollingTimeoutRef.current = null;
+        return;
+      }
+
+      console.log(`📡 [Polling] ${pendingConsultations.length} consultations need status check`);
+
+      for (const consultation of pendingConsultations) {
         try {
           console.log(`📡 [Polling] Fetching status for consultation ${consultation.id}`);
           const data = await AIService.getConsultationStatus(consultation.id);
           console.log(`📡 [Polling] Status response for ${consultation.id}:`, data);
 
-          const stageMap = {
-            'pending': 0,
-            'processing': 2,
-            'completed': 5,
-            'failed': 5,
-          };
-          const stage = stageMap[data.status] || 0;
-          const progress = data.status === 'pending' ? 10 :
-                         data.status === 'processing' ? 50 :
-                         data.status === 'completed' ? 100 :
-                         data.status === 'failed' ? 100 : 0;
+          // =========================================================
+          // ✅ مرحله‌بندی پویا بر اساس زمان سپری‌شده
+          // =========================================================
+          const elapsedSeconds = Math.floor((Date.now() - consultation.startTime) / 1000);
+
+          let stage = 0;
+          let progress = 0;
+
+          if (data.status === 'pending') {
+            stage = 0;
+            progress = 10;
+          } else if (data.status === 'processing') {
+            // مراحل ۱ تا ۴ بر اساس زمان سپری‌شده
+            if (elapsedSeconds < 15) {
+              stage = 1;   // دریافت قیمت
+              progress = 25;
+            } else if (elapsedSeconds < 30) {
+              stage = 2;   // اتصال به AI
+              progress = 45;
+            } else if (elapsedSeconds < 60) {
+              stage = 3;   // تحلیل شرایط
+              progress = 65;
+            } else {
+              stage = 4;   // ترکیب داده‌ها و نهایی‌سازی
+              progress = 85;
+            }
+          } else if (data.status === 'completed') {
+            stage = 5;
+            progress = 100;
+          } else if (data.status === 'failed') {
+            stage = 5;
+            progress = 100;
+          }
 
           const updates = {
             status: data.status,
@@ -154,20 +188,25 @@ export const ConsultationProvider = ({ children }) => {
             stage: stage,
           };
 
-          if (data.status === 'completed' && data.result) {
-            updates.result = data.result;
+          // =========================================================
+          // ✅ تشخیص completed و حذف فوری
+          // =========================================================
+          if (data.status === 'completed') {
+            updates.result = data.result || { score: 0, response: {} };
             console.log(`✅ [COMPLETE] Consultation ${consultation.id} completed!`);
 
+            // اضافه کردن به لیست تکمیل‌شده‌ها (برای نمایش بنر)
             setCompletedConsultations(prev => {
               if (prev.some(c => c.id === consultation.id)) return prev;
               console.log(`📦 [BANNER] Adding ${consultation.id} to completed list`);
               return [...prev, {
                 id: consultation.id,
                 symbol: consultation.symbol,
-                result: data.result,
+                result: data.result || { score: 0 },
               }];
             });
 
+            // افزودن پیام Toast
             setToastMessages(prev => [
               ...prev,
               {
@@ -181,6 +220,10 @@ export const ConsultationProvider = ({ children }) => {
             setTimeout(() => {
               setToastMessages(prev => prev.filter(t => t.id !== consultation.id));
             }, 15000);
+
+            // ✅ حذف فوری مشاوره از لیست فعال (بدون تاخیر)
+            // این باعث می‌شود پولینگ در تکرار بعدی متوقف شود
+            removeConsultation(consultation.id);
 
           } else if (data.status === 'failed') {
             updates.error = data.error || 'خطا در پردازش';
@@ -208,66 +251,88 @@ export const ConsultationProvider = ({ children }) => {
             setTimeout(() => {
               setToastMessages(prev => prev.filter(t => t.id !== consultation.id));
             }, 15000);
+
+            // ✅ حذف فوری مشاوره از لیست فعال
+            removeConsultation(consultation.id);
           }
 
+          // به‌روزرسانی وضعیت مشاوره در UI (ویجت)
           updateConsultation(consultation.id, updates);
-
-          if (data.status === 'completed' || data.status === 'failed') {
-            setTimeout(() => {
-              removeConsultation(consultation.id);
-            }, 12000);
-          }
 
         } catch (error) {
           console.error(`❌ [Polling] Error fetching status for consultation ${consultation.id}:`, error);
         }
       }
-    }, 2000);
+
+      // برنامه‌ریزی برای اجرای مجدد بعد از ۳ ثانیه (فقط اگر هنوز مشاوره فعال وجود دارد)
+      if (activeConsultationsRef.current.length > 0) {
+        console.log('⏱️ [Polling] Scheduling next poll in 3 seconds...');
+        pollingTimeoutRef.current = setTimeout(poll, 3000);
+      } else {
+        console.log('🛑 [Polling] No active consultations, stopping');
+        isPollingActiveRef.current = false;
+        pollingTimeoutRef.current = null;
+      }
+    };
+
+    // شروع اولین اجرا
+    poll();
   }, [removeConsultation, updateConsultation]);
 
   // ============================================
-  // شروع پولینگ هنگام mount و به‌روزرسانی activeConsultations
+  // شروع/توقف پولینگ بر اساس تغییرات activeConsultations
   // ============================================
   useEffect(() => {
     console.log('🔄 [Polling Effect] activeConsultations =', activeConsultations);
 
-    // اگر consultation فعالی وجود دارد و پولینگ فعال نیست، شروع کن
     if (activeConsultations.length > 0) {
-      if (!intervalRef.current) {
+      // اگر مشاوره فعال وجود دارد و پولینگ در حال اجرا نیست، آن را شروع کن
+      if (!isPollingActiveRef.current) {
         startPolling();
       }
     } else {
-      // اگر consultation فعالی وجود ندارد، پولینگ را متوقف کن
-      if (intervalRef.current) {
-        console.log('🛑 [Polling Effect] No active consultations, clearing interval');
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      // اگر مشاوره فعالی وجود ندارد، پولینگ را متوقف کن
+      if (pollingTimeoutRef.current) {
+        console.log('🛑 [Polling Effect] No active consultations, clearing timeout');
+        clearTimeout(pollingTimeoutRef.current);
+        pollingTimeoutRef.current = null;
+        isPollingActiveRef.current = false;
       }
     }
 
     // Cleanup هنگام unmount
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+        pollingTimeoutRef.current = null;
+        isPollingActiveRef.current = false;
       }
     };
   }, [activeConsultations, startPolling]);
 
   // ============================================
-  // تایمر شمارش زمان سپری‌شده
+  // ✅ تایمر شمارش زمان سپری‌شده (بهینه‌شده)
   // ============================================
   useEffect(() => {
+    // اگر مشاوره‌ای وجود ندارد، تایمر را راه‌اندازی نکن
+    if (activeConsultations.length === 0) {
+      return;
+    }
+
     const timer = setInterval(() => {
-      setActiveConsultations(prev =>
-        prev.map(c => ({
+      setActiveConsultations(prev => {
+        // اگر آرایه خالی است، از به‌روزرسانی جلوگیری کن
+        if (prev.length === 0) return prev;
+
+        return prev.map(c => ({
           ...c,
           elapsed: Math.floor((Date.now() - c.startTime) / 1000),
-        }))
-      );
+        }));
+      });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [activeConsultations.length]); // وابسته به تعداد مشاوره‌ها
 
   // ============================================
   // مقدار Context

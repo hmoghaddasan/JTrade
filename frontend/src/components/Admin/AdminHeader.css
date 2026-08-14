@@ -1,0 +1,82 @@
+/* frontend/src/components/Admin/AdminHeader.css */
+.admin-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e8ecf1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 999;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  padding: 4px 8px;
+  display: none;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: auto;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #6c63ff;
+  background: rgba(108, 99, 255, 0.1);
+  padding: 0 8px;
+  border-radius: 4px;
+}
+
+.logout-btn {
+  background: none;
+  border: 1px solid #e8ecf1;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #dc3545;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  .admin-header {
+    padding: 0 16px;
+  }
+  .user-name {
+    font-size: 12px;
+  }
+}

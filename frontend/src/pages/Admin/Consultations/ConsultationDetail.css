@@ -1,0 +1,87 @@
+/* frontend/src/pages/Admin/Consultations/ConsultationDetail.css */
+.consultation-detail-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.consultation-detail-page .page-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.info-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.warning-card {
+  border-right: 4px solid #e67e22;
+  background: #fff8f0;
+}
+
+.warning-card p {
+  color: #e67e22;
+  margin: 8px 0;
+}
+
+.response-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 16px 0;
+}
+
+.response-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid #f8f9fa;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.response-list.strengths li {
+  color: #28a745;
+}
+
+.response-list.warnings li {
+  color: #dc3545;
+}
+
+.suggestion,
+.psychology,
+.tip {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 8px 0 16px 0;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.tip {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.info-card h4 {
+  font-size: 14px;
+  color: #495057;
+  margin: 12px 0 4px 0;
+}
+
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .info-card.full-width {
+    grid-column: 1;
+  }
+}

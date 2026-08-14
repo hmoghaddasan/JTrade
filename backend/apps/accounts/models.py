@@ -147,9 +147,19 @@ class User(AbstractBaseUser):
 
 
 class SystemSetting(models.Model):
+    """تنظیمات سیستم - قابل ویرایش در پنل ادمین"""
+    SETTING_TYPES = [
+        ('string', 'رشته'),
+        ('integer', 'عدد صحیح'),
+        ('boolean', 'بولی'),
+        ('text', 'متن طولانی'),
+        ('float', 'عدد اعشاری'),
+        ('json', 'JSON'),
+    ]
+
     setting_key = models.CharField('کلید تنظیم', max_length=100, unique=True)
     setting_value = models.TextField('مقدار تنظیم', blank=True, null=True)
-    setting_type = models.CharField('نوع تنظیم', max_length=20, default='string')
+    setting_type = models.CharField('نوع تنظیم', max_length=20, choices=SETTING_TYPES, default='string')
     description = models.TextField('توضیحات', blank=True)
     is_editable = models.BooleanField('قابل ویرایش', default=True)
     created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
@@ -166,6 +176,7 @@ class SystemSetting(models.Model):
 
     @classmethod
     def get_setting(cls, key, default=None):
+        """دریافت مقدار تنظیم از دیتابیس"""
         try:
             setting = cls.objects.get(setting_key=key)
             value = setting.setting_value
@@ -200,6 +211,7 @@ class SystemSetting(models.Model):
 
     @classmethod
     def set_setting(cls, key, value, setting_type='string', description='', is_editable=True):
+        """تنظیم یا ایجاد مقدار در دیتابیس"""
         setting, created = cls.objects.get_or_create(
             setting_key=key,
             defaults={
@@ -218,6 +230,74 @@ class SystemSetting(models.Model):
             setting.save()
 
         return setting
+
+    @classmethod
+    def get(cls, key, default=None):
+        """نام مستعار برای get_setting (سازگاری با کدهای جدید)"""
+        return cls.get_setting(key, default)
+
+    @classmethod
+    def set(cls, key, value, setting_type='string', description='', is_editable=True):
+        """نام مستعار برای set_setting (سازگاری با کدهای جدید)"""
+        return cls.set_setting(key, value, setting_type, description, is_editable)
+
+    @classmethod
+    def get_bool(cls, key, default=False):
+        """دریافت تنظیم بولی"""
+        return cls.get_setting(key, default) in (True, 'true', 'True', '1', 'yes', 'on', 't')
+
+    @classmethod
+    def get_int(cls, key, default=0):
+        """دریافت تنظیم عددی"""
+        try:
+            return int(cls.get_setting(key, default))
+        except (ValueError, TypeError):
+            return default
+
+    @classmethod
+    def set_setting(cls, key, value, setting_type='string', description='', is_editable=True):
+        """تنظیم یا ایجاد مقدار در دیتابیس"""
+        setting, created = cls.objects.get_or_create(
+            setting_key=key,
+            defaults={
+                'setting_value': str(value) if value is not None else '',
+                'setting_type': setting_type,
+                'description': description,
+                'is_editable': is_editable
+            }
+        )
+
+        if not created:
+            setting.setting_value = str(value) if value is not None else ''
+            setting.setting_type = setting_type
+            setting.description = description or setting.description
+            setting.is_editable = is_editable
+            setting.save()
+
+        return setting
+
+    @classmethod
+    def get(cls, key, default=None):
+        """نام مستعار برای get_setting (سازگاری با کدهای جدید)"""
+        return cls.get_setting(key, default)
+
+    @classmethod
+    def set(cls, key, value, setting_type='string', description='', is_editable=True):
+        """نام مستعار برای set_setting (سازگاری با کدهای جدید)"""
+        return cls.set_setting(key, value, setting_type, description, is_editable)
+
+    @classmethod
+    def get_bool(cls, key, default=False):
+        """دریافت تنظیم بولی"""
+        return cls.get_setting(key, default) in (True, 'true', 'True', '1', 'yes', 'on', 't')
+
+    @classmethod
+    def get_int(cls, key, default=0):
+        """دریافت تنظیم عددی"""
+        try:
+            return int(cls.get_setting(key, default))
+        except (ValueError, TypeError):
+            return default
 
 
 class SystemMessage(models.Model):

@@ -1,0 +1,45 @@
+🧠 INFO 2026-08-12 10:57:53,089 [AI] ✅ AI consultation used: 09155511393
+🧠 INFO 2026-08-12 10:57:53,089 [AI] 🚀 [TASK START] Starting background task for consultation 123
+🧠 INFO 2026-08-12 10:57:53,089 [AI] 🚀 [START] Processing consultation 123
+🧠 INFO 2026-08-12 10:57:53,089 [AI] ✅ [TASK STARTED] Thread 'OllamaWorker-123' started
+🧠 INFO 2026-08-12 10:57:53,098 [AI] 📊 [STEP 1] Consultation 123 retrieved
+🧠 INFO 2026-08-12 10:57:53,098 [AI] 🔄 [STEP 2] Status changed to 'processing'
+🧠 INFO 2026-08-12 10:57:53,219 [AI] ✅ [STEP 3] Analytics fetched
+🧠 INFO 2026-08-12 10:57:53,249 [AI] ✅ [STEP 4] Prompt built, length: 1861
+🧠 INFO 2026-08-12 10:57:53,249 [AI] 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+🧠 INFO 2026-08-12 10:57:53,249 [AI] 🔄 Calling Ollama with model: llama3.1:8b, url: http://localhost:11434/api/generate, timeout: 600s
+🧠 INFO 2026-08-12 11:04:03,689 [AI] ✅ Ollama response received, length: 1334
+🧠 INFO 2026-08-12 11:04:03,689 [AI] ✅ [STEP 5] Ollama responded, length: 1334
+🧠 INFO 2026-08-12 11:04:03,692 [AI] ✅ [STEP 7] Response parsed, score: 75
+🧠 INFO 2026-08-12 11:04:03,702 [AI] ✅ [DONE] Consultation 123 completed successfully! Status: completed
+🧠 INFO 2026-08-12 11:04:03,717 [AI] ✅ Usage counted: 87
+🧠 INFO 2026-08-12 11:10:01,250 [AI] ✅ AI consultation used: 09155511393
+🧠 INFO 2026-08-12 11:10:01,250 [AI] 🚀 [TASK START] Starting background task for consultation 124
+🧠 INFO 2026-08-12 11:10:01,250 [AI] 🚀 [START] Processing consultation 124
+🧠 INFO 2026-08-12 11:10:01,250 [AI] ✅ [TASK STARTED] Thread 'OllamaWorker-124' started
+🧠 INFO 2026-08-12 11:10:01,266 [AI] 📊 [STEP 1] Consultation 124 retrieved
+🧠 INFO 2026-08-12 11:10:01,271 [AI] 🔄 [STEP 2] Status changed to 'processing'
+🧠 INFO 2026-08-12 11:10:01,400 [AI] ✅ [STEP 3] Analytics fetched
+🧠 INFO 2026-08-12 11:10:01,443 [AI] ✅ [STEP 4] Prompt built, length: 1861
+🧠 INFO 2026-08-12 11:10:01,443 [AI] 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+🧠 INFO 2026-08-12 11:10:01,443 [AI] 🔄 Calling Ollama with model: llama3.1:8b, url: http://localhost:11434/api/generate, timeout: 600s
+🧠 INFO 2026-08-12 11:16:07,514 [AI] ✅ Ollama response received, length: 1145
+🧠 INFO 2026-08-12 11:16:07,517 [AI] ✅ [STEP 5] Ollama responded, length: 1145
+🧠 INFO 2026-08-12 11:16:07,519 [AI] ✅ [STEP 7] Response parsed, score: 80
+🧠 INFO 2026-08-12 11:16:07,533 [AI] ✅ [DONE] Consultation 124 completed successfully! Status: completed
+🧠 INFO 2026-08-12 11:16:07,563 [AI] ✅ Usage counted: 89
+🧠 INFO 2026-08-12 11:23:22,546 [AI] ✅ AI consultation used: 09155511393
+🧠 INFO 2026-08-12 11:23:22,546 [AI] 🚀 [TASK START] Starting background task for consultation 125
+🧠 INFO 2026-08-12 11:23:22,546 [AI] 🚀 [START] Processing consultation 125
+🧠 INFO 2026-08-12 11:23:22,546 [AI] ✅ [TASK STARTED] Thread 'OllamaWorker-125' started
+🧠 INFO 2026-08-12 11:23:22,561 [AI] 📊 [STEP 1] Consultation 125 retrieved
+🧠 INFO 2026-08-12 11:23:22,561 [AI] 🔄 [STEP 2] Status changed to 'processing'
+🧠 INFO 2026-08-12 11:23:22,716 [AI] ✅ [STEP 3] Analytics fetched
+🧠 INFO 2026-08-12 11:23:22,757 [AI] ✅ [STEP 4] Prompt built, length: 1861
+🧠 INFO 2026-08-12 11:23:22,768 [AI] 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+🧠 INFO 2026-08-12 11:23:22,775 [AI] 🔄 Calling Ollama with model: llama3.1:8b, url: http://localhost:11434/api/generate, timeout: 600s
+🧠 INFO 2026-08-12 11:28:47,899 [AI] ✅ Ollama response received, length: 863
+🧠 INFO 2026-08-12 11:28:47,916 [AI] ✅ [STEP 5] Ollama responded, length: 863
+🧠 INFO 2026-08-12 11:28:47,916 [AI] ✅ [STEP 7] Response parsed, score: 80
+🧠 INFO 2026-08-12 11:28:47,923 [AI] ✅ [DONE] Consultation 125 completed successfully! Status: completed
+🧠 INFO 2026-08-12 11:28:47,938 [AI] ✅ Usage counted: 91

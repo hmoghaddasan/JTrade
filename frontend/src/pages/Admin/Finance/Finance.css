@@ -1,0 +1,49 @@
+/* frontend/src/pages/Admin/Finance/Finance.css */
+.finance-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.finance-page .page-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.period-select {
+  padding: 8px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.period-select:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.stats-grid.mini {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.chart-card h3 {
+  font-size: 16px;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+}

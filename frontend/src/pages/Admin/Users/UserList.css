@@ -1,0 +1,39 @@
+/* frontend/src/pages/Admin/Users/UserList.css */
+.user-list-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.user-list-page .page-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-sms {
+  padding: 8px 16px;
+  background: #17a2b8;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-sms:hover {
+  background: #138496;
+}

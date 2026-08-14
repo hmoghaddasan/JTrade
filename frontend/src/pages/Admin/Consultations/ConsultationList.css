@@ -1,0 +1,33 @@
+/* frontend/src/pages/Admin/Consultations/ConsultationList.css */
+.consultation-list-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.consultation-list-page .page-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.btn-analytics {
+  padding: 8px 16px;
+  background: #6f42c1;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-analytics:hover {
+  background: #5a32a3;
+}

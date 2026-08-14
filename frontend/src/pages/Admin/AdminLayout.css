@@ -1,0 +1,36 @@
+/* frontend/src/pages/Admin/AdminLayout.css */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.admin-main {
+  flex: 1;
+  margin-right: 260px;
+  transition: margin-right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-main.sidebar-open {
+  margin-right: 260px;
+}
+
+.admin-main:not(.sidebar-open) {
+  margin-right: 0;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 24px;
+  margin-top: 64px;
+  overflow-y: auto;
+  min-height: calc(100vh - 64px);
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    margin-right: 0 !important;
+  }
+}

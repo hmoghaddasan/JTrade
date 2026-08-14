@@ -1,0 +1,19 @@
+/* frontend/src/pages/Admin/Symbols/SymbolForm.css */
+.symbol-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.symbol-form .full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .symbol-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .symbol-form .full-width {
+    grid-column: 1;
+  }
+}

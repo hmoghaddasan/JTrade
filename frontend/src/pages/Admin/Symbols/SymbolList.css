@@ -1,0 +1,15 @@
+/* frontend/src/pages/Admin/Symbols/SymbolList.css */
+.symbol-list-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.symbol-list-page .page-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0;
+}

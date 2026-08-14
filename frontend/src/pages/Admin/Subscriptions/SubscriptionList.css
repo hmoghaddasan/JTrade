@@ -1,0 +1,33 @@
+/* frontend/src/pages/Admin/Subscriptions/SubscriptionList.css */
+.subscription-list-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.subscription-list-page .page-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.btn-gift {
+  padding: 8px 16px;
+  background: #fd7e14;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-gift:hover {
+  background: #e06b0a;
+}

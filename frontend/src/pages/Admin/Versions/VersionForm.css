@@ -1,0 +1,36 @@
+/* frontend/src/pages/Admin/Versions/VersionForm.css */
+.version-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.version-form .full-width {
+  grid-column: 1 / -1;
+}
+
+.version-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.version-form textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .version-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .version-form .full-width {
+    grid-column: 1;
+  }
+}

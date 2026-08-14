@@ -1,0 +1,154 @@
+/* frontend/src/pages/Admin/Dashboard/Dashboard.css */
+.admin-dashboard {
+  padding: 0;
+}
+
+.admin-dashboard h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin-bottom: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  font-size: 32px;
+  width: 56px;
+  height: 56px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #868e96;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.chart-card h3 {
+  font-size: 16px;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+}
+
+.recent-logs {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.recent-logs h3 {
+  font-size: 16px;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.logs-table th {
+  text-align: right;
+  padding: 10px 12px;
+  border-bottom: 2px solid #f1f3f5;
+  color: #495057;
+  font-weight: 600;
+}
+
+.logs-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f3f5;
+  color: #212529;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #868e96;
+}
+
+.error {
+  color: #dc3545;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stat-card {
+    padding: 14px;
+  }
+  .stat-value {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

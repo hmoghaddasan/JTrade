@@ -1,0 +1,56 @@
+/* frontend/src/pages/Admin/Messages/MessageReplyModal.css */
+.message-info {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.message-info .info-row {
+  display: flex;
+  margin-bottom: 6px;
+}
+
+.message-info .label {
+  width: 80px;
+  color: #868e96;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.message-info .value {
+  color: #212529;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.message-text {
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #e8ecf1;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.modal-content .form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s ease;
+}
+
+.modal-content .form-group textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
