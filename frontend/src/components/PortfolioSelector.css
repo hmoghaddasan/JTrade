@@ -1,0 +1,289 @@
+/* frontend/src/components/PortfolioSelector.css */
+
+.portfolio-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  font-family: inherit;
+}
+
+.dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.portfolio-icon {
+  font-size: 18px;
+}
+
+.portfolio-name {
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+/* ===== منوی کشویی ===== */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 260px;
+  max-width: 340px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+.dark-theme .dropdown-menu {
+  background: #2d2d44;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== آیتم‌های منو ===== */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #333;
+  font-size: 14px;
+  position: relative;
+}
+
+.dark-theme .dropdown-item {
+  color: #e0e0e0;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dark-theme .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-item.active {
+  background: #e8f0fe;
+}
+
+.dark-theme .dropdown-item.active {
+  background: rgba(108, 99, 255, 0.2);
+}
+
+.item-icon {
+  font-size: 18px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.item-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== نشان‌ها ===== */
+.badge-default {
+  font-size: 10px;
+  background: #e0e0e0;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.dark-theme .badge-default {
+  background: #444;
+  color: #aaa;
+}
+
+.badge-active {
+  font-size: 14px;
+  color: #4CAF50;
+  flex-shrink: 0;
+}
+
+/* ===== دکمه‌های عملیات ===== */
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.btn-edit-portfolio,
+.btn-delete-portfolio {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  color: #999;
+  opacity: 0.3;
+  line-height: 1;
+}
+
+.btn-edit-portfolio:hover,
+.btn-delete-portfolio:hover {
+  opacity: 1;
+}
+
+.btn-edit-portfolio:hover {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.btn-delete-portfolio:hover {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark-theme .btn-edit-portfolio:hover {
+  background: rgba(21, 101, 192, 0.2);
+  color: #64b5f6;
+}
+
+.dark-theme .btn-delete-portfolio:hover {
+  background: rgba(198, 40, 40, 0.2);
+  color: #ef5350;
+}
+
+/* ===== جداکننده ===== */
+.dropdown-divider {
+  height: 1px;
+  background: #e8e8e8;
+  margin: 4px 12px;
+}
+
+.dark-theme .dropdown-divider {
+  background: #444;
+}
+
+/* ===== آیتم افزودن جدید ===== */
+.dropdown-item.add-new {
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.dark-theme .dropdown-item.add-new {
+  color: #66bb6a;
+}
+
+.dropdown-item.add-new:hover {
+  background: #e8f5e9;
+}
+
+.dark-theme .dropdown-item.add-new:hover {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+/* ===== واکنش‌گرا ===== */
+@media (max-width: 768px) {
+  .dropdown-toggle {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 120px;
+  }
+
+  .portfolio-name {
+    max-width: 100px;
+  }
+
+  .dropdown-menu {
+    min-width: 220px;
+    max-width: 280px;
+    right: -10px;
+  }
+
+  .dropdown-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .item-actions {
+    gap: 2px;
+  }
+
+  .btn-edit-portfolio,
+  .btn-delete-portfolio {
+    font-size: 13px;
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown-menu {
+    min-width: 200px;
+    right: -5px;
+  }
+
+  .dropdown-item {
+    font-size: 12px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .item-icon {
+    font-size: 15px;
+    width: 22px;
+  }
+
+  .btn-edit-portfolio,
+  .btn-delete-portfolio {
+    font-size: 12px;
+  }
+
+  .badge-default {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+}

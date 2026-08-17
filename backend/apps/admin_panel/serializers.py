@@ -1,17 +1,18 @@
 # backend/apps/admin_panel/serializers.py
 
+# backend/apps/admin_panel/serializers.py
+
 from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from apps.accounts.models import SystemSetting, AppVersion
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription, DiscountCode, Transaction, DiscountCodeUsage
-from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion
+from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, Portfolio  # ✅ Portfolio اضافه شد
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from .models import AdminActionLog
 
 User = get_user_model()
-
 
 # ================================
 # ۱. مدیریت کاربران
@@ -161,7 +162,7 @@ class AdminUserDetailSerializer(AdminUserSerializer):
 
     def get_messages(self, obj):
         from apps.messaging.serializers import UserMessageSerializer
-        msgs = obj.user_messages.all().order_by('-created_at')[:10]
+        msgs = obj.messages.all().order_by('-created_at')[:10]
         return UserMessageSerializer(msgs, many=True).data
 
 
@@ -276,7 +277,6 @@ class AdminTransactionSerializer(serializers.ModelSerializer):
         return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
 
     def get_status_display(self, obj):
-        # ✅ استفاده از دیکشنری مستقیم به جای attribute
         status_map = {
             'pending': 'در انتظار',
             'paid': 'پرداخت شده',
@@ -337,7 +337,6 @@ class AdminDiscountSerializer(serializers.ModelSerializer):
         return obj.expires_at.strftime('%Y/%m/%d') if obj.expires_at else 'نامحدود'
 
     def get_used_by(self, obj):
-        # ✅ استفاده از مدل DiscountCodeUsage به جای related_name
         try:
             usages = DiscountCodeUsage.objects.filter(discount_code=obj).select_related('user')
             return [{
@@ -494,77 +493,62 @@ class AdminSystemSettingSerializer(serializers.ModelSerializer):
         ]
 
     def get_category(self, obj):
-        """تعیین دسته‌بندی تنظیمات بر اساس کلید"""
         categories = {
-            # عمومی
             'app_name': 'عمومی',
             'app_version': 'عمومی',
             'default_font': 'عمومی',
             'primary_color': 'عمومی',
             'secondary_color': 'عمومی',
-            # سایت
             'site_email': 'سایت',
             'site_phone': 'سایت',
             'site_address': 'سایت',
             'footer_text': 'سایت',
-            # ظاهر
             'logo_path': 'ظاهر',
             'favicon_path': 'ظاهر',
             'bg_image_path': 'ظاهر',
-            # ترید
             'max_trades_per_day': 'ترید',
             'min_trade_interval': 'ترید',
             'trial_days': 'ترید',
             'trial_trades_limit': 'ترید',
             'trial_ai_consultations_limit': 'ترید',
-            # هوش مصنوعی
             'ai_model': 'هوش مصنوعی',
             'ai_temperature': 'هوش مصنوعی',
             'ai_timeout': 'هوش مصنوعی',
             'ollama_url': 'هوش مصنوعی',
             'ollama_available_models': 'هوش مصنوعی',
-            # تصاویر
             'max_image_width': 'تصاویر',
             'max_image_height': 'تصاویر',
             'image_quality': 'تصاویر',
             'max_image_size_mb': 'تصاویر',
             'show_screenshot_upload': 'تصاویر',
-            # پیامک
             'sms_enabled': 'پیامک',
             'sms_api_key': 'پیامک',
             'sms_sender_number': 'پیامک',
             'sms_otp_template': 'پیامک',
-            # پرداخت
             'zarinpal_merchant_id': 'پرداخت',
             'zarinpal_sandbox': 'پرداخت',
             'zarinpal_callback_url': 'پرداخت',
             'enable_payment': 'پرداخت',
-            # قیمت لحظه‌ای
             'live_price_provider': 'قیمت لحظه‌ای',
             'twelvedata_api_key': 'قیمت لحظه‌ای',
             'twelvedata_base_url': 'قیمت لحظه‌ای',
             'finnhub_api_key': 'قیمت لحظه‌ای',
             'finnhub_base_url': 'قیمت لحظه‌ای',
             'alphavantage_api_key': 'قیمت لحظه‌ای',
-            # امنیت
             'secret_key': 'امنیت',
             'debug': 'امنیت',
             'allowed_hosts': 'امنیت',
-            # دیتابیس
             'db_name': 'دیتابیس',
             'db_user': 'دیتابیس',
             'db_password': 'دیتابیس',
             'db_host': 'دیتابیس',
             'db_port': 'دیتابیس',
-            # CORS
             'cors_allowed_origins': 'CORS',
-            # ادمین
             'admin_phone_number': 'ادمین',
         }
         return categories.get(obj.setting_key, 'متفرقه')
 
     def get_type_display(self, obj):
-        """نمایش نوع تنظیم به فارسی"""
         type_map = {
             'string': 'رشته',
             'integer': 'عدد صحیح',
@@ -576,7 +560,6 @@ class AdminSystemSettingSerializer(serializers.ModelSerializer):
         return type_map.get(obj.setting_type, obj.setting_type)
 
     def get_is_sensitive(self, obj):
-        """تشخیص تنظیمات حساس"""
         sensitive_keys = [
             'secret_key', 'db_password', 'sms_api_key',
             'twelvedata_api_key', 'finnhub_api_key', 'alphavantage_api_key',
@@ -714,6 +697,105 @@ class AdminActionLogSerializer(serializers.ModelSerializer):
 
     def get_action_display(self, obj):
         return dict(AdminActionLog.ACTION_TYPES).get(obj.action_type, obj.action_type)
+
+    def get_created_at_fa(self, obj):
+        return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
+
+
+# ================================
+# ۱۲. مدیریت پلن‌های اشتراک - جدید
+# ================================
+# ================================
+# ۱۲. مدیریت پلن‌های اشتراک - جدید
+# ================================
+# ================================
+# ۱۲. مدیریت پلن‌های اشتراک - جدید
+# ================================
+# ================================
+# ۱۲. مدیریت پلن‌های اشتراک - جدید
+# ================================
+class AdminSubscriptionPlanSerializer(serializers.ModelSerializer):
+    """سریالایزر پلن اشتراک برای ادمین"""
+    plan_type_display = serializers.SerializerMethodField()
+    price_display = serializers.SerializerMethodField()
+    created_at_fa = serializers.SerializerMethodField()
+    updated_at_fa = serializers.SerializerMethodField()
+    total_subscribers = serializers.SerializerMethodField()
+    active_subscribers = serializers.SerializerMethodField()
+    total_revenue = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SubscriptionPlan
+        fields = [
+            'id', 'plan_name', 'plan_type', 'plan_type_display',
+            'duration_days', 'monthly_trades_limit', 'monthly_ai_consultations_limit',
+            'price', 'price_display', 'is_active', 'description',
+            'total_subscribers', 'active_subscribers', 'total_revenue',
+            'created_at', 'created_at_fa', 'updated_at', 'updated_at_fa'
+        ]
+
+    def get_plan_type_display(self, obj):
+        type_map = {
+            'basic': 'پایه',
+            'professional': 'حرفه‌ای',
+            'vip': 'VIP',
+        }
+        return type_map.get(obj.plan_type, obj.plan_type)
+
+    def get_price_display(self, obj):
+        return f"{int(obj.price):,} تومان" if obj.price else "رایگان"
+
+    def get_created_at_fa(self, obj):
+        return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
+
+    def get_updated_at_fa(self, obj):
+        return obj.updated_at.strftime('%Y/%m/%d %H:%M') if obj.updated_at else None
+
+    def get_total_subscribers(self, obj):
+        # ✅ استفاده از related_name صحیح: subscriptions
+        return obj.subscriptions.count()
+
+    def get_active_subscribers(self, obj):
+        return obj.subscriptions.filter(
+            is_active=True,
+            end_date__gt=timezone.now()
+        ).count()
+
+    def get_total_revenue(self, obj):
+        result = obj.subscriptions.filter(
+            payment_status='paid'
+        ).aggregate(Sum('amount_paid'))
+        return float(result['amount_paid__sum'] or 0)
+
+# ================================
+# مدیریت پورتفولیوها (ادمین)
+# ================================
+class AdminPortfolioSerializer(serializers.ModelSerializer):
+    user_phone = serializers.CharField(source='user.phone_number', read_only=True)
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    total_trades = serializers.SerializerMethodField()
+    total_profit = serializers.SerializerMethodField()
+    current_balance = serializers.SerializerMethodField()
+    created_at_fa = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Portfolio
+        fields = [
+            'id', 'user', 'user_phone', 'user_name',
+            'name', 'description', 'icon', 'initial_balance',
+            'is_active', 'is_default',
+            'total_trades', 'total_profit', 'current_balance',
+            'created_at', 'created_at_fa', 'updated_at'
+        ]
+
+    def get_total_trades(self, obj):
+        return obj.get_total_trades()
+
+    def get_total_profit(self, obj):
+        return float(obj.get_total_profit())
+
+    def get_current_balance(self, obj):
+        return float(obj.get_current_balance())
 
     def get_created_at_fa(self, obj):
         return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None

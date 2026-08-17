@@ -183,13 +183,15 @@
 }
 
 /* ============================================
-   Step Indicator
+   ✅ Step Indicator (دایره‌ها با فاصله مساوی) - از فایل قدیمی
    ============================================ */
 .step-indicator {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
   padding: 0 10px;
+  position: relative;
 }
 
 .step-dot {
@@ -206,6 +208,9 @@
   color: var(--text-muted);
   border: 3px solid transparent;
   font-size: 14px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .step-dot.active {
@@ -223,6 +228,9 @@
   transform: scale(1.05);
 }
 
+/* ============================================
+   ✅ Step Labels (لیبل‌های زیر دایره‌ها با فاصله مساوی) - از فایل قدیمی
+   ============================================ */
 .step-labels {
   display: flex;
   justify-content: space-between;
@@ -230,6 +238,22 @@
   margin-bottom: 24px;
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.step-labels span {
+  text-align: center;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.step-labels span.active {
+  color: var(--gradient-start);
+  font-weight: 600;
+}
+
+.step-labels span.current {
+  color: var(--gradient-end);
+  font-weight: 700;
 }
 
 /* ============================================
@@ -1092,4 +1116,150 @@
 }
 .btn-remove-file:hover {
   background: #5a6268;
+}
+/* frontend/src/components/TradeForm.css */
+
+/* افزایش فاصله بین فیلدها */
+.trade-form-container .form-step {
+  padding: 20px 24px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.trade-form-container .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+/* فیلدهای تمام عرض */
+.trade-form-container .form-row.full-width {
+  grid-template-columns: 1fr;
+}
+
+.trade-form-container .form-group {
+  margin-bottom: 16px;
+}
+
+.trade-form-container .form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.trade-form-container .form-group input,
+.trade-form-container .form-group select,
+.trade-form-container .form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 0.3s;
+}
+
+.trade-form-container .form-group input:focus,
+.trade-form-container .form-group select:focus,
+.trade-form-container .form-group textarea:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+/* frontend/src/components/TradeForm.css */
+
+/* ===== پیام عدم وجود پورتفولیو ===== */
+.no-portfolio {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.no-portfolio-message {
+  text-align: center;
+  padding: 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 450px;
+}
+
+.no-portfolio-message .icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.no-portfolio-message h3 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.no-portfolio-message p {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 20px 0;
+}
+
+.btn-create-portfolio {
+  padding: 12px 32px;
+  background: #1a237e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-create-portfolio:hover {
+  background: #0d1b5e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+}
+/* frontend/src/components/TradeForm.css */
+
+/* ===== دکمه ثبت ترید جدید ===== */
+.btn-add-trade {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+  font-family: inherit;
+}
+
+.btn-add-trade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
+  background: linear-gradient(135deg, #0d47a1, #1a237e);
+}
+
+.btn-add-trade:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.2);
+}
+
+.dark .btn-add-trade {
+  background: linear-gradient(135deg, #3949ab, #5c6bc0);
+  box-shadow: 0 4px 12px rgba(57, 73, 171, 0.4);
+}
+
+.dark .btn-add-trade:hover {
+  background: linear-gradient(135deg, #5c6bc0, #3949ab);
+  box-shadow: 0 6px 20px rgba(57, 73, 171, 0.5);
 }

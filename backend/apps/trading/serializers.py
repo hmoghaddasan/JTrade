@@ -8,7 +8,10 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.db.models import Sum, Avg, Count, Q
-from .models import CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion, AIConsultationAnalytics, TradingRule, TradeRuleCheck
+from .models import (
+    CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion,
+    AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio
+)
 
 
 class CurrencyPairSerializer(serializers.ModelSerializer):
@@ -39,7 +42,9 @@ class TradeListSerializer(serializers.ModelSerializer):
     timeframes = serializers.SerializerMethodField()
     emotions = serializers.SerializerMethodField()
     rule_compliance = serializers.SerializerMethodField()
-    screenshot = serializers.SerializerMethodField()  # ✅ برگرداندن URL کامل تصویر
+    screenshot = serializers.SerializerMethodField()
+    portfolio_id = serializers.IntegerField(source='portfolio.id', read_only=True, allow_null=True)
+    portfolio_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Trade
@@ -75,6 +80,8 @@ class TradeListSerializer(serializers.ModelSerializer):
             'liquidity_sweep', 'poi', 'demand_zone', 'supply_zone',
             'screenshot',
             'group', 'group_name', 'group_icon',
+            'portfolio_id',
+            'portfolio_info',
             'created_at', 'updated_at',
             'timeframes', 'emotions', 'rule_compliance'
         ]
@@ -106,6 +113,16 @@ class TradeListSerializer(serializers.ModelSerializer):
             return obj.screenshot.url
         return None
 
+    def get_portfolio_info(self, obj):
+        """برگرداندن اطلاعات پورتفولیو"""
+        if obj.portfolio:
+            return {
+                'id': obj.portfolio.id,
+                'name': obj.portfolio.name,
+                'icon': obj.portfolio.icon,
+            }
+        return None
+
 
 class TradeDetailSerializer(serializers.ModelSerializer):
     group_name = serializers.CharField(source='group.group_name', read_only=True, default=None)
@@ -115,7 +132,9 @@ class TradeDetailSerializer(serializers.ModelSerializer):
     checklist_items = serializers.SerializerMethodField()
     rule_compliance = serializers.SerializerMethodField()
     rule_checks_detail = serializers.SerializerMethodField()
-    screenshot = serializers.SerializerMethodField()  # ✅ برگرداندن URL کامل تصویر
+    screenshot = serializers.SerializerMethodField()
+    portfolio_id = serializers.IntegerField(source='portfolio.id', read_only=True, allow_null=True)
+    portfolio_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Trade
@@ -158,6 +177,16 @@ class TradeDetailSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.screenshot.url)
             return obj.screenshot.url
+        return None
+
+    def get_portfolio_info(self, obj):
+        """برگرداندن اطلاعات پورتفولیو"""
+        if obj.portfolio:
+            return {
+                'id': obj.portfolio.id,
+                'name': obj.portfolio.name,
+                'icon': obj.portfolio.icon,
+            }
         return None
 
 
@@ -480,14 +509,13 @@ class AIConsultationSerializer(serializers.ModelSerializer):
             'comparison_stats',
             'ai_score', 'ai_response', 'prompt_used', 'model_used',
             'status',
-            'live_price', 'price_warning', 'price_diff_percent',  # ✅ جدید
-            'internal_analytics',  # ✅ جدید
+            'live_price', 'price_warning', 'price_diff_percent',
+            'internal_analytics',
             'is_followed', 'trade_result',
             'feedback_score', 'feedback_helpfulness', 'feedback_comment', 'feedback_given_at',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'feedback_given_at']
-
 
     def get_internal_analytics(self, obj):
         user = obj.user
@@ -561,3 +589,75 @@ class RulesReportSerializer(serializers.Serializer):
     overall_compliance = serializers.FloatField()
     rules_stats = serializers.ListField()
     compliance_by_category = serializers.DictField()
+
+
+# ============================================
+# سریالایزرهای پورتفولیو
+# ============================================
+class PortfolioSerializer(serializers.ModelSerializer):
+    """سریالایزر اصلی پورتفولیو"""
+    total_trades = serializers.SerializerMethodField()
+    total_profit = serializers.SerializerMethodField()
+    win_rate = serializers.SerializerMethodField()
+    current_balance = serializers.SerializerMethodField()
+    trade_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Portfolio
+        fields = [
+            'id', 'user', 'name', 'description', 'icon',
+            'initial_balance', 'is_active', 'is_default',
+            'total_trades', 'total_profit', 'win_rate',
+            'current_balance', 'trade_count',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+    def get_total_trades(self, obj):
+        try:
+            return obj.get_total_trades()
+        except:
+            return 0
+
+    def get_total_profit(self, obj):
+        try:
+            return float(obj.get_total_profit())
+        except:
+            return 0.0
+
+    def get_win_rate(self, obj):
+        try:
+            return obj.get_win_rate()
+        except:
+            return 0
+
+    def get_current_balance(self, obj):
+        try:
+            return float(obj.get_current_balance())
+        except:
+            return float(obj.initial_balance or 0)
+
+    def get_trade_count(self, obj):
+        try:
+            return obj.trades.filter(is_deleted=False).count()
+        except:
+            return 0
+
+
+class PortfolioDetailSerializer(PortfolioSerializer):
+    """سریالایزر پورتفولیو با جزئیات کامل"""
+    recent_trades = serializers.SerializerMethodField()
+    rules = serializers.SerializerMethodField()
+
+    class Meta(PortfolioSerializer.Meta):
+        fields = PortfolioSerializer.Meta.fields + ['recent_trades', 'rules']
+
+    def get_recent_trades(self, obj):
+        from .serializers import TradeListSerializer
+        trades = obj.trades.filter(is_deleted=False).order_by('-created_at')[:20]
+        return TradeListSerializer(trades, many=True, context=self.context).data
+
+    def get_rules(self, obj):
+        from .serializers import TradingRuleSerializer
+        rules = obj.rules.filter(is_active=True)
+        return TradingRuleSerializer(rules, many=True).data

@@ -1,4 +1,5 @@
 # backend/apps/admin_panel/views.py
+# backend/apps/admin_panel/views.py
 
 from rest_framework import status, generics, permissions, filters
 from rest_framework.response import Response
@@ -18,7 +19,7 @@ import logging
 
 from apps.accounts.models import User, SystemSetting, AppVersion
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription, DiscountCode, Transaction, DiscountCodeUsage
-from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics
+from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics, Portfolio
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from apps.accounts.permissions import IsAdminUser
 from apps.subscriptions.sms import GhasedakSMS
@@ -36,6 +37,8 @@ from .serializers import (
     AdminUserMessageSerializer, AdminMessageReplySerializer,
     AdminTradeSerializer,
     AdminActionLogSerializer,
+    AdminSubscriptionPlanSerializer,
+    AdminPortfolioSerializer,  # ✅ اضافه شد
 )
 
 logger = logging.getLogger(__name__)
@@ -232,7 +235,7 @@ class AdminDashboardView(APIView):
             'current_version': AdminAppVersionSerializer(current_version).data if current_version else None,
         })
 
-    
+
 
 # ================================
 # ۲. مدیریت کاربران (توسعه کامل)
@@ -1074,7 +1077,70 @@ class AdminAppVersionDeleteView(APIView):
         except AppVersion.DoesNotExist:
             return Response({'error': 'نسخه یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
+# ================================
+# ۱۳. مدیریت پلن‌های اشتراک - جدید
+# ================================
+class AdminSubscriptionPlanListView(generics.ListCreateAPIView):
+    """لیست و ایجاد پلن اشتراک"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminSubscriptionPlanSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['plan_name', 'description']
+    ordering_fields = ['price', 'duration_days', 'created_at']
+    ordering = ['-created_at']
 
+    def get_queryset(self):
+        queryset = SubscriptionPlan.objects.all()
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        plan_type = self.request.query_params.get('plan_type')
+        if plan_type:
+            queryset = queryset.filter(plan_type=plan_type)
+        return queryset
+
+    def perform_create(self, serializer):
+        plan = serializer.save()
+        AdminActionLog.objects.create(
+            admin=self.request.user,
+            action_type='create',
+            target_model='SubscriptionPlan',
+            target_id=plan.id,
+            description=f'ایجاد پلن {plan.plan_name}'
+        )
+
+
+class AdminSubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """جزئیات، ویرایش و حذف پلن اشتراک"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminSubscriptionPlanSerializer
+    queryset = SubscriptionPlan.objects.all()
+
+    def perform_update(self, serializer):
+        plan = serializer.save()
+        AdminActionLog.objects.create(
+            admin=self.request.user,
+            action_type='update',
+            target_model='SubscriptionPlan',
+            target_id=plan.id,
+            description=f'به‌روزرسانی پلن {plan.plan_name}'
+        )
+
+    def perform_destroy(self, instance):
+        # بررسی وجود اشتراک فعال برای این پلن
+        if instance.user_subscriptions.filter(is_active=True).exists():
+            return Response(
+                {'error': 'این پلن دارای اشتراک فعال است. ابتدا اشتراک‌ها را غیرفعال کنید.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        AdminActionLog.objects.create(
+            admin=self.request.user,
+            action_type='delete',
+            target_model='SubscriptionPlan',
+            target_id=instance.id,
+            description=f'حذف پلن {instance.plan_name}'
+        )
+        instance.delete()
 # ================================
 # ۹. مدیریت تنظیمات سیستم - توسعه کامل
 # ================================
@@ -1414,3 +1480,32 @@ class ExportSubscriptionsExcelView(APIView):
         response = HttpResponse(output.getvalue(), content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="subscriptions_export_{datetime.now().strftime("%Y%m%d")}.csv"'
         return response
+
+# ================================
+# مدیریت پورتفولیوها (ادمین)
+# ================================
+class AdminPortfolioListView(generics.ListCreateAPIView):
+    """لیست و ایجاد پورتفولیو برای ادمین"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminPortfolioSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'user__phone_number', 'user__first_name', 'user__last_name']
+    ordering_fields = ['created_at', 'name']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        queryset = Portfolio.objects.all().select_related('user')
+        user_id = self.request.query_params.get('user_id')
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        return queryset
+
+
+class AdminPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """جزئیات، ویرایش و حذف پورتفولیو برای ادمین"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminPortfolioSerializer
+    queryset = Portfolio.objects.all()

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { usePortfolio } from '../contexts/PortfolioContext';
 import RealApiService from '../services/realApiService';
 import RuleService from '../services/ruleService';
 import SystemSettingsService from '../services/systemSettingsService';
@@ -17,6 +18,7 @@ const TradeEditForm = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { portfolios } = usePortfolio();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -28,10 +30,9 @@ const TradeEditForm = () => {
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
   const [rulesLoading, setRulesLoading] = useState(false);
-  const [screenshotFile, setScreenshotFile] = useState(null); // Base64 string
+  const [screenshotFile, setScreenshotFile] = useState(null);
   const [removeScreenshot, setRemoveScreenshot] = useState(false);
 
-  // تنظیمات آپلود تصویر
   const [screenshotSettings, setScreenshotSettings] = useState({
     show_upload: true,
     max_size_mb: 5,
@@ -39,7 +40,6 @@ const TradeEditForm = () => {
     max_height: 2000,
   });
 
-  // ===== state برای مودال نمایش تصویر بزرگ =====
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState(null);
 
@@ -88,7 +88,6 @@ const TradeEditForm = () => {
       'QNTUSD','EGLDUSD','KASUSD','TIAUSD','JUPUSD','ONDOUSD'].includes(s))
   };
 
-  // ===== تبدیل فایل به Base64 =====
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -98,7 +97,6 @@ const TradeEditForm = () => {
     });
   };
 
-  // ===== توابع مودال تصویر =====
   const openImageModal = (src) => {
     if (src) {
       setModalImageSrc(src);
@@ -111,7 +109,6 @@ const TradeEditForm = () => {
     setModalImageSrc(null);
   };
 
-  // ===== useEffect ها =====
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -149,6 +146,13 @@ const TradeEditForm = () => {
           trade.group_id = trade.group;
         } else {
           trade.group_id = null;
+        }
+
+        // تنظیم portfolio_id
+        if (trade.portfolio && typeof trade.portfolio === 'object') {
+          trade.portfolio_id = trade.portfolio.id;
+        } else if (trade.portfolio) {
+          trade.portfolio_id = trade.portfolio;
         }
 
         setTradeData(trade);
@@ -191,7 +195,6 @@ const TradeEditForm = () => {
     }
   }, [id, navigate, showToast]);
 
-  // ===== توابع تغییرات =====
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
@@ -213,7 +216,6 @@ const TradeEditForm = () => {
     );
   };
 
-  // ===== تغییر فایل با کنترل کامل =====
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -272,7 +274,6 @@ const TradeEditForm = () => {
     if (fileInput) fileInput.value = '';
   };
 
-  // ===== اعتبارسنجی =====
   const validateForm = () => {
     const validationErrors = [];
     if (!tradeData.symbol) validationErrors.push('لطفاً نماد معاملاتی را انتخاب کنید');
@@ -304,7 +305,6 @@ const TradeEditForm = () => {
     return validationErrors.length === 0;
   };
 
-  // ===== ارسال فرم =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -332,14 +332,16 @@ const TradeEditForm = () => {
         return;
       }
 
+      const portfolioId = tradeData.portfolio_id ? parseInt(tradeData.portfolio_id) : null;
+
       const payload = {
         ...tradeData,
         group: groupId,
         group_id: groupId,
+        portfolio: portfolioId, // ✅ اضافه شد
         rule_checks: checkedRules.filter(r => r.checked).map(r => r.id),
       };
 
-      // مدیریت تصویر
       if (screenshotFile) {
         payload.screenshot = screenshotFile;
       } else if (removeScreenshot) {
@@ -350,7 +352,6 @@ const TradeEditForm = () => {
         }
       }
 
-      // حذف فیلدهای اضافی
       delete payload.group_name;
       delete payload.group_icon;
       delete payload.timeframes;
@@ -359,7 +360,6 @@ const TradeEditForm = () => {
       delete payload.rule_compliance;
       delete payload.rule_checks_detail;
 
-      // حذف فیلدهای خالی (فقط اختیاری)
       const optionalFields = [
         'time_ny', 'stop_loss', 'take_profit_1', 'take_profit_2', 'take_profit_3',
         'risk_usd', 'risk_percent', 'risk_reward_ratio', 'profit', 'tp_sl_hit',
@@ -400,36 +400,7 @@ const TradeEditForm = () => {
     }
   };
 
-  // ===== بقیه توابع و رندر مراحل =====
-  const handleBack = () => {
-    const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
-    if (fromDashboard) {
-      localStorage.removeItem('returnToDashboard');
-      navigate('/dashboard');
-    } else {
-      navigate('/trades');
-    }
-  };
-
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 10));
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-
-  const renderStep1 = () => (
-    <div className="form-step">
-      <h3>📅 شناسه و تاریخ</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>تاریخ معامله <span style={{ color: 'red' }}>(اجباری)</span></label>
-          <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={tradeData.time_ny || ''} onChange={handleChange} />
-        </div>
-      </div>
-    </div>
-  );
-
+  // توابع رندر مراحل - مرحله ۲ با اضافه شدن پورتفولیو
   const renderStep2 = () => {
     let groupValue = '';
     if (tradeData.group_id) {
@@ -441,6 +412,8 @@ const TradeEditForm = () => {
     } else {
       groupValue = tradeData.group || '';
     }
+
+    const portfolioValue = tradeData.portfolio_id || '';
 
     return (
       <div className="form-step">
@@ -484,13 +457,58 @@ const TradeEditForm = () => {
             {!groupValue && <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>}
           </div>
         </div>
-        <div className="form-group">
-          <label>یادداشت پروفایل هفتگی</label>
-          <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
+        {/* ✅ فیلد انتخاب پورتفولیو */}
+        <div className="form-row">
+          <div className="form-group">
+            <label>پورتفولیو</label>
+            <select name="portfolio_id" value={portfolioValue} onChange={handleChange}>
+              <option value="">بدون پورتفولیو</option>
+              {portfolios.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.icon || '📊'} {p.name} {p.is_default ? '(پیش‌فرض)' : ''}
+                </option>
+              ))}
+            </select>
+            <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
+          </div>
+          <div className="form-group">
+            <label>یادداشت پروفایل هفتگی</label>
+            <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
+          </div>
         </div>
       </div>
     );
   };
+
+  // ادامه توابع رندر مراحل (بقیه توابع مانند قبل)
+  const handleBack = () => {
+    const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
+    if (fromDashboard) {
+      localStorage.removeItem('returnToDashboard');
+      navigate('/dashboard');
+    } else {
+      navigate('/trades');
+    }
+  };
+
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 10));
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const renderStep1 = () => (
+    <div className="form-step">
+      <h3>📅 شناسه و تاریخ</h3>
+      <div className="form-row">
+        <div className="form-group">
+          <label>تاریخ معامله <span style={{ color: 'red' }}>(اجباری)</span></label>
+          <input type="date" name="trade_date" value={tradeData.trade_date || ''} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label>ساعت به وقت نیویورک</label>
+          <input type="time" name="time_ny" value={tradeData.time_ny || ''} onChange={handleChange} />
+        </div>
+      </div>
+    </div>
+  );
 
   const renderStep3 = () => {
     const emotions = [
@@ -845,7 +863,6 @@ const TradeEditForm = () => {
     );
   };
 
-  // ===== رندر مرحله ۱۰ (تصویر) با مودال سفارشی =====
   const renderStep10 = () => {
     const currentImage = tradeData?.screenshot;
     const imageUrl = currentImage && !removeScreenshot
@@ -923,7 +940,6 @@ const TradeEditForm = () => {
           <p className="upload-disabled-message">⛔ بخش آپلود تصویر توسط ادمین غیرفعال شده است.</p>
         )}
 
-        {/* ===== مودال نمایش تصویر بزرگ ===== */}
         {showImageModal && modalImageSrc && (
           <div className="image-modal-overlay" onClick={closeImageModal}>
             <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>

@@ -1,6 +1,5 @@
 // frontend/src/components/Dashboard.js
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -9,7 +8,10 @@ import RealApiService from '../services/realApiService';
 import SystemMessages from './SystemMessages';
 import PnLCalendar from './dashboard/PnLCalendar';
 import './Dashboard.css';
-import { useConsultation } from '../contexts/ConsultationContext'; // ✅ قبلاً اضافه شده بود
+import { useConsultation } from '../contexts/ConsultationContext';
+import { usePortfolio } from '../contexts/PortfolioContext';
+import PortfolioSelector from './PortfolioSelector';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
 // لیست ۵۰ آیکون برای دسته‌بندی‌ها
 const GROUP_ICONS = [
@@ -26,12 +28,14 @@ const Dashboard = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  // ✅ استفاده از ConsultationContext برای وضعیت مشاوره فعال
+  // ✅ استفاده از ConsultationContext
   const { hasActiveConsultation } = useConsultation();
+
+  // ✅ استفاده از PortfolioContext
+  const { currentPortfolioId, portfolios } = usePortfolio();
 
   // ===== State جدید برای نسخه =====
   const [appVersion, setAppVersion] = useState('1.0.0');
-
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [trades, setTrades] = useState([]);
@@ -161,7 +165,10 @@ const Dashboard = () => {
         });
 
         setTrades(tradesData);
-
+        console.log('📊 Trades set in state:', tradesData.length);
+        tradesData.forEach(t => {
+          console.log(`📊 Trade ${t.id}: portfolio_id=${t.portfolio_id}, portfolio=${t.portfolio?.id}`);
+        });
         if (categoriesData.length > 0) {
           setSelectedCategory(categoriesData[0]);
         }
@@ -179,28 +186,64 @@ const Dashboard = () => {
   }, [user, showToast]);
 
   // ============================================
-  // محاسبه تعداد تریدهای هر دسته‌بندی
-  // ============================================
-  const getTradeCount = (categoryId) => {
-    if (categoryId === 0) return trades.length;
-    return trades.filter(t => t.group === categoryId || t.group_id === categoryId).length;
-  };
+// فیلتر تریدها بر اساس دسته‌بندی و پورتفولیو
+// ============================================
+const filteredTrades = useMemo(() => {
+  if (!trades || trades.length === 0) return [];
 
-  // ============================================
-  // فیلتر تریدها بر اساس دسته‌بندی انتخاب شده
-  // ============================================
-  const filteredTrades = useMemo(() => {
-    if (!trades || trades.length === 0) return [];
+  // ✅ لاگ برای دیباگ
+  console.log('🔍 ==== FILTER DEBUG ====');
+  console.log('📊 Total trades:', trades.length);
+  console.log('📍 currentPortfolioId:', currentPortfolioId);
+  console.log('📍 currentPortfolioId type:', typeof currentPortfolioId);
+  console.log('📁 selectedCategory:', selectedCategory?.name);
 
-    if (selectedCategory?.id === 0) {
-      return trades;
-    }
+  // نمونه اولی از تریدها برای بررسی
+  if (trades.length > 0) {
+    console.log('📋 Sample trade:', {
+      id: trades[0].id,
+      symbol: trades[0].symbol,
+      portfolio_id: trades[0].portfolio_id,
+      portfolio: trades[0].portfolio,
+      group: trades[0].group,
+      group_id: trades[0].group_id
+    });
+  }
 
-    return trades.filter(t => {
+  let result = trades;
+
+  // ✅ فیلتر بر اساس پورتفولیو
+  if (currentPortfolioId && currentPortfolioId !== 'all' && currentPortfolioId !== 'none') {
+    const portfolioIdStr = String(currentPortfolioId);
+    console.log('🔍 Filtering by portfolio:', portfolioIdStr);
+
+    result = result.filter(t => {
+      const tradePortfolioId = t.portfolio_id || t.portfolio?.id;
+      const match = String(tradePortfolioId) === portfolioIdStr;
+      console.log(`   Trade ${t.id}: ${tradePortfolioId} === ${portfolioIdStr} -> ${match}`);
+      return match;
+    });
+  } else if (currentPortfolioId === 'none') {
+    console.log('🔍 Filtering by: without portfolio');
+    result = result.filter(t => !t.portfolio_id && !t.portfolio);
+  } else {
+    console.log('🔍 No portfolio filter applied (showing all)');
+  }
+
+  // فیلتر بر اساس دسته‌بندی
+  if (selectedCategory?.id !== 0) {
+    console.log('🔍 Filtering by category:', selectedCategory?.name, '(ID:', selectedCategory?.id, ')');
+    result = result.filter(t => {
       const tradeGroupId = t.group || t.group_id;
       return tradeGroupId === selectedCategory?.id;
     });
-  }, [trades, selectedCategory]);
+  }
+
+  console.log('🔍 Final filtered trades count:', result.length);
+  console.log('🔍 ==== END DEBUG ====');
+
+  return result;
+}, [trades, selectedCategory, currentPortfolioId]);
 
   // ============================================
   // نمایش داده‌های محدود شده
@@ -256,13 +299,15 @@ const Dashboard = () => {
   // انتخاب دسته‌بندی
   // ============================================
   const handleCategorySelect = (category) => {
-    if (selectedCategory?.id !== category.id) {
-      setSelectedCategory(category);
-      setSelectedDate(null);
-      setShowAllTrades(false);
-      console.log('📁 Selected category:', category);
-    }
-  };
+  if (selectedCategory?.id !== category.id) {
+    console.log('📁 Category selected:', category);
+    console.log('📁 Category ID:', category.id);
+    console.log('📁 Category name:', category.name);
+    setSelectedCategory(category);
+    setSelectedDate(null);
+    setShowAllTrades(false);
+  }
+};
 
   // ============================================
   // انتخاب ترید
@@ -479,7 +524,14 @@ const Dashboard = () => {
     link.click();
     URL.revokeObjectURL(link.href);
   };
-
+// ============================================
+// محاسبه تعداد تریدهای هر دسته‌بندی
+// ============================================
+const getTradeCount = useCallback((categoryId) => {
+  // ✅ استفاده از filteredTrades به جای trades
+  if (categoryId === 0) return filteredTrades.length;
+  return filteredTrades.filter(t => t.group === categoryId || t.group_id === categoryId).length;
+}, [filteredTrades]);
   // ============================================
   // خروج از سیستم
   // ============================================
@@ -536,6 +588,7 @@ const Dashboard = () => {
           <h1>📊 ژورنال حرفه‌ای ترید <span className="header-version">v{appVersion}</span></h1>
         </div>
         <div className="header-right">
+          <PortfolioSelector />
           <button className="theme-toggle" onClick={toggleTheme}>
             {isDark ? '☀️' : '🌙'}
           </button>
@@ -558,7 +611,6 @@ const Dashboard = () => {
         <button className="action-btn warning" onClick={() => navigate('/reports')}>
           <span className="action-icon">📈</span><span>گزارش‌های پیشرفته</span>
         </button>
-        {/* ✅ دکمه مشاوره AI – غیرفعال در صورت وجود مشاوره فعال */}
         <button
           className="action-btn ai"
           onClick={() => navigate('/ai-consultation')}
@@ -599,22 +651,23 @@ const Dashboard = () => {
           </div>
           <div className="groups-list">
             {displayedGroups.map(category => (
-              <div
-                key={category.id}
-                className={`group-item ${selectedCategory?.id === category.id ? 'active' : ''}`}
-                onClick={() => handleCategorySelect(category)}
-              >
-                <span className="group-icon">{category.icon}</span>
-                <span className="group-name">{category.name}</span>
-                <span className="group-count">{getTradeCount(category.id)}</span>
-                {category.is_default && category.id !== 0 && (
-                  <span className="group-status default">پیش‌فرض</span>
-                )}
-                {!category.is_active && (
-                  <span className="group-status inactive">غیرفعال</span>
-                )}
-              </div>
-            ))}
+            <div
+              key={category.id}
+              className={`group-item ${selectedCategory?.id === category.id ? 'active' : ''}`}
+              onClick={() => handleCategorySelect(category)}
+            >
+              <span className="group-icon">{category.icon}</span>
+              <span className="group-name">{category.name}</span>
+              <span className="group-count">{getTradeCount(category.id)}</span>
+              {category.is_default && category.id !== 0 && (
+                <span className="group-status default">پیش‌فرض</span>
+              )}
+              {!category.is_active && (
+                <span className="group-status inactive">غیرفعال</span>
+              )}
+            </div>
+          ))}
+
             {categories.length > DISPLAY_LIMIT && (
               <button
                 className="show-more-btn"

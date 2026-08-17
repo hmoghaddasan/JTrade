@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
+import { usePortfolio } from '../../contexts/PortfolioContext';
 import RealApiService from '../../services/realApiService';
 import './ReportDashboard.css';
 
@@ -25,21 +26,20 @@ const ReportDashboard = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
   const { showToast } = useToast();
+  const { portfolios, currentPortfolioId } = usePortfolio();
   const reportContentRef = useRef(null);
 
   const [trades, setTrades] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: ''
   });
   const [selectedReport, setSelectedReport] = useState('pnl');
 
-  // ============================================
-  // بارگذاری داده‌ها از دیتابیس
-  // ============================================
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -64,6 +64,11 @@ const ReportDashboard = () => {
           setSelectedCategory(categories[0]);
         }
 
+        // تنظیم پورتفولیو پیش‌فرض
+        if (portfolios.length > 0) {
+          setSelectedPortfolio(currentPortfolioId || portfolios[0]?.id || null);
+        }
+
       } catch (error) {
         console.error('Error loading data:', error);
         showToast('خطا در بارگذاری داده‌ها', 'error');
@@ -73,11 +78,8 @@ const ReportDashboard = () => {
     };
 
     loadData();
-  }, [user, showToast]);
+  }, [user, showToast, portfolios, currentPortfolioId]);
 
-  // ============================================
-  // فیلتر تریدها
-  // ============================================
   const filteredTrades = useMemo(() => {
     let result = [...trades];
 
@@ -86,6 +88,14 @@ const ReportDashboard = () => {
         t.group === selectedCategory.id ||
         t.group_id === selectedCategory.id
       );
+    }
+
+    // ✅ فیلتر بر اساس پورتفولیو
+    if (selectedPortfolio) {
+      result = result.filter(t => {
+        const p = t.portfolio_info || t.portfolio;
+        return p && p.id === selectedPortfolio;
+      });
     }
 
     if (dateRange.startDate) {
@@ -97,11 +107,8 @@ const ReportDashboard = () => {
     }
 
     return result;
-  }, [trades, selectedCategory, dateRange]);
+  }, [trades, selectedCategory, selectedPortfolio, dateRange]);
 
-  // ============================================
-  // لیست گزارش‌ها با نام فارسی و انگلیسی
-  // ============================================
   const reports = [
     { id: 'pnl', label: '📊 P&L', labelEn: 'Profit & Loss', component: PnLReport },
     { id: 'risk_reward', label: '📈 نسبت R:R', labelEn: 'Risk/Reward Ratio', component: RiskRewardReport },
@@ -117,9 +124,6 @@ const ReportDashboard = () => {
     { id: 'risk_management', label: '🛡️ مدیریت ریسک', labelEn: 'Risk Management', component: RiskManagementReport },
   ];
 
-  // ============================================
-  // ✅ تابع چاپ
-  // ============================================
   const handlePrint = () => {
     const printContent = reportContentRef.current;
     if (!printContent) {
@@ -144,12 +148,7 @@ const ReportDashboard = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${title}</title>
         <style>
-          /* استایل‌های پایه برای چاپ */
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
             font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
             padding: 30px;
@@ -219,9 +218,6 @@ const ReportDashboard = () => {
     printWindow.document.close();
   };
 
-  // ============================================
-  // رندر گزارش انتخاب شده
-  // ============================================
   const renderReport = () => {
     const report = reports.find(r => r.id === selectedReport);
     if (!report) return null;
@@ -279,6 +275,22 @@ const ReportDashboard = () => {
           </select>
         </div>
 
+        {/* ✅ فیلتر پورتفولیو */}
+        <div className="filter-group">
+          <label>پورتفولیو</label>
+          <select
+            value={selectedPortfolio || ''}
+            onChange={(e) => setSelectedPortfolio(e.target.value ? parseInt(e.target.value) : null)}
+          >
+            <option value="">همه پورتفولیوها</option>
+            {portfolios.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.icon || '📊'} {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="filter-group">
           <label>از تاریخ</label>
           <input
@@ -302,15 +314,13 @@ const ReportDashboard = () => {
           onClick={() => {
             setDateRange({ startDate: '', endDate: '' });
             setSelectedCategory(categories[0]);
+            setSelectedPortfolio(null);
           }}
         >
           🗑️ پاک کردن فیلترها
         </button>
       </div>
 
-      {/* ============================================
-          تب‌های گزارشات با نام انگلیسی در پرانتز
-          ============================================ */}
       <div className="report-tabs">
         {reports.map(report => (
           <button

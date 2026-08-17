@@ -118,4 +118,11 @@ urlpatterns = [
     path('export/pdf/<int:pk>/', views.ExportTradePDFView.as_view(), name='export_pdf'),
     path('export/excel/', views.ExportTradeExcelView.as_view(), name='export_excel'),
     path('ai-consult/<int:pk>/status/', views.AIConsultationStatusView.as_view(), name='ai_consult_status'),
+    # ============================================
+    # مدیریت پورتفولیوها
+    # ============================================
+    path('portfolios/', views.PortfolioListCreateView.as_view(), name='portfolio_list'),
+    path('portfolios/<int:pk>/', views.PortfolioDetailView.as_view(), name='portfolio_detail'),
+    path('portfolios/<int:pk>/analytics/', views.PortfolioAnalyticsView.as_view(), name='portfolio_analytics'),
+    path('portfolios/combined-analytics/', views.CombinedPortfolioAnalyticsView.as_view(), name='combined_portfolio_analytics'),
 ]

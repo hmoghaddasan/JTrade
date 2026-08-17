@@ -23,16 +23,14 @@ const TradeList = () => {
     status: '',
     dateFrom: '',
     dateTo: '',
-    category: ''
+    category: '',
+    portfolio: '' // ✅ اضافه شد
   });
   const [selectedTrade, setSelectedTrade] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // ============================================
-  // بارگذاری داده‌ها از دیتابیس
-  // ============================================
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -52,11 +50,8 @@ const TradeList = () => {
         const tradesResponse = await RealApiService.getTrades();
         const tradesData = tradesResponse.data.results || tradesResponse.data || [];
         console.log('📊 Trades loaded:', tradesData.length);
-        // لاگ برای بررسی وجود فیلدها
         if (tradesData.length > 0) {
           console.log('🔍 Sample trade fields:', Object.keys(tradesData[0]));
-          console.log('📊 risk_reward_ratio:', tradesData[0].risk_reward_ratio);
-          console.log('📊 execution_quality_score:', tradesData[0].execution_quality_score);
         }
         setTrades(tradesData);
 
@@ -71,9 +66,18 @@ const TradeList = () => {
     loadData();
   }, [user, showToast]);
 
-  // ============================================
-  // فیلتر کردن تریدها
-  // ============================================
+  // ===== استخراج لیست پورتفولیوها از تریدها =====
+  const portfolioOptions = useMemo(() => {
+    const portfolios = new Map();
+    trades.forEach(trade => {
+      const p = trade.portfolio_info || trade.portfolio;
+      if (p && p.id) {
+        portfolios.set(p.id, { id: p.id, name: p.name, icon: p.icon || '📊' });
+      }
+    });
+    return Array.from(portfolios.values());
+  }, [trades]);
+
   const filteredTrades = useMemo(() => {
     let result = [...trades];
 
@@ -112,12 +116,17 @@ const TradeList = () => {
       );
     }
 
+    // ✅ فیلتر بر اساس پورتفولیو
+    if (filter.portfolio) {
+      result = result.filter(t => {
+        const p = t.portfolio_info || t.portfolio;
+        return p && p.id === parseInt(filter.portfolio);
+      });
+    }
+
     return result;
   }, [trades, filter]);
 
-  // ============================================
-  // محاسبه آمار
-  // ============================================
   const totalTrades = filteredTrades.length;
   const winningTrades = filteredTrades.filter(t => parseFloat(t.profit) > 0).length;
   const losingTrades = filteredTrades.filter(t => parseFloat(t.profit) < 0).length;
@@ -129,9 +138,6 @@ const TradeList = () => {
 
   const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(1) : 0;
 
-  // ============================================
-  // صفحه‌بندی
-  // ============================================
   const paginatedTrades = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
@@ -140,9 +146,6 @@ const TradeList = () => {
 
   const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
 
-  // ============================================
-  // توابع اقدامات
-  // ============================================
   const handleFilterChange = (e) => {
     setFilter({ ...filter, [e.target.name]: e.target.value });
     setCurrentPage(1);
@@ -155,7 +158,8 @@ const TradeList = () => {
       status: '',
       dateFrom: '',
       dateTo: '',
-      category: ''
+      category: '',
+      portfolio: '' // ✅ اضافه شد
     });
     setCurrentPage(1);
   };
@@ -191,9 +195,15 @@ const TradeList = () => {
     }
   };
 
-  // ============================================
-  // چاپ لیست کامل
-  // ============================================
+  // ===== تابع دریافت نام پورتفولیو =====
+  const getPortfolioDisplay = (trade) => {
+    const p = trade.portfolio_info || trade.portfolio;
+    if (p && p.name) {
+      return `${p.icon || '📊'} ${p.name}`;
+    }
+    return '-';
+  };
+
   const handlePrintList = () => {
     if (filteredTrades.length === 0) {
       showToast('هیچ تریدی برای چاپ وجود ندارد', 'warning');
@@ -208,12 +218,14 @@ const TradeList = () => {
 
     let tableRows = '';
     filteredTrades.forEach(trade => {
+      const portfolioDisplay = getPortfolioDisplay(trade);
       tableRows += `
         <tr>
           <td>${trade.trade_date || '-'}</td>
           <td>${trade.symbol || '-'}</td>
           <td>${trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</td>
           <td>${getCategoryName(trade.group || trade.group_id)}</td>
+          <td>${portfolioDisplay}</td>
           <td>${trade.entry_price || '-'}</td>
           <td>${trade.close_price || '-'}</td>
           <td class="${parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}">
@@ -351,6 +363,7 @@ const TradeList = () => {
               <th>نماد</th>
               <th>نوع</th>
               <th>دسته‌بندی</th>
+              <th>پورتفولیو</th>
               <th>قیمت ورود</th>
               <th>قیمت خروج</th>
               <th>سود/زیان</th>
@@ -378,9 +391,6 @@ const TradeList = () => {
     printWindow.document.close();
   };
 
-  // ============================================
-  // خروجی اکسل کامل (تمام فیلدهای مهم)
-  // ============================================
   const handleExportExcel = () => {
     if (filteredTrades.length === 0) {
       showToast('هیچ تریدی برای خروجی وجود ندارد', 'warning');
@@ -389,7 +399,7 @@ const TradeList = () => {
 
     const BOM = '\uFEFF';
     const headers = [
-      'تاریخ', 'نماد', 'نوع', 'دسته‌بندی',
+      'تاریخ', 'نماد', 'نوع', 'دسته‌بندی', 'پورتفولیو',
       'قیمت ورود', 'قیمت خروج', 'حد ضرر', 'حد سود TP1', 'حد سود TP2', 'حد سود TP3',
       'سود/زیان', 'حد خورده شده', 'نسبت R:R', 'ریسک (دلار)', 'درصد ریسک',
       'بایاس', 'نوع استراتژی', 'مدل ورودی',
@@ -407,11 +417,13 @@ const TradeList = () => {
     let csvContent = BOM + headers.join(',') + '\n';
 
     filteredTrades.forEach(trade => {
+      const portfolioDisplay = getPortfolioDisplay(trade);
       const row = [
         trade.trade_date || '',
         trade.symbol || '',
         trade.trade_type === 'Buy' ? 'خرید' : 'فروش',
         getCategoryName(trade.group || trade.group_id),
+        portfolioDisplay,
         trade.entry_price || '',
         trade.close_price || '',
         trade.stop_loss || '',
@@ -472,9 +484,6 @@ const TradeList = () => {
     showToast('✅ خروجی اکسل کامل با موفقیت دانلود شد', 'success');
   };
 
-  // ============================================
-  // توابع کمکی
-  // ============================================
   const getStatusBadge = (profit) => {
     const p = parseFloat(profit);
     if (p > 0) return <span className="badge-success">✅ سود</span>;
@@ -506,7 +515,6 @@ const TradeList = () => {
 
   return (
     <div className={`tradelist-container ${isDark ? 'dark' : 'light'}`}>
-      {/* Header */}
       <div className="tradelist-header">
         <h2>📈 لیست تریدها</h2>
         <div className="header-actions">
@@ -522,7 +530,6 @@ const TradeList = () => {
         </div>
       </div>
 
-      {/* Statistics */}
       <div className="stats-bar">
         <div className="stat-item">
           <span className="stat-label">کل تریدها</span>
@@ -548,7 +555,6 @@ const TradeList = () => {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="filters-bar">
         <div className="filter-group">
           <input
@@ -599,6 +605,24 @@ const TradeList = () => {
             ))}
           </select>
         </div>
+        {/* ✅ فیلتر پورتفولیو */}
+        {portfolioOptions.length > 0 && (
+          <div className="filter-group">
+            <select
+              name="portfolio"
+              value={filter.portfolio}
+              onChange={handleFilterChange}
+              className="filter-select"
+            >
+              <option value="">همه پورتفولیوها</option>
+              {portfolioOptions.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.icon} {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="filter-group">
           <input
             type="date"
@@ -624,7 +648,6 @@ const TradeList = () => {
         </button>
       </div>
 
-      {/* Trade Table */}
       <div className="table-container">
         {filteredTrades.length === 0 ? (
           <div className="empty-state">
@@ -641,6 +664,7 @@ const TradeList = () => {
                   <th>نماد</th>
                   <th>نوع</th>
                   <th>دسته‌بندی</th>
+                  <th>پورتفولیو</th>
                   <th>قیمت ورود</th>
                   <th>قیمت خروج</th>
                   <th>سود/زیان</th>
@@ -666,6 +690,7 @@ const TradeList = () => {
                       </span>
                     </td>
                     <td>{getCategoryName(trade.group || trade.group_id)}</td>
+                    <td>{getPortfolioDisplay(trade)}</td>
                     <td>{trade.entry_price}</td>
                     <td>{trade.close_price}</td>
                     <td className={parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}>
@@ -719,7 +744,6 @@ const TradeList = () => {
               </tbody>
             </table>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="pagination">
                 <button

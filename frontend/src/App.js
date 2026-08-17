@@ -38,6 +38,8 @@ import AIConsultationHistory from './components/ai/AIConsultationHistory';
 import AIConsultationDetail from './components/ai/AIConsultationDetail';
 import ConsultationCompletedBanner from './components/ai/ConsultationCompletedBanner';
 
+import PortfolioList from './pages/Admin/Portfolios/PortfolioList';
+import { PortfolioProvider } from './contexts/PortfolioContext';
 // ============================================
 // ✅ Admin Panel Components
 // ============================================
@@ -60,7 +62,7 @@ import AdminTradeDetail from './pages/Admin/Trades/TradeDetail';
 import AdminMessageList from './pages/Admin/Messages/MessageList';
 import VersionList from './pages/Admin/Versions/VersionList';
 import Settings from './pages/Admin/Settings/Settings';
-
+import PlanList from './pages/Admin/Subscriptions/PlanList';
 // Messaging Components
 import MessageList from './components/messaging/MessageList';
 import MessageForm from './components/messaging/MessageForm';
@@ -74,11 +76,13 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <ConsultationProvider>
-            <Router>
-              <AppRoutes />
-              <ConsultationProgressWidget />
-              <ConsultationCompletedBanner />
-            </Router>
+            <PortfolioProvider>  {/* ✅ اضافه شد */}
+              <Router>
+                <AppRoutes />
+                  <ConsultationProgressWidget />
+                  <ConsultationCompletedBanner />
+              </Router>
+            </PortfolioProvider>
           </ConsultationProvider>
         </ToastProvider>
       </AuthProvider>
@@ -254,6 +258,7 @@ function AppRoutes() {
         {/* ========================================== */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="portfolios" element={<PortfolioList />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserList />} />
           <Route path="users/:id" element={<UserDetail />} />
@@ -272,6 +277,7 @@ function AppRoutes() {
           <Route path="messages" element={<AdminMessageList />} />
           <Route path="versions" element={<VersionList />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="subscription-plans" element={<PlanList />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

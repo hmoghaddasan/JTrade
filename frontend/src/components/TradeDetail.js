@@ -20,9 +20,6 @@ const TradeDetail = () => {
   const [ruleChecks, setRuleChecks] = useState([]);
   const [ruleCompliance, setRuleCompliance] = useState(null);
 
-  // ============================================
-  // بارگذاری داده‌ها
-  // ============================================
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -60,9 +57,6 @@ const TradeDetail = () => {
     }
   }, [id, navigate, showToast]);
 
-  // ============================================
-  // ویرایش
-  // ============================================
   const handleEdit = () => {
     if (trade) {
       localStorage.setItem('editTradeId', trade.id.toString());
@@ -71,9 +65,29 @@ const TradeDetail = () => {
     }
   };
 
-  // ============================================
-  // چاپ کامل (همه بخش‌ها)
-  // ============================================
+  // ===== تابع دریافت نام پورتفولیو =====
+  const getPortfolioName = () => {
+    if (trade.portfolio_info) {
+      return `${trade.portfolio_info.icon || '📊'} ${trade.portfolio_info.name}`;
+    }
+    if (trade.portfolio && typeof trade.portfolio === 'object') {
+      return `${trade.portfolio.icon || '📊'} ${trade.portfolio.name}`;
+    }
+    return 'بدون پورتفولیو';
+  };
+
+  // ===== تابع دریافت اطلاعات پورتفولیو =====
+  const getPortfolioData = () => {
+    if (trade.portfolio_info) {
+      return trade.portfolio_info;
+    }
+    if (trade.portfolio && typeof trade.portfolio === 'object') {
+      return trade.portfolio;
+    }
+    return null;
+  };
+
+  // توابع چاپ و اکسل و بقیه...
   const handlePrint = () => {
     if (!trade) return;
 
@@ -84,6 +98,7 @@ const TradeDetail = () => {
     }
 
     const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی';
+    const portfolioName = getPortfolioName();
 
     const emotionLabels = {
       focus: 'تمرکز', calm: 'آرامش', excited: 'هیجان', fear: 'ترس',
@@ -133,7 +148,7 @@ const TradeDetail = () => {
           .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
           .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 20px; }
           .full-width { grid-column: 1 / -1; }
-          @media print { body { padding: 12px; } .no-print { display: none; } }
+          @media print { body { padding: 12px; } }
           .badge { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
           .badge-buy { background: #c8e6c9; color: #1b5e20; }
           .badge-sell { background: #ffcdd2; color: #b71c1c; }
@@ -152,7 +167,18 @@ const TradeDetail = () => {
           </span>
         </div>
 
-        <!-- بخش ۱: عمومی -->
+        <!-- بخش ۰: اطلاعات پورتفولیو -->
+        <div class="section">
+          <div class="section-title">📊 پورتفولیو</div>
+          <div class="section-body">
+            <div class="detail-row">
+              <span class="detail-label">پورتفولیو</span>
+              <span class="detail-value">${portfolioName}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- بقیه بخش‌ها... -->
         <div class="section">
           <div class="section-title">📋 اطلاعات عمومی</div>
           <div class="section-body">
@@ -161,6 +187,7 @@ const TradeDetail = () => {
               <div class="detail-row"><span class="detail-label">تاریخ</span><span class="detail-value">${trade.trade_date}</span></div>
               <div class="detail-row"><span class="detail-label">نوع</span><span class="detail-value"><span class="badge ${trade.trade_type === 'Buy' ? 'badge-buy' : 'badge-sell'}">${trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</span></span></div>
               <div class="detail-row"><span class="detail-label">دسته‌بندی</span><span class="detail-value">${categoryName}</span></div>
+              <div class="detail-row"><span class="detail-label">پورتفولیو</span><span class="detail-value">${portfolioName}</span></div>
               <div class="detail-row"><span class="detail-label">سود/زیان</span><span class="detail-value ${parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}">${parseFloat(trade.profit) >= 0 ? '+' : ''}${parseFloat(trade.profit) || 0}$</span></div>
               <div class="detail-row"><span class="detail-label">کیفیت اجرا</span><span class="detail-value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}">${trade.execution_quality_score || '-'}/10</span></div>
               <div class="detail-row"><span class="detail-label">نوع جلسه</span><span class="detail-value">${trade.session_type || '-'}</span></div>
@@ -171,6 +198,7 @@ const TradeDetail = () => {
           </div>
         </div>
 
+        <!-- بقیه بخش‌ها مانند قبل... -->
         <!-- بخش ۲: اجرا -->
         <div class="section">
           <div class="section-title">💰 جزئیات اجرا</div>
@@ -264,7 +292,7 @@ const TradeDetail = () => {
           </div>
         </div>
 
-        <!-- بخش ۷: تصویر چارت (اصلاح شده با src مستقیم) -->
+        <!-- بخش ۷: تصویر چارت -->
         ${trade.screenshot ? `
         <div class="section">
           <div class="section-title">🖼️ تصویر چارت</div>
@@ -285,7 +313,7 @@ const TradeDetail = () => {
           window.onload = function() {
             setTimeout(function() { window.print(); }, 600);
           };
-        </script>
+        <\/script>
       </body>
       </html>
     `;
@@ -294,14 +322,12 @@ const TradeDetail = () => {
     printWindow.document.close();
   };
 
-  // ============================================
-  // خروجی اکسل کامل (تمام فیلدها)
-  // ============================================
   const handleExportExcel = () => {
     if (!trade) return;
 
     const BOM = '\uFEFF';
     const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی';
+    const portfolioName = getPortfolioName();
 
     const headers = [
       'شناسه', 'تاریخ', 'روز هفته', 'ماه', 'ساعت (نیویورک)', 'نماد',
@@ -322,7 +348,7 @@ const TradeDetail = () => {
       'اسکن پس از معامله', 'دلیل ورود یادداشت شد', 'دلیل خروج یادداشت شد',
       'اشتباهات ثبت شد', 'کیفیت اجرا', 'FVG', 'Order Block', 'BOS',
       'CHOCH', 'MSS', 'Liquidity Sweep', 'POI', 'Demand Zone', 'Supply Zone',
-      'دسته‌بندی', 'تاریخ ایجاد', 'تاریخ بروزرسانی',
+      'دسته‌بندی', 'پورتفولیو', 'تاریخ ایجاد', 'تاریخ بروزرسانی',
       'تصویر چارت'
     ];
 
@@ -409,6 +435,7 @@ const TradeDetail = () => {
       trade.demand_zone || '',
       trade.supply_zone || '',
       categoryName,
+      portfolioName,
       trade.created_at || '',
       trade.updated_at || '',
       trade.screenshot || ''
@@ -425,9 +452,6 @@ const TradeDetail = () => {
     showToast('✅ خروجی اکسل کامل با موفقیت دانلود شد', 'success');
   };
 
-  // ============================================
-  // تعریف تب‌ها (با تب قوانین و تصویر)
-  // ============================================
   const sections = [
     { id: 'general', label: '📋 عمومی' },
     { id: 'execution', label: '💰 اجرا' },
@@ -439,27 +463,29 @@ const TradeDetail = () => {
     { id: 'screenshot', label: '🖼️ چارت' },
   ];
 
-  // ============================================
-  // توابع رندر هر تب
-  // ============================================
-  const renderGeneral = () => (
-    <div className="detail-section">
-      <h3>📋 اطلاعات عمومی</h3>
-      <div className="detail-grid">
-        <div className="detail-item"><span className="label">نماد</span><span className="value">{trade.symbol}</span></div>
-        <div className="detail-item"><span className="label">تاریخ</span><span className="value">{trade.trade_date}</span></div>
-        <div className="detail-item"><span className="label">نوع</span><span className={`value ${trade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>{trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</span></div>
-        <div className="detail-item"><span className="label">دسته‌بندی</span><span className="value">{categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی'}</span></div>
-        <div className="detail-item"><span className="label">سود/زیان</span><span className={`value ${parseFloat(trade.profit) >= 0 ? 'profit' : 'loss'}`}>{parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$</span></div>
-        <div className="detail-item"><span className="label">کیفیت اجرا</span><span className={`value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>{trade.execution_quality_score || '-'}/10</span></div>
-        <div className="detail-item"><span className="label">نوع جلسه</span><span className="value">{trade.session_type || '-'}</span></div>
-        <div className="detail-item"><span className="label">ساعت (نیویورک)</span><span className="value">{trade.time_ny || '-'}</span></div>
-        <div className="detail-item"><span className="label">روز هفته</span><span className="value">{trade.day_of_week || '-'}</span></div>
-        <div className="detail-item full-width"><span className="label">یادداشت هفتگی</span><span className="value">{trade.weekly_profile_note || '-'}</span></div>
+  const renderGeneral = () => {
+    const portfolioData = getPortfolioData();
+    return (
+      <div className="detail-section">
+        <h3>📋 اطلاعات عمومی</h3>
+        <div className="detail-grid">
+          <div className="detail-item"><span className="label">نماد</span><span className="value">{trade.symbol}</span></div>
+          <div className="detail-item"><span className="label">تاریخ</span><span className="value">{trade.trade_date}</span></div>
+          <div className="detail-item"><span className="label">نوع</span><span className={`value ${trade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>{trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</span></div>
+          <div className="detail-item"><span className="label">دسته‌بندی</span><span className="value">{categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی'}</span></div>
+          <div className="detail-item"><span className="label">پورتفولیو</span><span className="value">{portfolioData ? `${portfolioData.icon || '📊'} ${portfolioData.name}` : 'بدون پورتفولیو'}</span></div>
+          <div className="detail-item"><span className="label">سود/زیان</span><span className={`value ${parseFloat(trade.profit) >= 0 ? 'profit' : 'loss'}`}>{parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$</span></div>
+          <div className="detail-item"><span className="label">کیفیت اجرا</span><span className={`value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>{trade.execution_quality_score || '-'}/10</span></div>
+          <div className="detail-item"><span className="label">نوع جلسه</span><span className="value">{trade.session_type || '-'}</span></div>
+          <div className="detail-item"><span className="label">ساعت (نیویورک)</span><span className="value">{trade.time_ny || '-'}</span></div>
+          <div className="detail-item"><span className="label">روز هفته</span><span className="value">{trade.day_of_week || '-'}</span></div>
+          <div className="detail-item full-width"><span className="label">یادداشت هفتگی</span><span className="value">{trade.weekly_profile_note || '-'}</span></div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
+  // بقیه توابع رندر (همانند قبل با اضافه شدن پورتفولیو در عمومی)
   const renderExecution = () => (
     <div className="detail-section">
       <h3>💰 جزئیات اجرا</h3>
@@ -635,9 +661,6 @@ const TradeDetail = () => {
     );
   };
 
-  // ============================================
-  // ✅ رندر تب تصویر چارت (با ImageZoom)
-  // ============================================
   const renderScreenshot = () => {
     if (!trade.screenshot) {
       return (
@@ -648,7 +671,6 @@ const TradeDetail = () => {
       );
     }
 
-    // تصویر مستقیماً Base64 است، نیازی به ساخت URL نیست
     const imageUrl = trade.screenshot;
 
     return (
@@ -661,9 +683,6 @@ const TradeDetail = () => {
     );
   };
 
-  // ============================================
-  // رندر بر اساس تب فعال
-  // ============================================
   const renderContent = () => {
     switch (activeSection) {
       case 'general': return renderGeneral();
@@ -678,9 +697,6 @@ const TradeDetail = () => {
     }
   };
 
-  // ============================================
-  // وضعیت لودینگ و خطا
-  // ============================================
   if (loading) {
     return (
       <div className="trade-detail-container">
@@ -697,9 +713,6 @@ const TradeDetail = () => {
     );
   }
 
-  // ============================================
-  // رندر اصلی
-  // ============================================
   return (
     <div className={`trade-detail-container ${isDark ? 'dark' : 'light'}`}>
       <div className="trade-detail-header">
@@ -734,6 +747,10 @@ const TradeDetail = () => {
           <span className={`summary-value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>
             {trade.execution_quality_score || '-'}/10
           </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">پورتفولیو</span>
+          <span className="summary-value">{getPortfolioData() ? `${getPortfolioData().icon || '📊'} ${getPortfolioData().name}` : 'بدون پورتفولیو'}</span>
         </div>
       </div>
 

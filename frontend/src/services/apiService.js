@@ -87,7 +87,20 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+// ============================================
+// سرویس‌های پورتفولیو
+// ============================================
+// frontend/src/services/apiService.js
 
+export const portfolioService = {
+  getPortfolios: () => apiClient.get('/api/trading/portfolios/'),
+  createPortfolio: (data) => apiClient.post('/api/trading/portfolios/', data),
+  getPortfolio: (id) => apiClient.get(`/api/trading/portfolios/${id}/`),
+  updatePortfolio: (id, data) => apiClient.put(`/api/trading/portfolios/${id}/`, data),
+  deletePortfolio: (id) => apiClient.delete(`/api/trading/portfolios/${id}/`),
+  getPortfolioAnalytics: (id) => apiClient.get(`/api/trading/portfolios/${id}/analytics/`),
+  getCombinedAnalytics: () => apiClient.get('/api/trading/portfolios/combined-analytics/'),
+};
 // ✅ برای دسترسی در کنسول (دیباگ)
 window.apiClient = apiClient;
 

@@ -8,6 +8,7 @@ import RuleService from '../services/ruleService';
 import SystemSettingsService from '../services/systemSettingsService';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { usePortfolio } from '../contexts/PortfolioContext';
 import ImageZoom from './ImageZoom';
 import './TradeForm.css';
 
@@ -16,6 +17,7 @@ const TradeForm = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { portfolios, loadPortfolios } = usePortfolio();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -26,7 +28,7 @@ const TradeForm = () => {
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
   const [rulesLoading, setRulesLoading] = useState(false);
-  const [screenshotFile, setScreenshotFile] = useState(null); // Base64 string
+  const [screenshotFile, setScreenshotFile] = useState(null);
 
   // تنظیمات آپلود تصویر
   const [screenshotSettings, setScreenshotSettings] = useState({
@@ -101,6 +103,7 @@ const TradeForm = () => {
     session_type: 'High Pro',
     weekly_profile_note: '',
     group_id: '',
+    portfolio_id: '',
     sleep_quality: 'خوب',
     food_status: false,
     focus: false,
@@ -180,7 +183,6 @@ const TradeForm = () => {
         const response = await RealApiService.getSubscriptionStatus();
         const data = response.data;
         setSubscriptionStatus(data);
-        // اگر کاربر ادمین است، محدودیت را نادیده بگیر
         if (user?.is_admin) {
           setShowLimitWarning(false);
           return;
@@ -194,7 +196,7 @@ const TradeForm = () => {
       }
     };
     checkSubscription();
-  }, [user]);
+  }, [user, showToast]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -229,7 +231,6 @@ const TradeForm = () => {
     loadRules();
   }, []);
 
-  // بارگذاری تنظیمات آپلود تصویر
   useEffect(() => {
     const loadScreenshotSettings = async () => {
       const settings = await SystemSettingsService.getScreenshotSettings();
@@ -237,6 +238,24 @@ const TradeForm = () => {
     };
     loadScreenshotSettings();
   }, []);
+
+  // ===== بررسی وجود پورتفولیو =====
+  useEffect(() => {
+    if (!loading && portfolios.length === 0) {
+      showToast('⚠️ لطفاً ابتدا یک پورتفولیو بسازید.', 'warning');
+    }
+  }, [portfolios, loading, showToast]);
+
+  // ===== تنظیم پورتفولیو پیش‌فرض =====
+  useEffect(() => {
+    if (portfolios.length > 0 && !formData.portfolio_id) {
+      const defaultPortfolio = portfolios.find(p => p.is_default) || portfolios[0];
+      setFormData(prev => ({
+        ...prev,
+        portfolio_id: defaultPortfolio.id
+      }));
+    }
+  }, [portfolios]);
 
   // ===== توابع تغییرات =====
   const handleRuleCheck = (ruleId) => {
@@ -257,19 +276,17 @@ const TradeForm = () => {
     setErrors(prev => prev.filter(err => !err.includes(name)));
   };
 
-  // ===== تغییر فایل با کنترل کامل =====
+  // ===== تغییر فایل =====
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // 1️⃣ بررسی فعال بودن آپلود
     if (!screenshotSettings.show_upload) {
       showToast('❌ امکان آپلود تصویر غیرفعال است.', 'warning');
       e.target.value = '';
       return;
     }
 
-    // 2️⃣ بررسی حجم
     const maxSizeMB = screenshotSettings.max_size_mb || 5;
     if (file.size > maxSizeMB * 1024 * 1024) {
       showToast(`❌ حجم فایل نباید بیشتر از ${maxSizeMB} مگابایت باشد.`, 'error');
@@ -277,7 +294,6 @@ const TradeForm = () => {
       return;
     }
 
-    // 3️⃣ بررسی ابعاد (با استفاده از Image object)
     try {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
@@ -299,10 +315,8 @@ const TradeForm = () => {
       URL.revokeObjectURL(objectUrl);
     } catch (error) {
       console.error('Error checking image dimensions:', error);
-      // ادامه بده، چون ممکن است خطا مربوط به بررسی ابعاد باشد
     }
 
-    // 4️⃣ تبدیل به Base64
     try {
       const base64 = await fileToBase64(file);
       setScreenshotFile(base64);
@@ -348,7 +362,7 @@ const TradeForm = () => {
     return validationErrors.length === 0;
   };
 
-  // ===== ارسال فرم (با JSON - مشابه فرم ویرایش) =====
+  // ===== ارسال فرم =====
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -373,32 +387,37 @@ const TradeForm = () => {
     const ruleCheckIds = checkedRules.filter(r => r.checked).map(r => r.id);
     const groupId = parseInt(formData.group_id);
 
+    // اگر پورتفولیو انتخاب نشده، از پیش‌فرض استفاده کن
+    let portfolioId = formData.portfolio_id;
+    if (!portfolioId && portfolios.length > 0) {
+      const defaultPortfolio = portfolios.find(p => p.is_default) || portfolios[0];
+      portfolioId = defaultPortfolio.id;
+    }
+
     if (isNaN(groupId) || groupId <= 0) {
       alert('لطفاً یک دسته‌بندی معتبر انتخاب کنید.');
       setLoading(false);
       return;
     }
 
-    // ===== ساخت payload به‌صورت JSON (دقیقاً مشابه فرم ویرایش) =====
     const payload = {
       ...formData,
       group: groupId,
       group_id: groupId,
+      portfolio: portfolioId,
       day_of_week: day_of_week,
       month: month,
       rule_checks: ruleCheckIds,
     };
 
-    // ===== مدیریت تصویر (دقیقاً مشابه فرم ویرایش) =====
     if (screenshotFile) {
-      payload.screenshot = screenshotFile; // Base64
+      payload.screenshot = screenshotFile;
       console.log('✅ Screenshot added to payload, length:', screenshotFile.length);
     } else {
       console.warn('⚠️ No screenshot file');
       delete payload.screenshot;
     }
 
-    // حذف فیلدهای خالی (اختیاری)
     const optionalFields = [
       'time_ny', 'stop_loss', 'take_profit_1', 'take_profit_2', 'take_profit_3',
       'risk_usd', 'risk_percent', 'risk_reward_ratio', 'profit', 'tp_sl_hit',
@@ -497,9 +516,23 @@ const TradeForm = () => {
           {!formData.group_id && <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>}
         </div>
       </div>
-      <div className="form-group">
-        <label>یادداشت پروفایل هفتگی</label>
-        <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" disabled={showLimitWarning} />
+      <div className="form-row">
+        <div className="form-group">
+          <label>پورتفولیو</label>
+          <select name="portfolio_id" value={formData.portfolio_id || ''} onChange={handleChange} disabled={showLimitWarning}>
+            <option value="">بدون پورتفولیو</option>
+            {portfolios.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.icon || '📊'} {p.name} {p.is_default ? '(پیش‌فرض)' : ''}
+              </option>
+            ))}
+          </select>
+          <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
+        </div>
+        <div className="form-group">
+          <label>یادداشت پروفایل هفتگی</label>
+          <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" disabled={showLimitWarning} />
+        </div>
       </div>
     </div>
   );
@@ -918,6 +951,27 @@ const TradeForm = () => {
     }
   };
 
+  // ===== بررسی وجود پورتفولیو =====
+  if (!loading && portfolios.length === 0) {
+    return (
+      <div className="trade-form-container no-portfolio">
+        <div className="no-portfolio-message">
+          <div className="icon">📊</div>
+          <h3>هیچ پورتفولیویی ایجاد نشده است</h3>
+          <p>برای ثبت ترید، ابتدا باید یک پورتفولیو بسازید.</p>
+          <button
+            className="btn-create-portfolio"
+            onClick={() => {
+              showToast('لطفاً از منوی بالای صفحه، گزینه "افزودن پورتفولیو جدید" را انتخاب کنید.', 'info');
+            }}
+          >
+            ➕ ساخت پورتفولیو جدید
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`trade-form-container ${isDark ? 'dark' : 'light'}`}>
       <div className="trade-form-header">
@@ -946,20 +1000,29 @@ const TradeForm = () => {
 
       <div className="step-indicator">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(step => (
-          <div
-            key={step}
-            className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`}
-            onClick={() => setCurrentStep(step)}
-          >
-            {step}
-          </div>
+          <React.Fragment key={step}>
+            <div
+              className={`step-dot ${step <= currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`}
+              onClick={() => setCurrentStep(step)}
+            >
+              {step}
+            </div>
+            {step < 10 && <div className={`step-line ${step < currentStep ? 'active' : ''} ${step === currentStep ? 'current' : ''}`} />}
+          </React.Fragment>
         ))}
       </div>
 
       <div className="step-labels">
-        <span>تاریخ</span><span>نماد</span><span>روحی</span><span>برنامه</span>
-        <span>اجرا</span><span>نتیجه</span><span>بازبینی</span><span>ICT</span>
-        <span>قوانین</span><span>تصویر</span>
+        <span className={currentStep === 1 ? 'current' : currentStep > 1 ? 'active' : ''}>تاریخ</span>
+        <span className={currentStep === 2 ? 'current' : currentStep > 2 ? 'active' : ''}>نماد</span>
+        <span className={currentStep === 3 ? 'current' : currentStep > 3 ? 'active' : ''}>روحی</span>
+        <span className={currentStep === 4 ? 'current' : currentStep > 4 ? 'active' : ''}>برنامه</span>
+        <span className={currentStep === 5 ? 'current' : currentStep > 5 ? 'active' : ''}>اجرا</span>
+        <span className={currentStep === 6 ? 'current' : currentStep > 6 ? 'active' : ''}>نتیجه</span>
+        <span className={currentStep === 7 ? 'current' : currentStep > 7 ? 'active' : ''}>بازبینی</span>
+        <span className={currentStep === 8 ? 'current' : currentStep > 8 ? 'active' : ''}>ICT</span>
+        <span className={currentStep === 9 ? 'current' : currentStep > 9 ? 'active' : ''}>قوانین</span>
+        <span className={currentStep === 10 ? 'current' : currentStep > 10 ? 'active' : ''}>تصویر</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>

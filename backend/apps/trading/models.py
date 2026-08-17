@@ -1,6 +1,7 @@
 # backend/apps/trading/models.py
 
 from django.db import models
+from django.db.models import Sum  # ✅ اضافه شد
 from django.utils import timezone
 from django.conf import settings
 
@@ -11,6 +12,74 @@ def screenshot_upload_path(instance, filename):
     import time
     timestamp = int(time.time() * 1000)
     return f'trades/user_{instance.user.id}/{timestamp}.{ext}'
+
+
+# ============================================
+# پورتفولیو (حساب‌های معاملاتی مستقل)
+# ============================================
+class Portfolio(models.Model):
+    """پورتفولیو/حساب معاملاتی مستقل با قوانین و تنظیمات جداگانه"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='portfolios',
+        verbose_name='کاربر'
+    )
+    name = models.CharField('نام پورتفولیو', max_length=100)
+    description = models.TextField('توضیحات', blank=True)
+    icon = models.CharField('آیکون', max_length=10, default='📊')
+    initial_balance = models.DecimalField(
+        'سرمایه اولیه',
+        max_digits=15,
+        decimal_places=2,
+        default=0,
+        help_text='سرمایه اولیه این پورتفولیو به دلار'
+    )
+    is_active = models.BooleanField('فعال', default=True)
+    is_default = models.BooleanField('پیش‌فرض', default=False)
+    created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
+    updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
+
+    class Meta:
+        verbose_name = 'پورتفولیو'
+        verbose_name_plural = 'پورتفولیوها'
+        ordering = ['-is_default', 'name']
+        unique_together = [['user', 'name']]
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['user', 'is_default']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.phone_number} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            Portfolio.objects.filter(
+                user=self.user,
+                is_default=True
+            ).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    def get_total_trades(self):
+        return self.trades.filter(is_deleted=False).count()
+
+    def get_total_profit(self):
+        result = self.trades.filter(is_deleted=False).aggregate(Sum('profit'))
+        return result['profit__sum'] or 0
+
+    def get_win_rate(self):
+        trades = self.trades.filter(is_deleted=False)
+        total = trades.count()
+        if total == 0:
+            return 0
+        wins = trades.filter(profit__gt=0).count()
+        return round((wins / total) * 100, 1)
+
+    def get_current_balance(self):
+        """محاسبه موجودی فعلی بر اساس سرمایه اولیه و سود/زیان"""
+        return self.initial_balance + self.get_total_profit()
+
 
 
 class CurrencyPair(models.Model):
@@ -109,6 +178,14 @@ class Trade(models.Model):
         on_delete=models.PROTECT,
         related_name='trades',
         verbose_name='گروه'
+    )
+    portfolio = models.ForeignKey(
+        'Portfolio',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='trades',
+        verbose_name='پورتفولیو'
     )
 
     trade_date = models.DateField('تاریخ معامله')
@@ -309,6 +386,14 @@ class TradingRule(models.Model):
         on_delete=models.CASCADE,
         related_name='trading_rules',
         verbose_name='کاربر'
+    )
+    portfolio = models.ForeignKey(
+        'Portfolio',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rules',
+        verbose_name='پورتفولیو'
     )
     rule_text = models.TextField('متن قانون')
     category = models.CharField('دسته‌بندی', max_length=20, choices=RULE_CATEGORIES, default='general')
@@ -603,3 +688,4 @@ class AIConsultationAnalytics(models.Model):
     class Meta:
         db_table = 'trading_ai_analytics'
         ordering = ['-date']
+

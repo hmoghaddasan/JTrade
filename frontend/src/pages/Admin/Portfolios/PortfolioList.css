@@ -1,0 +1,397 @@
+/* frontend/src/pages/Admin/Portfolios/PortfolioList.css */
+
+.admin-portfolio-list {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.admin-portfolio-list.dark {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.admin-portfolio-list .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-portfolio-list .page-header h1 {
+  font-size: 24px;
+  margin: 0;
+  color: #1a1a2e;
+}
+
+.admin-portfolio-list.dark .page-header h1 {
+  color: #e0e0e0;
+}
+
+.btn-add {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.btn-add:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+.filter-bar {
+  margin-bottom: 16px;
+}
+
+.filter-bar select {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.dark .filter-bar select {
+  background: #2d2d44;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #ffebee;
+  color: #c62828;
+}
+
+.table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.dark .table-container {
+  background: #2d2d44;
+}
+
+.portfolios-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.portfolios-table th {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 13px;
+  color: #495057;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.dark .portfolios-table th {
+  background: #3d3d5c;
+  color: #b0b0b0;
+  border-bottom-color: #444;
+}
+
+.portfolios-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f3f5;
+  font-size: 14px;
+}
+
+.dark .portfolios-table td {
+  border-bottom-color: #444;
+  color: #d0d0d0;
+}
+
+.portfolios-table tr:hover {
+  background: #f8f9fa;
+}
+
+.dark .portfolios-table tr:hover {
+  background: #3d3d5c;
+}
+
+.portfolios-table .icon-cell {
+  font-size: 24px;
+  text-align: center;
+}
+
+.portfolios-table .positive {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.portfolios-table .negative {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.dark .portfolios-table .positive {
+  color: #66bb6a;
+}
+
+.dark .portfolios-table .negative {
+  color: #ef5350;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.inactive {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark .status-badge.active {
+  background: rgba(76, 175, 80, 0.2);
+  color: #66bb6a;
+}
+
+.dark .status-badge.inactive {
+  background: rgba(198, 40, 40, 0.2);
+  color: #ef5350;
+}
+
+.portfolios-table .actions {
+  display: flex;
+  gap: 6px;
+}
+
+.portfolios-table .actions button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.portfolios-table .actions .btn-edit:hover {
+  background: #e3f2fd;
+}
+
+.portfolios-table .actions .btn-delete:hover {
+  background: #ffebee;
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 520px;
+  width: 92%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.dark .modal-content {
+  background: #2d2d44;
+  color: #e0e0e0;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.modal-close {
+  border: none;
+  background: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #999;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.dark .form-group input,
+.dark .form-group select,
+.dark .form-group textarea {
+  background: #3d3d5c;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+.icon-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 22px;
+  transition: all 0.2s;
+}
+
+.dark .icon-btn {
+  background: #3d3d5c;
+  border-color: #555;
+}
+
+.icon-btn.selected {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+}
+
+.dark .icon-btn.selected {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.dark .form-actions {
+  border-top-color: #444;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dark .btn-cancel {
+  background: #3d3d5c;
+  border-color: #555;
+  color: #b0b0b0;
+}
+
+.btn-cancel:hover {
+  background: #f8f9fa;
+}
+
+.btn-save {
+  padding: 10px 24px;
+  border: none;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.btn-save:hover {
+  background: #45a049;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

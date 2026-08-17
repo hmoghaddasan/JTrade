@@ -256092,3 +256092,1594 @@ AttributeError: 'DiscountCode' object has no attribute 'discountcodeusage_set'
 ERROR 2026-08-14 12:29:05,268 basehttp 23616 21972 "GET /api/admin/discounts/?page=1&page_size=20 HTTP/1.1" 500 167343
 ERROR 2026-08-14 12:29:05,294 basehttp 23616 9936 "GET /api/admin/discounts/?page=1&page_size=20 HTTP/1.1" 500 167343
 ERROR 2026-08-14 22:42:21,680 sms 23060 20728 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+ERROR 2026-08-14 23:39:10,479 log 21876 17968 Internal Server Error: /api/admin/users/32/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:10,479 log 21876 11048 Internal Server Error: /api/admin/users/32/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:10,509 basehttp 21876 17968 "GET /api/admin/users/32/ HTTP/1.1" 500 155412
+ERROR 2026-08-14 23:39:10,509 basehttp 21876 11048 "GET /api/admin/users/32/ HTTP/1.1" 500 155412
+ERROR 2026-08-14 23:39:21,319 log 21876 19684 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:21,352 log 21876 17104 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:21,359 basehttp 21876 19684 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:39:21,372 basehttp 21876 17104 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:39:29,458 log 21876 12136 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:29,490 log 21876 2436 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:29,504 basehttp 21876 12136 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:39:29,504 basehttp 21876 2436 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:39:35,484 log 21876 16296 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:35,521 log 21876 20560 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:35,538 basehttp 21876 16296 "GET /api/admin/users/33/ HTTP/1.1" 500 159196
+ERROR 2026-08-14 23:39:35,538 basehttp 21876 20560 "GET /api/admin/users/33/ HTTP/1.1" 500 159196
+ERROR 2026-08-14 23:39:41,250 log 21876 16596 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:41,308 log 21876 22368 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:41,308 basehttp 21876 16596 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:39:41,332 basehttp 21876 22368 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:39:44,216 log 21876 7220 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:44,287 basehttp 21876 7220 "GET /api/admin/users/33/ HTTP/1.1" 500 159070
+ERROR 2026-08-14 23:39:44,306 log 21876 21672 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:39:44,413 basehttp 21876 21672 "GET /api/admin/users/33/ HTTP/1.1" 500 159070
+ERROR 2026-08-14 23:40:09,975 log 21876 21660 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:40:10,012 log 21876 17688 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:40:10,022 basehttp 21876 21660 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:40:10,027 basehttp 21876 17688 "GET /api/admin/users/33/ HTTP/1.1" 500 159191
+ERROR 2026-08-14 23:40:55,259 log 24176 8188 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:40:55,346 log 24176 24524 Internal Server Error: /api/admin/users/33/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 208, in get
+    return self.retrieve(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 56, in retrieve
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 164, in get_messages
+    msgs = obj.user_messages.all().order_by('-created_at')[:10]
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'user_messages'
+ERROR 2026-08-14 23:40:55,363 basehttp 24176 8188 "GET /api/admin/users/33/ HTTP/1.1" 500 159330
+ERROR 2026-08-14 23:40:55,449 basehttp 24176 24524 "GET /api/admin/users/33/ HTTP/1.1" 500 159330
+ERROR 2026-08-15 00:30:35,981 log 13212 22664 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 745, in get_total_subscribers
+    return obj.user_subscriptions.count()
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'user_subscriptions'
+ERROR 2026-08-15 00:30:35,981 log 13212 9056 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 745, in get_total_subscribers
+    return obj.user_subscriptions.count()
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'user_subscriptions'
+ERROR 2026-08-15 00:30:36,014 basehttp 13212 22664 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171418
+ERROR 2026-08-15 00:30:36,046 basehttp 13212 9056 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171418
+ERROR 2026-08-15 00:31:16,588 log 24260 15764 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 745, in get_total_subscribers
+    return obj.user_subscriptions.count()
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'user_subscriptions'
+ERROR 2026-08-15 00:31:16,608 log 24260 23048 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 745, in get_total_subscribers
+    return obj.user_subscriptions.count()
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'user_subscriptions'
+ERROR 2026-08-15 00:31:16,633 basehttp 24260 15764 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171292
+ERROR 2026-08-15 00:31:16,633 basehttp 24260 23048 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171292
+ERROR 2026-08-15 00:33:35,788 log 18932 5348 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 749, in get_total_subscribers
+    return obj.usersubscription_set.count()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'usersubscription_set'
+ERROR 2026-08-15 00:33:35,804 log 18932 7956 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 749, in get_total_subscribers
+    return obj.usersubscription_set.count()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'usersubscription_set'
+ERROR 2026-08-15 00:33:35,833 basehttp 18932 5348 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171430
+ERROR 2026-08-15 00:33:35,859 basehttp 18932 7956 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171430
+ERROR 2026-08-15 00:33:59,060 log 4804 14220 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 749, in get_total_subscribers
+    return obj.usersubscription_set.count()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'usersubscription_set'
+ERROR 2026-08-15 00:33:59,075 log 4804 8972 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 749, in get_total_subscribers
+    return obj.usersubscription_set.count()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'usersubscription_set'
+ERROR 2026-08-15 00:33:59,098 basehttp 4804 14220 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171430
+ERROR 2026-08-15 00:33:59,143 basehttp 4804 8972 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171430
+ERROR 2026-08-15 00:36:10,766 log 18480 3580 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 752, in get_total_subscribers
+    return obj.user_subscriptions.count()
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'user_subscriptions'
+ERROR 2026-08-15 00:36:10,771 log 18480 23548 Internal Server Error: /api/admin/subscription-plans/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\admin_panel\serializers.py", line 752, in get_total_subscribers
+    return obj.user_subscriptions.count()
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubscriptionPlan' object has no attribute 'user_subscriptions'
+ERROR 2026-08-15 00:36:10,794 basehttp 18480 3580 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171353
+ERROR 2026-08-15 00:36:10,809 basehttp 18480 23548 "GET /api/admin/subscription-plans/ HTTP/1.1" 500 171353
+ERROR 2026-08-16 17:31:00,526 sms 9176 24972 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+ERROR 2026-08-16 17:54:22,370 log 10912 13132 Internal Server Error: /api/trading/portfolios/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 38, in list
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1574, in get_queryset
+    return Portfolio.objects.filter(user=self.request.user, is_active=True)
+           ^^^^^^^^^
+NameError: name 'Portfolio' is not defined
+ERROR 2026-08-16 17:54:22,401 log 10912 29380 Internal Server Error: /api/trading/portfolios/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 38, in list
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1574, in get_queryset
+    return Portfolio.objects.filter(user=self.request.user, is_active=True)
+           ^^^^^^^^^
+NameError: name 'Portfolio' is not defined
+ERROR 2026-08-16 17:54:22,645 basehttp 10912 13132 "GET /api/trading/portfolios/ HTTP/1.1" 500 124739
+ERROR 2026-08-16 17:54:22,699 basehttp 10912 29380 "GET /api/trading/portfolios/ HTTP/1.1" 500 124739
+ERROR 2026-08-16 17:54:44,143 log 10912 25476 Internal Server Error: /api/trading/portfolios/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 242, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 20, in create
+    headers = self.get_success_headers(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\serializers.py", line 617, in get_total_profit
+    return float(obj.get_total_profit())
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\models.py", line 67, in get_total_profit
+    result = self.trades.filter(is_deleted=False).aggregate(Sum('profit'))
+                                                            ^^^
+NameError: name 'Sum' is not defined
+ERROR 2026-08-16 17:54:44,171 basehttp 10912 25476 "POST /api/trading/portfolios/ HTTP/1.1" 500 155859
+ERROR 2026-08-16 17:55:43,310 log 10912 17508 Internal Server Error: /api/trading/portfolios/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 38, in list
+    queryset = self.filter_queryset(self.get_queryset())
+                                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1574, in get_queryset
+    return Portfolio.objects.filter(user=self.request.user, is_active=True)
+           ^^^^^^^^^
+NameError: name 'Portfolio' is not defined
+ERROR 2026-08-16 17:55:43,322 basehttp 10912 17508 "GET /api/trading/portfolios/ HTTP/1.1" 500 124835
+INFO 2026-08-16 18:33:27,550 signals 19380 25244 ✅ Trade used: 09155511393
+INFO 2026-08-16 18:35:23,909 signals 19380 1348 ✅ Trade used: 09155511393
+INFO 2026-08-17 00:06:57,111 signals 30680 31288 ✅ Trade used: 09155511393
+ERROR 2026-08-17 00:27:53,651 log 32512 15092 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1837, in to_representation
+    method = getattr(self.parent, self.method_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TradeListSerializer' object has no attribute 'get_screenshot'
+ERROR 2026-08-17 00:27:53,656 log 32512 27932 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1837, in to_representation
+    method = getattr(self.parent, self.method_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TradeListSerializer' object has no attribute 'get_screenshot'
+ERROR 2026-08-17 00:27:53,664 log 32512 25204 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 239, in get
+    return self.list(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+                                       ^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 768, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 686, in to_representation
+    return [
+           ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 687, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\fields.py", line 1837, in to_representation
+    method = getattr(self.parent, self.method_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TradeListSerializer' object has no attribute 'get_screenshot'
+ERROR 2026-08-17 00:27:53,682 basehttp 32512 15092 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 28808
+ERROR 2026-08-17 00:27:53,699 basehttp 32512 27932 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 28808
+ERROR 2026-08-17 00:27:53,722 basehttp 32512 25204 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 28808

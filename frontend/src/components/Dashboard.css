@@ -1240,3 +1240,88 @@
     display: none !important;
   }
 }
+/* frontend/src/components/Dashboard.css */
+
+/* ===== استایل دکمه ثبت ترید جدید در حالت خالی ===== */
+.empty-trades {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  height: 100%;
+  min-height: 200px;
+}
+
+.empty-trades p {
+  font-size: 15px;
+  margin-bottom: 16px;
+  color: #999;
+}
+
+.btn-add-trade {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+  font-family: inherit;
+}
+
+.btn-add-trade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
+  background: linear-gradient(135deg, #0d47a1, #1a237e);
+}
+
+.btn-add-trade:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.2);
+}
+
+/* ===== حالت تاریک ===== */
+.dark .btn-add-trade {
+  background: linear-gradient(135deg, #3949ab, #5c6bc0);
+  box-shadow: 0 4px 12px rgba(57, 73, 171, 0.4);
+}
+
+.dark .btn-add-trade:hover {
+  background: linear-gradient(135deg, #5c6bc0, #3949ab);
+  box-shadow: 0 6px 20px rgba(57, 73, 171, 0.5);
+}
+
+.dark .empty-trades p {
+  color: #777;
+}
+
+/* ===== واکنش‌گرا ===== */
+@media (max-width: 768px) {
+  .empty-trades {
+    padding: 30px 15px;
+    min-height: 150px;
+  }
+
+  .btn-add-trade {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-add-trade {
+    padding: 8px 16px;
+    font-size: 13px;
+    width: 100%;
+    justify-content: center;
+  }
+}

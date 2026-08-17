@@ -26,6 +26,10 @@ urlpatterns = [
     path('subscriptions/gift/', views.AdminSubscriptionGiftView.as_view(), name='admin_subscription_gift'),
     path('subscriptions/export-excel/', views.ExportSubscriptionsExcelView.as_view(), name='export_subscriptions_excel'),
 
+    # ===== مدیریت پلن‌های اشتراک (جدید) =====
+    path('subscription-plans/', views.AdminSubscriptionPlanListView.as_view(), name='admin_subscription_plans'),
+    path('subscription-plans/<int:pk>/', views.AdminSubscriptionPlanDetailView.as_view(), name='admin_subscription_plan_detail'),
+
     # ===== مدیریت مالی =====
     path('transactions/', views.AdminTransactionListView.as_view(), name='admin_transactions'),
     path('sales/report/', views.AdminSalesReportView.as_view(), name='admin_sales_report'),
@@ -65,4 +69,7 @@ urlpatterns = [
     # ===== تنظیمات سیستم =====
     path('settings/', views.AdminSettingsListView.as_view(), name='admin_settings'),
     path('settings/update/', views.AdminSettingsUpdateView.as_view(), name='admin_settings_update'),
+    # ===== مدیریت پورتفولیوها (ادمین) =====
+    path('portfolios/', views.AdminPortfolioListView.as_view(), name='admin_portfolios'),
+    path('portfolios/<int:pk>/', views.AdminPortfolioDetailView.as_view(), name='admin_portfolio_detail'),
 ]

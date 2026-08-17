@@ -13,7 +13,7 @@ import io
 import json
 from .models import (
     CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion,
-    AIConsultationAnalytics, TradingRule, TradeRuleCheck
+    AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio  # ✅ Portfolio اضافه شد
 )
 from .serializers import (
     CurrencyPairSerializer,
@@ -30,6 +30,9 @@ from .serializers import (
     TradingRuleSerializer,
     TradeRuleCheckSerializer,
     RulesReportSerializer,
+    PortfolioSerializer,  # ✅ اضافه شد
+    PortfolioDetailSerializer,  # ✅ اضافه شد
+
 )
 from .ai_service import AIService, AIFeedbackService, AIAnalyticsService
 from apps.accounts.permissions import IsAuthenticatedWithSubscription, CanTrade
@@ -1557,4 +1560,123 @@ class LivePriceView(APIView):
             'price': price,
             'provider': getattr(AIService, 'LIVE_PRICE_PROVIDER', 'unknown'),
             'timestamp': datetime.now().isoformat(),
+        })
+
+# ============================================
+# ویوهای مدیریت پورتفولیو
+# ============================================
+class PortfolioListCreateView(generics.ListCreateAPIView):
+    """لیست و ایجاد پورتفولیو"""
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
+    serializer_class = PortfolioSerializer
+
+    def get_queryset(self):
+        return Portfolio.objects.filter(user=self.request.user, is_active=True)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class PortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
+    serializer_class = PortfolioDetailSerializer
+
+    def get_queryset(self):
+        return Portfolio.objects.filter(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        # ❌ جلوگیری از حذف پورتفولیو پیش‌فرض
+        if instance.is_default:
+            raise serializers.ValidationError(
+                {'error': 'پورتفولیو پیش‌فرض قابل حذف نیست. ابتدا پورتفولیوی دیگری را به عنوان پیش‌فرض انتخاب کنید.'}
+            )
+
+        # بررسی وجود ترید در این پورتفولیو
+        if instance.trades.filter(is_deleted=False).exists():
+            raise serializers.ValidationError(
+                {'error': 'این پورتفولیو دارای ترید است. ابتدا تریدها را منتقل یا حذف کنید.'}
+            )
+
+        instance.is_active = False
+        instance.save()
+        return Response({'message': 'پورتفولیو با موفقیت غیرفعال شد'})
+
+class PortfolioAnalyticsView(APIView):
+    """دریافت آمار تحلیلی یک پورتفولیو"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            portfolio = Portfolio.objects.get(id=pk, user=request.user, is_active=True)
+        except Portfolio.DoesNotExist:
+            return Response({'error': 'پورتفولیو یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+        trades = portfolio.trades.filter(is_deleted=False)
+        total = trades.count()
+
+        if total == 0:
+            return Response({
+                'portfolio': PortfolioSerializer(portfolio).data,
+                'analytics': {
+                    'total_trades': 0,
+                    'win_rate': 0,
+                    'total_profit': 0,
+                    'avg_rr': 0,
+                    'avg_quality': 0,
+                }
+            })
+
+        win_count = trades.filter(profit__gt=0).count()
+        total_profit = trades.aggregate(Sum('profit'))['profit__sum'] or 0
+        avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(Avg('risk_reward_ratio'))['avg'] or 0
+        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(Avg('execution_quality_score'))['avg'] or 0
+
+        return Response({
+            'portfolio': PortfolioSerializer(portfolio).data,
+            'analytics': {
+                'total_trades': total,
+                'win_rate': round((win_count / total * 100), 1) if total > 0 else 0,
+                'total_profit': float(total_profit),
+                'avg_rr': round(avg_rr, 2),
+                'avg_quality': round(avg_quality, 1),
+            }
+        })
+
+
+class CombinedPortfolioAnalyticsView(APIView):
+    """دریافت آمار ترکیبی همه پورتفولیوهای کاربر"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        portfolios = Portfolio.objects.filter(user=request.user, is_active=True)
+        all_trades = Trade.objects.filter(user=request.user, is_deleted=False)
+
+        total = all_trades.count()
+        win_count = all_trades.filter(profit__gt=0).count()
+        total_profit = all_trades.aggregate(Sum('profit'))['profit__sum'] or 0
+        avg_rr = all_trades.filter(risk_reward_ratio__isnull=False).aggregate(Avg('risk_reward_ratio'))['avg'] or 0
+
+        portfolio_summary = []
+        for p in portfolios:
+            p_trades = p.trades.filter(is_deleted=False)
+            p_total = p_trades.count()
+            p_win = p_trades.filter(profit__gt=0).count()
+            p_profit = p_trades.aggregate(Sum('profit'))['profit__sum'] or 0
+            portfolio_summary.append({
+                'id': p.id,
+                'name': p.name,
+                'icon': p.icon,
+                'total_trades': p_total,
+                'win_rate': round((p_win / p_total * 100), 1) if p_total > 0 else 0,
+                'total_profit': float(p_profit),
+                'current_balance': float(p.get_current_balance()),
+                'is_default': p.is_default,
+            })
+
+        return Response({
+            'total_trades': total,
+            'win_rate': round((win_count / total * 100), 1) if total > 0 else 0,
+            'total_profit': float(total_profit),
+            'avg_rr': round(avg_rr, 2),
+            'portfolios': portfolio_summary,
         })

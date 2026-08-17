@@ -1,7 +1,7 @@
 // frontend/src/pages/Admin/Settings/Settings.js
 
 import React, { useState, useEffect } from 'react';
-import adminService from '../../../services/adminService';
+import axios from 'axios';
 import LoadingSpinner from '../../../components/Admin/LoadingSpinner';
 import './Settings.css';
 
@@ -19,28 +19,36 @@ const Settings = () => {
   const loadSettings = async () => {
     setLoading(true);
     try {
-      const response = await adminService.getSettings();
-      console.log('📊 Settings API Response:', response);
+      const token = localStorage.getItem('token');
+      let allSettings = [];
+      let nextPage = '/api/admin/settings/?page_size=100';
 
-      let settingsData = response.data;
+      // ✅ دریافت همه صفحات به صورت خودکار
+      while (nextPage) {
+        const response = await axios.get(nextPage, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-      if (settingsData && !Array.isArray(settingsData)) {
-        if (settingsData.results) {
-          settingsData = settingsData.results;
-        } else if (settingsData.data) {
-          settingsData = settingsData.data;
+        if (response.data && response.data.results) {
+          allSettings = [...allSettings, ...response.data.results];
+          nextPage = response.data.next;
         } else {
-          settingsData = Object.entries(settingsData).map(([key, value]) => ({
-            setting_key: key,
-            setting_value: typeof value === 'object' ? JSON.stringify(value) : String(value),
-            setting_type: typeof value === 'boolean' ? 'boolean' : 'string',
-            description: key,
-            is_editable: true,
-          }));
+          break;
         }
       }
 
-      setSettings(Array.isArray(settingsData) ? settingsData : []);
+      console.log('📊 Total settings loaded:', allSettings.length);
+      setSettings(allSettings);
+
+      // ✅ لاگ تنظیمات هوش مصنوعی
+      const aiSettings = allSettings.filter(s =>
+        s.setting_key.includes('ollama') || s.setting_key.includes('ai_')
+      );
+      console.log('🤖 AI Settings found:', aiSettings);
+      console.log('✅ ollama_available_models exists?',
+        allSettings.some(s => s.setting_key === 'ollama_available_models')
+      );
+
     } catch (error) {
       console.error('Error loading settings:', error);
       setError('خطا در بارگذاری تنظیمات');
@@ -69,7 +77,14 @@ const Settings = () => {
         }
       });
 
-      const response = await adminService.updateSettings(data);
+      const token = localStorage.getItem('token');
+      const response = await axios.put('/api/admin/settings/', data, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       setSuccess(response.data.message || 'تنظیمات با موفقیت ذخیره شد');
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
@@ -90,81 +105,45 @@ const Settings = () => {
   if (loading) return <LoadingSpinner />;
 
   // ============================================
-  // ✅ گروه‌بندی تنظیمات (همه دسته‌ها با تمام فیلدها)
+  // ✅ گروه‌بندی تنظیمات
   // ============================================
   const groups = {
     'عمومی': [
-      'app_name',
-      'app_version',
-      'default_font',
-      'primary_color',
-      'secondary_color'
+      'app_name', 'app_version', 'default_font', 'primary_color', 'secondary_color'
     ],
     'سایت': [
-      'site_email',
-      'site_phone',
-      'site_address',
-      'footer_text'
+      'site_email', 'site_phone', 'site_address', 'footer_text'
     ],
     'ظاهر': [
-      'logo_path',
-      'favicon_path',
-      'bg_image_path'
+      'logo_path', 'favicon_path', 'bg_image_path'
     ],
     'ترید': [
-      'max_trades_per_day',
-      'min_trade_interval',
-      'trial_days',
-      'trial_trades_limit',
-      'trial_ai_consultations_limit'
+      'max_trades_per_day', 'min_trade_interval', 'trial_days',
+      'trial_trades_limit', 'trial_ai_consultations_limit'
     ],
     'هوش مصنوعی': [
-      'ai_model',
-      'ai_temperature',
-      'ai_timeout',
-      'ollama_url',
-      'ollama_model',
-      'ollama_available_models',
-      'ollama_timeout'
+      'ai_model', 'ai_temperature', 'ai_timeout',
+      'ollama_url', 'ollama_model', 'ollama_available_models', 'ollama_timeout'
     ],
     'تصاویر': [
-      'max_image_width',
-      'max_image_height',
-      'image_quality',
-      'max_image_size_mb',
-      'show_screenshot_upload'
+      'max_image_width', 'max_image_height', 'image_quality',
+      'max_image_size_mb', 'show_screenshot_upload'
     ],
     'پیامک (SMS)': [
-      'sms_enabled',
-      'sms_api_key',
-      'sms_sender_number',
-      'sms_otp_template'
+      'sms_enabled', 'sms_api_key', 'sms_sender_number', 'sms_otp_template'
     ],
     'پرداخت (زرین‌پال)': [
-      'zarinpal_merchant_id',
-      'zarinpal_sandbox',
-      'zarinpal_callback_url',
-      'enable_payment'
+      'zarinpal_merchant_id', 'zarinpal_sandbox', 'zarinpal_callback_url', 'enable_payment'
     ],
     'قیمت لحظه‌ای': [
-      'live_price_provider',
-      'twelvedata_api_key',
-      'twelvedata_base_url',
-      'finnhub_api_key',
-      'finnhub_base_url',
-      'alphavantage_api_key'
+      'live_price_provider', 'twelvedata_api_key', 'twelvedata_base_url',
+      'finnhub_api_key', 'finnhub_base_url', 'alphavantage_api_key'
     ],
     'امنیت': [
-      'secret_key',
-      'debug',
-      'allowed_hosts'
+      'secret_key', 'debug', 'allowed_hosts'
     ],
     'دیتابیس': [
-      'db_name',
-      'db_user',
-      'db_password',
-      'db_host',
-      'db_port'
+      'db_name', 'db_user', 'db_password', 'db_host', 'db_port'
     ],
     'CORS': [
       'cors_allowed_origins'
@@ -185,7 +164,6 @@ const Settings = () => {
   const renderSettingInput = (setting) => {
     const value = setting.setting_value || '';
 
-    // تنظیمات حساس
     const sensitiveKeys = [
       'secret_key', 'db_password', 'sms_api_key',
       'twelvedata_api_key', 'finnhub_api_key',
@@ -267,7 +245,6 @@ const Settings = () => {
       const groupSettings = getGroupSettings(keys);
       if (groupSettings.length === 0) return null;
 
-      // بررسی آیا تنظیمات حساس در این گروه وجود دارد
       const sensitiveKeys = [
         'secret_key', 'db_password', 'sms_api_key',
         'twelvedata_api_key', 'finnhub_api_key',

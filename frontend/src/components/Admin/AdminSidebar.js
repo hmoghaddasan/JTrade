@@ -1,4 +1,5 @@
 // frontend/src/components/Admin/AdminSidebar.js
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import './AdminSidebar.css';
@@ -7,11 +8,13 @@ const menuItems = [
   { path: '/admin/dashboard', icon: '📊', label: 'داشبورد' },
   { path: '/admin/users', icon: '👤', label: 'کاربران' },
   { path: '/admin/subscriptions', icon: '📦', label: 'اشتراک‌ها' },
+  { path: '/admin/subscription-plans', icon: '📊', label: 'پلن‌های اشتراک' },
   { path: '/admin/finance', icon: '💰', label: 'مالی' },
   { path: '/admin/discounts', icon: '🏷️', label: 'تخفیف‌ها' },
   { path: '/admin/symbols', icon: '💱', label: 'نمادها' },
   { path: '/admin/consultations', icon: '🤖', label: 'مشاوره‌ها' },
   { path: '/admin/trades', icon: '📈', label: 'تریدها' },
+  { path: '/admin/portfolios', icon: '📊', label: 'پورتفولیوها' },
   { path: '/admin/messages', icon: '✉️', label: 'پیام‌ها' },
   { path: '/admin/versions', icon: '📌', label: 'نسخه‌ها' },
   { path: '/admin/settings', icon: '⚙️', label: 'تنظیمات' },
