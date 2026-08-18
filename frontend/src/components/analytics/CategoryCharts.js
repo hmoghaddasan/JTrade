@@ -4,16 +4,14 @@ import React from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer,
-  LineChart, Line, Area, ComposedChart
+  LineChart, Line, ComposedChart
 } from 'recharts';
+import ExpandableChart from '../common/ExpandableChart';
 import './CategoryCharts.css';
 
 const COLORS = ['#1a237e', '#2e7d32', '#c62828', '#f57c00', '#6a1b9a', '#00838f', '#4a148c', '#bf360c'];
 
 const CategoryCharts = ({ categories, distribution, categoryBy }) => {
-  // ============================================
-  // داده برای نمودار میله‌ای (سود هر دسته)
-  // ============================================
   const barData = categories.map(cat => ({
     name: cat.name,
     profit: cat.total_profit,
@@ -21,9 +19,6 @@ const CategoryCharts = ({ categories, distribution, categoryBy }) => {
     count: cat.count,
   }));
 
-  // ============================================
-  // داده برای نمودار دایره‌ای (توزیع نتایج)
-  // ============================================
   const pieData = [
     { name: 'سود', value: distribution.win },
     { name: 'زیان', value: distribution.loss },
@@ -32,18 +27,12 @@ const CategoryCharts = ({ categories, distribution, categoryBy }) => {
 
   const PIE_COLORS = ['#2e7d32', '#c62828', '#f57c00'];
 
-  // ============================================
-  // داده برای نمودار ترکیبی (نرخ برد و تعداد)
-  // ============================================
   const comboData = categories.map(cat => ({
     name: cat.name,
     winRate: cat.win_rate,
     count: cat.count,
   }));
 
-  // ============================================
-  // تابع فرمت‌کننده محورها
-  // ============================================
   const formatCurrency = (value) => {
     if (value === undefined || value === null) return '$0';
     return `$${value.toFixed(0)}`;
@@ -54,16 +43,13 @@ const CategoryCharts = ({ categories, distribution, categoryBy }) => {
     return `${value.toFixed(0)}%`;
   };
 
-  // ============================================
-  // رندر
-  // ============================================
   return (
     <div className="category-charts">
       <div className="charts-row">
-        {/* نمودار میله‌ای */}
         <div className="chart-box bar-chart-box">
           <h4 className="chart-title">📊 سود بر اساس {getCategoryLabel(categoryBy)}</h4>
-          <div className="chart-container">
+          <ExpandableChart className="chart-container" title="نمودار سود بر اساس دسته">
+            {/* 🟢 ارتفاع ثابت ۲۸۰ پیکسل در حالت عادی */}
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={barData} margin={{ top: 10, right: 20, left: 10, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -74,24 +60,23 @@ const CategoryCharts = ({ categories, distribution, categoryBy }) => {
                 <Bar dataKey="profit" fill="#1a237e" name="سود کل" />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ExpandableChart>
         </div>
 
-        {/* نمودار دایره‌ای */}
         <div className="chart-box pie-chart-box">
           <h4 className="chart-title">🍩 توزیع نتایج</h4>
-          <div className="chart-container">
+          <ExpandableChart className="chart-container" title="نمودار توزیع نتایج">
             {pieData.length === 0 ? (
               <div className="no-chart-data">داده‌ای برای نمایش وجود ندارد</div>
             ) : (
               <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
+                <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                   <Pie
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
+                    innerRadius="55%"
+                    outerRadius="80%"
                     paddingAngle={2}
                     dataKey="value"
                   >
@@ -104,14 +89,13 @@ const CategoryCharts = ({ categories, distribution, categoryBy }) => {
                 </PieChart>
               </ResponsiveContainer>
             )}
-          </div>
+          </ExpandableChart>
         </div>
       </div>
 
-      {/* نمودار ترکیبی (نرخ برد + تعداد) */}
       <div className="chart-box full-width">
         <h4 className="chart-title">📈 نرخ برد و تعداد تریدها بر اساس {getCategoryLabel(categoryBy)}</h4>
-        <div className="chart-container">
+        <ExpandableChart className="chart-container" title="نمودار ترکیبی نرخ برد و تعداد">
           <ResponsiveContainer width="100%" height={280}>
             <ComposedChart data={comboData} margin={{ top: 10, right: 20, left: 10, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -124,15 +108,12 @@ const CategoryCharts = ({ categories, distribution, categoryBy }) => {
               <Line yAxisId="left" type="monotone" dataKey="winRate" stroke="#2e7d32" strokeWidth={2} name="نرخ برد" />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ExpandableChart>
       </div>
     </div>
   );
 };
 
-// ============================================
-// تابع کمکی برای عنوان معیار
-// ============================================
 const getCategoryLabel = (value) => {
   const map = {
     'day_of_week': 'روز هفته',

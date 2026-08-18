@@ -1,0 +1,58 @@
+/* frontend/src/components/reports/MetricsChart.css */
+
+.metrics-chart {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.chart-container {
+  width: 100%;
+  min-height: 200px;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+}
+
+.chart-empty .empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.chart-empty p {
+  font-size: 14px;
+}
+
+/* ===== واکنش‌گرایی ===== */
+@media (max-width: 768px) {
+  .metrics-chart {
+    padding: 10px;
+  }
+
+  .chart-container {
+    min-height: 150px;
+  }
+}
+
+@media print {
+  .metrics-chart {
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+    break-inside: avoid;
+  }
+}

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import AnalyticsService from '../../services/analyticsService';
+import ExpandableChart from '../common/ExpandableChart';
 import './EmotionalPnL.css';
 
 // رنگ‌های اختصاصی هر احساس
@@ -172,37 +173,39 @@ const EmotionalPnL = () => {
           {/* نمودار میله‌ای */}
           <div className="chart-card bar-chart">
             <h4>📊 سود/زیان هر احساس</h4>
-            <div className="bar-chart-container">
-              {emotions.map((item) => {
-                const percent = Math.max(0, (Math.abs(item.total_pnl) / Math.max(maxProfit, Math.abs(minProfit), 1)) * 100);
-                const isPositive = item.total_pnl >= 0;
-                const color = EMOTION_COLORS[item.emotion] || '#888';
-                const icon = EMOTION_ICONS[item.emotion] || '😐';
+            <ExpandableChart className="bar-chart-container" title="نمودار سود/زیان هر احساس">
+              <div className="bar-chart-container">
+                {emotions.map((item) => {
+                  const percent = Math.max(0, (Math.abs(item.total_pnl) / Math.max(maxProfit, Math.abs(minProfit), 1)) * 100);
+                  const isPositive = item.total_pnl >= 0;
+                  const color = EMOTION_COLORS[item.emotion] || '#888';
+                  const icon = EMOTION_ICONS[item.emotion] || '😐';
 
-                return (
-                  <div key={item.emotion} className="bar-item">
-                    <div className="bar-label">
-                      <span className="bar-icon">{icon}</span>
-                      <span className="bar-name">{item.emotion}</span>
-                      <span className={`bar-value ${isPositive ? 'positive' : 'negative'}`}>
-                        {isPositive ? '+' : ''}{item.total_pnl.toFixed(2)}$
-                      </span>
+                  return (
+                    <div key={item.emotion} className="bar-item">
+                      <div className="bar-label">
+                        <span className="bar-icon">{icon}</span>
+                        <span className="bar-name">{item.emotion}</span>
+                        <span className={`bar-value ${isPositive ? 'positive' : 'negative'}`}>
+                          {isPositive ? '+' : ''}{item.total_pnl.toFixed(2)}$
+                        </span>
+                      </div>
+                      <div className="bar-track">
+                        <div
+                          className={`bar-fill ${isPositive ? 'positive' : 'negative'}`}
+                          style={{
+                            width: `${Math.min(percent, 100)}%`,
+                            backgroundColor: isPositive ? '#4caf50' : '#f44336',
+                            opacity: Math.max(0.3, percent / 100)
+                          }}
+                        />
+                      </div>
+                      <div className="bar-impact">{item.impact}% تأثیر</div>
                     </div>
-                    <div className="bar-track">
-                      <div
-                        className={`bar-fill ${isPositive ? 'positive' : 'negative'}`}
-                        style={{
-                          width: `${Math.min(percent, 100)}%`,
-                          backgroundColor: isPositive ? '#4caf50' : '#f44336',
-                          opacity: Math.max(0.3, percent / 100)
-                        }}
-                      />
-                    </div>
-                    <div className="bar-impact">{item.impact}% تأثیر</div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </ExpandableChart>
           </div>
 
           {/* نمودار دایره‌ای و جدول کنار هم */}
@@ -210,65 +213,65 @@ const EmotionalPnL = () => {
             {/* نمودار دایره‌ای */}
             <div className="chart-card doughnut-chart">
               <h4>🍩 توزیع تعداد تریدها</h4>
-              <div className="doughnut-container">
-                <div className="doughnut-legend">
-                  {emotions.map((item) => {
-                    const color = EMOTION_COLORS[item.emotion] || '#888';
-                    const icon = EMOTION_ICONS[item.emotion] || '😐';
-                    return (
-                      <div key={item.emotion} className="legend-item">
-                        <span className="legend-dot" style={{ backgroundColor: color }}></span>
-                        <span className="legend-label">{icon} {item.emotion}</span>
-                        <span className="legend-count">{item.count} ({item.win_rate}%)</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="doughnut-visual">
-                  <svg viewBox="0 0 100 100" width="180" height="180">
-                    {emotions.map((item, index) => {
-                      const percentage = (item.count / total_trades) * 100;
+              <ExpandableChart className="doughnut-container" title="نمودار توزیع تعداد تریدها">
+                <div className="doughnut-container">
+                  <div className="doughnut-legend">
+                    {emotions.map((item) => {
                       const color = EMOTION_COLORS[item.emotion] || '#888';
-                      // محاسبه استارت و اند زاویه برای دایره
-                      let startAngle = 0;
-                      for (let i = 0; i < index; i++) {
-                        startAngle += (emotions[i].count / total_trades) * 360;
-                      }
-                      const endAngle = startAngle + (item.count / total_trades) * 360;
-                      const startRad = (startAngle - 90) * Math.PI / 180;
-                      const endRad = (endAngle - 90) * Math.PI / 180;
-                      const x1 = 50 + 40 * Math.cos(startRad);
-                      const y1 = 50 + 40 * Math.sin(startRad);
-                      const x2 = 50 + 40 * Math.cos(endRad);
-                      const y2 = 50 + 40 * Math.sin(endRad);
-                      const largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
-                      const pathData = `
-                        M 50 50
-                        L ${x1} ${y1}
-                        A 40 40 0 ${largeArc} 1 ${x2} ${y2}
-                        Z
-                      `;
+                      const icon = EMOTION_ICONS[item.emotion] || '😐';
                       return (
-                        <path
-                          key={item.emotion}
-                          d={pathData}
-                          fill={color}
-                          stroke="#fff"
-                          strokeWidth="1"
-                          opacity="0.9"
-                        />
+                        <div key={item.emotion} className="legend-item">
+                          <span className="legend-dot" style={{ backgroundColor: color }}></span>
+                          <span className="legend-label">{icon} {item.emotion}</span>
+                          <span className="legend-count">{item.count} ({item.win_rate}%)</span>
+                        </div>
                       );
                     })}
-                    <circle cx="50" cy="50" r="20" fill="var(--card-bg, #fff)" stroke="var(--border-color, #ddd)" strokeWidth="1" />
-                    <text x="50" y="48" textAnchor="middle" fontSize="10" fill="var(--text-primary, #333)" fontWeight="bold">
-                      {total_trades}
-                    </text>
-                    <text x="50" y="58" textAnchor="middle" fontSize="6" fill="var(--text-muted, #888)">
-                      ترید
-                    </text>
-                  </svg>
+                  </div>
+                  <div className="doughnut-visual" style={{ width: '100%', height: '100%' }}>
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                      {emotions.map((item, index) => {
+                        const color = EMOTION_COLORS[item.emotion] || '#888';
+                        let startAngle = 0;
+                        for (let i = 0; i < index; i++) {
+                          startAngle += (emotions[i].count / total_trades) * 360;
+                        }
+                        const endAngle = startAngle + (item.count / total_trades) * 360;
+                        const startRad = (startAngle - 90) * Math.PI / 180;
+                        const endRad = (endAngle - 90) * Math.PI / 180;
+                        const x1 = 50 + 40 * Math.cos(startRad);
+                        const y1 = 50 + 40 * Math.sin(startRad);
+                        const x2 = 50 + 40 * Math.cos(endRad);
+                        const y2 = 50 + 40 * Math.sin(endRad);
+                        const largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
+                        const pathData = `
+                          M 50 50
+                          L ${x1} ${y1}
+                          A 40 40 0 ${largeArc} 1 ${x2} ${y2}
+                          Z
+                        `;
+                        return (
+                          <path
+                            key={item.emotion}
+                            d={pathData}
+                            fill={color}
+                            stroke="#fff"
+                            strokeWidth="1"
+                            opacity="0.9"
+                          />
+                        );
+                      })}
+                      <circle cx="50" cy="50" r="20" fill="var(--card-bg, #fff)" stroke="var(--border-color, #ddd)" strokeWidth="1" />
+                      <text x="50" y="48" textAnchor="middle" fontSize="10" fill="var(--text-primary, #333)" fontWeight="bold">
+                        {total_trades}
+                      </text>
+                      <text x="50" y="58" textAnchor="middle" fontSize="6" fill="var(--text-muted, #888)">
+                        ترید
+                      </text>
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              </ExpandableChart>
             </div>
 
             {/* جدول کامل */}

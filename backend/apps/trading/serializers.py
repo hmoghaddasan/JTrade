@@ -105,7 +105,6 @@ class TradeListSerializer(serializers.ModelSerializer):
         }
 
     def get_screenshot(self, obj):
-        """برگرداندن URL کامل تصویر"""
         if obj.screenshot:
             request = self.context.get('request')
             if request:
@@ -114,7 +113,6 @@ class TradeListSerializer(serializers.ModelSerializer):
         return None
 
     def get_portfolio_info(self, obj):
-        """برگرداندن اطلاعات پورتفولیو"""
         if obj.portfolio:
             return {
                 'id': obj.portfolio.id,
@@ -171,7 +169,6 @@ class TradeDetailSerializer(serializers.ModelSerializer):
         } for check in checks]
 
     def get_screenshot(self, obj):
-        """برگرداندن URL کامل تصویر"""
         if obj.screenshot:
             request = self.context.get('request')
             if request:
@@ -180,7 +177,6 @@ class TradeDetailSerializer(serializers.ModelSerializer):
         return None
 
     def get_portfolio_info(self, obj):
-        """برگرداندن اطلاعات پورتفولیو"""
         if obj.portfolio:
             return {
                 'id': obj.portfolio.id,
@@ -215,9 +211,6 @@ class TradeCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_screenshot(self, value):
-        """
-        تبدیل Base64 به فایل و ذخیره در سیستم فایل
-        """
         if not settings.SHOW_SCREENSHOT_UPLOAD:
             return None
         if value is None:
@@ -232,7 +225,6 @@ class TradeCreateSerializer(serializers.ModelSerializer):
         if value.strip() == '':
             return None
 
-        # استخراج داده Base64
         if ',' in value:
             header, base64_data = value.split(',', 1)
             if 'image' not in header.lower():
@@ -241,7 +233,6 @@ class TradeCreateSerializer(serializers.ModelSerializer):
             base64_data = value
 
         try:
-            # بررسی حجم
             size_in_bytes = len(base64_data) * 3 // 4
             size_in_mb = size_in_bytes / (1024 * 1024)
             if size_in_mb > settings.MAX_IMAGE_SIZE_MB:
@@ -250,10 +241,7 @@ class TradeCreateSerializer(serializers.ModelSerializer):
                     f"(حجم فعلی: {size_in_mb:.2f} MB)"
                 )
 
-            # دیکد کردن Base64
             image_data = base64.b64decode(base64_data)
-
-            # تشخیص فرمت تصویر
             image_format = imghdr.what(None, image_data)
             if image_format not in ['jpeg', 'png', 'gif', 'webp']:
                 raise serializers.ValidationError(
@@ -261,17 +249,14 @@ class TradeCreateSerializer(serializers.ModelSerializer):
                     "فقط JPEG, PNG, GIF, WebP مجاز هستند."
                 )
 
-            # پردازش با Pillow
             image = Image.open(BytesIO(image_data))
             original_width, original_height = image.size
 
-            # تغییر اندازه در صورت نیاز
             max_w = settings.MAX_IMAGE_WIDTH
             max_h = settings.MAX_IMAGE_HEIGHT
             if original_width > max_w or original_height > max_h:
                 image.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
 
-            # ذخیره در buffer
             buffer = BytesIO()
             save_format = image.format or 'JPEG'
             if save_format.upper() == 'JPEG':
@@ -281,7 +266,6 @@ class TradeCreateSerializer(serializers.ModelSerializer):
 
             buffer.seek(0)
 
-            # تعیین نام فایل
             import time
             timestamp = int(time.time() * 1000)
             ext = image_format.lower()
@@ -289,7 +273,6 @@ class TradeCreateSerializer(serializers.ModelSerializer):
                 ext = 'jpg'
             filename = f"screenshot_{timestamp}.{ext}"
 
-            # ایجاد فایل ContentFile
             content_file = ContentFile(buffer.getvalue(), name=filename)
             image.close()
 
@@ -302,7 +285,6 @@ class TradeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"خطا در پردازش تصویر: {str(e)}")
 
     def to_representation(self, instance):
-        """override to_representation برای نمایش URL تصویر در خروجی"""
         ret = super().to_representation(instance)
         if instance.screenshot:
             request = self.context.get('request')
@@ -358,9 +340,6 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
         return super().to_internal_value(mutable_data)
 
     def validate_screenshot(self, value):
-        """
-        تبدیل Base64 به فایل و ذخیره در سیستم فایل (همانند TradeCreateSerializer)
-        """
         if not settings.SHOW_SCREENSHOT_UPLOAD:
             return None
         if value is None:
@@ -435,7 +414,6 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"خطا در پردازش تصویر: {str(e)}")
 
     def to_representation(self, instance):
-        """override to_representation برای نمایش URL تصویر در خروجی"""
         ret = super().to_representation(instance)
         if instance.screenshot:
             request = self.context.get('request')
@@ -448,7 +426,9 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
         return ret
 
 
-# ===== سریالایزرهای دیگر =====
+# ============================================
+# سریالایزرهای قوانین معاملاتی
+# ============================================
 class TradingRuleSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='get_category_label', read_only=True)
 
@@ -467,6 +447,9 @@ class TradeRuleCheckSerializer(serializers.ModelSerializer):
         fields = ['id', 'rule', 'rule_text', 'rule_category', 'is_checked', 'checked_at']
 
 
+# ============================================
+# سریالایزرهای هوش مصنوعی
+# ============================================
 class AIConsultationInputSerializer(serializers.Serializer):
     symbol = serializers.CharField(max_length=20)
     direction = serializers.ChoiceField(choices=['Buy', 'Sell'])
@@ -595,7 +578,6 @@ class RulesReportSerializer(serializers.Serializer):
 # سریالایزرهای پورتفولیو
 # ============================================
 class PortfolioSerializer(serializers.ModelSerializer):
-    """سریالایزر اصلی پورتفولیو"""
     total_trades = serializers.SerializerMethodField()
     total_profit = serializers.SerializerMethodField()
     win_rate = serializers.SerializerMethodField()
@@ -645,7 +627,6 @@ class PortfolioSerializer(serializers.ModelSerializer):
 
 
 class PortfolioDetailSerializer(PortfolioSerializer):
-    """سریالایزر پورتفولیو با جزئیات کامل"""
     recent_trades = serializers.SerializerMethodField()
     rules = serializers.SerializerMethodField()
 
@@ -661,3 +642,128 @@ class PortfolioDetailSerializer(PortfolioSerializer):
         from .serializers import TradingRuleSerializer
         rules = obj.rules.filter(is_active=True)
         return TradingRuleSerializer(rules, many=True).data
+
+
+# ============================================
+# سریالایزرهای شاخص‌های حرفه‌ای (Advanced Metrics)
+# ============================================
+class MetricsSerializer(serializers.Serializer):
+    """سریالایزر شاخص‌های حرفه‌ای برای یک دوره زمانی"""
+    total_trades = serializers.IntegerField()
+    total_profit = serializers.FloatField()
+    win_rate = serializers.FloatField()
+    sharpe_ratio = serializers.FloatField(allow_null=True)
+    sharpe_desc = serializers.CharField(allow_null=True)
+    sortino_ratio = serializers.FloatField(allow_null=True)
+    sortino_desc = serializers.CharField(allow_null=True)
+    calmar_ratio = serializers.FloatField(allow_null=True)
+    calmar_desc = serializers.CharField(allow_null=True)
+    profit_factor = serializers.FloatField(allow_null=True)
+    profit_factor_desc = serializers.CharField(allow_null=True)
+    max_drawdown = serializers.FloatField(allow_null=True)
+    kelly_criterion = serializers.FloatField(allow_null=True)
+    kelly_desc = serializers.CharField(allow_null=True)
+    avg_rr = serializers.FloatField(allow_null=True)
+    expectancy = serializers.FloatField(allow_null=True)
+    recovery_factor = serializers.FloatField(allow_null=True)
+
+
+class MetricsTrendSerializer(serializers.Serializer):
+    """سریالایزر داده‌های روند شاخص‌ها"""
+    date = serializers.DateField()
+    sharpe_ratio = serializers.FloatField(allow_null=True)
+    sortino_ratio = serializers.FloatField(allow_null=True)
+    profit_factor = serializers.FloatField(allow_null=True)
+    total_trades = serializers.IntegerField()
+    total_profit = serializers.FloatField()
+
+# backend/apps/trading/serializers.py
+
+# ============================================
+# سریالایزرهای گزارش‌های ترکیبی و مقایسه‌ای پورتفولیو (جدید)
+# ============================================
+
+class PortfolioComparisonMetricsSerializer(serializers.Serializer):
+    """سریالایزر شاخص‌های یک پورتفولیو برای مقایسه"""
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    icon = serializers.CharField()
+    is_default = serializers.BooleanField()
+    initial_balance = serializers.FloatField()
+    current_balance = serializers.FloatField()
+    total_trades = serializers.IntegerField()
+    win_count = serializers.IntegerField()
+    loss_count = serializers.IntegerField()
+    breakeven_count = serializers.IntegerField()
+    win_rate = serializers.FloatField()
+    total_profit = serializers.FloatField()
+    total_loss = serializers.FloatField()
+    avg_profit = serializers.FloatField()
+    avg_loss = serializers.FloatField()
+    profit_factor = serializers.FloatField()
+    avg_rr = serializers.FloatField()
+    max_drawdown = serializers.FloatField()
+    expectancy = serializers.FloatField()
+
+
+class PortfolioCombinedMetricsSerializer(serializers.Serializer):
+    """سریالایزر شاخص‌های ترکیبی همه پورتفولیوها"""
+    total_portfolios = serializers.IntegerField()
+    total_balance = serializers.FloatField()
+    total_trades = serializers.IntegerField()
+    win_count = serializers.IntegerField()
+    loss_count = serializers.IntegerField()
+    breakeven_count = serializers.IntegerField()
+    win_rate = serializers.FloatField()
+    total_profit = serializers.FloatField()
+    total_loss = serializers.FloatField()
+    avg_profit = serializers.FloatField()
+    avg_loss = serializers.FloatField()
+    profit_factor = serializers.FloatField()
+    avg_rr = serializers.FloatField()
+    max_drawdown = serializers.FloatField()
+    expectancy = serializers.FloatField()
+
+
+class PortfolioComparisonDataSerializer(serializers.Serializer):
+    """سریالایزر داده‌های کامل مقایسه"""
+    portfolios = PortfolioComparisonMetricsSerializer(many=True)
+    combined = PortfolioCombinedMetricsSerializer()
+    best = PortfolioComparisonMetricsSerializer(allow_null=True)
+    worst = PortfolioComparisonMetricsSerializer(allow_null=True)
+    most_active = PortfolioComparisonMetricsSerializer(allow_null=True)
+    highest_win_rate = PortfolioComparisonMetricsSerializer(allow_null=True)
+
+
+class CumulativePnLPointSerializer(serializers.Serializer):
+    """سریالایزر نقطه نمودار سود تجمعی"""
+    date = serializers.CharField()
+    profit = serializers.FloatField()
+
+
+class CumulativePnLSeriesSerializer(serializers.Serializer):
+    """سریالایزر سری نمودار سود تجمعی"""
+    portfolio_id = serializers.IntegerField()
+    portfolio_name = serializers.CharField()
+    portfolio_icon = serializers.CharField()
+    data = CumulativePnLPointSerializer(many=True)
+
+
+class RadarMetricsItemSerializer(serializers.Serializer):
+    """سریالایزر آیتم راداری"""
+    portfolio_id = serializers.IntegerField()
+    portfolio_name = serializers.CharField()
+    portfolio_icon = serializers.CharField()
+    metrics = serializers.DictField()
+
+
+class BarDataItemSerializer(serializers.Serializer):
+    """سریالایزر آیتم نمودار میله‌ای"""
+    portfolio_id = serializers.IntegerField()
+    portfolio_name = serializers.CharField()
+    total_profit = serializers.FloatField()
+    win_rate = serializers.FloatField()
+    profit_factor = serializers.FloatField()
+    avg_rr = serializers.FloatField()
+    total_trades = serializers.IntegerField()
+    max_drawdown = serializers.FloatField()

@@ -33,6 +33,7 @@ if (typeof window !== 'undefined' && window.WebSocket) {
 
 class RealApiService {
   constructor() {
+    // ✅ بدون اسلش انتهایی
     this.apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
     this.wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/';
   }
@@ -66,21 +67,24 @@ class RealApiService {
     return headers;
   }
 
-
-async getLivePrice(symbol) {
-  try {
-    const response = await this.request(`/trading/live-price/${symbol}/`);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Error fetching live price:', error);
-    throw error;
-  }
-}
   // ============================================
-  // درخواست پایه
+  // درخواست پایه (مسیرهای صحیح)
   // ============================================
   async request(endpoint, options = {}) {
-    const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
+    // ✅ اگر endpoint با 'api/' شروع شد، آن را حذف کن
+    let cleanEndpoint = endpoint;
+    if (cleanEndpoint.startsWith('/api/')) {
+      cleanEndpoint = cleanEndpoint.substring(4); // حذف '/api'
+    }
+    if (cleanEndpoint.startsWith('api/')) {
+      cleanEndpoint = cleanEndpoint.substring(4); // حذف 'api/'
+    }
+    // اگر endpoint با '/' شروع شد، آن را هم حذف کن
+    if (cleanEndpoint.startsWith('/')) {
+      cleanEndpoint = cleanEndpoint.substring(1);
+    }
+
+    const url = `${this.apiUrl}/${cleanEndpoint}`;
     const headers = this.getHeaders();
 
     console.log(`📤 ${options.method || 'GET'} ${url}`);
@@ -200,7 +204,6 @@ async getLivePrice(symbol) {
   // ============================================
 
   async getTrades(params = {}) {
-    // ✅ افزایش page_size به ۱۰۰۰ برای دریافت تمام تریدها در یک درخواست
     const defaultParams = { page_size: 1000, ...params };
     return this.request('/trading/trades/', {
       params: defaultParams
@@ -356,6 +359,66 @@ async getLivePrice(symbol) {
 
   async getTimeframeReport(params = {}) {
     return this.request('/trading/reports/timeframe/', { params });
+  }
+
+  // ============================================
+  // ✅ گزارش قوانین معاملاتی (اصلاح‌شده)
+  // ============================================
+
+  async getRulesReport(params = {}) {
+    return this.request('/trading/rules/report/', { params });
+  }
+
+  // ============================================
+  // ✅ گزارش‌های ترکیبی و مقایسه‌ای پورتفولیو (جدید)
+  // ============================================
+
+  /**
+   * دریافت داده‌های کامل مقایسه پورتفولیوها
+   * @param {Object} params - پارامترهای فیلتر
+   * @param {string} params.start_date - تاریخ شروع
+   * @param {string} params.end_date - تاریخ پایان
+   * @returns {Promise} داده‌های مقایسه
+   */
+  async getPortfolioComparison(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.start_date) queryParams.append('start_date', params.start_date);
+    if (params.end_date) queryParams.append('end_date', params.end_date);
+
+    const url = `/trading/portfolios/compare/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return this.request(url);
+  }
+
+  /**
+   * دریافت خلاصه مقایسه پورتفولیوها (برای کارت‌ها)
+   * @param {Object} params - پارامترهای فیلتر
+   * @returns {Promise} خلاصه مقایسه
+   */
+  async getPortfolioComparisonSummary(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.start_date) queryParams.append('start_date', params.start_date);
+    if (params.end_date) queryParams.append('end_date', params.end_date);
+
+    const url = `/trading/portfolios/compare/summary/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return this.request(url);
+  }
+
+  /**
+   * دریافت داده‌های نمودار مقایسه‌ای
+   * @param {Object} params - پارامترها
+   * @param {string} params.chart_type - نوع نمودار (cumulative_pnl, radar, bar)
+   * @param {string} params.start_date - تاریخ شروع
+   * @param {string} params.end_date - تاریخ پایان
+   * @returns {Promise} داده‌های نمودار
+   */
+  async getPortfolioComparisonChart(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.chart_type) queryParams.append('chart_type', params.chart_type);
+    if (params.start_date) queryParams.append('start_date', params.start_date);
+    if (params.end_date) queryParams.append('end_date', params.end_date);
+
+    const url = `/trading/portfolios/compare/chart/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return this.request(url);
   }
 
   // ============================================

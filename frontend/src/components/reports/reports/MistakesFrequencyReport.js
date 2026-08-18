@@ -11,6 +11,7 @@ import {
   Tooltip,
   Cell,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const MistakesFrequencyReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -77,23 +78,25 @@ const MistakesFrequencyReport = ({ dateRange, selectedCategory, isDark, trades }
       {mistakes.length > 0 && (
         <div className="chart-wrapper" style={{ margin: '20px 0', height: '250px' }}>
           <h6 style={{ color: isDark ? '#eee' : '#333' }}>فراوانی اشتباهات</h6>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={mistakes} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-              <XAxis dataKey="code" stroke={chartAxisColor} />
-              <YAxis stroke={chartAxisColor} />
-              <Tooltip
-                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#333' }}
-                formatter={(value) => [`${value} بار`, 'تعداد تکرار']}
-              />
-              <Bar dataKey="count" name="تعداد تکرار">
-                {mistakes.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.impact === 'high' ? '#f44336' : entry.impact === 'medium' ? '#ff9800' : '#4caf50'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <ExpandableChart title="نمودار فراوانی اشتباهات">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={mistakes} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+                <XAxis dataKey="code" stroke={chartAxisColor} />
+                <YAxis stroke={chartAxisColor} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                  formatter={(value) => [`${value} بار`, 'تعداد تکرار']}
+                />
+                <Bar dataKey="count" name="تعداد تکرار">
+                  {mistakes.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.impact === 'high' ? '#f44336' : entry.impact === 'medium' ? '#ff9800' : '#4caf50'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </ExpandableChart>
         </div>
       )}
 

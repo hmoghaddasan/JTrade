@@ -11,6 +11,7 @@ import {
   Tooltip,
   Cell,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -62,23 +63,25 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       <h5>🎭 واکنش به سود</h5>
       {/* نمودار واکنش به سود */}
       <div className="chart-wrapper" style={{ margin: '15px 0', height: '200px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={reactionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-            <XAxis dataKey="reaction" stroke={chartAxisColor} />
-            <YAxis stroke={chartAxisColor} />
-            <Tooltip
-              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود']}
-            />
-            <Bar dataKey="avgProfit" name="میانگین سود">
-              {reactionData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.avgProfit >= 0 ? '#4caf50' : '#f44336'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ExpandableChart title="نمودار واکنش به سود">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={reactionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis dataKey="reaction" stroke={chartAxisColor} />
+              <YAxis stroke={chartAxisColor} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود']}
+              />
+              <Bar dataKey="avgProfit" name="میانگین سود">
+                {reactionData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.avgProfit >= 0 ? '#4caf50' : '#f44336'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ExpandableChart>
       </div>
 
       <table className="report-table">
@@ -109,23 +112,25 @@ const ReactionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       <h5>🧠 کنترل احساسات پس از ضرر</h5>
       {/* نمودار کنترل احساسات */}
       <div className="chart-wrapper" style={{ margin: '15px 0', height: '200px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={emotionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-            <XAxis dataKey="emotion" stroke={chartAxisColor} />
-            <YAxis stroke={chartAxisColor} />
-            <Tooltip
-              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود ترید بعدی']}
-            />
-            <Bar dataKey="avgNextProfit" name="میانگین سود ترید بعدی">
-              {emotionData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.avgNextProfit >= 0 ? '#4caf50' : '#f44336'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ExpandableChart title="نمودار کنترل احساسات پس از ضرر">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={emotionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis dataKey="emotion" stroke={chartAxisColor} />
+              <YAxis stroke={chartAxisColor} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود ترید بعدی']}
+              />
+              <Bar dataKey="avgNextProfit" name="میانگین سود ترید بعدی">
+                {emotionData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.avgNextProfit >= 0 ? '#4caf50' : '#f44336'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ExpandableChart>
       </div>
 
       <table className="report-table">

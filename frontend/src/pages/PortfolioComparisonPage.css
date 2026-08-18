@@ -1,0 +1,464 @@
+/* frontend/src/pages/PortfolioComparisonPage.css */
+
+.comparison-page {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+    direction: rtl;
+    font-family: inherit;
+}
+
+/* ===== هدر ===== */
+.comparison-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.btn-back {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-back:hover {
+    background: var(--bg-hover);
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-print {
+    padding: 8px 20px;
+    background: #2e7d32;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-print:hover {
+    background: #1b5e20;
+}
+
+/* ===== انتخاب نوع نمودار ===== */
+.chart-type-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.chart-type-btn {
+    padding: 8px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.chart-type-btn:hover {
+    background: var(--bg-hover);
+}
+
+.chart-type-btn.active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.dark .chart-type-btn.active {
+    background: #303f9f;
+    border-color: #303f9f;
+}
+
+/* ===== اطلاعات ترکیبی ===== */
+.combined-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.combined-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+}
+
+.combined-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.combined-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ===== بدون داده ===== */
+.no-data-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    gap: 12px;
+    text-align: center;
+}
+
+.no-data-message .empty-icon {
+    font-size: 56px;
+}
+
+.no-data-message h3 {
+    font-size: 20px;
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.no-data-message p {
+    font-size: 15px;
+    margin: 0;
+}
+
+/* ===== لودینگ ===== */
+.comparison-page-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+    color: var(--text-secondary);
+}
+
+.comparison-page-loading .loading-spinner {
+    font-size: 48px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ===== واکنش‌گرایی ===== */
+@media (max-width: 768px) {
+    .comparison-page {
+        padding: 12px;
+    }
+
+    .comparison-page-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px;
+    }
+
+    .header-left {
+        flex-wrap: wrap;
+    }
+
+    .header-left h1 {
+        font-size: 18px;
+    }
+
+    .combined-info {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .comparison-page {
+        padding: 8px;
+    }
+
+    .combined-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .combined-value {
+        font-size: 16px;
+    }
+
+    .chart-type-selector {
+        gap: 4px;
+    }
+
+    .chart-type-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* ===== چاپ ===== */
+@media print {
+    .btn-back,
+    .btn-print,
+    .btn-expand-chart,
+    .chart-type-selector {
+        display: none !important;
+    }
+
+    .comparison-page {
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    .comparison-page-header {
+        border: none !important;
+        background: #fff !important;
+        padding: 10px 0 !important;
+    }
+
+    .comparison-summary-cards {
+        break-inside: avoid;
+    }
+
+    .comparison-chart {
+        break-inside: avoid;
+        border: 1px solid #ddd !important;
+    }
+
+    .comparison-table-container {
+        border: 1px solid #ddd !important;
+    }
+
+    .combined-info {
+        border: 1px solid #ddd !important;
+    }
+}
+/* frontend/src/pages/PortfolioComparisonPage.css */
+
+/* ===== دکمه راهنما ===== */
+.guide-toggle-wrapper {
+    text-align: right;
+    margin-bottom: 12px;
+}
+
+.btn-guide-toggle {
+    padding: 8px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-guide-toggle:hover {
+    background: var(--bg-hover);
+}
+
+.btn-guide-toggle.active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.dark .btn-guide-toggle.active {
+    background: #303f9f;
+    border-color: #303f9f;
+}
+
+/* ===== بخش راهنما ===== */
+.guide-container {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.guide-container h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.guide-table-wrapper {
+    overflow-x: auto;
+}
+
+.guide-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    direction: rtl;
+}
+
+.guide-table thead {
+    background: var(--bg-tertiary);
+}
+
+.guide-table th {
+    padding: 10px 14px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.guide-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.guide-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.guide-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+.guide-fa {
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.guide-en {
+    color: var(--text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.guide-formula code {
+    background: var(--bg-tertiary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    direction: ltr;
+    display: inline-block;
+}
+
+.guide-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== واکنش‌گرایی ===== */
+@media (max-width: 768px) {
+    .guide-container {
+        padding: 14px;
+    }
+
+    .guide-table {
+        font-size: 12px;
+        min-width: 500px;
+    }
+
+    .guide-table th,
+    .guide-table td {
+        padding: 6px 10px;
+    }
+
+    .guide-fa,
+    .guide-en {
+        white-space: normal;
+    }
+
+    .btn-guide-toggle {
+        font-size: 13px;
+        padding: 6px 14px;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .guide-table {
+        min-width: 400px;
+    }
+}
+/* frontend/src/pages/PortfolioComparisonPage.css */
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* فاصله بین دکمه‌ها */
+}
+
+.btn-back {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-back:hover {
+    background: var(--bg-hover);
+}

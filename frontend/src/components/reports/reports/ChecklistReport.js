@@ -14,6 +14,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const ChecklistReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -128,45 +129,55 @@ const ChecklistReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       <div className="chart-wrapper" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', margin: '20px 0' }}>
         <div style={{ flex: '1 1 250px', height: '200px' }}>
           <h6 style={{ color: isDark ? '#eee' : '#333' }}>امتیاز کلی</h6>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={donutData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
-                {donutData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              />
-              <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" style={{ fontSize: '20px', fontWeight: 'bold', fill: isDark ? '#fff' : '#333' }}>
-                {overallScore.toFixed(1)}%
-              </text>
-            </PieChart>
-          </ResponsiveContainer>
+          <ExpandableChart title="نمودار امتیاز کلی">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={donutData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="60%" outerRadius="80%">
+                  {donutData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                />
+                <text
+                  x="50%"
+                  y="50%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  style={{ fontSize: '20px', fontWeight: 'bold', fill: isDark ? '#fff' : '#333' }}
+                >
+                  {overallScore.toFixed(1)}%
+                </text>
+              </PieChart>
+            </ResponsiveContainer>
+          </ExpandableChart>
         </div>
         <div style={{ flex: '1 1 350px', height: '200px' }}>
           <h6 style={{ color: isDark ? '#eee' : '#333' }}>درصد رعایت آیتم‌ها</h6>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={checklistData} layout="vertical" margin={{ top: 5, right: 20, left: 60, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-              <XAxis type="number" stroke={chartAxisColor} />
-              <YAxis dataKey="label" type="category" stroke={chartAxisColor} width={100} />
-              <Tooltip
-                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#333' }}
-                formatter={(value) => [`${value}%`, 'درصد رعایت']}
-              />
-              <Bar dataKey="percentage" name="درصد رعایت">
-                {checklistData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={
-                    parseFloat(entry.percentage) >= 70 ? '#4caf50' :
-                    parseFloat(entry.percentage) >= 50 ? '#ff9800' : '#f44336'
-                  } />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <ExpandableChart title="نمودار درصد رعایت آیتم‌ها">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={checklistData} layout="vertical" margin={{ top: 5, right: 20, left: 60, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+                <XAxis type="number" stroke={chartAxisColor} />
+                <YAxis dataKey="label" type="category" stroke={chartAxisColor} width={100} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                  formatter={(value) => [`${value}%`, 'درصد رعایت']}
+                />
+                <Bar dataKey="percentage" name="درصد رعایت">
+                  {checklistData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={
+                      parseFloat(entry.percentage) >= 70 ? '#4caf50' :
+                      parseFloat(entry.percentage) >= 50 ? '#ff9800' : '#f44336'
+                    } />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </ExpandableChart>
         </div>
       </div>
 

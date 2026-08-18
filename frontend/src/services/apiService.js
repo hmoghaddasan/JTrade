@@ -2,13 +2,12 @@
 
 import axios from 'axios';
 
-// ✅ اگر proxy در package.json وجود دارد، baseURL باید خالی باشد
-const API_BASE_URL = '';
+// ✅ baseURL با اسلش انتهایی برای ترکیب صحیح
+const API_BASE_URL = 'http://localhost:8000/api/';
 
 // ایجاد نمونه axios
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,7 +18,6 @@ const apiClient = axios.create({
 // ============================================
 apiClient.interceptors.request.use(
   (config) => {
-    // ✅ اصلاح: ابتدا 'token' و سپس 'accessToken' را بررسی می‌کنیم
     let token = localStorage.getItem('token');
     if (!token || token === 'undefined' || token === 'null') {
       token = localStorage.getItem('accessToken');
@@ -29,12 +27,10 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // اگر داده از نوع FormData است، هدر Content-Type را حذف کن تا axios خودش تنظیم کند
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
 
-    // ✅ دیباگ: آدرس نهایی را در کنسول نشان بده
     console.log('🚀 Request URL:', config.baseURL + config.url);
     console.log('🔑 Token:', token ? '✅ موجود' : '❌ ندارد');
 
@@ -61,7 +57,7 @@ apiClient.interceptors.response.use(
         }
 
         if (refreshToken) {
-          const response = await axios.post(`/api/auth/refresh/`, {
+          const response = await axios.post(`${API_BASE_URL}auth/refresh/`, {
             refresh: refreshToken,
           });
           const { access } = response.data;
@@ -87,20 +83,20 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-// ============================================
-// سرویس‌های پورتفولیو
-// ============================================
-// frontend/src/services/apiService.js
 
+// ============================================
+// سرویس‌های پورتفولیو (با مسیرهای صحیح - بدون اسلش ابتدایی)
+// ============================================
 export const portfolioService = {
-  getPortfolios: () => apiClient.get('/api/trading/portfolios/'),
-  createPortfolio: (data) => apiClient.post('/api/trading/portfolios/', data),
-  getPortfolio: (id) => apiClient.get(`/api/trading/portfolios/${id}/`),
-  updatePortfolio: (id, data) => apiClient.put(`/api/trading/portfolios/${id}/`, data),
-  deletePortfolio: (id) => apiClient.delete(`/api/trading/portfolios/${id}/`),
-  getPortfolioAnalytics: (id) => apiClient.get(`/api/trading/portfolios/${id}/analytics/`),
-  getCombinedAnalytics: () => apiClient.get('/api/trading/portfolios/combined-analytics/'),
+  getPortfolios: () => apiClient.get('trading/portfolios/'),
+  createPortfolio: (data) => apiClient.post('trading/portfolios/', data),
+  getPortfolio: (id) => apiClient.get(`trading/portfolios/${id}/`),
+  updatePortfolio: (id, data) => apiClient.put(`trading/portfolios/${id}/`, data),
+  deletePortfolio: (id) => apiClient.delete(`trading/portfolios/${id}/`),
+  getPortfolioAnalytics: (id) => apiClient.get(`trading/portfolios/${id}/analytics/`),
+  getCombinedAnalytics: () => apiClient.get('trading/portfolios/combined-analytics/'),
 };
+
 // ✅ برای دسترسی در کنسول (دیباگ)
 window.apiClient = apiClient;
 

@@ -11,6 +11,7 @@ import {
   Tooltip,
   Cell,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const SleepNutritionReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -64,23 +65,25 @@ const SleepNutritionReport = ({ dateRange, selectedCategory, isDark, trades }) =
       <h5>😴 کیفیت خواب</h5>
       {/* نمودار خواب */}
       <div className="chart-wrapper" style={{ margin: '15px 0', height: '200px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={sleepData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-            <XAxis dataKey="quality" stroke={chartAxisColor} />
-            <YAxis stroke={chartAxisColor} />
-            <Tooltip
-              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              formatter={(value) => [`$${value}`, 'سود کل']}
-            />
-            <Bar dataKey="profit" name="سود کل">
-              {sleepData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ExpandableChart title="نمودار تأثیر کیفیت خواب بر سود">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={sleepData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis dataKey="quality" stroke={chartAxisColor} />
+              <YAxis stroke={chartAxisColor} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`$${value}`, 'سود کل']}
+              />
+              <Bar dataKey="profit" name="سود کل">
+                {sleepData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ExpandableChart>
       </div>
 
       <table className="report-table">
@@ -111,23 +114,25 @@ const SleepNutritionReport = ({ dateRange, selectedCategory, isDark, trades }) =
       <h5>🍽️ وضعیت تغذیه</h5>
       {/* نمودار تغذیه */}
       <div className="chart-wrapper" style={{ margin: '15px 0', height: '200px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={nutritionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-            <XAxis dataKey="status" stroke={chartAxisColor} />
-            <YAxis stroke={chartAxisColor} />
-            <Tooltip
-              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              formatter={(value) => [`$${value}`, 'سود کل']}
-            />
-            <Bar dataKey="profit" name="سود کل">
-              {nutritionData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ExpandableChart title="نمودار تأثیر تغذیه بر سود">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={nutritionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis dataKey="status" stroke={chartAxisColor} />
+              <YAxis stroke={chartAxisColor} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`$${value}`, 'سود کل']}
+              />
+              <Bar dataKey="profit" name="سود کل">
+                {nutritionData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ExpandableChart>
       </div>
 
       <table className="report-table">

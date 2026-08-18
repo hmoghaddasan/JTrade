@@ -1,0 +1,113 @@
+/* frontend/src/components/portfolio/ComparisonFilter.css */
+
+.comparison-filter {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.filter-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 120px;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-input {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 1px;
+}
+
+.btn-filter-apply {
+    padding: 8px 20px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-filter-apply:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.btn-filter-reset {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-filter-reset:hover {
+    background: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+    .comparison-filter {
+        padding: 12px 16px;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    .filter-actions {
+        justify-content: stretch;
+    }
+
+    .btn-filter-apply,
+    .btn-filter-reset {
+        flex: 1;
+        text-align: center;
+    }
+}

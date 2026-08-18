@@ -1,0 +1,894 @@
+/* frontend/src/components/reports/AdvancedMetricsReport.css */
+
+.metrics-report {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  direction: rtl;
+  font-family: 'Vazirmatn', 'IRANSans', sans-serif;
+}
+
+/* ============================================
+   هدر صفحه
+   ============================================ */
+.metrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.metrics-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.metrics-header-left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background: var(--bg-tertiary, #f5f5f5);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  color: var(--text-primary, #1a1a2e);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: var(--bg-hover, #e8e8e8);
+}
+
+.metrics-header-right {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-print {
+  padding: 8px 20px;
+  background: #2e7d32;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-print:hover {
+  background: #1b5e20;
+}
+
+/* ============================================
+   اطلاعات پورتفولیو
+   ============================================ */
+.metrics-portfolio-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  flex-wrap: wrap;
+}
+
+.portfolio-label {
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+}
+
+.portfolio-name {
+  font-weight: 600;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.date-range {
+  color: var(--text-secondary, #666);
+  font-size: 13px;
+}
+
+/* ============================================
+   دکمه نمایش فرمول‌ها
+   ============================================ */
+.metrics-formula-toggle {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.btn-toggle-formula {
+  padding: 10px 24px;
+  background: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  color: var(--text-primary, #1a1a2e);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-toggle-formula:hover {
+  background: var(--bg-hover, #f0f0f0);
+}
+
+.btn-toggle-formula.active {
+  background: #1a237e;
+  color: #fff;
+  border-color: #1a237e;
+}
+
+/* ============================================
+   بخش فرمول‌ها
+   ============================================ */
+.metrics-formulas {
+  padding: 20px;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  margin-bottom: 24px;
+}
+
+.metrics-formulas h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.formula-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.formula-item {
+  padding: 16px;
+  background: var(--bg-tertiary, #f8f9fa);
+  border-radius: 10px;
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.formula-item h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.formula-latin {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: var(--text-secondary, #555);
+  padding: 4px 8px;
+  background: var(--bg-secondary, #fff);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  direction: ltr;
+  text-align: left;
+}
+
+.formula-fa {
+  font-size: 13px;
+  color: var(--text-secondary, #555);
+  margin-bottom: 6px;
+}
+
+.formula-desc {
+  font-size: 13px;
+  color: var(--text-secondary, #555);
+  margin-bottom: 6px;
+  border-right: 3px solid #1a237e;
+  padding-right: 8px;
+}
+
+.formula-interpret {
+  font-size: 12px;
+  color: var(--text-secondary, #555);
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color, #ddd);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.formula-interpret .label {
+  font-weight: 500;
+  color: var(--text-primary, #1a1a2e);
+  margin-left: 4px;
+}
+
+/* ============================================
+   جدول شاخص‌ها - بخش اصلی
+   ============================================ */
+.metrics-table-container {
+  margin: 16px 0;
+  overflow-x: auto;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 4px;
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  direction: rtl;
+  min-width: 700px;
+}
+
+.metrics-table thead {
+  background: var(--bg-tertiary, #f5f5f5);
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
+}
+
+.metrics-table th {
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-secondary, #555);
+  white-space: nowrap;
+}
+
+.metrics-table th.metric-name {
+  min-width: 100px;
+}
+
+.metrics-table th.metric-en {
+  min-width: 100px;
+  font-weight: 400;
+  color: var(--text-secondary, #777);
+  font-size: 12px;
+}
+
+.metrics-table th.period-header {
+  min-width: 85px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.metrics-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color, #eee);
+  vertical-align: middle;
+}
+
+.metrics-table tr:last-child td {
+  border-bottom: none;
+}
+
+.metrics-table td.metric-name {
+  font-weight: 500;
+  color: var(--text-primary, #1a1a2e);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.metrics-table td.metric-en {
+  font-size: 11px;
+  color: var(--text-secondary, #777);
+  white-space: nowrap;
+}
+
+.metrics-table td.period-value {
+  text-align: center;
+  min-width: 70px;
+}
+
+/* ============================================
+   محتویات هر سلول جدول
+   ============================================ */
+.value-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 50px;
+}
+
+.value-container .value {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.value-container .status-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.value-container .value-desc {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-secondary, #666);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* ============================================
+   وضعیت‌های رنگی
+   ============================================ */
+.value-container.amazing {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.dark .value-container.amazing {
+  background: #1b3a1b;
+  color: #81c784;
+}
+
+.value-container.excellent {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.dark .value-container.excellent {
+  background: #1a237e;
+  color: #64b5f6;
+}
+
+.value-container.good {
+  background: #f1f8e9;
+  color: #2e7d32;
+}
+
+.dark .value-container.good {
+  background: #1b3a1b;
+  color: #66bb6a;
+}
+
+.value-container.warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.dark .value-container.warning {
+  background: #3e2a00;
+  color: #ffa726;
+}
+
+.value-container.danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark .value-container.danger {
+  background: #3a1a1a;
+  color: #ef5350;
+}
+
+/* ============================================
+   افسانه جدول
+   ============================================ */
+.metrics-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color, #eee);
+  flex-wrap: wrap;
+}
+
+.legend-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #555);
+}
+
+.legend-item {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: var(--bg-tertiary, #f5f5f5);
+  color: var(--text-secondary, #555);
+}
+
+.legend-item.amazing { background: #e8f5e9; color: #1b5e20; }
+.legend-item.excellent { background: #e3f2fd; color: #0d47a1; }
+.legend-item.good { background: #f1f8e9; color: #2e7d32; }
+.legend-item.warning { background: #fff3e0; color: #e65100; }
+.legend-item.danger { background: #ffebee; color: #c62828; }
+
+.dark .legend-item.amazing { background: #1b3a1b; color: #81c784; }
+.dark .legend-item.excellent { background: #1a237e; color: #64b5f6; }
+.dark .legend-item.good { background: #1b3a1b; color: #66bb6a; }
+.dark .legend-item.warning { background: #3e2a00; color: #ffa726; }
+.dark .legend-item.danger { background: #3a1a1a; color: #ef5350; }
+
+/* ============================================
+   بخش نمودارها
+   ============================================ */
+.metrics-charts-section {
+  margin-top: 24px;
+}
+
+.metrics-charts-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary, #1a1a2e);
+}
+
+/* ============================================
+   خلاصه در پایین صفحه
+   ============================================ */
+.metrics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.summary-item {
+  text-align: center;
+  padding: 8px;
+}
+
+.summary-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  margin-bottom: 4px;
+}
+
+.summary-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.summary-value.positive {
+  color: #2e7d32;
+}
+
+.summary-value.negative {
+  color: #c62828;
+}
+
+/* ============================================
+   لودینگ و خطا
+   ============================================ */
+.metrics-report-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  font-size: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.metrics-report-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 12px;
+}
+
+.error-icon {
+  font-size: 48px;
+}
+
+.btn-retry {
+  padding: 10px 24px;
+  background: #1a237e;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-retry:hover {
+  opacity: 0.85;
+}
+
+/* ============================================
+   واکنش‌گرایی - دسکتاپ کوچک
+   ============================================ */
+@media (max-width: 1024px) {
+  .metrics-table th.period-header {
+    min-width: 70px;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .metrics-table td {
+    padding: 8px 10px;
+  }
+
+  .metrics-table td.metric-name {
+    font-size: 12px;
+  }
+
+  .value-container .value {
+    font-size: 13px;
+  }
+
+  .formula-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* ============================================
+   واکنش‌گرایی - تبلت
+   ============================================ */
+@media (max-width: 768px) {
+  .metrics-report {
+    padding: 12px;
+  }
+
+  .metrics-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px;
+  }
+
+  .metrics-header-left {
+    flex-wrap: wrap;
+  }
+
+  .metrics-header-left h1 {
+    font-size: 18px;
+  }
+
+  .metrics-header-right {
+    justify-content: flex-start;
+  }
+
+  .formula-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* ===== جدول: حالت پاسخگو با اسکرول افقی ===== */
+  .metrics-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .metrics-table {
+    font-size: 12px;
+    min-width: 600px;
+  }
+
+  .metrics-table th {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .metrics-table th.metric-name {
+    min-width: 70px;
+  }
+
+  .metrics-table th.metric-en {
+    min-width: 70px;
+    font-size: 10px;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 60px;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .metrics-table td {
+    padding: 6px 8px;
+  }
+
+  .metrics-table td.metric-name {
+    font-size: 11px;
+  }
+
+  .metrics-table td.metric-en {
+    font-size: 10px;
+  }
+
+  .value-container {
+    padding: 3px 4px;
+    min-width: 40px;
+  }
+
+  .value-container .value {
+    font-size: 12px;
+  }
+
+  .value-container .value-desc {
+    display: none;
+  }
+
+  .value-container .status-icon {
+    font-size: 12px;
+  }
+
+  .metrics-legend {
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  .legend-item {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+}
+
+/* ============================================
+   واکنش‌گرایی - موبایل
+   ============================================ */
+@media (max-width: 480px) {
+  .metrics-report {
+    padding: 8px;
+  }
+
+  .metrics-header-left h1 {
+    font-size: 16px;
+  }
+
+  .btn-back {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn-print {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  .metrics-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .summary-value {
+    font-size: 16px;
+  }
+
+  .metrics-formulas {
+    padding: 12px;
+  }
+
+  .formula-item {
+    padding: 12px;
+  }
+
+  .formula-item h4 {
+    font-size: 13px;
+  }
+
+  .formula-latin {
+    font-size: 12px;
+  }
+
+  .formula-fa,
+  .formula-desc {
+    font-size: 12px;
+  }
+
+  .formula-interpret {
+    font-size: 11px;
+  }
+
+  /* ===== جدول: حالت کارت برای موبایل ===== */
+  .metrics-table-container {
+    border-radius: 8px;
+    padding: 2px;
+  }
+
+  .metrics-table {
+    font-size: 11px;
+    min-width: 450px;
+  }
+
+  .metrics-table th {
+    padding: 6px 6px;
+    font-size: 10px;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 45px;
+    font-size: 10px;
+    padding: 4px 4px;
+  }
+
+  .metrics-table td {
+    padding: 4px 6px;
+  }
+
+  .metrics-table td.metric-name {
+    font-size: 10px;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 60px;
+  }
+
+  .metrics-table td.metric-en {
+    font-size: 9px;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 50px;
+  }
+
+  .value-container {
+    padding: 2px 3px;
+    min-width: 30px;
+  }
+
+  .value-container .value {
+    font-size: 11px;
+  }
+
+  .value-container .status-icon {
+    font-size: 10px;
+  }
+
+  .metrics-legend {
+    gap: 4px;
+    padding: 6px 8px;
+  }
+
+  .legend-item {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .legend-title {
+    font-size: 11px;
+  }
+}
+
+/* ============================================
+   حالت چاپ
+   ============================================ */
+@media print {
+  .btn-back,
+  .btn-print,
+  .btn-toggle-formula,
+  .metrics-filter {
+    display: none !important;
+  }
+
+  .metrics-report {
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .metrics-header {
+    border: none !important;
+    background: #fff !important;
+    padding: 10px 0 !important;
+  }
+
+  .metrics-header-left h1 {
+    font-size: 18px !important;
+    color: #000 !important;
+  }
+
+  .metrics-formulas {
+    border: 1px solid #ddd !important;
+    background: #f9f9f9 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .formula-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .metrics-summary {
+    border: 1px solid #ddd !important;
+    background: #f9f9f9 !important;
+  }
+
+  .metrics-table-container {
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+  }
+
+  .metrics-table thead {
+    background: #f5f5f5 !important;
+  }
+
+  .metrics-table th {
+    color: #333 !important;
+    border-bottom: 2px solid #333 !important;
+  }
+
+  .metrics-table td {
+    border-bottom: 1px solid #ddd !important;
+  }
+
+  .value-container {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .value-container.amazing {
+    background: #e8f5e9 !important;
+    color: #1b5e20 !important;
+  }
+
+  .value-container.excellent {
+    background: #e3f2fd !important;
+    color: #0d47a1 !important;
+  }
+
+  .value-container.good {
+    background: #f1f8e9 !important;
+    color: #2e7d32 !important;
+  }
+
+  .value-container.warning {
+    background: #fff3e0 !important;
+    color: #e65100 !important;
+  }
+
+  .value-container.danger {
+    background: #ffebee !important;
+    color: #c62828 !important;
+  }
+
+  .metrics-legend {
+    border-top: 1px solid #ddd !important;
+  }
+
+  .legend-item {
+    background: #f5f5f5 !important;
+    color: #333 !important;
+  }
+
+  .metrics-charts-section {
+    page-break-inside: avoid;
+  }
+
+  .chart-container {
+    max-width: 100% !important;
+  }
+}

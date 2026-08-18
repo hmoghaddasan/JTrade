@@ -247,7 +247,7 @@ const ReportDashboard = () => {
   return (
     <div className={`report-dashboard ${isDark ? 'dark' : 'light'}`}>
       <div className="report-header">
-        <h2>📊 تحلیل تریدها</h2>
+        <h2>📊 گزارش های پیشرفته</h2>
         <div className="header-actions">
           <button className="btn-print-report" onClick={handlePrint}>
             🖨️ چاپ گزارش

@@ -25,6 +25,10 @@ const TradeForm = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
 
+  // ===== State برای نمادها =====
+  const [symbolsFromServer, setSymbolsFromServer] = useState([]);
+  const [symbolsLoading, setSymbolsLoading] = useState(true);
+
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
   const [rulesLoading, setRulesLoading] = useState(false);
@@ -38,17 +42,8 @@ const TradeForm = () => {
     max_height: 2000,
   });
 
-  // ===== تبدیل فایل به Base64 =====
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const symbols = [
+  // ===== لیست استاتیک نمادها (Fallback) =====
+  const staticSymbols = [
     'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'USDCHF', 'NZDUSD',
     'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY', 'CADJPY', 'CHFJPY', 'NZDJPY',
     'EURAUD', 'EURCHF', 'GBPAUD', 'GBPCAD', 'AUDCHF', 'AUDCAD',
@@ -69,21 +64,22 @@ const TradeForm = () => {
     'QNTUSD', 'EGLDUSD', 'KASUSD', 'TIAUSD', 'JUPUSD', 'ONDOUSD'
   ];
 
-  const symbolGroups = {
-    'فارکس': symbols.filter(s => ['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD',
+  // ===== گروه‌بندی استاتیک نمادها (Fallback) =====
+  const staticSymbolGroups = {
+    'فارکس': staticSymbols.filter(s => ['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD',
       'EURGBP','EURJPY','GBPJPY','AUDJPY','CADJPY','CHFJPY','NZDJPY',
       'EURAUD','EURCHF','GBPAUD','GBPCAD','AUDCHF','AUDCAD',
       'GBPCHF','GBPNZD','EURNZD','AUDNZD','NZDCAD','NZDCHF',
       'USDHKD','USDSGD','USDSEK','USDNOK','USDDKK','USDZAR',
       'EURSEK','EURNOK','GBPSEK','AUDSEK','CHFNOK','JPYSEK'].includes(s)),
-    'شاخص‌ها': symbols.filter(s => ['NAS100','SPX500','DAX40','UK100','CAC40','STOXX50','AUS200',
+    'شاخص‌ها': staticSymbols.filter(s => ['NAS100','SPX500','DAX40','UK100','CAC40','STOXX50','AUS200',
       'JPN225','US30','US500','US100','HKG50','CHN50','IND50',
       'SGP30','BRA50','RUS50','SAU30','UAE20','TUR30'].includes(s)),
-    'کالاها': symbols.filter(s => ['XAUUSD','XAGUSD','USOIL','UKOIL','XPDUSD','XPTUSD',
+    'کالاها': staticSymbols.filter(s => ['XAUUSD','XAGUSD','USOIL','UKOIL','XPDUSD','XPTUSD',
       'XCUUSD','XALUSD','XZNUSD','XNIUSD','XPBUSD','XSNUSD',
       'CORN','WHEAT','SOYBN','COFFEE','SUGAR','COTTON',
       'COCOA','ORANGE','LUMBER'].includes(s)),
-    'کریپتو': symbols.filter(s => ['BTCUSD','ETHUSD','USDTUSD','BNBUSD','SOLUSD','ADAUSD',
+    'کریپتو': staticSymbols.filter(s => ['BTCUSD','ETHUSD','USDTUSD','BNBUSD','SOLUSD','ADAUSD',
       'XRPUSD','DOTUSD','DOGEUSD','AVAXUSD','MATICUSD','LINKUSD',
       'UNIUSD','ATOMUSD','LTCUSD','BCHUSD','NEARUSD','FILUSD',
       'APTUSD','ARBUSD','OPUSD','SUIUSD','SEIUSD','INJUSD',
@@ -92,6 +88,64 @@ const TradeForm = () => {
       'IMXUSD','EOSUSD','THETAUSD','FTMUSD','XLMUSD','HBARUSD',
       'QNTUSD','EGLDUSD','KASUSD','TIAUSD','JUPUSD','ONDOUSD'].includes(s))
   };
+
+  // ===== تابع تولید گروه‌بندی داینامیک =====
+  const getSymbolGroups = () => {
+    if (symbolsFromServer.length > 0) {
+      // اگر از سرور دریافت شد، نمادها را بر اساس گروه‌بندی استاتیک فیلتر کن
+      const groups = {};
+      for (const [groupName, groupSymbols] of Object.entries(staticSymbolGroups)) {
+        groups[groupName] = groupSymbols.filter(s => symbolsFromServer.includes(s));
+      }
+      // نمادهای جدید که در گروه‌بندی استاتیک نیستند
+      const otherSymbols = symbolsFromServer.filter(s =>
+        !Object.values(staticSymbolGroups).flat().includes(s)
+      );
+      if (otherSymbols.length > 0) {
+        groups['سایر'] = otherSymbols;
+      }
+      return groups;
+    }
+    // Fallback به گروه‌بندی استاتیک
+    return staticSymbolGroups;
+  };
+
+  // ===== تبدیل فایل به Base64 =====
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // ===== بارگذاری نمادها از سرور =====
+  useEffect(() => {
+    const loadSymbols = async () => {
+      setSymbolsLoading(true);
+      try {
+        const response = await RealApiService.getAllSymbols();
+        let symbolList = [];
+        if (Array.isArray(response.data)) {
+          symbolList = response.data.filter(Boolean);
+        } else if (response.data && response.data.results) {
+          symbolList = response.data.results.filter(Boolean);
+        }
+        if (symbolList.length > 0) {
+          setSymbolsFromServer(symbolList);
+        } else {
+          setSymbolsFromServer(staticSymbols);
+        }
+      } catch (error) {
+        console.error('❌ Error loading symbols from server:', error);
+        setSymbolsFromServer(staticSymbols);
+      } finally {
+        setSymbolsLoading(false);
+      }
+    };
+    loadSymbols();
+  }, []);
 
   const [formData, setFormData] = useState({
     trade_date: new Date().toISOString().split('T')[0],
@@ -387,7 +441,6 @@ const TradeForm = () => {
     const ruleCheckIds = checkedRules.filter(r => r.checked).map(r => r.id);
     const groupId = parseInt(formData.group_id);
 
-    // اگر پورتفولیو انتخاب نشده، از پیش‌فرض استفاده کن
     let portfolioId = formData.portfolio_id;
     if (!portfolioId && portfolios.length > 0) {
       const defaultPortfolio = portfolios.find(p => p.is_default) || portfolios[0];
@@ -474,68 +527,81 @@ const TradeForm = () => {
     </div>
   );
 
-  const renderStep2 = () => (
-    <div className="form-step">
-      <h3>📈 جلسه و نماد</h3>
-      <div className="form-row">
-        <div className="form-group">
-          <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
-          <select name="symbol" value={formData.symbol} onChange={handleChange} required disabled={showLimitWarning}>
-            <option value="">انتخاب نماد</option>
-            {Object.entries(symbolGroups).map(([group, items]) => (
-              <optgroup key={group} label={group}>
-                {items.map(s => <option key={s} value={s}>{s}</option>)}
-              </optgroup>
-            ))}
-          </select>
+  const renderStep2 = () => {
+    const symbolGroups = getSymbolGroups();
+    return (
+      <div className="form-step">
+        <h3>📈 جلسه و نماد</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
+            <select name="symbol" value={formData.symbol} onChange={handleChange} required disabled={showLimitWarning || symbolsLoading}>
+              {symbolsLoading ? (
+                <option value="">⏳ در حال بارگذاری نمادها...</option>
+              ) : (
+                <>
+                  <option value="">انتخاب نماد</option>
+                  {Object.entries(symbolGroups).map(([group, items]) => (
+                    items.length > 0 && (
+                      <optgroup key={group} label={group}>
+                        {items.map(s => <option key={s} value={s}>{s}</option>)}
+                      </optgroup>
+                    )
+                  ))}
+                </>
+              )}
+            </select>
+            {symbolsLoading && <span className="field-hint">⏳ در حال بارگذاری لیست نمادها...</span>}
+            {!symbolsLoading && symbolsFromServer.length > 0 && <span className="field-hint">🔍 {symbolsFromServer.length} نماد موجود است.</span>}
+          </div>
+          <div className="form-group">
+            <label>نوع ترید <span style={{ color: 'red' }}>(اجباری)</span></label>
+            <select name="trade_type" value={formData.trade_type} onChange={handleChange} disabled={showLimitWarning}>
+              <option value="Buy">خرید (Buy)</option><option value="Sell">فروش (Sell)</option>
+            </select>
+          </div>
         </div>
-        <div className="form-group">
-          <label>نوع ترید <span style={{ color: 'red' }}>(اجباری)</span></label>
-          <select name="trade_type" value={formData.trade_type} onChange={handleChange} disabled={showLimitWarning}>
-            <option value="Buy">خرید (Buy)</option><option value="Sell">فروش (Sell)</option>
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <label>نوع جلسه</label>
+            <select name="session_type" value={formData.session_type} onChange={handleChange} disabled={showLimitWarning}>
+              <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>دسته‌بندی <span style={{ color: 'red' }}>(اجباری)</span></label>
+            <select name="group_id" value={formData.group_id} onChange={handleChange} required disabled={showLimitWarning}>
+              <option value="">انتخاب دسته‌بندی</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.icon || '📁'} {cat.group_name}
+                </option>
+              ))}
+            </select>
+            {!formData.group_id && <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>پورتفولیو</label>
+            <select name="portfolio_id" value={formData.portfolio_id || ''} onChange={handleChange} disabled={showLimitWarning}>
+              <option value="">بدون پورتفولیو</option>
+              {portfolios.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.icon || '📊'} {p.name} {p.is_default ? '(پیش‌فرض)' : ''}
+                </option>
+              ))}
+            </select>
+            <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
+          </div>
+          <div className="form-group">
+            <label>یادداشت پروفایل هفتگی</label>
+            <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" disabled={showLimitWarning} />
+          </div>
         </div>
       </div>
-      <div className="form-row">
-        <div className="form-group">
-          <label>نوع جلسه</label>
-          <select name="session_type" value={formData.session_type} onChange={handleChange} disabled={showLimitWarning}>
-            <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label>دسته‌بندی <span style={{ color: 'red' }}>(اجباری)</span></label>
-          <select name="group_id" value={formData.group_id} onChange={handleChange} required disabled={showLimitWarning}>
-            <option value="">انتخاب دسته‌بندی</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>
-                {cat.icon || '📁'} {cat.group_name}
-              </option>
-            ))}
-          </select>
-          {!formData.group_id && <span className="field-error">لطفاً یک دسته‌بندی انتخاب کنید</span>}
-        </div>
-      </div>
-      <div className="form-row">
-        <div className="form-group">
-          <label>پورتفولیو</label>
-          <select name="portfolio_id" value={formData.portfolio_id || ''} onChange={handleChange} disabled={showLimitWarning}>
-            <option value="">بدون پورتفولیو</option>
-            {portfolios.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.icon || '📊'} {p.name} {p.is_default ? '(پیش‌فرض)' : ''}
-              </option>
-            ))}
-          </select>
-          <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
-        </div>
-        <div className="form-group">
-          <label>یادداشت پروفایل هفتگی</label>
-          <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" disabled={showLimitWarning} />
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderStep3 = () => {
     const emotions = [

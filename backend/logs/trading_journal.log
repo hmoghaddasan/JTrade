@@ -257683,3 +257683,170 @@ AttributeError: 'TradeListSerializer' object has no attribute 'get_screenshot'
 ERROR 2026-08-17 00:27:53,682 basehttp 32512 15092 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 28808
 ERROR 2026-08-17 00:27:53,699 basehttp 32512 27932 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 28808
 ERROR 2026-08-17 00:27:53,722 basehttp 32512 25204 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 28808
+ERROR 2026-08-17 17:34:49,754 sms 12756 29948 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+ERROR 2026-08-18 17:12:00,639 log 20968 32092 Internal Server Error: /api/trading/portfolios/compare/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1794, in get
+    data = engine.get_comparison_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 208, in get_comparison_data
+    all_metrics = self.get_all_portfolios_metrics()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 132, in get_all_portfolios_metrics
+    result.append(self.get_portfolio_metrics(portfolio))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 117, in get_portfolio_metrics
+    metrics = self._calculate_metrics_for_trades(trades)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 76, in _calculate_metrics_for_trades
+    expectancy = (avg_profit * (win_count / total_trades)) - (
+                  ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'decimal.Decimal' and 'float'
+ERROR 2026-08-18 17:12:00,673 log 20968 27436 Internal Server Error: /api/trading/portfolios/compare/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1794, in get
+    data = engine.get_comparison_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 208, in get_comparison_data
+    all_metrics = self.get_all_portfolios_metrics()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 132, in get_all_portfolios_metrics
+    result.append(self.get_portfolio_metrics(portfolio))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 117, in get_portfolio_metrics
+    metrics = self._calculate_metrics_for_trades(trades)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 76, in _calculate_metrics_for_trades
+    expectancy = (avg_profit * (win_count / total_trades)) - (
+                  ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'decimal.Decimal' and 'float'
+ERROR 2026-08-18 17:12:00,688 log 20968 32056 Internal Server Error: /api/trading/portfolios/compare/summary/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1812, in get
+    data = engine.get_comparison_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 208, in get_comparison_data
+    all_metrics = self.get_all_portfolios_metrics()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 132, in get_all_portfolios_metrics
+    result.append(self.get_portfolio_metrics(portfolio))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 117, in get_portfolio_metrics
+    metrics = self._calculate_metrics_for_trades(trades)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 76, in _calculate_metrics_for_trades
+    expectancy = (avg_profit * (win_count / total_trades)) - (
+                  ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'decimal.Decimal' and 'float'
+ERROR 2026-08-18 17:12:00,688 log 20968 30600 Internal Server Error: /api/trading/portfolios/compare/summary/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1812, in get
+    data = engine.get_comparison_data()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 208, in get_comparison_data
+    all_metrics = self.get_all_portfolios_metrics()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 132, in get_all_portfolios_metrics
+    result.append(self.get_portfolio_metrics(portfolio))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 117, in get_portfolio_metrics
+    metrics = self._calculate_metrics_for_trades(trades)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\portfolio_comparison.py", line 76, in _calculate_metrics_for_trades
+    expectancy = (avg_profit * (win_count / total_trades)) - (
+                  ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'decimal.Decimal' and 'float'
+ERROR 2026-08-18 17:12:00,721 basehttp 20968 32092 "GET /api/trading/portfolios/compare/ HTTP/1.1" 500 139943
+ERROR 2026-08-18 17:12:00,743 basehttp 20968 27436 "GET /api/trading/portfolios/compare/ HTTP/1.1" 500 139943
+ERROR 2026-08-18 17:12:00,773 basehttp 20968 32056 "GET /api/trading/portfolios/compare/summary/ HTTP/1.1" 500 140317
+ERROR 2026-08-18 17:12:00,803 basehttp 20968 30600 "GET /api/trading/portfolios/compare/summary/ HTTP/1.1" 500 140317
+ERROR 2026-08-18 17:36:39,605 sms 29944 26436 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+ERROR 2026-08-18 22:21:20,947 sms 29944 32540 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams

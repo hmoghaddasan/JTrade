@@ -11,6 +11,7 @@ import {
   Tooltip,
   Cell,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -78,23 +79,25 @@ const ExecutionQualityReport = ({ dateRange, selectedCategory, isDark, trades })
       {/* بخش نمودار */}
       <div className="chart-wrapper" style={{ margin: '20px 0', height: '250px' }}>
         <h6 style={{ color: isDark ? '#eee' : '#333' }}>میانگین سود در هر سطح کیفیت</h6>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-            <XAxis dataKey="label" stroke={chartAxisColor} />
-            <YAxis stroke={chartAxisColor} />
-            <Tooltip
-              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود']}
-            />
-            <Bar dataKey="avgProfit" name="میانگین سود">
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.avgProfit >= 0 ? '#4caf50' : '#f44336'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ExpandableChart title="نمودار میانگین سود بر اساس کیفیت">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+              <XAxis dataKey="label" stroke={chartAxisColor} />
+              <YAxis stroke={chartAxisColor} />
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value) => [`$${value.toFixed(2)}`, 'میانگین سود']}
+              />
+              <Bar dataKey="avgProfit" name="میانگین سود">
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.avgProfit >= 0 ? '#4caf50' : '#f44336'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ExpandableChart>
       </div>
 
       <table className="report-table">

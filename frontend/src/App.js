@@ -10,6 +10,7 @@ import ConsultationProgressWidget from './components/ai/ConsultationProgressWidg
 import SubscriptionRenewal from './components/auth/SubscriptionRenewal';
 import PaymentVerify from './components/PaymentVerify';
 import RealApiService from './services/realApiService';
+import PortfolioComparisonPage from './pages/PortfolioComparisonPage';
 
 // Auth Components
 import LoginStep1 from './components/auth/LoginStep1';
@@ -29,6 +30,9 @@ import TradeDetail from './components/TradeDetail';
 // Reports Components
 import ReportDashboard from './components/reports/ReportDashboard';
 
+// ✅ Advanced Metrics - جدید
+import AdvancedMetricsReport from './components/reports/AdvancedMetricsReport';
+
 // Analytics
 import AnalyticsDashboard from './components/analytics/AnalyticsDashboard';
 
@@ -40,6 +44,7 @@ import ConsultationCompletedBanner from './components/ai/ConsultationCompletedBa
 
 import PortfolioList from './pages/Admin/Portfolios/PortfolioList';
 import { PortfolioProvider } from './contexts/PortfolioContext';
+
 // ============================================
 // ✅ Admin Panel Components
 // ============================================
@@ -63,6 +68,7 @@ import AdminMessageList from './pages/Admin/Messages/MessageList';
 import VersionList from './pages/Admin/Versions/VersionList';
 import Settings from './pages/Admin/Settings/Settings';
 import PlanList from './pages/Admin/Subscriptions/PlanList';
+
 // Messaging Components
 import MessageList from './components/messaging/MessageList';
 import MessageForm from './components/messaging/MessageForm';
@@ -76,11 +82,11 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <ConsultationProvider>
-            <PortfolioProvider>  {/* ✅ اضافه شد */}
+            <PortfolioProvider>
               <Router>
                 <AppRoutes />
-                  <ConsultationProgressWidget />
-                  <ConsultationCompletedBanner />
+                <ConsultationProgressWidget />
+                <ConsultationCompletedBanner />
               </Router>
             </PortfolioProvider>
           </ConsultationProvider>
@@ -121,7 +127,6 @@ function AppRoutes() {
           setIsSubscriptionExpired(true);
         }
 
-        // ✅ اگر کاربر ادمین است یا در صفحات ادمین است، کاری نکن
         if (status.is_admin || location.pathname.startsWith('/admin')) {
           return;
         }
@@ -146,10 +151,9 @@ function AppRoutes() {
   }, [isAuthenticated, loading, location.pathname, navigate]);
 
   // ============================================
-  // ✅ اصلاح: هدایت کاربر - صفحات ادمین استثنا
+  // هدایت کاربر - صفحات ادمین استثنا
   // ============================================
   useEffect(() => {
-    // اگر کاربر ادمین است، هیچ ری‌دایرکتی انجام نده
     if (user?.is_admin) {
       console.log('👑 Admin user detected, skipping redirect');
       return;
@@ -161,7 +165,6 @@ function AppRoutes() {
     const isProfilePage = location.pathname === '/profile';
     const isAdminPage = location.pathname.startsWith('/admin');
 
-    // ✅ اگر کاربر در صفحات ادمین، پرداخت یا تمدید است، ری‌دایرکت نکن
     if (isPaymentPage || isRenewPage || isAdminPage) {
       console.log('⏭️ Skipping redirect on payment/renew/admin page');
       return;
@@ -187,7 +190,6 @@ function AppRoutes() {
   // جلوگیری از خروج از صفحات ادمین
   // ============================================
   useEffect(() => {
-    // ✅ اگر کاربر ادمین است، هیچ محدودیتی اعمال نکن
     if (user?.is_admin) {
       return;
     }
@@ -246,6 +248,10 @@ function AppRoutes() {
         <Route path="/trades/edit/:id" element={<TradeEditForm />} />
         <Route path="/trades/:id" element={<TradeDetail />} />
         <Route path="/reports" element={<ReportDashboard />} />
+
+        {/* ===== ✅ مسیر شاخص‌های پیشرفته ===== */}
+        <Route path="/advanced-metrics" element={<AdvancedMetricsReport />} />
+        <Route path="/portfolio-comparison" element={<PortfolioComparisonPage />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
         <Route path="/messages" element={<MessageList />} />
         <Route path="/messages/new" element={<MessageForm />} />
@@ -254,7 +260,7 @@ function AppRoutes() {
         <Route path="/ai-consultation/detail/:id" element={<AIConsultationDetail />} />
 
         {/* ========================================== */}
-        {/* ✅ مسیرهای پنل ادمین */}
+        {/* مسیرهای پنل ادمین */}
         {/* ========================================== */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />

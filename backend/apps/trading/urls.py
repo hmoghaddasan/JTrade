@@ -52,12 +52,12 @@ urlpatterns = [
     path('analytics/', views.AnalyticsView.as_view(), name='analytics'),
 
     # ============================================
-    # ✅ تحلیل مالی احساسات (Emotional P&L)
+    # تحلیل مالی احساسات (Emotional P&L)
     # ============================================
     path('analytics/emotional-pnl/', views.EmotionalPnLView.as_view(), name='emotional_pnl'),
 
     # ============================================
-    # ✅ قوانین معاملاتی (Trading Rules)
+    # قوانین معاملاتی (Trading Rules)
     # ============================================
     path('rules/', views.TradingRuleListView.as_view(), name='rules_list'),
     path('rules/create/', views.TradingRuleCreateView.as_view(), name='rules_create'),
@@ -66,7 +66,7 @@ urlpatterns = [
     path('rules/report/', views.RulesReportView.as_view(), name='rules_report'),
 
     # ============================================
-    # ✅ لیست مدل‌های هوش مصنوعی
+    # لیست مدل‌های هوش مصنوعی
     # ============================================
     path('ai/models/', views.AvailableModelsView.as_view(), name='ai_models'),
 
@@ -81,7 +81,7 @@ urlpatterns = [
     path('ai-consult-stream/', views.AIConsultationStreamView.as_view(), name='ai_consult_stream'),
 
     # ============================================
-    # ✅ وضعیت مشاوره (برای پولینگ)
+    # وضعیت مشاوره (برای پولینگ)
     # ============================================
     path('ai-consult/<int:pk>/status/', views.AIConsultationStatusView.as_view(), name='ai_consult_status'),
 
@@ -108,16 +108,23 @@ urlpatterns = [
     path('admin/ai/prompts/<int:pk>/', views.AIPromptVersionDetailView.as_view(), name='ai_prompt_detail'),
 
     # ============================================
-    # ✅ قیمت لحظه‌ای (جدید)
+    # قیمت لحظه‌ای
     # ============================================
     path('live-price/<str:symbol>/', views.LivePriceView.as_view(), name='live_price'),
+
+    # ============================================
+    # ✅ شاخص‌های حرفه‌ای (Advanced Metrics) - جدید
+    # ============================================
+    path('metrics/', views.AdvancedMetricsView.as_view(), name='advanced_metrics'),
+    path('metrics/trend/', views.MetricsTrendView.as_view(), name='metrics_trend'),
+    path('metrics/summary/', views.MetricsSummaryView.as_view(), name='metrics_summary'),
 
     # ============================================
     # خروجی‌ها
     # ============================================
     path('export/pdf/<int:pk>/', views.ExportTradePDFView.as_view(), name='export_pdf'),
     path('export/excel/', views.ExportTradeExcelView.as_view(), name='export_excel'),
-    path('ai-consult/<int:pk>/status/', views.AIConsultationStatusView.as_view(), name='ai_consult_status'),
+
     # ============================================
     # مدیریت پورتفولیوها
     # ============================================
@@ -125,4 +132,11 @@ urlpatterns = [
     path('portfolios/<int:pk>/', views.PortfolioDetailView.as_view(), name='portfolio_detail'),
     path('portfolios/<int:pk>/analytics/', views.PortfolioAnalyticsView.as_view(), name='portfolio_analytics'),
     path('portfolios/combined-analytics/', views.CombinedPortfolioAnalyticsView.as_view(), name='combined_portfolio_analytics'),
+
+    # ============================================
+    # ✅ گزارش‌های ترکیبی و مقایسه‌ای پورتفولیو (جدید)
+    # ============================================
+    path('portfolios/compare/', views.PortfolioComparisonView.as_view(), name='portfolio_compare'),
+    path('portfolios/compare/summary/', views.PortfolioComparisonSummaryView.as_view(), name='portfolio_compare_summary'),
+    path('portfolios/compare/chart/', views.PortfolioComparisonChartView.as_view(), name='portfolio_compare_chart'),
 ]

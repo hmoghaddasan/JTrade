@@ -1,0 +1,626 @@
+/* frontend/src/components/reports/MetricsTable.css */
+
+.metrics-table-container {
+  margin: 16px 0;
+  overflow-x: auto;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 4px;
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  direction: rtl;
+  min-width: auto;
+  table-layout: auto;
+}
+
+.metrics-table thead {
+  background: var(--bg-tertiary, #f5f5f5);
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
+}
+
+.metrics-table th {
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-secondary, #555);
+  font-size: 13px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.metrics-table th.metric-name {
+  text-align: right;
+  font-size: 13px;
+  padding: 12px 20px;
+  white-space: nowrap;
+  min-width: 240px;
+}
+
+.metrics-table th.period-header {
+  min-width: 100px;
+  font-size: 13px;
+  padding: 12px 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.metrics-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color, #eee);
+  vertical-align: middle;
+}
+
+.metrics-table tr:last-child td {
+  border-bottom: none;
+}
+
+.metrics-table td.metric-name {
+  font-weight: 500;
+  color: var(--text-primary, #1a1a2e);
+  font-size: 13px;
+  white-space: nowrap;
+  padding: 10px 20px;
+  text-align: right;
+  min-width: 240px;
+}
+
+.metrics-table td.period-value {
+  text-align: center;
+  padding: 10px 12px;
+  min-width: 100px;
+}
+
+.value-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 60px;
+  width: 100%;
+}
+
+.value-container .value {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.value-container .status-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.value-container .value-desc {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary, #666);
+  max-width: 100%;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ============================================
+   وضعیت‌های رنگی - مطابق انتخاب شما
+   ============================================ */
+
+/* ===== استثنایی (Amazing) - rgb(0,255,0) ===== */
+.value-container.amazing {
+  background: #00FF00 !important;
+  color: #0a3a0a !important;
+  font-weight: 600;
+}
+
+.dark .value-container.amazing {
+  background: #00CC00 !important;
+  color: #003300 !important;
+}
+
+/* ===== عالی (Excellent) - آبی ===== */
+.value-container.excellent {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.dark .value-container.excellent {
+  background: #1a237e;
+  color: #64b5f6;
+}
+
+/* ===== خوب (Good) - rgb(204,255,204) ===== */
+.value-container.good {
+  background: #CCFFCC;
+  color: #2e7d32;
+}
+
+.dark .value-container.good {
+  background: #1b3a1b;
+  color: #66bb6a;
+}
+
+/* ===== متوسط (Warning) - نارنجی ===== */
+.value-container.warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.dark .value-container.warning {
+  background: #3e2a00;
+  color: #ffa726;
+}
+
+/* ===== نیاز به بهبود (Danger) - قرمز ===== */
+.value-container.danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark .value-container.danger {
+  background: #3a1a1a;
+  color: #ef5350;
+}
+
+/* ============================================
+   افسانه - مطابق رنگ‌های جدید
+   ============================================ */
+.metrics-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-color, #eee);
+  flex-wrap: wrap;
+}
+
+.legend-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #555);
+}
+
+.legend-item.amazing {
+  background: #00FF00 !important;
+  color: #0a3a0a !important;
+  border: 1px solid #00AA00;
+}
+
+.dark .legend-item.amazing {
+  background: #00CC00 !important;
+  color: #003300 !important;
+  border: 1px solid #009900;
+}
+
+.legend-item.excellent {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.legend-item.good {
+  background: #CCFFCC;
+  color: #2e7d32;
+}
+
+.legend-item.warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.legend-item.danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark .legend-item.excellent {
+  background: #1a237e;
+  color: #64b5f6;
+}
+
+.dark .legend-item.good {
+  background: #1b3a1b;
+  color: #66bb6a;
+}
+
+.dark .legend-item.warning {
+  background: #3e2a00;
+  color: #ffa726;
+}
+
+.dark .legend-item.danger {
+  background: #3a1a1a;
+  color: #ef5350;
+}
+
+/* ============================================
+   واکنش‌گرایی - لپ‌تاپ و دسکتاپ
+   ============================================ */
+@media (min-width: 1024px) {
+  .metrics-table th.metric-name {
+    min-width: 300px;
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .metrics-table td.metric-name {
+    min-width: 300px;
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 130px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .metrics-table td.period-value {
+    min-width: 130px;
+    padding: 10px 20px;
+  }
+
+  .value-container {
+    padding: 8px 16px;
+    min-width: 80px;
+    gap: 4px;
+  }
+
+  .value-container .value {
+    font-size: 16px;
+  }
+
+  .value-container .value-desc {
+    font-size: 12px;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.5;
+  }
+}
+
+/* ============================================
+   تبلت
+   ============================================ */
+@media (max-width: 1023px) and (min-width: 769px) {
+  .metrics-table th.metric-name {
+    min-width: 200px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .metrics-table td.metric-name {
+    min-width: 200px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 100px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .metrics-table td.period-value {
+    min-width: 100px;
+    padding: 8px 12px;
+  }
+
+  .value-container {
+    padding: 6px 10px;
+    min-width: 60px;
+  }
+
+  .value-container .value {
+    font-size: 14px;
+  }
+
+  .value-container .value-desc {
+    font-size: 10px;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+}
+
+/* ============================================
+   تبلت کوچک
+   ============================================ */
+@media (max-width: 768px) {
+  .metrics-table-container {
+    border-radius: 8px;
+    padding: 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .metrics-table {
+    font-size: 12px;
+    min-width: 650px;
+  }
+
+  .metrics-table th {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .metrics-table th.metric-name {
+    min-width: 160px;
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 80px;
+    font-size: 11px;
+    padding: 8px 8px;
+  }
+
+  .metrics-table td {
+    padding: 6px 8px;
+  }
+
+  .metrics-table td.metric-name {
+    font-size: 12px;
+    min-width: 160px;
+    padding: 6px 14px;
+    white-space: nowrap;
+  }
+
+  .metrics-table td.period-value {
+    min-width: 80px;
+    padding: 6px 8px;
+  }
+
+  .value-container {
+    padding: 4px 8px;
+    min-width: 50px;
+  }
+
+  .value-container .value {
+    font-size: 13px;
+  }
+
+  .value-container .value-desc {
+    font-size: 9px;
+    display: block;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .value-container .status-icon {
+    font-size: 12px;
+  }
+
+  .metrics-legend {
+    gap: 6px;
+    padding: 8px 14px;
+  }
+
+  .legend-item {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+}
+
+/* ============================================
+   موبایل
+   ============================================ */
+@media (max-width: 480px) {
+  .metrics-table-container {
+    border-radius: 6px;
+    padding: 0;
+  }
+
+  .metrics-table {
+    font-size: 11px;
+    min-width: 500px;
+  }
+
+  .metrics-table th {
+    padding: 6px 6px;
+    font-size: 10px;
+  }
+
+  .metrics-table th.metric-name {
+    min-width: 120px;
+    padding: 6px 10px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 60px;
+    font-size: 9px;
+    padding: 6px 4px;
+  }
+
+  .metrics-table td {
+    padding: 4px 4px;
+  }
+
+  .metrics-table td.metric-name {
+    font-size: 10px;
+    min-width: 120px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .metrics-table td.period-value {
+    min-width: 60px;
+    padding: 4px 4px;
+  }
+
+  .value-container {
+    padding: 3px 4px;
+    min-width: 35px;
+  }
+
+  .value-container .value {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .value-container .status-icon {
+    font-size: 10px;
+  }
+
+  .value-container .value-desc {
+    font-size: 8px;
+    display: block;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.1;
+  }
+
+  .metrics-legend {
+    gap: 4px;
+    padding: 6px 10px;
+  }
+
+  .legend-item {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .legend-title {
+    font-size: 10px;
+  }
+}
+
+/* ============================================
+   موبایل بسیار کوچک
+   ============================================ */
+@media (max-width: 360px) {
+  .metrics-table {
+    min-width: 400px;
+    font-size: 10px;
+  }
+
+  .metrics-table th.metric-name {
+    min-width: 90px;
+    font-size: 9px;
+    padding: 4px 6px;
+  }
+
+  .metrics-table th.period-header {
+    min-width: 45px;
+    font-size: 8px;
+    padding: 4px 2px;
+  }
+
+  .metrics-table td.metric-name {
+    font-size: 9px;
+    min-width: 90px;
+    padding: 4px 6px;
+  }
+
+  .metrics-table td.period-value {
+    min-width: 45px;
+    padding: 4px 2px;
+  }
+
+  .value-container {
+    padding: 2px 3px;
+    min-width: 28px;
+  }
+
+  .value-container .value {
+    font-size: 10px;
+  }
+
+  .value-container .status-icon {
+    font-size: 8px;
+  }
+
+  .value-container .value-desc {
+    font-size: 7px;
+  }
+}
+
+/* ============================================
+   چاپ
+   ============================================ */
+@media print {
+  .metrics-table-container {
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+  }
+
+  .metrics-table thead {
+    background: #f5f5f5 !important;
+  }
+
+  .metrics-table th {
+    color: #333 !important;
+    border-bottom: 2px solid #333 !important;
+  }
+
+  .metrics-table td {
+    border-bottom: 1px solid #ddd !important;
+  }
+
+  .value-container {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .value-container.amazing {
+    background: #00FF00 !important;
+    color: #0a3a0a !important;
+  }
+
+  .value-container.excellent {
+    background: #e3f2fd !important;
+    color: #0d47a1 !important;
+  }
+
+  .value-container.good {
+    background: #CCFFCC !important;
+    color: #2e7d32 !important;
+  }
+
+  .value-container.warning {
+    background: #fff3e0 !important;
+    color: #e65100 !important;
+  }
+
+  .value-container.danger {
+    background: #ffebee !important;
+    color: #c62828 !important;
+  }
+
+  .metrics-legend {
+    border-top: 1px solid #ddd !important;
+  }
+
+  .legend-item.amazing {
+    background: #00FF00 !important;
+    color: #0a3a0a !important;
+    border: 1px solid #00AA00;
+  }
+
+  .legend-item.excellent { background: #e3f2fd; color: #0d47a1; }
+  .legend-item.good { background: #CCFFCC; color: #2e7d32; }
+  .legend-item.warning { background: #fff3e0; color: #e65100; }
+  .legend-item.danger { background: #ffebee; color: #c62828; }
+}

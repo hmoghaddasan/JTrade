@@ -5,7 +5,8 @@ import apiClient from './apiService';
 // ============================================
 // سرویس قوانین معاملاتی
 // ============================================
-const API_BASE = '/api/trading';
+// ✅ اصلاح: API_BASE بدون 'api/' و بدون اسلش ابتدایی
+const API_BASE = 'trading';
 
 const RuleService = {
   /**
@@ -228,7 +229,7 @@ const RuleService = {
    */
   getTradeRuleCompliance: async (tradeId) => {
     try {
-      const response = await apiClient.get(`${API_BASE}/trades/${tradeId}/`);
+      const response = await apiClient.get(`trading/trades/${tradeId}/`);
       const trade = response.data;
 
       if (!trade.rule_compliance) {

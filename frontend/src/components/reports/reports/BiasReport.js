@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const BiasReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -103,40 +104,44 @@ const BiasReport = ({ dateRange, selectedCategory, isDark, trades }) => {
       <div className="chart-wrapper" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', margin: '20px 0' }}>
         <div style={{ flex: '1 1 300px', height: '250px' }}>
           <h6 style={{ color: isDark ? '#eee' : '#333' }}>توزیع تعداد تریدها</h6>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={80}>
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              />
-              <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: isDark ? '#fff' : '#333' }}>{value}</span>} />
-            </PieChart>
-          </ResponsiveContainer>
+          <ExpandableChart title="نمودار توزیع تعداد تریدها">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={data} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius="80%">
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                />
+                <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: isDark ? '#fff' : '#333' }}>{value}</span>} />
+              </PieChart>
+            </ResponsiveContainer>
+          </ExpandableChart>
         </div>
         <div style={{ flex: '1 1 300px', height: '250px' }}>
           <h6 style={{ color: isDark ? '#eee' : '#333' }}>سود کل هر Bias</h6>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
-              <XAxis dataKey="label" stroke={chartAxisColor} />
-              <YAxis stroke={chartAxisColor} />
-              <Tooltip
-                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#333' }}
-                formatter={(value) => [`$${value}`, 'سود']}
-              />
-              <Bar dataKey="profit" name="سود کل">
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <ExpandableChart title="نمودار سود کل هر Bias">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#444' : '#eee'} />
+                <XAxis dataKey="label" stroke={chartAxisColor} />
+                <YAxis stroke={chartAxisColor} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                  formatter={(value) => [`$${value}`, 'سود']}
+                />
+                <Bar dataKey="profit" name="سود کل">
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#4caf50' : '#f44336'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </ExpandableChart>
         </div>
       </div>
 

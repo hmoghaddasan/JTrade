@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import ExpandableChart from '../../common/ExpandableChart';
 
 const FeelingsHeatmapReport = ({ dateRange, selectedCategory, isDark, trades }) => {
   if (!trades || trades.length === 0) {
@@ -69,21 +70,23 @@ const FeelingsHeatmapReport = ({ dateRange, selectedCategory, isDark, trades }) 
       {/* بخش نمودار پای برای احساسات برتر */}
       <div className="chart-wrapper" style={{ margin: '20px 0', height: '250px' }}>
         <h6 style={{ color: isDark ? '#eee' : '#333' }}>۵ احساس پرتکرار</h6>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={topEmotions} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={80}>
-              {topEmotions.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
-              itemStyle={{ color: isDark ? '#fff' : '#333' }}
-              formatter={(value, name, props) => [`${value} بار`, `${props.payload.label} (نرخ برد: ${props.payload.winRate}%)`]}
-            />
-            <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: isDark ? '#fff' : '#333' }}>{value}</span>} />
-          </PieChart>
-        </ResponsiveContainer>
+        <ExpandableChart title="نمودار احساسات پرتکرار">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={topEmotions} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius="80%">
+                {topEmotions.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ backgroundColor: isDark ? '#333' : '#fff', border: 'none', borderRadius: '8px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#333' }}
+                formatter={(value, name, props) => [`${value} بار`, `${props.payload.label} (نرخ برد: ${props.payload.winRate}%)`]}
+              />
+              <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: isDark ? '#fff' : '#333' }}>{value}</span>} />
+            </PieChart>
+          </ResponsiveContainer>
+        </ExpandableChart>
       </div>
 
       {/* نقشه حرارتی ارتقا یافته با CSS Grid */}

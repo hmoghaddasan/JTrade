@@ -1,0 +1,234 @@
+/* frontend/src/components/portfolio/ComparisonTable.css */
+
+.comparison-table-container {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-top: 16px;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+}
+
+.table-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.table-count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    padding: 4px;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    direction: rtl;
+    min-width: 700px;
+}
+
+.comparison-table thead {
+    background: var(--bg-tertiary);
+}
+
+.comparison-table th {
+    padding: 10px 14px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.comparison-table th.sortable {
+    cursor: pointer;
+}
+
+.comparison-table th.sortable:hover {
+    color: var(--text-primary);
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-right: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.comparison-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.comparison-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+.comparison-table tbody tr.row-default {
+    background: var(--bg-primary);
+    border-left: 3px solid var(--primary-color);
+}
+
+.col-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.name-icon {
+    font-size: 16px;
+}
+
+.name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+}
+
+.badge-default {
+    font-size: 9px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: #e8f5e9;
+    color: #1b5e20;
+    white-space: nowrap;
+}
+
+.dark .badge-default {
+    background: #1b3a1b;
+    color: #81c784;
+}
+
+.col-total_profit.positive {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.col-total_profit.negative {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.col-win_rate.positive {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.col-win_rate.negative {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.col-profit_factor.positive {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.col-profit_factor.warning {
+    color: #e65100;
+    font-weight: 600;
+}
+
+.col-profit_factor.negative {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.col-max_drawdown.positive {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.col-max_drawdown.warning {
+    color: #e65100;
+    font-weight: 600;
+}
+
+.col-max_drawdown.negative {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.col-expectancy.positive {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.col-expectancy.negative {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.table-footer {
+    padding: 10px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+}
+
+.footer-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.comparison-table-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    gap: 8px;
+}
+
+.comparison-table-empty span {
+    font-size: 40px;
+}
+
+.comparison-table-empty p {
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .comparison-table {
+        font-size: 12px;
+        min-width: 500px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 6px 10px;
+    }
+
+    .col-name .name-text {
+        max-width: 80px;
+    }
+
+    .table-header {
+        padding: 10px 14px;
+    }
+
+    .table-title {
+        font-size: 13px;
+    }
+}

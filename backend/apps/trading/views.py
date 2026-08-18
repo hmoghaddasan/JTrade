@@ -7,13 +7,13 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db.models import Sum, Avg, Count, Q, Value, F
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, StreamingHttpResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 import csv
 import io
 import json
 from .models import (
     CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion,
-    AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio  # ✅ Portfolio اضافه شد
+    AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio
 )
 from .serializers import (
     CurrencyPairSerializer,
@@ -30,14 +30,28 @@ from .serializers import (
     TradingRuleSerializer,
     TradeRuleCheckSerializer,
     RulesReportSerializer,
-    PortfolioSerializer,  # ✅ اضافه شد
-    PortfolioDetailSerializer,  # ✅ اضافه شد
-
+    PortfolioSerializer,
+    PortfolioDetailSerializer,
+    MetricsSerializer,
+    MetricsTrendSerializer,
 )
 from .ai_service import AIService, AIFeedbackService, AIAnalyticsService
+from .analytics import AdvancedMetricsCalculator, MetricsCache
 from apps.accounts.permissions import IsAuthenticatedWithSubscription, CanTrade
 from apps.subscriptions.models import UserSubscription
 from django.conf import settings
+
+# ============================================
+# ✅ importهای جدید برای گزارش‌های ترکیبی پورتفولیو
+# ============================================
+from .portfolio_comparison import PortfolioComparisonEngine
+from .comparison_serializers import (
+    ComparisonDataSerializer,
+    ComparisonSummarySerializer,
+    CumulativePnLSeriesSerializer,
+    RadarMetricsSerializer,
+    BarDataItemSerializer,
+)
 
 
 # ============================================
@@ -626,7 +640,8 @@ class AnalyticsView(APIView):
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         total_loss_abs = abs(total_loss)
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = \
+        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / total_loss_abs) if total_loss_abs > 0 else (999 if total_profit > 0 else 0)
@@ -1191,110 +1206,6 @@ class AIConsultationView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# backend/apps/trading/views.py
-
-# ... بقیه کدها بدون تغییر ...
-
-# ============================================
-# ✅ وضعیت مشاوره (برای پولینگ) – اضافه شده
-# ============================================
-class AIConsultationStatusView(APIView):
-    """
-    دریافت وضعیت یک مشاوره خاص (برای پولینگ)
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, pk):
-        try:
-            consultation = AIConsultation.objects.get(id=pk, user=request.user)
-        except AIConsultation.DoesNotExist:
-            return Response(
-                {'error': 'مشاوره یافت نشد'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        response_data = {
-            'id': consultation.id,
-            'status': consultation.status,
-            'created_at': consultation.created_at,
-            'updated_at': consultation.updated_at,
-            'symbol': consultation.symbol,
-        }
-
-        if consultation.status == 'completed':
-            response_data['result'] = {
-                'score': consultation.ai_score,
-                'response': consultation.ai_response,
-                'comparison_stats': consultation.comparison_stats,
-            }
-        elif consultation.status == 'failed':
-            response_data['error'] = consultation.ai_response.get('error', 'خطای ناشناخته')
-
-        return Response(response_data)
-
-# ... بقیه کدها بدون تغییر ...
-# ============================================
-# ✅ مشاوره AI با استریم (نسخه ناهمگام جدید)
-# ============================================
-class AIConsultationStreamView(APIView):
-    """
-    شروع مشاوره به‌صورت ناهمگام – بلافاصله consultation_id را برمی‌گرداند.
-    کاربر می‌تواند با پولینگ وضعیت را بررسی کند.
-    """
-    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
-
-    def post(self, request):
-        serializer = AIConsultationInputSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            subscription = UserSubscription.objects.filter(
-                user=request.user,
-                is_active=True
-            ).latest('created_at')
-
-            if not subscription.can_consult_ai():
-                return Response({
-                    'error': 'limit_reached',
-                    'message': f'محدودیت مشاوره AI شما به پایان رسیده است. ({subscription.ai_consultations_limit} مشاوره)'
-                }, status=status.HTTP_403_FORBIDDEN)
-        except UserSubscription.DoesNotExist:
-            return Response({
-                'error': 'no_subscription',
-                'message': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
-            }, status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            # شروع پردازش ناهمگام
-            result = AIService.start_async_consultation(request.user, serializer.validated_data)
-
-            if isinstance(result, dict) and 'error' in result:
-                return Response({
-                    'error': result['error'],
-                    'message': result.get('message', '')
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            # برگرداندن consultation_id و وضعیت
-            return Response({
-                'consultation_id': result['consultation_id'],
-                'status': result['status'],
-                'message': result['message'],
-            }, status=status.HTTP_202_ACCEPTED)
-
-        except Exception as e:
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def options(self, request, *args, **kwargs):
-        response = Response()
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
-        response['Access-Control-Max-Age'] = '86400'
-        return response
-
 
 # ============================================
 # ✅ وضعیت مشاوره (برای پولینگ)
@@ -1332,6 +1243,67 @@ class AIConsultationStatusView(APIView):
             response_data['error'] = consultation.ai_response.get('error', 'خطای ناشناخته')
 
         return Response(response_data)
+
+
+# ============================================
+# مشاوره AI با استریم (نسخه ناهمگام جدید)
+# ============================================
+class AIConsultationStreamView(APIView):
+    """
+    شروع مشاوره به‌صورت ناهمگام – بلافاصله consultation_id را برمی‌گرداند.
+    کاربر می‌تواند با پولینگ وضعیت را بررسی کند.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
+
+    def post(self, request):
+        serializer = AIConsultationInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription = UserSubscription.objects.filter(
+                user=request.user,
+                is_active=True
+            ).latest('created_at')
+
+            if not subscription.can_consult_ai():
+                return Response({
+                    'error': 'limit_reached',
+                    'message': f'محدودیت مشاوره AI شما به پایان رسیده است. ({subscription.ai_consultations_limit} مشاوره)'
+                }, status=status.HTTP_403_FORBIDDEN)
+        except UserSubscription.DoesNotExist:
+            return Response({
+                'error': 'no_subscription',
+                'message': 'شما اشتراک فعالی ندارید. لطفاً اشتراک تهیه کنید.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            result = AIService.start_async_consultation(request.user, serializer.validated_data)
+
+            if isinstance(result, dict) and 'error' in result:
+                return Response({
+                    'error': result['error'],
+                    'message': result.get('message', '')
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({
+                'consultation_id': result['consultation_id'],
+                'status': result['status'],
+                'message': result['message'],
+            }, status=status.HTTP_202_ACCEPTED)
+
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def options(self, request, *args, **kwargs):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
+        response['Access-Control-Max-Age'] = '86400'
+        return response
 
 
 # ============================================
@@ -1562,6 +1534,129 @@ class LivePriceView(APIView):
             'timestamp': datetime.now().isoformat(),
         })
 
+
+# ============================================
+# ✅ شاخص‌های حرفه‌ای (Advanced Metrics)
+# ============================================
+
+class AdvancedMetricsView(APIView):
+    """
+    دریافت شاخص‌های پیشرفته معاملاتی
+    شامل: Sharpe Ratio, Sortino Ratio, Calmar Ratio,
+          Profit Factor, Max Drawdown, Kelly Criterion,
+          Average R/R, Expectancy, Recovery Factor
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        portfolio_id = request.query_params.get('portfolio_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        period = request.query_params.get('period', 'all')  # '7d', '30d', '90d', 'all'
+
+        # ===== تعریف دوره‌ها =====
+        today = datetime.now().date()
+        periods = [
+            ('7d', today - timedelta(days=7)),
+            ('30d', today - timedelta(days=30)),
+            ('90d', today - timedelta(days=90)),
+            ('all', None),
+        ]
+
+        # ===== بررسی کش =====
+        cache_key = MetricsCache.get_cache_key(
+            user.id,
+            portfolio_id,
+            start_date,
+            end_date
+        )
+        cached_data = MetricsCache.get_cached_metrics(cache_key)
+
+        if cached_data is not None:
+            return Response(cached_data)
+
+        result = {}
+
+        # ===== محاسبه برای هر دوره =====
+        for period_key, period_start in periods:
+            # اگر درخواست خاصی برای یک دوره خاص است
+            if period != 'all' and period_key != period:
+                continue
+
+            calc = AdvancedMetricsCalculator(
+                user=user,
+                portfolio_id=portfolio_id,
+                start_date=period_start,
+                end_date=end_date
+            )
+
+            metrics = calc.get_all_metrics()
+            result[period_key] = metrics
+
+        # ===== ذخیره در کش =====
+        MetricsCache.set_cached_metrics(cache_key, result)
+
+        return Response(result)
+
+
+class MetricsTrendView(APIView):
+    """
+    دریافت داده‌های روند شاخص‌ها در بازه زمانی مشخص
+    برای نمایش نمودارها
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        portfolio_id = request.query_params.get('portfolio_id')
+        days = int(request.query_params.get('days', 90))
+
+        calc = AdvancedMetricsCalculator(
+            user=user,
+            portfolio_id=portfolio_id
+        )
+
+        trend_data = calc.get_trend_data(days=days)
+        return Response(trend_data)
+
+
+class MetricsSummaryView(APIView):
+    """
+    دریافت خلاصه شاخص‌ها برای کارت‌های داشبورد
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        portfolio_id = request.query_params.get('portfolio_id')
+
+        calc = AdvancedMetricsCalculator(
+            user=user,
+            portfolio_id=portfolio_id
+        )
+
+        metrics = calc.get_all_metrics()
+
+        # فقط شاخص‌های کلیدی برای کارت‌ها
+        summary = {
+            'sharpe_ratio': metrics.get('sharpe_ratio'),
+            'sharpe_desc': metrics.get('sharpe_desc'),
+            'sortino_ratio': metrics.get('sortino_ratio'),
+            'sortino_desc': metrics.get('sortino_desc'),
+            'profit_factor': metrics.get('profit_factor'),
+            'profit_factor_desc': metrics.get('profit_factor_desc'),
+            'max_drawdown': metrics.get('max_drawdown'),
+            'kelly_criterion': metrics.get('kelly_criterion'),
+            'kelly_desc': metrics.get('kelly_desc'),
+            'total_trades': metrics.get('total_trades'),
+            'total_profit': metrics.get('total_profit'),
+            'win_rate': metrics.get('win_rate'),
+        }
+
+        return Response(summary)
+
+
 # ============================================
 # ویوهای مدیریت پورتفولیو
 # ============================================
@@ -1585,13 +1680,11 @@ class PortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Portfolio.objects.filter(user=self.request.user)
 
     def perform_destroy(self, instance):
-        # ❌ جلوگیری از حذف پورتفولیو پیش‌فرض
         if instance.is_default:
             raise serializers.ValidationError(
                 {'error': 'پورتفولیو پیش‌فرض قابل حذف نیست. ابتدا پورتفولیوی دیگری را به عنوان پیش‌فرض انتخاب کنید.'}
             )
 
-        # بررسی وجود ترید در این پورتفولیو
         if instance.trades.filter(is_deleted=False).exists():
             raise serializers.ValidationError(
                 {'error': 'این پورتفولیو دارای ترید است. ابتدا تریدها را منتقل یا حذف کنید.'}
@@ -1600,6 +1693,7 @@ class PortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.is_active = False
         instance.save()
         return Response({'message': 'پورتفولیو با موفقیت غیرفعال شد'})
+
 
 class PortfolioAnalyticsView(APIView):
     """دریافت آمار تحلیلی یک پورتفولیو"""
@@ -1629,7 +1723,8 @@ class PortfolioAnalyticsView(APIView):
         win_count = trades.filter(profit__gt=0).count()
         total_profit = trades.aggregate(Sum('profit'))['profit__sum'] or 0
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(Avg('risk_reward_ratio'))['avg'] or 0
-        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(Avg('execution_quality_score'))['avg'] or 0
+        avg_quality = trades.filter(execution_quality_score__isnull=False).aggregate(Avg('execution_quality_score'))[
+                          'avg'] or 0
 
         return Response({
             'portfolio': PortfolioSerializer(portfolio).data,
@@ -1680,3 +1775,77 @@ class CombinedPortfolioAnalyticsView(APIView):
             'avg_rr': round(avg_rr, 2),
             'portfolios': portfolio_summary,
         })
+
+
+# ============================================
+# ✅ گزارش‌های ترکیبی و مقایسه‌ای پورتفولیو (جدید)
+# ============================================
+
+class PortfolioComparisonView(APIView):
+    """
+    دریافت داده‌های کامل مقایسه پورتفولیوها
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        engine = PortfolioComparisonEngine(user, start_date, end_date)
+        data = engine.get_comparison_data()
+
+        serializer = ComparisonDataSerializer(data)
+        return Response(serializer.data)
+
+
+class PortfolioComparisonSummaryView(APIView):
+    """
+    دریافت خلاصه مقایسه پورتفولیوها (برای کارت‌ها)
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        engine = PortfolioComparisonEngine(user, start_date, end_date)
+        data = engine.get_comparison_data()
+
+        summary_data = {
+            'best': data.get('best'),
+            'worst': data.get('worst'),
+            'most_active': data.get('most_active'),
+            'highest_win_rate': data.get('highest_win_rate'),
+        }
+
+        serializer = ComparisonSummarySerializer(summary_data)
+        return Response(serializer.data)
+
+
+class PortfolioComparisonChartView(APIView):
+    """
+    دریافت داده‌های نمودار مقایسه‌ای پورتفولیوها
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        chart_type = request.query_params.get('chart_type', 'cumulative_pnl')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        engine = PortfolioComparisonEngine(user, start_date, end_date)
+        data = engine.get_chart_data(chart_type)
+
+        if chart_type == 'cumulative_pnl':
+            serializer = CumulativePnLSeriesSerializer(data, many=True)
+        elif chart_type == 'radar':
+            serializer = RadarMetricsSerializer(data, many=True)
+        elif chart_type == 'bar':
+            serializer = BarDataItemSerializer(data, many=True)
+        else:
+            return Response({'error': 'نوع نمودار نامعتبر است'}, status=400)
+
+        return Response(serializer.data)
