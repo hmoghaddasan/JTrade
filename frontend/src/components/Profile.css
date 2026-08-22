@@ -1,5 +1,163 @@
 /* frontend/src/components/Profile.css */
 
+/* ============================================
+   استایل راهنمای جمع‌شونده قوانین معاملاتی
+   ============================================ */
+.rules-guide-wrapper {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  transition: all 0.3s ease;
+}
+
+.dark .rules-guide-wrapper {
+  background: #2d2d44;
+  border-color: #444;
+}
+
+.rules-guide-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--bg-secondary, #f5f7fa);
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #1a237e);
+  transition: background 0.2s;
+  gap: 10px;
+  font-family: inherit;
+}
+
+.dark .rules-guide-toggle {
+  background: #1e1e2e;
+  color: #e0e0e0;
+}
+
+.rules-guide-toggle:hover {
+  background: var(--hover-bg, #e8eaf6);
+}
+
+.dark .rules-guide-toggle:hover {
+  background: #2a2a3a;
+}
+
+.rules-guide-toggle .guide-icon {
+  font-size: 20px;
+}
+
+.rules-guide-toggle .guide-title {
+  flex: 1;
+  text-align: right;
+}
+
+.rules-guide-toggle .guide-arrow {
+  font-size: 14px;
+  color: var(--text-muted, #888);
+  transition: transform 0.2s;
+}
+
+.rules-guide-content {
+  padding: 0 18px 18px 18px;
+  border-top: 1px solid var(--border-color, #eee);
+  animation: fadeIn 0.3s ease;
+}
+
+.dark .rules-guide-content {
+  border-top-color: #444;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rules-guide-content .guide-section {
+  margin-top: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #eee);
+}
+
+.dark .rules-guide-content .guide-section {
+  border-bottom-color: #3d3d5c;
+}
+
+.rules-guide-content .guide-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.rules-guide-content .guide-section h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  color: var(--text-primary, #1a237e);
+}
+
+.dark .rules-guide-content .guide-section h4 {
+  color: #e0e0e0;
+}
+
+.rules-guide-content .guide-section p {
+  margin: 4px 0 8px 0;
+  font-size: 14px;
+  color: var(--text-secondary, #555);
+  line-height: 1.7;
+}
+
+.dark .rules-guide-content .guide-section p {
+  color: #aaa;
+}
+
+.rules-guide-content .guide-section ul,
+.rules-guide-content .guide-section ol {
+  margin: 6px 0;
+  padding-right: 22px;
+  font-size: 14px;
+  color: var(--text-secondary, #555);
+  line-height: 1.8;
+}
+
+.dark .rules-guide-content .guide-section ul,
+.dark .rules-guide-content .guide-section ol {
+  color: #aaa;
+}
+
+.rules-guide-content .guide-section ul li,
+.rules-guide-content .guide-section ol li {
+  margin-bottom: 2px;
+}
+
+.rules-guide-content .guide-section ul li strong {
+  color: var(--text-primary, #1a237e);
+}
+
+.dark .rules-guide-content .guide-section ul li strong {
+  color: #e0e0e0;
+}
+
+.rules-guide-content .guide-tip {
+  background: #fff8e1 !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  border-right: 4px solid #f57c00 !important;
+  font-weight: 500 !important;
+}
+
+.dark .rules-guide-content .guide-tip {
+  background: rgba(245, 124, 0, 0.15) !important;
+  border-right-color: #ffa726 !important;
+  color: #ffcc80 !important;
+}
+
+/* ============================================
+   بقیه استایل‌های پروفایل (بدون تغییر)
+   ============================================ */
 .profile-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -18,9 +176,6 @@
   color: #e0e0e0;
 }
 
-/* ============================================
-   هدر
-   ============================================ */
 .profile-header {
   display: flex;
   justify-content: space-between;
@@ -65,9 +220,7 @@
   background: #3d3d5c;
 }
 
-/* ============================================
-   تب‌های پروفایل (بهبودیافته)
-   ============================================ */
+/* ===== تب‌های پروفایل ===== */
 .profile-tabs {
   display: flex;
   gap: 6px;
@@ -122,9 +275,6 @@
   box-shadow: 0 2px 12px rgba(26, 35, 126, 0.3);
 }
 
-/* ============================================
-   کارت‌های محتوا
-   ============================================ */
 .profile-content {
   display: flex;
   flex-direction: column;
@@ -198,9 +348,7 @@
   background: #4d4d6c;
 }
 
-/* ============================================
-   فرم اطلاعات شخصی
-   ============================================ */
+/* ===== فرم ===== */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -314,9 +462,7 @@
   cursor: not-allowed;
 }
 
-/* ============================================
-   پیام‌ها
-   ============================================ */
+/* ===== پیام‌ها ===== */
 .message {
   padding: 10px 16px;
   border-radius: 8px;
@@ -345,9 +491,7 @@
   color: #ef5350;
 }
 
-/* ============================================
-   آمار سریع
-   ============================================ */
+/* ===== آمار سریع ===== */
 .quick-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -414,9 +558,7 @@
   color: #ef5350;
 }
 
-/* ============================================
-   اشتراک
-   ============================================ */
+/* ===== اشتراک ===== */
 .subscription-info {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -558,9 +700,7 @@
   background: #4d4d6c;
 }
 
-/* ============================================
-   نسخه‌ها
-   ============================================ */
+/* ===== نسخه‌ها ===== */
 .version-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -661,9 +801,7 @@
   color: #888;
 }
 
-/* ============================================
-   تماس با ما
-   ============================================ */
+/* ===== تماس با ما ===== */
 .contact-info {
   display: flex;
   flex-direction: column;
@@ -786,6 +924,25 @@
   .btn-messages {
     width: 100%;
     text-align: center;
+  }
+
+  .rules-guide-toggle {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  .rules-guide-content {
+    padding: 0 14px 14px 14px;
+  }
+
+  .rules-guide-content .guide-section h4 {
+    font-size: 14px;
+  }
+
+  .rules-guide-content .guide-section p,
+  .rules-guide-content .guide-section ul,
+  .rules-guide-content .guide-section ol {
+    font-size: 13px;
   }
 }
 

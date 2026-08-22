@@ -9,6 +9,68 @@ import RealApiService from '../services/realApiService';
 import RulesManager from './rules/RulesManager';
 import './Profile.css';
 
+// ============================================
+// ✅ کامپوننت راهنمای جمع‌شونده قوانین معاملاتی
+// ============================================
+const RulesGuide = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="rules-guide-wrapper">
+      <button
+        className="rules-guide-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+      >
+        <span className="guide-icon">📖</span>
+        <span className="guide-title">راهنمای قوانین معاملاتی</span>
+        <span className="guide-arrow">{isOpen ? '▲' : '▼'}</span>
+      </button>
+      {isOpen && (
+        <div className="rules-guide-content">
+          <div className="guide-section">
+            <h4>🎯 هدف قوانین معاملاتی</h4>
+            <p>
+              قوانین معاملاتی به شما کمک می‌کنند تا یک چارچوب مشخص برای ورود، خروج و مدیریت ریسک داشته باشید.
+              با ثبت و پایبندی به این قوانین، می‌توانید عملکرد خود را بهبود بخشیده و از تصمیمات احساسی جلوگیری کنید.
+            </p>
+          </div>
+
+          <div className="guide-section">
+            <h4>📋 انواع قوانین</h4>
+            <ul>
+              <li><strong>قوانین ورود:</strong> معیارهایی که قبل از ورود به معامله باید بررسی شوند (مانند تأیید SMT، بررسی سطوح کلیدی).</li>
+              <li><strong>قوانین خروج:</strong> معیارهایی که برای بستن معامله در نظر گرفته می‌شوند (مانند حد سود، حد ضرر).</li>
+              <li><strong>مدیریت ریسک:</strong> قوانین مربوط به حجم معامله، درصد ریسک و سقف ضرر.</li>
+              <li><strong>روانشناختی:</strong> قوانین مربوط به کنترل احساسات و رفتار معاملاتی.</li>
+              <li><strong>قوانین زمانی:</strong> محدودیت‌های زمانی مانند حداکثر ترید در روز.</li>
+              <li><strong>متفرقه:</strong> سایر قوانین شخصی.</li>
+            </ul>
+          </div>
+
+          <div className="guide-section">
+            <h4>✅ نحوه استفاده</h4>
+            <ol>
+              <li>قوانین خود را در این بخش ثبت کنید.</li>
+              <li>قوانین <strong>اجباری</strong> در هنگام ثبت ترید باید تأیید شوند.</li>
+              <li>در صفحه ثبت ترید، می‌توانید قوانین رعایت‌شده را علامت بزنید.</li>
+              <li>گزارش پایبندی به قوانین در بخش گزارشات قابل مشاهده است.</li>
+            </ol>
+          </div>
+
+          <div className="guide-section">
+            <h4>💡 نکته مهم</h4>
+            <p className="guide-tip">
+              هرچه تعداد قوانین شما بیشتر باشد، پایبندی به همه‌ی آنها دشوارتر است.
+              بهتر است با ۳-۵ قانون کلیدی شروع کنید و به‌مرور زمان قوانین جدید اضافه کنید.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Profile = () => {
   const { user, updateUser, logout } = useAuth();
   const { isDark } = useTheme();
@@ -28,7 +90,7 @@ const Profile = () => {
   const [trades, setTrades] = useState([]);
   const [appVersions, setAppVersions] = useState([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
-  const [activeProfileTab, setActiveProfileTab] = useState('info'); // 'info' | 'rules'
+  const [activeProfileTab, setActiveProfileTab] = useState('info');
   const [subscription, setSubscription] = useState({
     plan: 'آزمایشی',
     remainingDays: 7,
@@ -293,9 +355,9 @@ const Profile = () => {
   return (
     <div className={`profile-container ${isDark ? 'dark' : 'light'}`}>
       <div className="profile-header">
-        <h2>👤 پروفایل کاربری</h2>
+        <h2>👤 پنل کاربری</h2>
         <button className="btn-back" onClick={() => navigate('/dashboard')}>
-          ↩️ بازگشت به داشبورد
+          ↩️ بازگشت
         </button>
       </div>
 
@@ -571,7 +633,10 @@ const Profile = () => {
 
         {/* تب قوانین معاملاتی */}
         {activeProfileTab === 'rules' && (
-          <RulesManager />
+          <>
+            <RulesGuide />
+            <RulesManager />
+          </>
         )}
       </div>
     </div>

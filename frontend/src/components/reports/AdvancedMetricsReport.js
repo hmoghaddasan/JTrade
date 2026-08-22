@@ -118,14 +118,14 @@ const AdvancedMetricsReport = () => {
       {/* ===== هدر صفحه ===== */}
       <div className="metrics-header">
         <div className="metrics-header-left">
-          <button className="btn-back" onClick={handleBack}>
-            ← بازگشت
-          </button>
           <h1>📊 شاخص‌های پیشرفته معاملاتی</h1>
         </div>
         <div className="metrics-header-right">
           <button className="btn-print" onClick={handlePrint}>
             🖨️ چاپ
+          </button>
+          <button className="btn-back" onClick={handleBack}>
+            ↩️ بازگشت
           </button>
         </div>
       </div>
@@ -177,7 +177,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['< ۱: قابل قبول', '۱-۲: خوب', '۲-۳: عالی', '> ۳: استثنایی'].join(' | ')}
+                {'< ۱: قابل قبول | ۱-۲: خوب | ۲-۳: عالی | > ۳: استثنایی'}
               </div>
             </div>
 
@@ -194,7 +194,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['< ۱: قابل قبول', '۱-۲: خوب', '۲-۳: عالی', '> ۳: استثنایی'].join(' | ')}
+                {'< ۱: قابل قبول | ۱-۲: خوب | ۲-۳: عالی | > ۳: استثنایی'}
               </div>
             </div>
 
@@ -209,7 +209,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['< ۱: قابل قبول', '۱-۲: خوب', '> ۲: عالی'].join(' | ')}
+                {'< ۱: قابل قبول | ۱-۲: خوب | > ۲: عالی'}
               </div>
             </div>
 
@@ -222,7 +222,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['< ۱: ضرردهنده', '۱-۱.۲: نیاز به بهبود', '۱.۲-۱.۵: خوب', '۱.۵-۲: عالی', '> ۲: استثنایی'].join(' | ')}
+                {'< ۱: ضرردهنده | ۱-۱.۲: نیاز به بهبود | ۱.۲-۱.۵: خوب | ۱.۵-۲: عالی | > ۲: استثنایی'}
               </div>
             </div>
 
@@ -237,7 +237,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['< ۱۰٪: عالی', '۱۰-۲۰٪: خوب', '۲۰-۳۰٪: قابل قبول', '> ۳۰٪: خطرناک'].join(' | ')}
+                {'< ۱۰٪: عالی | ۱۰-۲۰٪: خوب | ۲۰-۳۰٪: قابل قبول | > ۳۰٪: خطرناک'}
               </div>
             </div>
 
@@ -253,7 +253,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['< ۵٪: محافظه‌کارانه', '۵-۱۵٪: متوسط', '۱۵-۲۵٪: جسورانه', '> ۲۵٪: بسیار جسورانه'].join(' | ')}
+                {'< ۵٪: محافظه‌کارانه | ۵-۱۵٪: متوسط | ۱۵-۲۵٪: جسورانه | > ۲۵٪: بسیار جسورانه'}
               </div>
             </div>
 
@@ -268,7 +268,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['> ۰: لبه مثبت', '= ۰: بدون لبه', '< ۰: لبه منفی'].join(' | ')}
+                {'> ۰: لبه مثبت | = ۰: بدون لبه | < ۰: لبه منفی'}
               </div>
             </div>
 
@@ -283,7 +283,7 @@ const AdvancedMetricsReport = () => {
               </div>
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
-                {['> ۳: بازیابی عالی', '۲-۳: بازیابی خوب', '۱-۲: قابل قبول', '< ۱: نیاز به بهبود'].join(' | ')}
+                {'> ۳: بازیابی عالی | ۲-۳: بازیابی خوب | ۱-۲: قابل قبول | < ۱: نیاز به بهبود'}
               </div>
             </div>
           </div>
@@ -303,26 +303,39 @@ const AdvancedMetricsReport = () => {
         />
       )}
 
-      {/* ===== نمودارها ===== */}
+      {/* ===== نمودارها با عناوین فارسی + انگلیسی ===== */}
       {trendData.length > 0 && (
         <div className="metrics-charts-section">
           <h3>📈 روند شاخص‌ها در ۹۰ روز اخیر</h3>
-          <MetricsChart
-            data={trendData}
-            type="line"
-            metrics={['sharpe_ratio', 'sortino_ratio']}
-            colors={['#2e7d32', '#f57c00']}
-            labels={['نسبت شارپ', 'نسبت سورتینو']}
-          />
+
+          <div className="chart-wrapper">
+            <div className="chart-container">
+              <MetricsChart
+                data={trendData}
+                type="line"
+                metrics={['sharpe_ratio', 'sortino_ratio']}
+                colors={['#2e7d32', '#f57c00']}
+                labels={['نسبت شارپ (Sharpe Ratio)', 'نسبت سورتینو (Sortino Ratio)']}
+                xAxisLabel="تاریخ (Date)"
+                yAxisLabel="مقدار شاخص (Value)"
+              />
+            </div>
+          </div>
 
           {metrics && (
-            <MetricsChart
-              data={trendData}
-              type="bar"
-              metrics={['profit_factor']}
-              colors={['#1a237e']}
-              labels={['فاکتور سود']}
-            />
+            <div className="chart-wrapper">
+              <div className="chart-container">
+                <MetricsChart
+                  data={trendData}
+                  type="bar"
+                  metrics={['profit_factor']}
+                  colors={['#1a237e']}
+                  labels={['فاکتور سود (Profit Factor)']}
+                  xAxisLabel="تاریخ (Date)"
+                  yAxisLabel="مقدار (Value)"
+                />
+              </div>
+            </div>
           )}
         </div>
       )}

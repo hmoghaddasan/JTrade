@@ -1,0 +1,688 @@
+/* frontend/src/pages/DisciplineDashboard.css */
+
+.discipline-dashboard {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg-main, #f5f7fa);
+}
+
+.discipline-dashboard.dark {
+    background: #121212;
+    color: #e0e0e0;
+}
+
+/* ===== راهنمای بازشونده ===== */
+.discipline-guide {
+    margin-bottom: 16px;
+    background: var(--guide-bg, #f8f9fa);
+    border-radius: 12px;
+    border: 1px solid var(--border-color, #e0e0e0);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.discipline-guide .guide-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary, #1a237e);
+    transition: background 0.2s;
+    gap: 8px;
+}
+
+.discipline-guide .guide-toggle:hover {
+    background: var(--hover-bg, #e8eaf6);
+}
+
+.discipline-guide .guide-icon {
+    font-size: 18px;
+}
+
+.discipline-guide .guide-title {
+    flex: 1;
+    text-align: right;
+}
+
+.discipline-guide .guide-arrow {
+    font-size: 14px;
+    color: var(--text-secondary, #888);
+}
+
+.discipline-guide .guide-content {
+    padding: 0 16px 16px 16px;
+    border-top: 1px solid var(--border-color, #eee);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.discipline-guide .guide-section {
+    margin-top: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+
+.discipline-guide .guide-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.discipline-guide .guide-section h4 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    color: var(--text-primary, #1a237e);
+}
+
+.discipline-guide .guide-section p {
+    margin: 4px 0 8px 0;
+    font-size: 14px;
+    color: var(--text-secondary, #555);
+    line-height: 1.7;
+}
+
+.discipline-guide .formula-box,
+.discipline-guide .info-box {
+    background: var(--code-bg, #e8eaf6);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 4px 0 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.discipline-guide .formula-label,
+.discipline-guide .info-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary, #1a237e);
+}
+
+.discipline-guide .formula-code {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    background: var(--code-text-bg, #1a237e);
+    color: #ffffff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    direction: ltr;
+    display: inline-block;
+    word-break: break-word;
+}
+
+.discipline-guide .interpretation {
+    margin-top: 6px;
+}
+
+.discipline-guide .interpret-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary, #1a237e);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.discipline-guide .interpretation ul {
+    margin: 0;
+    padding-right: 20px;
+    list-style: none;
+}
+
+.discipline-guide .interpretation li {
+    font-size: 13px;
+    color: var(--text-secondary, #555);
+    padding: 2px 0;
+}
+
+/* ===== تب‌ها ===== */
+.discipline-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--tabs-bg, #e8eaf6);
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.discipline-tabs .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-secondary, #555);
+}
+
+.discipline-tabs .tab-btn.active {
+    background: var(--tab-active-bg, #fff);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: var(--text-primary, #1a237e);
+}
+
+.discipline-tabs .tab-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.3);
+}
+
+/* ===== محتوای تب‌ها ===== */
+.discipline-content {
+    background: var(--content-bg, #fff);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* ===== تب خلاصه ===== */
+.tab-summary .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background: var(--card-bg, #f8f9fa);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.summary-card .card-icon {
+    font-size: 28px;
+}
+
+.summary-card .card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-card .card-label {
+    font-size: 12px;
+    color: var(--text-secondary, #888);
+}
+
+.summary-card .card-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary, #1a237e);
+}
+
+.summary-card .mini-progress {
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.summary-card .mini-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s;
+}
+
+.summary-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.summary-details .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--row-bg, #f5f5f5);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.summary-details .detail-row .danger {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.summary-details .detail-row .success {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.habits-section {
+    grid-column: 1 / -1;
+}
+
+.habits-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.habit-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: #e0e0e0;
+}
+
+.habit-badge.done {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+/* ===== تب تنظیمات ===== */
+.tab-settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.tab-settings .settings-group {
+    background: var(--group-bg, #f8f9fa);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.tab-settings .settings-group h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: var(--text-primary, #1a237e);
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-row label {
+    font-size: 14px;
+    color: var(--text-secondary, #555);
+}
+
+.setting-row input[type="number"] {
+    width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.setting-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.setting-row.textarea {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.setting-row.textarea label {
+    margin-bottom: 4px;
+}
+
+.setting-row.textarea textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    resize: vertical;
+}
+
+.tab-settings .btn-save {
+    grid-column: 1 / -1;
+    padding: 12px;
+    background: #1565c0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tab-settings .btn-save:hover {
+    background: #0d47a1;
+}
+
+.tab-settings .btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== تب گزارش نشت ===== */
+.tab-leak-report .report-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.report-card {
+    background: var(--card-bg, #f8f9fa);
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.report-card .report-label {
+    font-size: 12px;
+    color: var(--text-secondary, #888);
+    display: block;
+}
+
+.report-card .report-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary, #1a237e);
+}
+
+.report-card .report-value.positive {
+    color: #2e7d32;
+}
+
+.report-card .report-value.negative {
+    color: #c62828;
+}
+
+.violations-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.violations-table th,
+.violations-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color, #eee);
+    text-align: right;
+}
+
+.violations-table th {
+    background: var(--table-header, #e8eaf6);
+    font-weight: 600;
+}
+
+.recommendations {
+    margin-top: 20px;
+    padding: 16px;
+    background: #fff8e1;
+    border-radius: 12px;
+}
+
+.recommendations ul {
+    padding-right: 20px;
+    margin: 8px 0;
+}
+
+.recommendations li {
+    margin: 4px 0;
+}
+
+/* ===== تب هیت‌مپ ===== */
+.tab-heatmap .heatmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.heat-cell {
+    padding: 12px 4px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.2s;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.heat-cell:hover {
+    transform: scale(1.05);
+}
+
+.heat-cell .heat-date {
+    font-size: 11px;
+    color: rgba(0,0,0,0.6);
+}
+
+.heat-cell .heat-value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.heat-green {
+    background: #a5d6a7;
+    color: #1b5e20;
+}
+
+.heat-yellow {
+    background: #ffe082;
+    color: #e65100;
+}
+
+.heat-red {
+    background: #ef9a9a;
+    color: #b71c1c;
+}
+
+.heat-empty {
+    background: #e0e0e0;
+    color: #999;
+}
+
+.heatmap-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* ===== حالت لودینگ و خالی ===== */
+.tab-loading,
+.tab-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary, #888);
+    font-size: 16px;
+}
+
+/* ===== واکنش‌گرایی ===== */
+@media (max-width: 768px) {
+    .discipline-header .btn-back {
+        font-size: 13px !important;
+        padding: 4px 8px !important;
+    }
+    .discipline-header h1 {
+        font-size: 16px !important;
+    }
+    .discipline-tabs .tab-btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    .tab-settings {
+        grid-template-columns: 1fr;
+    }
+    .summary-details {
+        grid-template-columns: 1fr;
+    }
+    .discipline-content {
+        padding: 12px;
+    }
+    .summary-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+    .discipline-guide .guide-toggle {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    .discipline-guide .formula-code {
+        font-size: 12px;
+        padding: 2px 8px;
+        word-break: break-all;
+    }
+}
+
+@media (max-width: 576px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+    .report-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== تم تاریک ===== */
+.dark .discipline-content {
+    background: #1e1e2f;
+}
+
+.dark .summary-card,
+.dark .settings-group,
+.dark .report-card {
+    background: #2a2a3d;
+}
+
+.dark .summary-card .card-value,
+.dark .settings-group h4,
+.dark .report-card .report-value {
+    color: #e0e0e0;
+}
+
+.dark .summary-details .detail-row {
+    background: #2a2a3d;
+}
+
+.dark .discipline-tabs {
+    background: #2a2a3d;
+}
+
+.dark .discipline-tabs .tab-btn.active {
+    background: #3a3a5d;
+    color: #fff;
+}
+
+.dark .heat-green {
+    background: #1b5e20;
+    color: #a5d6a7;
+}
+
+.dark .heat-yellow {
+    background: #4a3a00;
+    color: #ffe082;
+}
+
+.dark .heat-red {
+    background: #4a1a1a;
+    color: #ef9a9a;
+}
+
+.dark .discipline-guide {
+    background: #1e1e2f;
+    border-color: #333;
+}
+
+.dark .discipline-guide .guide-toggle {
+    color: #e0e0e0;
+}
+
+.dark .discipline-guide .guide-toggle:hover {
+    background: #2a2a3d;
+}
+
+.dark .discipline-guide .guide-content {
+    border-top-color: #333;
+}
+
+.dark .discipline-guide .guide-section {
+    border-bottom-color: #333;
+}
+
+.dark .discipline-guide .guide-section h4 {
+    color: #e0e0e0;
+}
+
+.dark .discipline-guide .guide-section p {
+    color: #aaa;
+}
+
+.dark .discipline-guide .formula-box,
+.dark .discipline-guide .info-box {
+    background: #2a2a3d;
+}
+
+.dark .discipline-guide .formula-label,
+.dark .discipline-guide .info-label {
+    color: #e0e0e0;
+}
+
+.dark .discipline-guide .formula-code {
+    background: #0d1b4a;
+    color: #e0e0e0;
+}
+
+.dark .discipline-guide .interpretation li {
+    color: #aaa;
+}
+
+.dark .discipline-guide .guide-arrow {
+    color: #aaa;
+}
+
+.dark .recommendations {
+    background: #2a1a0a;
+}
+
+.dark .tab-loading,
+.dark .tab-empty {
+    color: #aaa;
+}
+
+.dark .violations-table th {
+    background: #2a2a3d;
+    color: #e0e0e0;
+}
+
+.dark .violations-table td {
+    border-bottom-color: #333;
+    color: #ccc;
+}
+
+.dark .discipline-header {
+    border-bottom-color: #333 !important;
+}

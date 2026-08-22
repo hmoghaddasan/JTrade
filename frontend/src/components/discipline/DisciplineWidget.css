@@ -1,0 +1,319 @@
+/* frontend/src/components/discipline/DisciplineWidget.css */
+
+.discipline-widget {
+    background: var(--widget-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color, #e8e8e8);
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.discipline-widget.locked {
+    border-color: #c62828;
+    background: #fff5f5;
+}
+
+/* ===== هدر ===== */
+.discipline-widget .widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    min-height: 40px;
+    background-color: #1a237e; /* آبی پررنگ پیش‌فرض */
+}
+
+/* ===== سفید کردن تمام متن‌های هدر ===== */
+.discipline-widget .widget-header,
+.discipline-widget .widget-header .widget-title,
+.discipline-widget .widget-header .widget-date,
+.discipline-widget .widget-header .widget-status-text,
+.discipline-widget .widget-header .toggle-btn {
+    color: #ffffff !important;
+}
+
+/* (اختیاری) سفید کردن آیکون‌های ایموجی هدر */
+.discipline-widget .widget-header .widget-icon,
+.discipline-widget .widget-header .widget-status-icon {
+    filter: brightness(0) invert(1);
+}
+
+.discipline-widget .widget-header:hover {
+    background: #0d47a1; /* تیره‌تر در هاور */
+}
+
+.discipline-widget .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.discipline-widget .widget-icon {
+    font-size: 18px;
+}
+
+.discipline-widget .widget-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.discipline-widget .widget-date {
+    font-size: 11px;
+    background: rgba(255,255,255,0.2);
+    padding: 0 8px;
+    border-radius: 12px;
+}
+
+.discipline-widget .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.discipline-widget .widget-status-icon {
+    font-size: 16px;
+}
+
+.discipline-widget .widget-status-text {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.discipline-widget .toggle-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    line-height: 1;
+}
+
+.discipline-widget .toggle-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ===== بدنه (فقط در حالت باز) ===== */
+.discipline-widget .widget-body {
+    padding: 8px 14px 14px 14px;
+    border-top: 1px solid var(--border-color, #eee);
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== بخش‌های داخلی ===== */
+.discipline-widget .tiltmeter-section {
+    margin-bottom: 8px;
+}
+
+.discipline-widget .tiltmeter-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary, #555);
+    margin-bottom: 3px;
+}
+
+.discipline-widget .tiltmeter-value {
+    font-weight: 700;
+    color: var(--text-primary, #1a237e);
+}
+
+.discipline-widget .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--progress-bg, #e0e0e0);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.discipline-widget .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.discipline-widget .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.discipline-widget .stat-item {
+    display: flex;
+    flex-direction: column;
+    background: var(--stat-bg, #f5f5f5);
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.discipline-widget .stat-label {
+    font-size: 10px;
+    color: var(--text-secondary, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.discipline-widget .stat-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary, #1a237e);
+}
+
+.discipline-widget .stat-value.warning {
+    color: #ef6c00;
+}
+
+.discipline-widget .stat-value.danger {
+    color: #c62828;
+}
+
+.discipline-widget .cooldown-alert {
+    background: #ffebee;
+    color: #c62828;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.discipline-widget .consecutive-losses {
+    color: #ef6c00;
+    font-size: 11px;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.discipline-widget .compliance-section {
+    margin-top: 6px;
+    text-align: right;
+}
+
+.discipline-widget .compliance-label {
+    font-size: 12px;
+    color: var(--text-secondary, #555);
+}
+
+.discipline-widget .widget-footer {
+    margin-top: 8px;
+    text-align: left;
+}
+
+.discipline-widget .btn-details {
+    background: none;
+    border: none;
+    color: #1565c0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.discipline-widget .btn-details:hover {
+    background: #e3f2fd;
+    color: #0d47a1;
+}
+
+/* ===== حالت لودینگ ===== */
+.discipline-widget.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+}
+
+.discipline-widget .spinner {
+    font-size: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== حالت جمع‌شده (فقط هدر) ===== */
+.discipline-widget.collapsed .widget-body {
+    display: none;
+}
+
+/* ===== تم تاریک ===== */
+.dark .discipline-widget {
+    background: #1e1e2f;
+    border-color: #333;
+}
+
+.dark .discipline-widget .widget-header {
+    background-color: #0d1b4a; /* آبی تیره‌تر برای تم تاریک */
+}
+
+.dark .discipline-widget .widget-header:hover {
+    background: #0a1538;
+}
+
+.dark .discipline-widget .widget-title,
+.dark .discipline-widget .widget-date,
+.dark .discipline-widget .widget-status-text,
+.dark .discipline-widget .toggle-btn {
+    color: #ffffff !important;
+}
+
+.dark .discipline-widget .widget-date {
+    background: rgba(255,255,255,0.15);
+}
+
+.dark .discipline-widget .toggle-btn:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.dark .discipline-widget .stat-item {
+    background: #2a2a3d;
+}
+
+.dark .discipline-widget .stat-value {
+    color: #e0e0e0;
+}
+
+.dark .discipline-widget .tiltmeter-label {
+    color: #aaa;
+}
+
+.dark .discipline-widget .compliance-label {
+    color: #aaa;
+}
+
+.dark .discipline-widget .widget-body {
+    border-top-color: #333;
+}
+
+.dark .discipline-widget .btn-details {
+    color: #64b5f6;
+}
+
+.dark .discipline-widget .btn-details:hover {
+    background: #1a2a4a;
+    color: #90caf9;
+}
+
+.dark .discipline-widget.locked {
+    background: #2a1a1a;
+    border-color: #c62828;
+}

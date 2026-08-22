@@ -40,7 +40,7 @@ const UserDetail = () => {
             ✏️ ویرایش
           </button>
           <button onClick={() => navigate('/admin/users')} className="btn-back">
-            🔙 بازگشت
+            ↩️ بازگشت
           </button>
         </div>
       </div>

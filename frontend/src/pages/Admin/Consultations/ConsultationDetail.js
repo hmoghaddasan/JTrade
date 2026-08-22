@@ -38,7 +38,7 @@ const ConsultationDetail = () => {
       <div className="page-header">
         <h1>جزئیات مشاوره #{consultation.id}</h1>
         <button onClick={() => navigate('/admin/consultations')} className="btn-back">
-          🔙 بازگشت
+          ↩️ بازگشت
         </button>
       </div>
 

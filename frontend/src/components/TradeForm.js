@@ -11,6 +11,20 @@ import { useToast } from '../contexts/ToastContext';
 import { usePortfolio } from '../contexts/PortfolioContext';
 import ImageZoom from './ImageZoom';
 import './TradeForm.css';
+import disciplineService from '../services/disciplineService';
+
+// ============================================
+// ✅ کامپوننت Tooltip راهنما
+// ============================================
+const HelpTooltip = ({ text }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="help-tooltip" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <span className="help-icon">ⓘ</span>
+      {show && <span className="help-content">{text}</span>}
+    </span>
+  );
+};
 
 const TradeForm = () => {
   const { user } = useAuth();
@@ -28,6 +42,10 @@ const TradeForm = () => {
   // ===== State برای نمادها =====
   const [symbolsFromServer, setSymbolsFromServer] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
+
+  // ===== State برای بروکرها =====
+  const [brokers, setBrokers] = useState([]);
+  const [brokersLoading, setBrokersLoading] = useState(true);
 
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
@@ -92,12 +110,10 @@ const TradeForm = () => {
   // ===== تابع تولید گروه‌بندی داینامیک =====
   const getSymbolGroups = () => {
     if (symbolsFromServer.length > 0) {
-      // اگر از سرور دریافت شد، نمادها را بر اساس گروه‌بندی استاتیک فیلتر کن
       const groups = {};
       for (const [groupName, groupSymbols] of Object.entries(staticSymbolGroups)) {
         groups[groupName] = groupSymbols.filter(s => symbolsFromServer.includes(s));
       }
-      // نمادهای جدید که در گروه‌بندی استاتیک نیستند
       const otherSymbols = symbolsFromServer.filter(s =>
         !Object.values(staticSymbolGroups).flat().includes(s)
       );
@@ -106,7 +122,6 @@ const TradeForm = () => {
       }
       return groups;
     }
-    // Fallback به گروه‌بندی استاتیک
     return staticSymbolGroups;
   };
 
@@ -147,6 +162,35 @@ const TradeForm = () => {
     loadSymbols();
   }, []);
 
+  // ===== بارگذاری بروکرها (با page_size=1000) =====
+  useEffect(() => {
+    const loadBrokers = async () => {
+      setBrokersLoading(true);
+      try {
+        const response = await RealApiService.getBrokers({ page_size: 1000 });
+        console.log('📥 Brokers response:', response.data);
+
+        let brokerData = [];
+        if (response.data && response.data.results) {
+          brokerData = response.data.results;
+        } else if (Array.isArray(response.data)) {
+          brokerData = response.data;
+        } else {
+          brokerData = [];
+        }
+
+        setBrokers(brokerData);
+        console.log('✅ Brokers loaded:', brokerData.length);
+      } catch (error) {
+        console.error('❌ Error loading brokers:', error);
+        setBrokers([]);
+      } finally {
+        setBrokersLoading(false);
+      }
+    };
+    loadBrokers();
+  }, []);
+
   const [formData, setFormData] = useState({
     trade_date: new Date().toISOString().split('T')[0],
     day_of_week: '',
@@ -158,6 +202,7 @@ const TradeForm = () => {
     weekly_profile_note: '',
     group_id: '',
     portfolio_id: '',
+    broker_id: '',
     sleep_quality: 'خوب',
     food_status: false,
     focus: false,
@@ -230,6 +275,72 @@ const TradeForm = () => {
     supply_zone: '',
   });
 
+  // ===== راهنمای اصطلاحات =====
+  const helpTexts = {
+    session_type: {
+      title: 'نوع جلسه',
+      items: [
+        'High Pro: جلسات معاملاتی حرفه‌ای که معمولاً در ساعات پرمعامله (London/NY overlap) انجام می‌شود.',
+        'Low Pro: جلسات معاملاتی با حجم کمتر مانند آسیا یا ساعات کم‌نوسان.'
+      ]
+    },
+    bias: {
+      title: 'جهت‌گیری کلی',
+      items: [
+        'Bullish (صعودی): انتظار افزایش قیمت و حرکت به سمت بالا.',
+        'Bearish (نزولی): انتظار کاهش قیمت و حرکت به سمت پایین.',
+        'Neutral (خنثی): بدون جهت‌گیری مشخص، معمولاً در بازارهای رنج.'
+      ]
+    },
+    strategy_type: {
+      title: 'نوع استراتژی',
+      items: [
+        'LTP (Long Term Position): معاملات بلندمدت با هدف سودهای بزرگ و توقف‌های وسیع.',
+        'ITP (Intermediate Term Position): معاملات میان‌مدت با تعادل بین ریسک و ریوارد.',
+        'STP (Short Term Position): معاملات کوتاه‌مدت با هدف سودهای سریع و توقف‌های محدود.'
+      ]
+    },
+    retirement_model: {
+      title: 'مدل ورودی',
+      items: [
+        'مدلی که نشان‌دهنده‌ی نحوه‌ی ورود به معامله است.',
+        'ERL TO IRL: ورود از محدوده‌های قیمتی کلیدی با تأیید ساختار بازار.',
+        'IRL TO ERL: خروج از محدوده‌های قیمتی کلیدی با تغییر ساختار.'
+      ]
+    },
+    tp_sl_hit: {
+      title: 'حد خورده شده',
+      items: [
+        'TP1/TP2/TP3: حد سود اول/دوم/سوم – نشان‌دهنده‌ی سطحی است که قیمت به آن رسیده و سود محقق شده است.',
+        'SL: حد ضرر – سطحی که قیمت به آن رسیده و ضرر محقق شده است.',
+        'BE: Breakeven – معامله بدون سود و ضرر بسته شده است.'
+      ]
+    },
+    execution_quality: {
+      title: 'امتیاز کیفیت اجرا',
+      items: [
+        'امتیازی بین ۱ تا ۱۰ که کیفیت اجرای معامله را نشان می‌دهد.',
+        'امتیاز ۷-۱۰: اجرای عالی و منطبق با برنامه.',
+        'امتیاز ۴-۶: اجرای قابل قبول با انحراف جزئی.',
+        'امتیاز ۱-۳: اجرای ضعیف با انحراف قابل توجه از برنامه.'
+      ]
+    },
+    ict: {
+      title: 'تحلیل ICT',
+      items: {
+        fvg: 'FVG (Fair Value Gap): شکاف قیمتی که نشان‌دهنده‌ی عدم تعادل عرضه و تقاضا است و معمولاً به عنوان سطح حمایت/مقاومت عمل می‌کند.',
+        order_block: 'Order Block: بلوکی از سفارش‌های بزرگ که می‌تواند به عنوان سطح حمایت/مقاومت عمل کند.',
+        bos: 'BOS (Break of Structure): شکست ساختار – نشان‌دهنده‌ی تغییر در روند یا ادامه‌ی آن.',
+        choch: 'CHOCH (Change of Character): تغییر شخصیت – نشان‌دهنده‌ی شروع یک روند جدید یا تغییر در رفتار قیمت.',
+        mss: 'MSS (Market Structure Shift): تغییر ساختار بازار – نشان‌دهنده‌ی تغییر در روند اصلی.',
+        liquidity_sweep: 'Liquidity Sweep: شکار نقدینگی – زمانی که قیمت سطوح کلیدی را برای فعال‌سازی سفارش‌های حد ضرر و حد سود می‌شکند.',
+        poi: 'POI (Point of Interest): نقطه‌ی مورد توجه – سطحی که انتظار واکنش قیمت در آن وجود دارد.',
+        demand_zone: 'Demand Zone: منطقه‌ی تقاضا – محدوده‌ای که در آن تقاضا بر عرضه غلبه دارد و قیمت از آن حمایت می‌شود.',
+        supply_zone: 'Supply Zone: منطقه‌ی عرضه – محدوده‌ای که در آن عرضه بر تقاضا غلبه دارد و قیمت با مقاومت مواجه می‌شود.'
+      }
+    }
+  };
+
   // ===== useEffect ها =====
   useEffect(() => {
     const checkSubscription = async () => {
@@ -287,8 +398,18 @@ const TradeForm = () => {
 
   useEffect(() => {
     const loadScreenshotSettings = async () => {
-      const settings = await SystemSettingsService.getScreenshotSettings();
-      setScreenshotSettings(settings);
+      try {
+        const settings = await SystemSettingsService.getScreenshotSettings();
+        setScreenshotSettings(settings);
+      } catch (error) {
+        console.error('Error loading screenshot settings:', error);
+        setScreenshotSettings({
+          show_upload: true,
+          max_size_mb: 5,
+          max_width: 2000,
+          max_height: 2000,
+        });
+      }
     };
     loadScreenshotSettings();
   }, []);
@@ -458,6 +579,7 @@ const TradeForm = () => {
       group: groupId,
       group_id: groupId,
       portfolio: portfolioId,
+      broker_id: formData.broker_id || null,
       day_of_week: day_of_week,
       month: month,
       rule_checks: ruleCheckIds,
@@ -486,6 +608,24 @@ const TradeForm = () => {
     });
 
     console.log('📤 Full payload being sent:', JSON.stringify(payload, null, 2));
+
+    // ===== بررسی قوانین انضباطی قبل از ارسال =====
+    try {
+      const checkResponse = await disciplineService.checkTrade(payload);
+      if (!checkResponse.data.allowed) {
+        showToast(`❌ ${checkResponse.data.message}`, 'error');
+        setLoading(false);
+        return;
+      }
+      if (checkResponse.data.warnings && checkResponse.data.warnings.length > 0) {
+        checkResponse.data.warnings.forEach(w => showToast(w, 'warning'));
+      }
+    } catch (error) {
+      console.error('Error checking discipline:', error);
+      showToast('⚠️ خطا در بررسی قوانین انضباطی', 'warning');
+      setLoading(false);
+      return;
+    }
 
     try {
       await RealApiService.createTrade(payload);
@@ -563,7 +703,7 @@ const TradeForm = () => {
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>نوع جلسه</label>
+            <label>نوع جلسه <HelpTooltip text={helpTexts.session_type.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
             <select name="session_type" value={formData.session_type} onChange={handleChange} disabled={showLimitWarning}>
               <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
             </select>
@@ -594,6 +734,28 @@ const TradeForm = () => {
             </select>
             <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
           </div>
+          <div className="form-group">
+            <label>بروکر / کارگزار</label>
+            <select name="broker_id" value={formData.broker_id || ''} onChange={handleChange} disabled={showLimitWarning || brokersLoading}>
+              {brokersLoading ? (
+                <option value="">⏳ در حال بارگذاری بروکرها...</option>
+              ) : (
+                <>
+                  <option value="">انتخاب بروکر</option>
+                  {brokers.length === 0 ? (
+                    <option value="" disabled>هیچ بروکری یافت نشد</option>
+                  ) : (
+                    brokers.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))
+                  )}
+                </>
+              )}
+            </select>
+            <small className="hint-text">کارگزار یا صرافی که معامله در آن انجام شده است</small>
+          </div>
+        </div>
+        <div className="form-row">
           <div className="form-group">
             <label>یادداشت پروفایل هفتگی</label>
             <textarea name="weekly_profile_note" value={formData.weekly_profile_note} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" disabled={showLimitWarning} />
@@ -666,13 +828,13 @@ const TradeForm = () => {
         <h3>📋 برنامه و بایاس روزانه</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>جهت‌گیری کلی</label>
+            <label>جهت‌گیری کلی <HelpTooltip text={helpTexts.bias.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
             <select name="bias" value={formData.bias} onChange={handleChange} disabled={showLimitWarning}>
               <option value="Bullish">صعودی (Bullish)</option><option value="Bearish">نزولی (Bearish)</option><option value="Neutral">خنثی (Neutral)</option>
             </select>
           </div>
           <div className="form-group">
-            <label>نوع استراتژی</label>
+            <label>نوع استراتژی <HelpTooltip text={helpTexts.strategy_type.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
             <select name="strategy_type" value={formData.strategy_type} onChange={handleChange} disabled={showLimitWarning}>
               <option value="LTP">LTP</option><option value="ITP">ITP</option><option value="STP">STP</option>
             </select>
@@ -690,7 +852,7 @@ const TradeForm = () => {
           </div>
         </div>
         <div className="form-group">
-          <label>مدل ورودی</label>
+          <label>مدل ورودی <HelpTooltip text={helpTexts.retirement_model.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
           <input type="text" name="retirement_model" value={formData.retirement_model} onChange={handleChange} placeholder="مثلاً: ERL TO IRL" disabled={showLimitWarning} />
         </div>
         <div className="form-group">
@@ -765,7 +927,7 @@ const TradeForm = () => {
           <input type="number" name="close_price" value={formData.close_price} onChange={handleChange} step="0.00001" placeholder="0.00000" disabled={showLimitWarning} />
         </div>
         <div className="form-group">
-          <label>حد خورده شده</label>
+          <label>حد خورده شده <HelpTooltip text={helpTexts.tp_sl_hit.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
           <select name="tp_sl_hit" value={formData.tp_sl_hit} onChange={handleChange} disabled={showLimitWarning}>
             <option value="">انتخاب کنید</option>
             <option value="TP1">TP1</option>
@@ -827,7 +989,7 @@ const TradeForm = () => {
         </div>
       </div>
       <div className="form-group">
-        <label>امتیاز کیفیت اجرا (۱-۱۰)</label>
+        <label>امتیاز کیفیت اجرا <HelpTooltip text={helpTexts.execution_quality.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
         <input type="number" name="execution_quality_score" value={formData.execution_quality_score} onChange={handleChange} min="1" max="10" placeholder="5" disabled={showLimitWarning} />
       </div>
       <div className="checkbox-grid">
@@ -843,28 +1005,58 @@ const TradeForm = () => {
     </div>
   );
 
-  const renderICTStep = () => (
-    <div className="form-step">
-      <h3>📊 تحلیل ICT</h3>
-      <div className="form-row">
-        <div className="form-group"><label>FVG (Fair Value Gap)</label><input type="text" name="fvg" value={formData.fvg} onChange={handleChange} placeholder="مثلاً: FVG خرید" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>Order Block</label><input type="text" name="order_block" value={formData.order_block} onChange={handleChange} placeholder="مثلاً: OB فروش" disabled={showLimitWarning} /></div>
+  const renderICTStep = () => {
+    const ictHelp = helpTexts.ict.items;
+    return (
+      <div className="form-step">
+        <h3>📊 تحلیل ICT</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>FVG (Fair Value Gap) <HelpTooltip text={ictHelp.fvg} /></label>
+            <input type="text" name="fvg" value={formData.fvg} onChange={handleChange} placeholder="مثلاً: FVG خرید" disabled={showLimitWarning} />
+          </div>
+          <div className="form-group">
+            <label>Order Block <HelpTooltip text={ictHelp.order_block} /></label>
+            <input type="text" name="order_block" value={formData.order_block} onChange={handleChange} placeholder="مثلاً: OB فروش" disabled={showLimitWarning} />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>BOS (Break of Structure) <HelpTooltip text={ictHelp.bos} /></label>
+            <input type="text" name="bos" value={formData.bos} onChange={handleChange} placeholder="مثلاً: BOS صعودی" disabled={showLimitWarning} />
+          </div>
+          <div className="form-group">
+            <label>CHOCH (Change of Character) <HelpTooltip text={ictHelp.choch} /></label>
+            <input type="text" name="choch" value={formData.choch} onChange={handleChange} placeholder="مثلاً: CHOCH نزولی" disabled={showLimitWarning} />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>MSS (Market Structure Shift) <HelpTooltip text={ictHelp.mss} /></label>
+            <input type="text" name="mss" value={formData.mss} onChange={handleChange} placeholder="مثلاً: MSS تایید شده" disabled={showLimitWarning} />
+          </div>
+          <div className="form-group">
+            <label>Liquidity Sweep <HelpTooltip text={ictHelp.liquidity_sweep} /></label>
+            <input type="text" name="liquidity_sweep" value={formData.liquidity_sweep} onChange={handleChange} placeholder="مثلاً: Sweep High" disabled={showLimitWarning} />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>POI (Point of Interest) <HelpTooltip text={ictHelp.poi} /></label>
+            <input type="text" name="poi" value={formData.poi} onChange={handleChange} placeholder="مثلاً: POI ورود" disabled={showLimitWarning} />
+          </div>
+          <div className="form-group">
+            <label>Demand Zone <HelpTooltip text={ictHelp.demand_zone} /></label>
+            <input type="text" name="demand_zone" value={formData.demand_zone} onChange={handleChange} placeholder="مثلاً: 1.0850-1.0870" disabled={showLimitWarning} />
+          </div>
+        </div>
+        <div className="form-group">
+          <label>Supply Zone <HelpTooltip text={ictHelp.supply_zone} /></label>
+          <input type="text" name="supply_zone" value={formData.supply_zone} onChange={handleChange} placeholder="مثلاً: 1.0920-1.0940" disabled={showLimitWarning} />
+        </div>
       </div>
-      <div className="form-row">
-        <div className="form-group"><label>BOS (Break of Structure)</label><input type="text" name="bos" value={formData.bos} onChange={handleChange} placeholder="مثلاً: BOS صعودی" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>CHOCH (Change of Character)</label><input type="text" name="choch" value={formData.choch} onChange={handleChange} placeholder="مثلاً: CHOCH نزولی" disabled={showLimitWarning} /></div>
-      </div>
-      <div className="form-row">
-        <div className="form-group"><label>MSS (Market Structure Shift)</label><input type="text" name="mss" value={formData.mss} onChange={handleChange} placeholder="مثلاً: MSS تایید شده" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>Liquidity Sweep</label><input type="text" name="liquidity_sweep" value={formData.liquidity_sweep} onChange={handleChange} placeholder="مثلاً: Sweep High" disabled={showLimitWarning} /></div>
-      </div>
-      <div className="form-row">
-        <div className="form-group"><label>POI (Point of Interest)</label><input type="text" name="poi" value={formData.poi} onChange={handleChange} placeholder="مثلاً: POI ورود" disabled={showLimitWarning} /></div>
-        <div className="form-group"><label>Demand Zone</label><input type="text" name="demand_zone" value={formData.demand_zone} onChange={handleChange} placeholder="مثلاً: 1.0850-1.0870" disabled={showLimitWarning} /></div>
-      </div>
-      <div className="form-group"><label>Supply Zone</label><input type="text" name="supply_zone" value={formData.supply_zone} onChange={handleChange} placeholder="مثلاً: 1.0920-1.0940" disabled={showLimitWarning} /></div>
-    </div>
-  );
+    );
+  };
 
   const renderRulesStep = () => {
     if (rulesLoading) {
@@ -907,8 +1099,17 @@ const TradeForm = () => {
     return (
       <div className="form-step rules-step">
         <h3>📋 قوانین معاملاتی</h3>
+
+        <div className="rules-intro">
+          <p className="rules-intro-text">
+            💡 قوانین معاملاتی به شما کمک می‌کنند تا یک چارچوب مشخص برای معاملات خود داشته باشید.
+            قبل از ثبت ترید، قوانین رعایت‌شده را علامت بزنید.
+            <strong> قوانین با * اجباری هستند</strong> و در صورت عدم رعایت، ترید ثبت نخواهد شد.
+          </p>
+        </div>
+
         <p className="rules-hint">
-          قبل از ثبت ترید، قوانین رعایت‌شده را علامت بزنید.
+          قوانین رعایت‌شده را علامت بزنید.
           <span className="required-hint">قوانین با * اجباری هستند.</span>
         </p>
 
@@ -1038,6 +1239,7 @@ const TradeForm = () => {
     );
   }
 
+  // ===== return اصلی =====
   return (
     <div className={`trade-form-container ${isDark ? 'dark' : 'light'}`}>
       <div className="trade-form-header">
@@ -1096,12 +1298,12 @@ const TradeForm = () => {
         <div className="form-actions">
           {currentStep > 1 && (
             <button type="button" className="btn-prev" onClick={prevStep} disabled={loading || showLimitWarning}>
-              ← قبلی
+              → قبلی
             </button>
           )}
           {currentStep < 10 && (
             <button type="button" className="btn-next" onClick={nextStep} disabled={loading || showLimitWarning}>
-              بعدی →
+              بعدی ←
             </button>
           )}
           {currentStep === 10 && (

@@ -54,7 +54,7 @@ const ConsultationAnalytics = () => {
       <div className="page-header">
         <h1>📊 تحلیل عملکرد هوش مصنوعی</h1>
         <button onClick={() => navigate('/admin/consultations')} className="btn-back">
-          🔙 بازگشت
+          ↩️ بازگشت
         </button>
       </div>
 

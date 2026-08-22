@@ -242,7 +242,7 @@ const Reports = () => {
       <div className="reports-header">
         <h2>📊 گزارشات ترید</h2>
         <button className="btn-back" onClick={() => navigate('/')}>
-          ↩️ بازگشت به داشبورد
+          ↩️ بازگشت
         </button>
       </div>
 

@@ -28,7 +28,8 @@ const MetricsService = {
       queryParams.append('period', params.period);
     }
 
-    const url = `/api/trading/metrics/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    // ✅ اصلاح: حذف `/api/` از ابتدای مسیر (چون baseURL قبلاً شامل آن است)
+    const url = `trading/metrics/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     console.log('📊 MetricsService.getMetrics: fetching from', url);
 
     try {
@@ -57,7 +58,8 @@ const MetricsService = {
       queryParams.append('days', params.days);
     }
 
-    const url = `/api/trading/metrics/trend/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    // ✅ اصلاح: حذف `/api/` از ابتدای مسیر
+    const url = `trading/metrics/trend/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     try {
       const response = await api.get(url);
@@ -80,7 +82,8 @@ const MetricsService = {
       queryParams.append('portfolio_id', params.portfolio_id);
     }
 
-    const url = `/api/trading/metrics/summary/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    // ✅ اصلاح: حذف `/api/` از ابتدای مسیر
+    const url = `trading/metrics/summary/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     try {
       const response = await api.get(url);

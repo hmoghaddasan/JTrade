@@ -1,0 +1,77 @@
+/* frontend/src/components/import/CSVUploader.css */
+.csv-uploader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  border: 3px dashed var(--border-color, #d0d4e0);
+  border-radius: 16px;
+  background: var(--bg-tertiary, #f8f9fc);
+  transition: all 0.3s ease;
+  min-height: 300px;
+}
+
+.csv-uploader.drag-over {
+  border-color: #1a237e;
+  background: rgba(26, 35, 126, 0.05);
+}
+
+.upload-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.csv-uploader h2 {
+  font-size: 22px;
+  color: var(--text-primary, #1a1a2e);
+  margin-bottom: 8px;
+}
+
+.upload-description {
+  color: var(--text-secondary, #555);
+  font-size: 15px;
+  margin-bottom: 24px;
+  text-align: center;
+  max-width: 500px;
+}
+
+.btn-upload {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+}
+
+.btn-upload:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
+}
+
+.btn-upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upload-hint {
+  color: var(--text-muted, #888);
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.supported-formats {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted, #888);
+  background: var(--bg-secondary, #ffffff);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color, #e0e0e0);
+}

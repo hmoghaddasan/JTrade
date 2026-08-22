@@ -11,6 +11,7 @@ import SubscriptionRenewal from './components/auth/SubscriptionRenewal';
 import PaymentVerify from './components/PaymentVerify';
 import RealApiService from './services/realApiService';
 import PortfolioComparisonPage from './pages/PortfolioComparisonPage';
+import DisciplineDashboard from './pages/DisciplineDashboard';
 
 // Auth Components
 import LoginStep1 from './components/auth/LoginStep1';
@@ -44,7 +45,7 @@ import ConsultationCompletedBanner from './components/ai/ConsultationCompletedBa
 
 import PortfolioList from './pages/Admin/Portfolios/PortfolioList';
 import { PortfolioProvider } from './contexts/PortfolioContext';
-
+import ImportPage from './pages/ImportPage';  // ✅ اضافه شد
 // ============================================
 // ✅ Admin Panel Components
 // ============================================
@@ -248,7 +249,8 @@ function AppRoutes() {
         <Route path="/trades/edit/:id" element={<TradeEditForm />} />
         <Route path="/trades/:id" element={<TradeDetail />} />
         <Route path="/reports" element={<ReportDashboard />} />
-
+        <Route path="/import" element={<ImportPage />} />
+        <Route path="/discipline" element={<DisciplineDashboard />} />
         {/* ===== ✅ مسیر شاخص‌های پیشرفته ===== */}
         <Route path="/advanced-metrics" element={<AdvancedMetricsReport />} />
         <Route path="/portfolio-comparison" element={<PortfolioComparisonPage />} />
@@ -258,6 +260,7 @@ function AppRoutes() {
         <Route path="/ai-consultation" element={<AIConsultation />} />
         <Route path="/ai-history" element={<AIConsultationHistory />} />
         <Route path="/ai-consultation/detail/:id" element={<AIConsultationDetail />} />
+        <Route path="/discipline" element={<DisciplineDashboard />} />
 
         {/* ========================================== */}
         {/* مسیرهای پنل ادمین */}

@@ -62,7 +62,7 @@ const SubscriptionDetail = () => {
             </button>
           )}
           <button onClick={() => navigate('/admin/subscriptions')} className="btn-back">
-            🔙 بازگشت
+            ↩️ بازگشت
           </button>
         </div>
       </div>

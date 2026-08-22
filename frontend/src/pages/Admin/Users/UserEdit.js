@@ -72,7 +72,7 @@ const UserEdit = () => {
       <div className="page-header">
         <h1>ویرایش کاربر</h1>
         <button onClick={() => navigate(`/admin/users/${id}`)} className="btn-back">
-          🔙 بازگشت
+          ↩️ بازگشت
         </button>
       </div>
 

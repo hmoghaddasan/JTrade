@@ -28,14 +28,15 @@
 .metrics-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.metrics-header-left h1 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-primary, #1a1a2e);
+.metrics-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .btn-back {
@@ -53,11 +54,6 @@
   background: var(--bg-hover, #e8e8e8);
 }
 
-.metrics-header-right {
-  display: flex;
-  gap: 10px;
-}
-
 .btn-print {
   padding: 8px 20px;
   background: #2e7d32;
@@ -72,6 +68,13 @@
 
 .btn-print:hover {
   background: #1b5e20;
+}
+
+.metrics-header-left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary, #1a1a2e);
 }
 
 /* ============================================
@@ -214,7 +217,7 @@
 }
 
 /* ============================================
-   جدول شاخص‌ها - بخش اصلی
+   جدول شاخص‌ها
    ============================================ */
 .metrics-table-container {
   margin: 16px 0;
@@ -291,9 +294,6 @@
   min-width: 70px;
 }
 
-/* ============================================
-   محتویات هر سلول جدول
-   ============================================ */
 .value-container {
   display: flex;
   flex-direction: column;
@@ -329,9 +329,6 @@
   line-height: 1.2;
 }
 
-/* ============================================
-   وضعیت‌های رنگی
-   ============================================ */
 .value-container.amazing {
   background: #e8f5e9;
   color: #1b5e20;
@@ -382,9 +379,6 @@
   color: #ef5350;
 }
 
-/* ============================================
-   افسانه جدول
-   ============================================ */
 .metrics-legend {
   display: flex;
   align-items: center;
@@ -434,8 +428,21 @@
   color: var(--text-primary, #1a1a2e);
 }
 
+.chart-wrapper {
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-wrapper .chart-container {
+  width: 100%;
+  height: 280px;
+}
+
 /* ============================================
-   خلاصه در پایین صفحه
+   خلاصه
    ============================================ */
 .metrics-summary {
   display: grid;
@@ -527,7 +534,7 @@
 }
 
 /* ============================================
-   واکنش‌گرایی - دسکتاپ کوچک
+   واکنش‌گرایی
    ============================================ */
 @media (max-width: 1024px) {
   .metrics-table th.period-header {
@@ -553,9 +560,6 @@
   }
 }
 
-/* ============================================
-   واکنش‌گرایی - تبلت
-   ============================================ */
 @media (max-width: 768px) {
   .metrics-report {
     padding: 12px;
@@ -567,16 +571,28 @@
     padding: 12px 16px;
   }
 
-  .metrics-header-left {
-    flex-wrap: wrap;
+  .metrics-header-left,
+  .metrics-header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .metrics-header-right {
+    justify-content: flex-end;
   }
 
   .metrics-header-left h1 {
     font-size: 18px;
   }
 
-  .metrics-header-right {
-    justify-content: flex-start;
+  .btn-back {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .btn-print {
+    padding: 6px 14px;
+    font-size: 13px;
   }
 
   .formula-grid {
@@ -587,7 +603,10 @@
     grid-template-columns: repeat(3, 1fr);
   }
 
-  /* ===== جدول: حالت پاسخگو با اسکرول افقی ===== */
+  .chart-wrapper .chart-container {
+    height: 220px;
+  }
+
   .metrics-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -658,9 +677,6 @@
   }
 }
 
-/* ============================================
-   واکنش‌گرایی - موبایل
-   ============================================ */
 @media (max-width: 480px) {
   .metrics-report {
     padding: 8px;
@@ -671,12 +687,12 @@
   }
 
   .btn-back {
-    padding: 6px 12px;
+    padding: 4px 10px;
     font-size: 12px;
   }
 
   .btn-print {
-    padding: 6px 14px;
+    padding: 4px 12px;
     font-size: 12px;
   }
 
@@ -715,10 +731,12 @@
     font-size: 11px;
   }
 
-  /* ===== جدول: حالت کارت برای موبایل ===== */
-  .metrics-table-container {
-    border-radius: 8px;
-    padding: 2px;
+  .chart-wrapper .chart-container {
+    height: 180px;
+  }
+
+  .chart-wrapper {
+    padding: 10px;
   }
 
   .metrics-table {
@@ -762,6 +780,7 @@
 
   .value-container .value {
     font-size: 11px;
+    word-break: break-all;
   }
 
   .value-container .status-icon {
@@ -890,5 +909,14 @@
 
   .chart-container {
     max-width: 100% !important;
+  }
+
+  .chart-wrapper {
+    border: 1px solid #ddd !important;
+    padding: 10px !important;
+  }
+
+  .chart-wrapper .chart-container {
+    height: 200px !important;
   }
 }

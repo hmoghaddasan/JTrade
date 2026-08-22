@@ -16,6 +16,11 @@ from .models import (
 )
 from apps.subscriptions.models import UserSubscription, SubscriptionPlan
 from apps.trading.models import TradeGroup
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
+from apps.trading.models import DisciplineSettings
+
 
 logger = logging.getLogger(__name__)
 
@@ -248,3 +253,12 @@ def log_user_logout(user, request=None):
 
         except Exception as e:
             logger.error(f"Error logging user logout: {str(e)}")
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_discipline_settings(sender, instance, created, **kwargs):
+    """
+    پس از ایجاد کاربر جدید، تنظیمات انضباطی پیش‌فرض را برای او ایجاد کن.
+    """
+    if created:
+        DisciplineSettings.objects.get_or_create(user=instance)
+

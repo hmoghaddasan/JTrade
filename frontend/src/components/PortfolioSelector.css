@@ -1,15 +1,19 @@
 /* frontend/src/components/PortfolioSelector.css */
 
-.portfolio-selector {
+/* ============================================
+   پورتفولیو سلکتور - کلاس‌های یکتا (ps-*)
+   ============================================ */
+
+.ps-selector {
   position: relative;
   display: inline-block;
 }
 
-.dropdown {
+.ps-dropdown {
   position: relative;
 }
 
-.dropdown-toggle {
+.ps-dropdown-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -25,15 +29,15 @@
   font-family: inherit;
 }
 
-.dropdown-toggle:hover {
+.ps-dropdown-toggle:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.portfolio-icon {
+.ps-icon {
   font-size: 18px;
 }
 
-.portfolio-name {
+.ps-name {
   flex: 1;
   text-align: right;
   white-space: nowrap;
@@ -41,17 +45,17 @@
   text-overflow: ellipsis;
 }
 
-.arrow {
+.ps-arrow {
   font-size: 12px;
   transition: transform 0.3s ease;
 }
 
-.arrow.open {
+.ps-arrow.ps-open {
   transform: rotate(180deg);
 }
 
 /* ===== منوی کشویی ===== */
-.dropdown-menu {
+.ps-dropdown-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -61,16 +65,16 @@
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   padding: 6px 0;
-  z-index: 1000;
-  animation: slideDown 0.2s ease;
+  z-index: 9999; /* بالاتر از همه */
+  animation: psSlideDown 0.2s ease;
 }
 
-.dark-theme .dropdown-menu {
+.dark-theme .ps-dropdown-menu {
   background: #2d2d44;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
-@keyframes slideDown {
+@keyframes psSlideDown {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -82,7 +86,7 @@
 }
 
 /* ===== آیتم‌های منو ===== */
-.dropdown-item {
+.ps-dropdown-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -94,34 +98,34 @@
   position: relative;
 }
 
-.dark-theme .dropdown-item {
+.dark-theme .ps-dropdown-item {
   color: #e0e0e0;
 }
 
-.dropdown-item:hover {
+.ps-dropdown-item:hover {
   background: #f5f5f5;
 }
 
-.dark-theme .dropdown-item:hover {
+.dark-theme .ps-dropdown-item:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.dropdown-item.active {
+.ps-dropdown-item.ps-active {
   background: #e8f0fe;
 }
 
-.dark-theme .dropdown-item.active {
+.dark-theme .ps-dropdown-item.ps-active {
   background: rgba(108, 99, 255, 0.2);
 }
 
-.item-icon {
+.ps-item-icon {
   font-size: 18px;
   width: 28px;
   text-align: center;
   flex-shrink: 0;
 }
 
-.item-name {
+.ps-item-name {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -129,7 +133,7 @@
 }
 
 /* ===== نشان‌ها ===== */
-.badge-default {
+.ps-badge-default {
   font-size: 10px;
   background: #e0e0e0;
   color: #666;
@@ -138,19 +142,19 @@
   flex-shrink: 0;
 }
 
-.dark-theme .badge-default {
+.dark-theme .ps-badge-default {
   background: #444;
   color: #aaa;
 }
 
-.badge-active {
+.ps-badge-active {
   font-size: 14px;
   color: #4CAF50;
   flex-shrink: 0;
 }
 
 /* ===== دکمه‌های عملیات ===== */
-.item-actions {
+.ps-item-actions {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -158,8 +162,8 @@
   margin-right: 4px;
 }
 
-.btn-edit-portfolio,
-.btn-delete-portfolio {
+.ps-btn-edit,
+.ps-btn-delete {
   background: none;
   border: none;
   cursor: pointer;
@@ -172,117 +176,433 @@
   line-height: 1;
 }
 
-.btn-edit-portfolio:hover,
-.btn-delete-portfolio:hover {
+.ps-btn-edit:hover,
+.ps-btn-delete:hover {
   opacity: 1;
 }
 
-.btn-edit-portfolio:hover {
+.ps-btn-edit:hover {
   background: #e3f2fd;
   color: #1565c0;
 }
 
-.btn-delete-portfolio:hover {
+.ps-btn-delete:hover {
   background: #ffebee;
   color: #c62828;
 }
 
-.dark-theme .btn-edit-portfolio:hover {
+.dark-theme .ps-btn-edit:hover {
   background: rgba(21, 101, 192, 0.2);
   color: #64b5f6;
 }
 
-.dark-theme .btn-delete-portfolio:hover {
+.dark-theme .ps-btn-delete:hover {
   background: rgba(198, 40, 40, 0.2);
   color: #ef5350;
 }
 
 /* ===== جداکننده ===== */
-.dropdown-divider {
+.ps-divider {
   height: 1px;
   background: #e8e8e8;
   margin: 4px 12px;
 }
 
-.dark-theme .dropdown-divider {
+.dark-theme .ps-divider {
   background: #444;
 }
 
 /* ===== آیتم افزودن جدید ===== */
-.dropdown-item.add-new {
+.ps-dropdown-item.ps-add-new {
   color: #4CAF50;
   font-weight: 500;
 }
 
-.dark-theme .dropdown-item.add-new {
+.dark-theme .ps-dropdown-item.ps-add-new {
   color: #66bb6a;
 }
 
-.dropdown-item.add-new:hover {
+.ps-dropdown-item.ps-add-new:hover {
   background: #e8f5e9;
 }
 
-.dark-theme .dropdown-item.add-new:hover {
+.dark-theme .ps-dropdown-item.ps-add-new:hover {
   background: rgba(76, 175, 80, 0.15);
 }
 
-/* ===== واکنش‌گرا ===== */
+/* ===== وضعیت لودینگ ===== */
+.ps-loading {
+  display: inline-block;
+  padding: 8px 16px;
+  color: var(--text-muted, #888);
+  font-size: 14px;
+}
+
+/* ============================================
+   واکنش‌گرا (Responsive)
+   ============================================ */
 @media (max-width: 768px) {
-  .dropdown-toggle {
+  .ps-dropdown-toggle {
     padding: 6px 12px;
     font-size: 13px;
     min-width: 120px;
   }
 
-  .portfolio-name {
+  .ps-name {
     max-width: 100px;
   }
 
-  .dropdown-menu {
+  .ps-dropdown-menu {
     min-width: 220px;
     max-width: 280px;
     right: -10px;
   }
 
-  .dropdown-item {
+  .ps-dropdown-item {
     padding: 8px 12px;
     font-size: 13px;
   }
 
-  .item-actions {
+  .ps-item-actions {
     gap: 2px;
   }
 
-  .btn-edit-portfolio,
-  .btn-delete-portfolio {
+  .ps-btn-edit,
+  .ps-btn-delete {
     font-size: 13px;
     padding: 2px 4px;
   }
 }
 
 @media (max-width: 480px) {
-  .dropdown-menu {
+  .ps-dropdown-menu {
     min-width: 200px;
     right: -5px;
   }
 
-  .dropdown-item {
+  .ps-dropdown-item {
     font-size: 12px;
     padding: 6px 10px;
     gap: 6px;
   }
 
-  .item-icon {
+  .ps-item-icon {
     font-size: 15px;
     width: 22px;
   }
 
-  .btn-edit-portfolio,
-  .btn-delete-portfolio {
+  .ps-btn-edit,
+  .ps-btn-delete {
     font-size: 12px;
   }
 
-  .badge-default {
+  .ps-badge-default {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+}
+.ps-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 260px;
+  max-width: 340px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+  z-index: 9999 !important; /* ✅ افزایش */
+  animation: psSlideDown 0.2s ease;
+}/* frontend/src/components/PortfolioSelector.css */
+
+/* ============================================
+   پورتفولیو سلکتور - کلاس‌های یکتا (ps-*)
+   ============================================ */
+
+.ps-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.ps-dropdown {
+  position: relative;
+}
+
+.ps-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  font-family: inherit;
+}
+
+.ps-dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ps-icon {
+  font-size: 18px;
+}
+
+.ps-name {
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.ps-arrow.ps-open {
+  transform: rotate(180deg);
+}
+
+/* ===== منوی کشویی ===== */
+.ps-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 260px;
+  max-width: 340px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+  z-index: 9999 !important;
+  animation: psSlideDown 0.2s ease;
+}
+
+.dark-theme .ps-dropdown-menu {
+  background: #2d2d44;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes psSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== آیتم‌های منو ===== */
+.ps-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #333;
+  font-size: 14px;
+  position: relative;
+}
+
+.dark-theme .ps-dropdown-item {
+  color: #e0e0e0;
+}
+
+.ps-dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dark-theme .ps-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ps-dropdown-item.ps-active {
+  background: #e8f0fe;
+}
+
+.dark-theme .ps-dropdown-item.ps-active {
+  background: rgba(108, 99, 255, 0.2);
+}
+
+.ps-item-icon {
+  font-size: 18px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ps-item-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== نشان‌ها ===== */
+.ps-badge-default {
+  font-size: 10px;
+  background: #e0e0e0;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.dark-theme .ps-badge-default {
+  background: #444;
+  color: #aaa;
+}
+
+.ps-badge-active {
+  font-size: 14px;
+  color: #4CAF50;
+  flex-shrink: 0;
+}
+
+/* ===== دکمه‌های عملیات ===== */
+.ps-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.ps-btn-edit,
+.ps-btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  color: #999;
+  opacity: 0.3;
+  line-height: 1;
+}
+
+.ps-btn-edit:hover,
+.ps-btn-delete:hover {
+  opacity: 1;
+}
+
+.ps-btn-edit:hover {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.ps-btn-delete:hover {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.dark-theme .ps-btn-edit:hover {
+  background: rgba(21, 101, 192, 0.2);
+  color: #64b5f6;
+}
+
+.dark-theme .ps-btn-delete:hover {
+  background: rgba(198, 40, 40, 0.2);
+  color: #ef5350;
+}
+
+/* ===== جداکننده ===== */
+.ps-divider {
+  height: 1px;
+  background: #e8e8e8;
+  margin: 4px 12px;
+}
+
+.dark-theme .ps-divider {
+  background: #444;
+}
+
+/* ===== آیتم افزودن جدید ===== */
+.ps-dropdown-item.ps-add-new {
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.dark-theme .ps-dropdown-item.ps-add-new {
+  color: #66bb6a;
+}
+
+.ps-dropdown-item.ps-add-new:hover {
+  background: #e8f5e9;
+}
+
+.dark-theme .ps-dropdown-item.ps-add-new:hover {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+/* ===== وضعیت لودینگ ===== */
+.ps-loading {
+  display: inline-block;
+  padding: 8px 16px;
+  color: var(--text-muted, #888);
+  font-size: 14px;
+}
+
+/* ============================================
+   واکنش‌گرا (Responsive)
+   ============================================ */
+@media (max-width: 768px) {
+  .ps-dropdown-toggle {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 120px;
+  }
+  .ps-name {
+    max-width: 100px;
+  }
+  .ps-dropdown-menu {
+    min-width: 220px;
+    max-width: 280px;
+    right: -10px;
+  }
+  .ps-dropdown-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .ps-item-actions {
+    gap: 2px;
+  }
+  .ps-btn-edit,
+  .ps-btn-delete {
+    font-size: 13px;
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ps-dropdown-menu {
+    min-width: 200px;
+    right: -5px;
+  }
+  .ps-dropdown-item {
+    font-size: 12px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .ps-item-icon {
+    font-size: 15px;
+    width: 22px;
+  }
+  .ps-btn-edit,
+  .ps-btn-delete {
+    font-size: 12px;
+  }
+  .ps-badge-default {
     font-size: 9px;
     padding: 1px 6px;
   }

@@ -12,6 +12,7 @@ import { useConsultation } from '../contexts/ConsultationContext';
 import { usePortfolio } from '../contexts/PortfolioContext';
 import PortfolioSelector from './PortfolioSelector';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import DisciplineWidget from './discipline/DisciplineWidget';
 
 // لیست ۵۰ آیکون برای دسته‌بندی‌ها
 const GROUP_ICONS = [
@@ -59,12 +60,37 @@ const Dashboard = () => {
   const [showAllTrades, setShowAllTrades] = useState(false);
   const [showAllGroups, setShowAllGroups] = useState(false);
   const DISPLAY_LIMIT = 15;
-// ============================================
-// رفتن به صفحه مقایسه پورتفولیوها (جدید)
-// ============================================
-const handleGoToComparison = () => {
-    navigate('/portfolio-comparison');
-};
+
+  // State جدید برای Dropdown
+  const [showTradeDropdown, setShowTradeDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // ============================================
+  // بستن Dropdown با کلیک خارج از آن
+  // ============================================
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowTradeDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ============================================
+  // توابع مربوط به Dropdown
+  // ============================================
+  const handleNewTrade = () => {
+    setShowTradeDropdown(false);
+    navigate('/trades/new');
+  };
+
+  const handleImportCSV = () => {
+    setShowTradeDropdown(false);
+    navigate('/import');
+  };
+
   // ============================================
   // دریافت نسخه جاری از سرور
   // ============================================
@@ -545,6 +571,13 @@ const handleGoToComparison = () => {
   };
 
   // ============================================
+  // رفتن به صفحه مقایسه پورتفولیوها
+  // ============================================
+  const handleGoToComparison = () => {
+    navigate('/portfolio-comparison');
+  };
+
+  // ============================================
   // تب‌ها
   // ============================================
   const tabs = [
@@ -592,7 +625,7 @@ const handleGoToComparison = () => {
           <h1>📊 ژورنال حرفه‌ای ترید <span className="header-version">v{appVersion}</span></h1>
         </div>
         <div className="header-right">
-          {/* ===== کلید شاخص‌ها (اول از راست) ===== */}
+          {/* ===== کلید شاخص‌ها ===== */}
           <button
             className="header-btn metrics-btn"
             onClick={handleGoToMetrics}
@@ -602,17 +635,31 @@ const handleGoToComparison = () => {
             <span className="btn-text">شاخص‌ها</span>
           </button>
 
-          {/* ===== کلید پورتفولیو ===== */}
-          <PortfolioSelector />
-{/* ===== کلید مقایسه پورتفولیوها ===== */}
+          {/* ===== کلید پورتفولیو - اصلاح شده با کلاس portfolio-selector ===== */}
+          <div className="portfolio-selector">
+            <PortfolioSelector />
+          </div>
+
+          {/* ===== کلید مقایسه پورتفولیوها ===== */}
           <button
-              className="header-btn comparison-btn"
-              onClick={handleGoToComparison}
-              title="مقایسه پورتفولیوها"
+            className="header-btn comparison-btn"
+            onClick={handleGoToComparison}
+            title="مقایسه پورتفولیوها"
           >
-              <span className="btn-icon">📊</span>
-              <span className="btn-text">مقایسه</span>
+            <span className="btn-icon">📊</span>
+            <span className="btn-text">مقایسه</span>
           </button>
+
+          {/* ===== کلید انضباط ===== */}
+          <button
+            className="header-btn discipline-btn"
+            onClick={() => navigate('/discipline')}
+            title="ابزارهای انضباطی"
+          >
+            <span className="btn-icon">🛡️</span>
+            <span className="btn-text">انضباط</span>
+          </button>
+
           {/* ===== کلید شب/روز ===== */}
           <button
             className="header-btn theme-btn"
@@ -623,9 +670,9 @@ const handleGoToComparison = () => {
             <span className="btn-text">{isDark ? 'روشن' : 'تاریک'}</span>
           </button>
 
-          {/* ===== کلید خروج (آخر از راست) ===== */}
+          {/* ===== کلید خروج ===== */}
           <button
-            className="header-btn logout-btn"
+            className="header-btn"
             onClick={handleLogout}
             title="خروج از حساب کاربری"
           >
@@ -637,9 +684,36 @@ const handleGoToComparison = () => {
 
       {/* ===== دکمه‌های اقدام سریع ===== */}
       <div className="quick-actions">
-        <button className="action-btn primary" onClick={() => navigate('/trades/new')}>
-          <span className="action-icon">➕</span><span>ترید جدید</span>
-        </button>
+        {/* ✅ دکمه "ترید جدید" با Dropdown */}
+        <div className="action-btn-wrapper" ref={dropdownRef}>
+          <button
+            className="action-btn primary"
+            onClick={handleNewTrade}
+          >
+            <span className="action-icon">➕</span>
+            <span>ترید جدید</span>
+          </button>
+          <button
+            className="dropdown-toggle"
+            onClick={() => setShowTradeDropdown(!showTradeDropdown)}
+            aria-label="گزینه‌های بیشتر"
+          >
+              <span className="arrow-icon">▾</span>
+          </button>
+          {showTradeDropdown && (
+            <div className="dropdown-menu">
+              <button className="dropdown-item" onClick={handleNewTrade}>
+                <span className="dropdown-icon">➕</span>
+                ثبت دستی
+              </button>
+              <button className="dropdown-item" onClick={handleImportCSV}>
+                <span className="dropdown-icon">📥</span>
+                انتقال از فایل CSV
+              </button>
+            </div>
+          )}
+        </div>
+
         <button className="action-btn secondary" onClick={() => navigate('/trades')}>
           <span className="action-icon">📋</span><span>لیست تریدها</span>
         </button>
@@ -658,12 +732,13 @@ const handleGoToComparison = () => {
           <span>{hasActiveConsultation ? '⏳ مشاوره در حال انجام...' : 'مشاور AI'}</span>
         </button>
         <button className="action-btn info" onClick={() => navigate('/profile')}>
-          <span className="action-icon">👤</span><span>پروفایل</span>
+          <span className="action-icon">👤</span><span>پنل کاربری</span>
         </button>
       </div>
 
       {/* ===== پیام‌های سیستم ===== */}
       <SystemMessages />
+      <DisciplineWidget onNavigate={navigate} />
 
       {/* ===== سه ستون اصلی ===== */}
       <div className="three-column-layout">
@@ -754,8 +829,10 @@ const handleGoToComparison = () => {
                     </div>
                     <div className="trade-item-info">
                       <span className="trade-date">{trade.trade_date || new Date(trade.created_at).toLocaleDateString('fa-IR')}</span>
+                      {trade.broker_name && <span className="trade-broker">{trade.broker_name}</span>}
                       <span className={`trade-profit ${parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}`}>
-                        {parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$</span>
+                        {parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$
+                      </span>
                     </div>
                   </div>
                 ))}

@@ -9,15 +9,29 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.db.models import Sum, Avg, Count, Q
 from .models import (
+    Broker,  # ✅ جدید
     CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion,
     AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio
 )
 
 
+# ============================================
+# ✅ سریالایزر بروکر (جدید)
+# ============================================
+class BrokerSerializer(serializers.ModelSerializer):
+    category_label = serializers.CharField(source='get_category_label', read_only=True)
+
+    class Meta:
+        model = Broker
+        fields = ['id', 'name', 'category', 'category_label', 'is_active', 'order_index']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
 class CurrencyPairSerializer(serializers.ModelSerializer):
     class Meta:
         model = CurrencyPair
-        fields = ['id', 'symbol', 'base_currency', 'quote_currency', 'pair_type', 'description', 'is_active', 'created_at', 'updated_at']
+        fields = ['id', 'symbol', 'base_currency', 'quote_currency', 'pair_type', 'description', 'is_active',
+                  'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -45,6 +59,9 @@ class TradeListSerializer(serializers.ModelSerializer):
     screenshot = serializers.SerializerMethodField()
     portfolio_id = serializers.IntegerField(source='portfolio.id', read_only=True, allow_null=True)
     portfolio_info = serializers.SerializerMethodField()
+    # ✅ فیلدهای بروکر
+    broker_id = serializers.IntegerField(source='broker.id', read_only=True, allow_null=True)
+    broker_name = serializers.CharField(source='broker.name', read_only=True, allow_null=True)
 
     class Meta:
         model = Trade
@@ -82,6 +99,7 @@ class TradeListSerializer(serializers.ModelSerializer):
             'group', 'group_name', 'group_icon',
             'portfolio_id',
             'portfolio_info',
+            'broker_id', 'broker_name',  # ✅ جدید
             'created_at', 'updated_at',
             'timeframes', 'emotions', 'rule_compliance'
         ]
@@ -133,6 +151,9 @@ class TradeDetailSerializer(serializers.ModelSerializer):
     screenshot = serializers.SerializerMethodField()
     portfolio_id = serializers.IntegerField(source='portfolio.id', read_only=True, allow_null=True)
     portfolio_info = serializers.SerializerMethodField()
+    # ✅ فیلدهای بروکر
+    broker_id = serializers.IntegerField(source='broker.id', read_only=True, allow_null=True)
+    broker_name = serializers.CharField(source='broker.name', read_only=True, allow_null=True)
 
     class Meta:
         model = Trade
@@ -199,6 +220,7 @@ class TradeCreateSerializer(serializers.ModelSerializer):
         allow_blank=True,
         help_text="تصویر چارت به صورت Base64"
     )
+    broker_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = Trade
@@ -209,6 +231,15 @@ class TradeCreateSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("انتخاب دسته‌بندی اجباری است")
         return value
+
+    def validate_broker_id(self, value):
+        if value is not None:
+            try:
+                broker = Broker.objects.get(id=value, is_active=True)
+                return broker
+            except Broker.DoesNotExist:
+                raise serializers.ValidationError("بروکر انتخاب‌شده نامعتبر یا غیرفعال است.")
+        return None
 
     def validate_screenshot(self, value):
         if not settings.SHOW_SCREENSHOT_UPLOAD:
@@ -276,7 +307,7 @@ class TradeCreateSerializer(serializers.ModelSerializer):
             content_file = ContentFile(buffer.getvalue(), name=filename)
             image.close()
 
-            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(buffer.getvalue()) / (1024*1024):.2f} MB")
+            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(buffer.getvalue()) / (1024 * 1024):.2f} MB")
             return content_file
 
         except base64.binascii.Error:
@@ -325,6 +356,7 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
         allow_blank=True,
         help_text="تصویر چارت به صورت Base64"
     )
+    broker_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = Trade
@@ -338,6 +370,15 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
             if screenshot_value in (None, {}, []):
                 mutable_data['screenshot'] = None
         return super().to_internal_value(mutable_data)
+
+    def validate_broker_id(self, value):
+        if value is not None:
+            try:
+                broker = Broker.objects.get(id=value, is_active=True)
+                return broker
+            except Broker.DoesNotExist:
+                raise serializers.ValidationError("بروکر انتخاب‌شده نامعتبر یا غیرفعال است.")
+        return None
 
     def validate_screenshot(self, value):
         if not settings.SHOW_SCREENSHOT_UPLOAD:
@@ -405,7 +446,7 @@ class TradeUpdateSerializer(serializers.ModelSerializer):
             content_file = ContentFile(buffer.getvalue(), name=filename)
             image.close()
 
-            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(buffer.getvalue()) / (1024*1024):.2f} MB")
+            print(f"✅ تصویر با موفقیت پردازش شد. حجم نهایی: {len(buffer.getvalue()) / (1024 * 1024):.2f} MB")
             return content_file
 
         except base64.binascii.Error:
@@ -434,7 +475,8 @@ class TradingRuleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TradingRule
-        fields = ['id', 'rule_text', 'category', 'category_label', 'is_active', 'is_required', 'order_index', 'created_at', 'updated_at']
+        fields = ['id', 'rule_text', 'category', 'category_label', 'is_active', 'is_required', 'order_index',
+                  'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -517,7 +559,8 @@ class AIConsultationSerializer(serializers.ModelSerializer):
         best_strategy_data = trades.values('strategy_type').annotate(
             wins=Count('id', filter=Q(profit__gt=0))
         ).order_by('-wins').first()
-        best_strategy = best_strategy_data['strategy_type'] if best_strategy_data and best_strategy_data.get('strategy_type') else None
+        best_strategy = best_strategy_data['strategy_type'] if best_strategy_data and best_strategy_data.get(
+            'strategy_type') else None
 
         best_hour_data = None
         if trades.filter(time_ny__isnull=False).exists():
@@ -529,7 +572,8 @@ class AIConsultationSerializer(serializers.ModelSerializer):
             ).order_by('-total').first()
         best_hour = int(best_hour_data['hour']) if best_hour_data else None
 
-        most_common_emotion = trades.exclude(dominant_feeling__isnull=True).exclude(dominant_feeling='').values('dominant_feeling').annotate(
+        most_common_emotion = trades.exclude(dominant_feeling__isnull=True).exclude(dominant_feeling='').values(
+            'dominant_feeling').annotate(
             cnt=Count('id')
         ).order_by('-cnt').first()
         emotion = most_common_emotion['dominant_feeling'] if most_common_emotion else None
@@ -549,7 +593,8 @@ class AIConsultationFeedbackSerializer(serializers.Serializer):
     is_followed = serializers.ChoiceField(choices=['full', 'partial', 'none'])
     trade_result = serializers.ChoiceField(choices=['win', 'loss', 'breakeven'])
     feedback_score = serializers.IntegerField(min_value=1, max_value=5)
-    feedback_helpfulness = serializers.ChoiceField(choices=['very_helpful', 'somewhat_helpful', 'little_helpful', 'not_helpful'])
+    feedback_helpfulness = serializers.ChoiceField(
+        choices=['very_helpful', 'somewhat_helpful', 'little_helpful', 'not_helpful'])
     feedback_comment = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
 
@@ -677,7 +722,6 @@ class MetricsTrendSerializer(serializers.Serializer):
     total_trades = serializers.IntegerField()
     total_profit = serializers.FloatField()
 
-# backend/apps/trading/serializers.py
 
 # ============================================
 # سریالایزرهای گزارش‌های ترکیبی و مقایسه‌ای پورتفولیو (جدید)

@@ -36,7 +36,7 @@ const TradeDetail = () => {
       <div className="page-header">
         <h1>جزئیات ترید #{trade.id}</h1>
         <button onClick={() => navigate('/admin/trades')} className="btn-back">
-          🔙 بازگشت
+          ↩️ بازگشت
         </button>
       </div>
 

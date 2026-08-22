@@ -48,6 +48,9 @@ urlpatterns = [
     # تنظیمات سیستم
     path('api/system/', include('apps.accounts.system_urls')),
 
+    # ✅ واردات خودکار (Auto-Import) - جدید
+    path('api/import/', include('apps.import.urls')),
+
     # سلامت سنجی
     path('health/', health_check, name='health_check'),
 

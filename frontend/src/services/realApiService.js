@@ -2,9 +2,9 @@
 
 import axios from 'axios';
 
-// ✅ ============================================
-// ✅ غیرفعال‌سازی کامل WebSocket در مرورگر
-// ✅ ============================================
+// ============================================
+// غیرفعال‌سازی کامل WebSocket
+// ============================================
 if (typeof window !== 'undefined' && window.WebSocket) {
   const OriginalWebSocket = window.WebSocket;
   window.WebSocket = function(url, protocols) {
@@ -33,61 +33,41 @@ if (typeof window !== 'undefined' && window.WebSocket) {
 
 class RealApiService {
   constructor() {
-    // ✅ بدون اسلش انتهایی
     this.apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
     this.wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/';
   }
 
-  // ============================================
-  // دریافت توکن از localStorage
-  // ============================================
   getToken() {
     const token = localStorage.getItem('accessToken');
-    console.log('🔑 getToken:', token ? token.substring(0, 20) + '...' : 'null');
     return token;
   }
 
-  // ============================================
-  // تنظیم هدرهای درخواست
-  // ============================================
   getHeaders() {
     const token = this.getToken();
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('✅ Authorization header set');
-    } else {
-      console.warn('⚠️ No token found!');
     }
-
     return headers;
   }
 
-  // ============================================
-  // درخواست پایه (مسیرهای صحیح)
-  // ============================================
   async request(endpoint, options = {}) {
-    // ✅ اگر endpoint با 'api/' شروع شد، آن را حذف کن
     let cleanEndpoint = endpoint;
     if (cleanEndpoint.startsWith('/api/')) {
-      cleanEndpoint = cleanEndpoint.substring(4); // حذف '/api'
+      cleanEndpoint = cleanEndpoint.substring(4);
     }
     if (cleanEndpoint.startsWith('api/')) {
-      cleanEndpoint = cleanEndpoint.substring(4); // حذف 'api/'
+      cleanEndpoint = cleanEndpoint.substring(4);
     }
-    // اگر endpoint با '/' شروع شد، آن را هم حذف کن
     if (cleanEndpoint.startsWith('/')) {
       cleanEndpoint = cleanEndpoint.substring(1);
     }
 
     const url = `${this.apiUrl}/${cleanEndpoint}`;
     const headers = this.getHeaders();
-
-    console.log(`📤 ${options.method || 'GET'} ${url}`);
 
     try {
       const config = {
@@ -98,17 +78,10 @@ class RealApiService {
         params: options.params,
         withCredentials: true,
       };
-
       const response = await axios(config);
-      console.log(`✅ Response: ${response.status}`);
       return response;
-
     } catch (error) {
-      console.error(`❌ Request failed:`, error.response?.status);
-      console.error('❌ Error details:', error.response?.data);
-
       if (error.response?.status === 401) {
-        console.log('🔑 Token expired, redirecting to login...');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         window.location.href = '/login';
@@ -118,9 +91,8 @@ class RealApiService {
   }
 
   // ============================================
-  // احراز هویت (نیاز به توکن ندارد)
+  // احراز هویت
   // ============================================
-
   async sendVerificationCode(phone) {
     return this.request('/auth/send-code/', {
       method: 'POST',
@@ -156,9 +128,8 @@ class RealApiService {
   }
 
   // ============================================
-  // پروفایل (نیاز به توکن دارد)
+  // پروفایل
   // ============================================
-
   async getProfile() {
     return this.request('/auth/profile/');
   }
@@ -171,11 +142,9 @@ class RealApiService {
   }
 
   // ============================================
-  // مدیریت دسته‌بندی‌ها (نیاز به توکن دارد)
+  // مدیریت دسته‌بندی‌ها
   // ============================================
-
   async getTradeGroups() {
-    console.log('📤 Getting trade groups...');
     return this.request('/trading/groups/');
   }
 
@@ -200,14 +169,11 @@ class RealApiService {
   }
 
   // ============================================
-  // مدیریت تریدها (نیاز به توکن دارد)
+  // مدیریت تریدها
   // ============================================
-
   async getTrades(params = {}) {
     const defaultParams = { page_size: 1000, ...params };
-    return this.request('/trading/trades/', {
-      params: defaultParams
-    });
+    return this.request('/trading/trades/', { params: defaultParams });
   }
 
   async getTrade(id) {
@@ -235,9 +201,8 @@ class RealApiService {
   }
 
   // ============================================
-  // جفت ارزها (Currency Pairs)
+  // جفت ارزها و نمادها
   // ============================================
-
   async getCurrencyPairs(params = {}) {
     const defaultParams = { page_size: 1000, ...params };
     return this.request('/trading/currency-pairs/', { params: defaultParams });
@@ -248,16 +213,11 @@ class RealApiService {
   }
 
   // ============================================
-  // ✅ دریافت لیست مدل‌های هوش مصنوعی
+  // هوش مصنوعی
   // ============================================
-
   async getAvailableModels() {
     return this.request('/trading/ai/models/');
   }
-
-  // ============================================
-  // ✅ دریافت قیمت لحظه‌ای یک نماد (جدید)
-  // ============================================
 
   async getLivePrice(symbol) {
     try {
@@ -270,17 +230,15 @@ class RealApiService {
   }
 
   // ============================================
-  // ✅ دریافت نسخه فعلی نرم‌افزار (جدید)
+  // نسخه نرم‌افزار
   // ============================================
-
   async getCurrentVersion() {
     return this.request('/system/version/');
   }
 
   // ============================================
-  // اشتراک و پرداخت (نیاز به توکن دارد)
+  // اشتراک و پرداخت
   // ============================================
-
   async getSubscriptionStatus() {
     return this.request('/subscription/status/');
   }
@@ -290,7 +248,6 @@ class RealApiService {
   }
 
   async getPlans() {
-    console.log('📤 Getting subscription plans...');
     return this.request('/subscription/plans/');
   }
 
@@ -307,10 +264,7 @@ class RealApiService {
   async validateDiscount(code, planId = null) {
     return this.request('/subscription/discount/validate/', {
       method: 'POST',
-      body: JSON.stringify({
-        code,
-        plan_id: planId
-      })
+      body: JSON.stringify({ code, plan_id: planId })
     });
   }
 
@@ -322,9 +276,8 @@ class RealApiService {
   }
 
   // ============================================
-  // گزارشات (نیاز به توکن دارد)
+  // گزارشات
   // ============================================
-
   async getReport(params = {}) {
     return this.request('/trading/reports/', { params });
   }
@@ -361,70 +314,41 @@ class RealApiService {
     return this.request('/trading/reports/timeframe/', { params });
   }
 
-  // ============================================
-  // ✅ گزارش قوانین معاملاتی (اصلاح‌شده)
-  // ============================================
-
   async getRulesReport(params = {}) {
     return this.request('/trading/rules/report/', { params });
   }
 
   // ============================================
-  // ✅ گزارش‌های ترکیبی و مقایسه‌ای پورتفولیو (جدید)
+  // پورتفولیو و مقایسه
   // ============================================
-
-  /**
-   * دریافت داده‌های کامل مقایسه پورتفولیوها
-   * @param {Object} params - پارامترهای فیلتر
-   * @param {string} params.start_date - تاریخ شروع
-   * @param {string} params.end_date - تاریخ پایان
-   * @returns {Promise} داده‌های مقایسه
-   */
   async getPortfolioComparison(params = {}) {
     const queryParams = new URLSearchParams();
     if (params.start_date) queryParams.append('start_date', params.start_date);
     if (params.end_date) queryParams.append('end_date', params.end_date);
-
     const url = `/trading/portfolios/compare/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return this.request(url);
   }
 
-  /**
-   * دریافت خلاصه مقایسه پورتفولیوها (برای کارت‌ها)
-   * @param {Object} params - پارامترهای فیلتر
-   * @returns {Promise} خلاصه مقایسه
-   */
   async getPortfolioComparisonSummary(params = {}) {
     const queryParams = new URLSearchParams();
     if (params.start_date) queryParams.append('start_date', params.start_date);
     if (params.end_date) queryParams.append('end_date', params.end_date);
-
     const url = `/trading/portfolios/compare/summary/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return this.request(url);
   }
 
-  /**
-   * دریافت داده‌های نمودار مقایسه‌ای
-   * @param {Object} params - پارامترها
-   * @param {string} params.chart_type - نوع نمودار (cumulative_pnl, radar, bar)
-   * @param {string} params.start_date - تاریخ شروع
-   * @param {string} params.end_date - تاریخ پایان
-   * @returns {Promise} داده‌های نمودار
-   */
   async getPortfolioComparisonChart(params = {}) {
     const queryParams = new URLSearchParams();
     if (params.chart_type) queryParams.append('chart_type', params.chart_type);
     if (params.start_date) queryParams.append('start_date', params.start_date);
     if (params.end_date) queryParams.append('end_date', params.end_date);
-
     const url = `/trading/portfolios/compare/chart/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return this.request(url);
   }
 
   // ============================================
-  // پیام‌رسانی (نیاز به توکن دارد)
+  // پیام‌رسانی
   // ============================================
-
   async getUserMessages(params = {}) {
     return this.request('/messages/', { params });
   }
@@ -464,9 +388,8 @@ class RealApiService {
   }
 
   // ============================================
-  // نسخه‌ها و تنظیمات (نیاز به توکن دارد)
+  // نسخه‌ها و تنظیمات
   // ============================================
-
   async getAppVersions() {
     return this.request('/system/versions/');
   }
@@ -475,10 +398,16 @@ class RealApiService {
     return this.request('/system/settings/');
   }
 
-  // ============================================
-  // ✅ وب‌سوکت - کاملاً غیرفعال (بدون لاگ)
-  // ============================================
 
+// ============================================
+// ✅ بروکرها (کارگزاران) - با پشتیبانی از پارامتر
+// ============================================
+async getBrokers(params = {}) {
+  return this.request('/trading/brokers/', { params });
+}
+  // ============================================
+  // WebSocket (غیرفعال)
+  // ============================================
   connectWebSocket() {
     return null;
   }

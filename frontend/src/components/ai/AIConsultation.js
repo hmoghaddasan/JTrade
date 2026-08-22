@@ -1701,7 +1701,7 @@ const AIConsultation = () => {
         <h2>🧠 مشاور هوشمند معاملاتی</h2>
         <div className="header-buttons">
           <button className="btn-history" onClick={() => navigate('/ai-history')}>📋 تاریخچه مشاوره‌ها</button>
-          <button className="btn-back" onClick={() => navigate('/dashboard')}>↩️ بازگشت به داشبورد</button>
+          <button className="btn-back" onClick={() => navigate('/dashboard')}>↩️ بازگشت</button>
         </div>
       </div>
 

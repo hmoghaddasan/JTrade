@@ -65,7 +65,7 @@ const TradeDetail = () => {
     }
   };
 
-  // ===== تابع دریافت نام پورتفولیو =====
+  // ===== توابع کمکی =====
   const getPortfolioName = () => {
     if (trade.portfolio_info) {
       return `${trade.portfolio_info.icon || '📊'} ${trade.portfolio_info.name}`;
@@ -76,7 +76,6 @@ const TradeDetail = () => {
     return 'بدون پورتفولیو';
   };
 
-  // ===== تابع دریافت اطلاعات پورتفولیو =====
   const getPortfolioData = () => {
     if (trade.portfolio_info) {
       return trade.portfolio_info;
@@ -87,7 +86,7 @@ const TradeDetail = () => {
     return null;
   };
 
-  // توابع چاپ و اکسل و بقیه...
+  // ===== تابع چاپ =====
   const handlePrint = () => {
     if (!trade) return;
 
@@ -99,6 +98,7 @@ const TradeDetail = () => {
 
     const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی';
     const portfolioName = getPortfolioName();
+    const brokerName = trade.broker_name || '-';
 
     const emotionLabels = {
       focus: 'تمرکز', calm: 'آرامش', excited: 'هیجان', fear: 'ترس',
@@ -167,18 +167,22 @@ const TradeDetail = () => {
           </span>
         </div>
 
-        <!-- بخش ۰: اطلاعات پورتفولیو -->
+        <!-- بخش ۰: اطلاعات پورتفولیو و بروکر -->
         <div class="section">
-          <div class="section-title">📊 پورتفولیو</div>
+          <div class="section-title">📊 اطلاعات حساب و کارگزار</div>
           <div class="section-body">
             <div class="detail-row">
               <span class="detail-label">پورتفولیو</span>
               <span class="detail-value">${portfolioName}</span>
             </div>
+            <div class="detail-row">
+              <span class="detail-label">بروکر / کارگزار</span>
+              <span class="detail-value">${brokerName}</span>
+            </div>
           </div>
         </div>
 
-        <!-- بقیه بخش‌ها... -->
+        <!-- بخش ۱: عمومی -->
         <div class="section">
           <div class="section-title">📋 اطلاعات عمومی</div>
           <div class="section-body">
@@ -188,6 +192,7 @@ const TradeDetail = () => {
               <div class="detail-row"><span class="detail-label">نوع</span><span class="detail-value"><span class="badge ${trade.trade_type === 'Buy' ? 'badge-buy' : 'badge-sell'}">${trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</span></span></div>
               <div class="detail-row"><span class="detail-label">دسته‌بندی</span><span class="detail-value">${categoryName}</span></div>
               <div class="detail-row"><span class="detail-label">پورتفولیو</span><span class="detail-value">${portfolioName}</span></div>
+              <div class="detail-row"><span class="detail-label">بروکر</span><span class="detail-value">${brokerName}</span></div>
               <div class="detail-row"><span class="detail-label">سود/زیان</span><span class="detail-value ${parseFloat(trade.profit) >= 0 ? 'positive' : 'negative'}">${parseFloat(trade.profit) >= 0 ? '+' : ''}${parseFloat(trade.profit) || 0}$</span></div>
               <div class="detail-row"><span class="detail-label">کیفیت اجرا</span><span class="detail-value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}">${trade.execution_quality_score || '-'}/10</span></div>
               <div class="detail-row"><span class="detail-label">نوع جلسه</span><span class="detail-value">${trade.session_type || '-'}</span></div>
@@ -198,7 +203,6 @@ const TradeDetail = () => {
           </div>
         </div>
 
-        <!-- بقیه بخش‌ها مانند قبل... -->
         <!-- بخش ۲: اجرا -->
         <div class="section">
           <div class="section-title">💰 جزئیات اجرا</div>
@@ -322,12 +326,14 @@ const TradeDetail = () => {
     printWindow.document.close();
   };
 
+  // ===== تابع خروجی اکسل =====
   const handleExportExcel = () => {
     if (!trade) return;
 
     const BOM = '\uFEFF';
     const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی';
     const portfolioName = getPortfolioName();
+    const brokerName = trade.broker_name || '-';
 
     const headers = [
       'شناسه', 'تاریخ', 'روز هفته', 'ماه', 'ساعت (نیویورک)', 'نماد',
@@ -348,7 +354,7 @@ const TradeDetail = () => {
       'اسکن پس از معامله', 'دلیل ورود یادداشت شد', 'دلیل خروج یادداشت شد',
       'اشتباهات ثبت شد', 'کیفیت اجرا', 'FVG', 'Order Block', 'BOS',
       'CHOCH', 'MSS', 'Liquidity Sweep', 'POI', 'Demand Zone', 'Supply Zone',
-      'دسته‌بندی', 'پورتفولیو', 'تاریخ ایجاد', 'تاریخ بروزرسانی',
+      'دسته‌بندی', 'پورتفولیو', 'بروکر', 'تاریخ ایجاد', 'تاریخ بروزرسانی',
       'تصویر چارت'
     ];
 
@@ -436,6 +442,7 @@ const TradeDetail = () => {
       trade.supply_zone || '',
       categoryName,
       portfolioName,
+      brokerName,  // ✅ جدید
       trade.created_at || '',
       trade.updated_at || '',
       trade.screenshot || ''
@@ -452,6 +459,7 @@ const TradeDetail = () => {
     showToast('✅ خروجی اکسل کامل با موفقیت دانلود شد', 'success');
   };
 
+  // ===== بخش‌های نمایش =====
   const sections = [
     { id: 'general', label: '📋 عمومی' },
     { id: 'execution', label: '💰 اجرا' },
@@ -474,6 +482,8 @@ const TradeDetail = () => {
           <div className="detail-item"><span className="label">نوع</span><span className={`value ${trade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>{trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</span></div>
           <div className="detail-item"><span className="label">دسته‌بندی</span><span className="value">{categories.find(c => c.id === (trade.group || trade.group_id))?.group_name || 'بدون دسته‌بندی'}</span></div>
           <div className="detail-item"><span className="label">پورتفولیو</span><span className="value">{portfolioData ? `${portfolioData.icon || '📊'} ${portfolioData.name}` : 'بدون پورتفولیو'}</span></div>
+          {/* ✅ نمایش بروکر */}
+          <div className="detail-item"><span className="label">بروکر / کارگزار</span><span className="value">{trade.broker_name || '-'}</span></div>
           <div className="detail-item"><span className="label">سود/زیان</span><span className={`value ${parseFloat(trade.profit) >= 0 ? 'profit' : 'loss'}`}>{parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$</span></div>
           <div className="detail-item"><span className="label">کیفیت اجرا</span><span className={`value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>{trade.execution_quality_score || '-'}/10</span></div>
           <div className="detail-item"><span className="label">نوع جلسه</span><span className="value">{trade.session_type || '-'}</span></div>
@@ -485,7 +495,6 @@ const TradeDetail = () => {
     );
   };
 
-  // بقیه توابع رندر (همانند قبل با اضافه شدن پورتفولیو در عمومی)
   const renderExecution = () => (
     <div className="detail-section">
       <h3>💰 جزئیات اجرا</h3>
@@ -751,6 +760,11 @@ const TradeDetail = () => {
         <div className="summary-item">
           <span className="summary-label">پورتفولیو</span>
           <span className="summary-value">{getPortfolioData() ? `${getPortfolioData().icon || '📊'} ${getPortfolioData().name}` : 'بدون پورتفولیو'}</span>
+        </div>
+        {/* ✅ نمایش بروکر در summary bar */}
+        <div className="summary-item">
+          <span className="summary-label">بروکر</span>
+          <span className="summary-value">{trade.broker_name || '-'}</span>
         </div>
       </div>
 

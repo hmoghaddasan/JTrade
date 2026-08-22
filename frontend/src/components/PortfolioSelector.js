@@ -19,7 +19,7 @@ const PortfolioSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState(null);
 
-  if (loading) return <div className="portfolio-loading">...</div>;
+  if (loading) return <div className="ps-loading">...</div>;
 
   const currentPortfolio = portfolios.find(p => p.id === currentPortfolioId);
 
@@ -71,76 +71,76 @@ const PortfolioSelector = () => {
   };
 
   return (
-    <div className="portfolio-selector">
-      <div className="dropdown">
+    <div className="ps-selector">
+      <div className="ps-dropdown">
         <button
-          className="dropdown-toggle"
+          type="button"
+          className="ps-dropdown-toggle"
           onClick={() => setIsOpen(!isOpen)}
           title="انتخاب پورتفولیو"
         >
-          <span className="portfolio-icon">
+          <span className="ps-icon">
             {currentPortfolioId === 'all' ? '📊' :
              currentPortfolioId === 'none' ? '📭' :
              currentPortfolio?.icon || '📊'}
           </span>
-          <span className="portfolio-name">
+          <span className="ps-name">
             {currentPortfolioId === 'all' ? 'همه پورتفولیوها' :
              currentPortfolioId === 'none' ? 'بدون پورتفولیو' :
              currentPortfolio?.name || 'انتخاب پورتفولیو'}
           </span>
-          <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+          <span className={`ps-arrow ${isOpen ? 'ps-open' : ''}`}>▼</span>
         </button>
 
         {isOpen && (
-          <div className="dropdown-menu">
+          <div className="ps-dropdown-menu">
             {/* گزینه همه پورتفولیوها */}
             <div
-              className={`dropdown-item ${currentPortfolioId === 'all' ? 'active' : ''}`}
+              className={`ps-dropdown-item ${currentPortfolioId === 'all' ? 'ps-active' : ''}`}
               onClick={() => handleSelect('all')}
             >
-              <span className="item-icon">📊</span>
-              <span className="item-name">همه پورتفولیوها</span>
-              {currentPortfolioId === 'all' && <span className="badge-active">✓</span>}
+              <span className="ps-item-icon">📊</span>
+              <span className="ps-item-name">همه پورتفولیوها</span>
+              {currentPortfolioId === 'all' && <span className="ps-badge-active">✓</span>}
             </div>
 
-            {/* گزینه بدون پورتفولیو (برای تریدهای قدیمی) */}
+            {/* گزینه بدون پورتفولیو */}
             <div
-              className={`dropdown-item ${currentPortfolioId === 'none' ? 'active' : ''}`}
+              className={`ps-dropdown-item ${currentPortfolioId === 'none' ? 'ps-active' : ''}`}
               onClick={() => handleSelect('none')}
             >
-              <span className="item-icon">📭</span>
-              <span className="item-name">بدون پورتفولیو</span>
-              {currentPortfolioId === 'none' && <span className="badge-active">✓</span>}
+              <span className="ps-item-icon">📭</span>
+              <span className="ps-item-name">بدون پورتفولیو</span>
+              {currentPortfolioId === 'none' && <span className="ps-badge-active">✓</span>}
             </div>
 
-            {portfolios.length > 0 && <div className="dropdown-divider" />}
+            {portfolios.length > 0 && <div className="ps-divider" />}
 
-            {/* لیست پورتفولیوها با دکمه‌های ویرایش و حذف */}
+            {/* لیست پورتفولیوها */}
             {portfolios.map(p => (
               <div
                 key={p.id}
-                className={`dropdown-item ${p.id === currentPortfolioId ? 'active' : ''}`}
+                className={`ps-dropdown-item ${p.id === currentPortfolioId ? 'ps-active' : ''}`}
                 onClick={() => handleSelect(p.id)}
               >
-                <span className="item-icon">{p.icon || '📊'}</span>
-                <span className="item-name">{p.name}</span>
-                {p.is_default && <span className="badge-default">پیش‌فرض</span>}
-                {p.id === currentPortfolioId && <span className="badge-active">✓</span>}
+                <span className="ps-item-icon">{p.icon || '📊'}</span>
+                <span className="ps-item-name">{p.name}</span>
+                {p.is_default && <span className="ps-badge-default">پیش‌فرض</span>}
+                {p.id === currentPortfolioId && <span className="ps-badge-active">✓</span>}
 
-                <div className="item-actions">
-                  {/* دکمه ویرایش */}
+                <div className="ps-item-actions">
                   <button
-                    className="btn-edit-portfolio"
+                    type="button"
+                    className="ps-btn-edit"
                     onClick={(e) => handleEdit(e, p)}
                     title="ویرایش پورتفولیو"
                   >
                     ✏️
                   </button>
-
-                  {/* دکمه حذف - فقط اگر پورتفولیو پیش‌فرض نباشد */}
                   {!p.is_default && (
                     <button
-                      className="btn-delete-portfolio"
+                      type="button"
+                      className="ps-btn-delete"
                       onClick={(e) => handleDelete(e, p.id, p.name, p.is_default)}
                       title="حذف پورتفولیو"
                     >
@@ -151,17 +151,17 @@ const PortfolioSelector = () => {
               </div>
             ))}
 
-            <div className="dropdown-divider" />
+            <div className="ps-divider" />
             <div
-              className="dropdown-item add-new"
+              className="ps-dropdown-item ps-add-new"
               onClick={() => {
                 setIsOpen(false);
                 setEditingPortfolio(null);
                 setShowModal(true);
               }}
             >
-              <span className="item-icon">➕</span>
-              <span className="item-name">افزودن پورتفولیو جدید</span>
+              <span className="ps-item-icon">➕</span>
+              <span className="ps-item-name">افزودن پورتفولیو جدید</span>
             </div>
           </div>
         )}

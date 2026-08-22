@@ -1,7 +1,7 @@
 # backend/apps/trading/models.py
 
 from django.db import models
-from django.db.models import Sum  # ✅ اضافه شد
+from django.db.models import Sum
 from django.utils import timezone
 from django.conf import settings
 
@@ -12,6 +12,42 @@ def screenshot_upload_path(instance, filename):
     import time
     timestamp = int(time.time() * 1000)
     return f'trades/user_{instance.user.id}/{timestamp}.{ext}'
+
+
+# ============================================
+# ✅ مدل بروکر (کارگزار) - جدید
+# ============================================
+class Broker(models.Model):
+    """مدل بروکر/کارگزار معاملاتی"""
+
+    CATEGORY_CHOICES = [
+        ('international_fx', 'بروکرهای بین‌المللی فارکس و CFD'),
+        ('international_crypto', 'صرافی‌های ارز دیجیتال بین‌المللی'),
+        ('iranian_crypto', 'صرافی‌های ارز دیجیتال داخلی'),
+        ('iranian_stock', 'کارگزاری‌های بورس داخلی'),
+    ]
+
+    name = models.CharField('نام بروکر', max_length=100, unique=True)
+    category = models.CharField('دسته‌بندی', max_length=30, choices=CATEGORY_CHOICES, default='international_fx')
+    is_active = models.BooleanField('فعال', default=True)
+    order_index = models.IntegerField('ترتیب نمایش', default=0)
+    created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
+    updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
+
+    class Meta:
+        verbose_name = 'بروکر'
+        verbose_name_plural = 'بروکرها'
+        ordering = ['category', 'order_index', 'name']
+        indexes = [
+            models.Index(fields=['category', 'is_active']),
+            models.Index(fields=['name']),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def get_category_label(self):
+        return dict(self.CATEGORY_CHOICES).get(self.category, self.category)
 
 
 # ============================================
@@ -79,7 +115,6 @@ class Portfolio(models.Model):
     def get_current_balance(self):
         """محاسبه موجودی فعلی بر اساس سرمایه اولیه و سود/زیان"""
         return self.initial_balance + self.get_total_profit()
-
 
 
 class CurrencyPair(models.Model):
@@ -188,6 +223,16 @@ class Trade(models.Model):
         verbose_name='پورتفولیو'
     )
 
+    # ===== فیلد جدید بروکر =====
+    broker = models.ForeignKey(
+        'Broker',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='trades',
+        verbose_name='بروکر/کارگزار'
+    )
+
     trade_date = models.DateField('تاریخ معامله')
     day_of_week = models.CharField('روز هفته', max_length=20, blank=True)
     month = models.IntegerField('ماه میلادی', null=True, blank=True)
@@ -243,17 +288,20 @@ class Trade(models.Model):
     take_profit_3 = models.DecimalField('حد سود ۳', max_digits=15, decimal_places=5, null=True, blank=True)
     risk_usd = models.DecimalField('ریسک به دلار', max_digits=10, decimal_places=2, null=True, blank=True)
     risk_percent = models.DecimalField('درصد ریسک', max_digits=5, decimal_places=2, null=True, blank=True)
-    risk_reward_ratio = models.DecimalField('نسبت ریسک به ریوارد', max_digits=5, decimal_places=2, null=True, blank=True)
+    risk_reward_ratio = models.DecimalField('نسبت ریسک به ریوارد', max_digits=5, decimal_places=2, null=True,
+                                            blank=True)
 
     close_price = models.DecimalField('قیمت بسته شدن', max_digits=15, decimal_places=5, null=True, blank=True)
     tp_sl_hit = models.CharField('حد خورده شده', max_length=20, blank=True)
     profit = models.DecimalField('سود/زیان', max_digits=15, decimal_places=2, null=True, blank=True)
 
     pre_trade_stress = models.CharField('استرس قبل معامله', max_length=10, choices=STRESS_LEVELS, blank=True, null=True)
-    entry_emotion_control = models.CharField('کنترل هیجان هنگام ورود', max_length=10, choices=EMOTION_CONTROL, blank=True, null=True)
+    entry_emotion_control = models.CharField('کنترل هیجان هنگام ورود', max_length=10, choices=EMOTION_CONTROL,
+                                             blank=True, null=True)
     reaction_to_profit = models.CharField('واکنش به سود', max_length=50, blank=True)
     stop_loss_adherence = models.BooleanField('پایبندی به حد ضرر', default=False)
-    expectation_management = models.CharField('مدیریت انتظار', max_length=10, choices=EXPECTATION_MANAGEMENT, blank=True, null=True)
+    expectation_management = models.CharField('مدیریت انتظار', max_length=10, choices=EXPECTATION_MANAGEMENT,
+                                              blank=True, null=True)
     strategy_adherence = models.BooleanField('پایبندی به استراتژی', default=False)
     capital_management_adherence = models.BooleanField('پایبندی به مدیریت سرمایه', default=False)
     over_trade = models.BooleanField('اورترید', default=False)
@@ -359,7 +407,8 @@ class TradeAnalytics(models.Model):
     )
     analysis_date = models.DateField('تاریخ تحلیل')
     actual_rr_ratio = models.DecimalField('نسبت RR واقعی', max_digits=5, decimal_places=2, null=True, blank=True)
-    expected_rr_ratio = models.DecimalField('نسبت RR مورد انتظار', max_digits=5, decimal_places=2, null=True, blank=True)
+    expected_rr_ratio = models.DecimalField('نسبت RR مورد انتظار', max_digits=5, decimal_places=2, null=True,
+                                            blank=True)
     setup_quality_score = models.IntegerField('امتیاز کیفیت ستاپ', null=True, blank=True)
     execution_score = models.IntegerField('امتیاز اجرا', null=True, blank=True)
     psychology_score = models.IntegerField('امتیاز روانشناسی', null=True, blank=True)
@@ -500,7 +549,8 @@ class AIConsultation(models.Model):
 
     # ===== ارتباطات =====
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ai_consultations')
-    trade = models.ForeignKey('Trade', on_delete=models.SET_NULL, null=True, blank=True, related_name='ai_consultations')
+    trade = models.ForeignKey('Trade', on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name='ai_consultations')
 
     # ===== ورودی کاربر =====
     symbol = models.CharField(max_length=20, db_index=True)
@@ -568,7 +618,7 @@ class AIConsultation(models.Model):
         help_text="هشدار تفاوت قیمت ورود با قیمت لحظه‌ای"
     )
     price_diff_percent = models.DecimalField(
-        max_digits=10,  # ✅ افزایش از ۶ به ۱۰
+        max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
@@ -689,3 +739,279 @@ class AIConsultationAnalytics(models.Model):
         db_table = 'trading_ai_analytics'
         ordering = ['-date']
 
+
+# ============================================
+# مدل‌های ابزارهای انضباطی (Discipline Tools)
+# ============================================
+
+class DisciplineSettings(models.Model):
+    """
+    تنظیمات قوانین انضباطی هر کاربر
+    """
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='discipline_settings',
+        verbose_name='کاربر'
+    )
+
+    # محدودیت‌های روزانه (Guardrails)
+    max_trades_per_day = models.IntegerField(
+        'حداکثر ترید در روز',
+        default=5,
+        help_text='تعداد تریدهای مجاز در هر روز'
+    )
+    daily_loss_limit = models.DecimalField(
+        'سقف ضرر روزانه (دلار)',
+        max_digits=10,
+        decimal_places=2,
+        default=500.00,
+        help_text='حداکثر ضرر مجاز در روز'
+    )
+    max_loss_per_trade = models.DecimalField(
+        'سقف ضرر هر ترید (دلار)',
+        max_digits=10,
+        decimal_places=2,
+        default=100.00,
+        help_text='حداکثر ضرر مجاز برای هر ترید (هشدار)'
+    )
+    max_contract_size = models.DecimalField(
+        'حداکثر حجم هر ترید (لات)',
+        max_digits=10,
+        decimal_places=2,
+        default=2.00,
+        help_text='حداکثر حجم مجاز برای هر ترید (هشدار)'
+    )
+
+    # کول‌داون
+    cooldown_consecutive_losses = models.IntegerField(
+        'تعداد ضرر متوالی برای کول‌داون',
+        default=2,
+        help_text='پس از چند ضرر متوالی، کول‌داون فعال شود'
+    )
+    cooldown_duration_minutes = models.IntegerField(
+        'مدت کول‌داون (دقیقه)',
+        default=15,
+        help_text='مدت زمان قفل شدن معاملات'
+    )
+    cooldown_after_daily_loss = models.BooleanField(
+        'کول‌داون پس از سقف ضرر روزانه',
+        default=True,
+        help_text='آیا پس از رسیدن به سقف ضرر روزانه، تا پایان روز قفل شود؟'
+    )
+    cooldown_after_max_trades = models.BooleanField(
+        'کول‌داون پس از سقف ترید',
+        default=True,
+        help_text='آیا پس از رسیدن به سقف ترید روزانه، تا پایان روز قفل شود؟'
+    )
+    manual_cooldown_minutes = models.IntegerField(
+        'کول‌داون اختیاری (دقیقه)',
+        default=0,
+        help_text='مدت زمان کول‌داون دستی (۰ = غیرفعال)'
+    )
+
+    # چک‌لیست پیش‌از معامله (اجباری)
+    pre_trade_checklist_items = models.JSONField(
+        'آیتم‌های چک‌لیست',
+        default=list,
+        help_text='لیست آیتم‌هایی که کاربر باید قبل از ورود تیک بزند'
+    )
+    checklist_required = models.BooleanField(
+        'چک‌لیست اجباری',
+        default=True,
+        help_text='آیا تکمیل چک‌لیست برای ثبت ترید الزامی است؟'
+    )
+
+    # عادات روزانه
+    daily_habits = models.JSONField(
+        'عادات روزانه',
+        default=list,
+        help_text='لیست عادت‌هایی که کاربر باید روزانه تکمیل کند'
+    )
+
+    # تنظیمات پیشرفته
+    tiltmeter_weights = models.JSONField(
+        'وزن‌های Tiltmeter',
+        default=dict,
+        help_text='وزن‌های هر بخش برای محاسبه Tiltmeter'
+    )
+    is_active = models.BooleanField('فعال', default=True)
+
+    created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
+    updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
+
+    class Meta:
+        verbose_name = 'تنظیمات انضباطی'
+        verbose_name_plural = 'تنظیمات انضباطی'
+        db_table = 'trading_discipline_settings'
+
+    def __str__(self):
+        return f"تنظیمات انضباطی - {self.user.phone_number}"
+
+
+class DailyDisciplineState(models.Model):
+    """
+    وضعیت روزانه انضباط کاربر (ذخیره در کش و دیتابیس)
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='daily_discipline_states',
+        verbose_name='کاربر'
+    )
+    date = models.DateField('تاریخ', auto_now_add=True)
+
+    # آمار روزانه
+    trades_today = models.IntegerField('تعداد ترید امروز', default=0)
+    daily_loss = models.DecimalField('ضرر امروز', max_digits=10, decimal_places=2, default=0)
+    consecutive_losses = models.IntegerField('ضرر متوالی', default=0)
+
+    # وضعیت قفل‌ها
+    is_locked_until_end_of_day = models.BooleanField('قفل تا پایان روز', default=False)
+    is_cooldown_active = models.BooleanField('کول‌داون فعال', default=False)
+    cooldown_until = models.DateTimeField('زمان پایان کول‌داون', null=True, blank=True)
+    cooldown_reason = models.CharField('دلیل کول‌داون', max_length=100, blank=True)
+
+    # امتیازات
+    tiltmeter_score = models.DecimalField('امتیاز Tiltmeter', max_digits=5, decimal_places=2, default=0)
+    compliance_rate = models.DecimalField('نرخ پایبندی', max_digits=5, decimal_places=2, default=0)
+
+    # وضعیت عادات روزانه
+    habits_completed = models.JSONField('عادات تکمیل‌شده', default=list)
+
+    created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
+    updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
+
+    class Meta:
+        verbose_name = 'وضعیت روزانه انضباط'
+        verbose_name_plural = 'وضعیت‌های روزانه انضباط'
+        unique_together = [['user', 'date']]
+        db_table = 'trading_daily_discipline_state'
+        indexes = [
+            models.Index(fields=['user', 'date']),
+            models.Index(fields=['user', 'is_cooldown_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.phone_number} - {self.date}"
+
+
+class DisciplineViolation(models.Model):
+    """
+    ثبت نقض قوانین انضباطی
+    """
+    VIOLATION_TYPES = [
+        ('max_trades', 'بیش‌ترید'),
+        ('daily_loss', 'سقف ضرر روزانه'),
+        ('consecutive_loss', 'ضرر متوالی'),
+        ('max_loss_per_trade', 'سقف ضرر هر ترید'),
+        ('max_contract_size', 'حجم بیش از حد'),
+        ('checklist_missing', 'چک‌لیست تکمیل نشده'),
+        ('over_trade', 'اورترید'),
+        ('emotional_trade', 'معامله احساسی'),
+        ('other', 'سایر'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='discipline_violations',
+        verbose_name='کاربر'
+    )
+    trade = models.ForeignKey(
+        'Trade',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='discipline_violations',
+        verbose_name='ترید مرتبط'
+    )
+    violation_type = models.CharField('نوع نقض', max_length=30, choices=VIOLATION_TYPES)
+    description = models.TextField('توضیحات', blank=True)
+    severity = models.IntegerField('شدت (۱-۵)', default=1, help_text='شدت نقض')
+    is_resolved = models.BooleanField('برطرف شده', default=False)
+
+    created_at = models.DateTimeField('زمان نقض', auto_now_add=True)
+    resolved_at = models.DateTimeField('زمان برطرف‌سازی', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'نقض انضباطی'
+        verbose_name_plural = 'نقض‌های انضباطی'
+        ordering = ['-created_at']
+        db_table = 'trading_discipline_violation'
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['user', 'violation_type']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.phone_number} - {self.get_violation_type_display()} - {self.created_at}"
+
+
+class Reflection(models.Model):
+    """
+    بازتاب پس از ترید (Post-Trade Reflection)
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='reflections',
+        verbose_name='کاربر'
+    )
+    trade = models.ForeignKey(
+        'Trade',
+        on_delete=models.CASCADE,
+        related_name='reflections',
+        verbose_name='ترید'
+    )
+    followed_plan = models.BooleanField('از برنامه پیروی کردی؟', default=True)
+    learned_lesson = models.TextField('چه آموختی؟', blank=True)
+    emotion_after = models.CharField('احساس پس از معامله', max_length=50, blank=True)
+    improvement_note = models.TextField('نکته بهبود', blank=True)
+    quality_score = models.IntegerField('امتیاز کیفیت بازتاب (۱-۵)', default=3)
+
+    created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'بازتاب'
+        verbose_name_plural = 'بازتاب‌ها'
+        ordering = ['-created_at']
+        db_table = 'trading_reflection'
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['trade']),
+        ]
+
+    def __str__(self):
+        return f"بازتاب - {self.user.phone_number} - {self.trade.symbol}"
+
+
+class DailyHabit(models.Model):
+    """
+    ردیابی عادات روزانه
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='daily_habits',
+        verbose_name='کاربر'
+    )
+    habit_name = models.CharField('نام عادت', max_length=100)
+    habit_description = models.TextField('توضیحات', blank=True)
+    is_done = models.BooleanField('انجام شد', default=False)
+    date = models.DateField('تاریخ', auto_now_add=True)
+
+    created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'عادت روزانه'
+        verbose_name_plural = 'عادات روزانه'
+        unique_together = [['user', 'habit_name', 'date']]
+        db_table = 'trading_daily_habit'
+        indexes = [
+            models.Index(fields=['user', 'date']),
+        ]
+
+    def __str__(self):
+        status = '✅' if self.is_done else '❌'
+        return f"{status} {self.user.phone_number} - {self.habit_name} - {self.date}"

@@ -248,7 +248,7 @@ const handleRenewSubscription = () => {
       <div className="profile-header">
         <h2>👤 پروفایل کاربری</h2>
         <button className="btn-back" onClick={() => navigate('/')}>
-          ↩️ بازگشت به داشبورد
+          ↩️ بازگشت
         </button>
       </div>
 

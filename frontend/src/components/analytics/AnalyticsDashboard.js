@@ -107,7 +107,7 @@ const AnalyticsDashboard = () => {
             <span className="header-subtitle">بررسی عملکرد بر اساس معیارهای مختلف</span>
           </div>
           <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            ↩️ بازگشت به داشبورد
+            ↩️ بازگشت
           </button>
         </div>
         {renderTabs()}
@@ -128,7 +128,7 @@ const AnalyticsDashboard = () => {
             <span className="header-subtitle">بررسی عملکرد بر اساس معیارهای مختلف</span>
           </div>
           <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            ↩️ بازگشت به داشبورد
+            ↩️ بازگشت
           </button>
         </div>
         {renderTabs()}
@@ -166,7 +166,7 @@ const AnalyticsDashboard = () => {
         </div>
         <div className="header-actions">
           <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            ↩️ بازگشت به داشبورد
+            ↩️ بازگشت
           </button>
         </div>
       </div>

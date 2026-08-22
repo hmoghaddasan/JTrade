@@ -12,6 +12,19 @@ import SystemSettingsService from '../services/systemSettingsService';
 import ImageZoom from './ImageZoom';
 import './TradeForm.css';
 
+// ============================================
+// ✅ کامپوننت Tooltip راهنما
+// ============================================
+const HelpTooltip = ({ text }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="help-tooltip" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <span className="help-icon">ⓘ</span>
+      {show && <span className="help-content">{text}</span>}
+    </span>
+  );
+};
+
 const TradeEditForm = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -30,6 +43,10 @@ const TradeEditForm = () => {
   // ===== State برای نمادها =====
   const [symbolsFromServer, setSymbolsFromServer] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
+
+  // ===== State برای بروکرها =====
+  const [brokers, setBrokers] = useState([]);
+  const [brokersLoading, setBrokersLoading] = useState(true);
 
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
@@ -112,6 +129,72 @@ const TradeEditForm = () => {
     return staticSymbolGroups;
   };
 
+  // ===== راهنمای اصطلاحات =====
+  const helpTexts = {
+    session_type: {
+      title: 'نوع جلسه',
+      items: [
+        'High Pro: جلسات معاملاتی حرفه‌ای که معمولاً در ساعات پرمعامله (London/NY overlap) انجام می‌شود.',
+        'Low Pro: جلسات معاملاتی با حجم کمتر مانند آسیا یا ساعات کم‌نوسان.'
+      ]
+    },
+    bias: {
+      title: 'جهت‌گیری کلی',
+      items: [
+        'Bullish (صعودی): انتظار افزایش قیمت و حرکت به سمت بالا.',
+        'Bearish (نزولی): انتظار کاهش قیمت و حرکت به سمت پایین.',
+        'Neutral (خنثی): بدون جهت‌گیری مشخص، معمولاً در بازارهای رنج.'
+      ]
+    },
+    strategy_type: {
+      title: 'نوع استراتژی',
+      items: [
+        'LTP (Long Term Position): معاملات بلندمدت با هدف سودهای بزرگ و توقف‌های وسیع.',
+        'ITP (Intermediate Term Position): معاملات میان‌مدت با تعادل بین ریسک و ریوارد.',
+        'STP (Short Term Position): معاملات کوتاه‌مدت با هدف سودهای سریع و توقف‌های محدود.'
+      ]
+    },
+    retirement_model: {
+      title: 'مدل ورودی',
+      items: [
+        'مدلی که نشان‌دهنده‌ی نحوه‌ی ورود به معامله است.',
+        'ERL TO IRL: ورود از محدوده‌های قیمتی کلیدی با تأیید ساختار بازار.',
+        'IRL TO ERL: خروج از محدوده‌های قیمتی کلیدی با تغییر ساختار.'
+      ]
+    },
+    tp_sl_hit: {
+      title: 'حد خورده شده',
+      items: [
+        'TP1/TP2/TP3: حد سود اول/دوم/سوم – نشان‌دهنده‌ی سطحی است که قیمت به آن رسیده و سود محقق شده است.',
+        'SL: حد ضرر – سطحی که قیمت به آن رسیده و ضرر محقق شده است.',
+        'BE: Breakeven – معامله بدون سود و ضرر بسته شده است.'
+      ]
+    },
+    execution_quality: {
+      title: 'امتیاز کیفیت اجرا',
+      items: [
+        'امتیازی بین ۱ تا ۱۰ که کیفیت اجرای معامله را نشان می‌دهد.',
+        'امتیاز ۷-۱۰: اجرای عالی و منطبق با برنامه.',
+        'امتیاز ۴-۶: اجرای قابل قبول با انحراف جزئی.',
+        'امتیاز ۱-۳: اجرای ضعیف با انحراف قابل توجه از برنامه.'
+      ]
+    },
+    ict: {
+      title: 'تحلیل ICT',
+      items: {
+        fvg: 'FVG (Fair Value Gap): شکاف قیمتی که نشان‌دهنده‌ی عدم تعادل عرضه و تقاضا است و معمولاً به عنوان سطح حمایت/مقاومت عمل می‌کند.',
+        order_block: 'Order Block: بلوکی از سفارش‌های بزرگ که می‌تواند به عنوان سطح حمایت/مقاومت عمل کند.',
+        bos: 'BOS (Break of Structure): شکست ساختار – نشان‌دهنده‌ی تغییر در روند یا ادامه‌ی آن.',
+        choch: 'CHOCH (Change of Character): تغییر شخصیت – نشان‌دهنده‌ی شروع یک روند جدید یا تغییر در رفتار قیمت.',
+        mss: 'MSS (Market Structure Shift): تغییر ساختار بازار – نشان‌دهنده‌ی تغییر در روند اصلی.',
+        liquidity_sweep: 'Liquidity Sweep: شکار نقدینگی – زمانی که قیمت سطوح کلیدی را برای فعال‌سازی سفارش‌های حد ضرر و حد سود می‌شکند.',
+        poi: 'POI (Point of Interest): نقطه‌ی مورد توجه – سطحی که انتظار واکنش قیمت در آن وجود دارد.',
+        demand_zone: 'Demand Zone: منطقه‌ی تقاضا – محدوده‌ای که در آن تقاضا بر عرضه غلبه دارد و قیمت از آن حمایت می‌شود.',
+        supply_zone: 'Supply Zone: منطقه‌ی عرضه – محدوده‌ای که در آن عرضه بر تقاضا غلبه دارد و قیمت با مقاومت مواجه می‌شود.'
+      }
+    }
+  };
+
   // ===== بارگذاری نمادها از سرور =====
   useEffect(() => {
     const loadSymbols = async () => {
@@ -139,7 +222,36 @@ const TradeEditForm = () => {
     loadSymbols();
   }, []);
 
-  // ===== ✅ همگام‌سازی نماد فعلی با لیست (اگر در لیست نبود، اضافه کن) =====
+  // ===== بارگذاری بروکرها (با page_size=1000) =====
+  useEffect(() => {
+    const loadBrokers = async () => {
+      setBrokersLoading(true);
+      try {
+        const response = await RealApiService.getBrokers({ page_size: 1000 });
+        console.log('📥 Brokers response:', response.data);
+
+        let brokerData = [];
+        if (response.data && response.data.results) {
+          brokerData = response.data.results;
+        } else if (Array.isArray(response.data)) {
+          brokerData = response.data;
+        } else {
+          brokerData = [];
+        }
+
+        setBrokers(brokerData);
+        console.log('✅ Brokers loaded:', brokerData.length);
+      } catch (error) {
+        console.error('❌ Error loading brokers:', error);
+        setBrokers([]);
+      } finally {
+        setBrokersLoading(false);
+      }
+    };
+    loadBrokers();
+  }, []);
+
+  // ===== همگام‌سازی نماد فعلی با لیست =====
   useEffect(() => {
     if (!symbolsLoading && tradeData?.symbol && symbolsFromServer.length > 0) {
       if (!symbolsFromServer.includes(tradeData.symbol)) {
@@ -186,8 +298,18 @@ const TradeEditForm = () => {
 
   useEffect(() => {
     const loadScreenshotSettings = async () => {
-      const settings = await SystemSettingsService.getScreenshotSettings();
-      setScreenshotSettings(settings);
+      try {
+        const settings = await SystemSettingsService.getScreenshotSettings();
+        setScreenshotSettings(settings);
+      } catch (error) {
+        console.error('Error loading screenshot settings:', error);
+        setScreenshotSettings({
+          show_upload: true,
+          max_size_mb: 5,
+          max_width: 2000,
+          max_height: 2000,
+        });
+      }
     };
     loadScreenshotSettings();
   }, []);
@@ -212,6 +334,20 @@ const TradeEditForm = () => {
           trade.portfolio_id = trade.portfolio.id;
         } else if (trade.portfolio) {
           trade.portfolio_id = trade.portfolio;
+        }
+
+        // ============================================
+        // ✅ تنظیم broker_id (اصلاح‌شده - اولویت با broker_id مستقیم)
+        // ============================================
+        if (trade.broker_id) {
+          // اگر broker_id مستقیماً در پاسخ وجود دارد، از آن استفاده کن
+          trade.broker_id = trade.broker_id;
+        } else if (trade.broker && typeof trade.broker === 'object') {
+          trade.broker_id = trade.broker.id;
+        } else if (trade.broker) {
+          trade.broker_id = trade.broker;
+        } else {
+          trade.broker_id = null;
         }
 
         setTradeData(trade);
@@ -398,6 +534,8 @@ const TradeEditForm = () => {
         group: groupId,
         group_id: groupId,
         portfolio: portfolioId,
+        // ✅ تبدیل broker_id به عدد
+        broker_id: tradeData.broker_id ? parseInt(tradeData.broker_id) : null,
         rule_checks: checkedRules.filter(r => r.checked).map(r => r.id),
       };
 
@@ -459,7 +597,6 @@ const TradeEditForm = () => {
     }
   };
 
-  // توابع رندر مراحل
   const handleBack = () => {
     const fromDashboard = localStorage.getItem('returnToDashboard') === 'true';
     if (fromDashboard) {
@@ -523,7 +660,6 @@ const TradeEditForm = () => {
               ) : (
                 <>
                   <option value="">انتخاب نماد</option>
-                  {/* ✅ اگر نماد فعلی در لیست نبود، آن را به عنوان option اضافه کن */}
                   {currentSymbol && !symbolsFromServer.includes(currentSymbol) && (
                     <option value={currentSymbol} key={currentSymbol}>
                       {currentSymbol} (فعلی)
@@ -553,7 +689,7 @@ const TradeEditForm = () => {
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>نوع جلسه</label>
+            <label>نوع جلسه <HelpTooltip text={helpTexts.session_type.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
             <select name="session_type" value={tradeData.session_type || 'High Pro'} onChange={handleChange}>
               <option value="High Pro">حرفه‌ای (High Pro)</option><option value="Low Pro">مبتدی (Low Pro)</option>
             </select>
@@ -584,6 +720,34 @@ const TradeEditForm = () => {
             </select>
             <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
           </div>
+          {/* ✅ سلکتور بروکر با مقدار اصلاح‌شده */}
+          <div className="form-group">
+            <label>بروکر / کارگزار</label>
+            <select
+              name="broker_id"
+              value={tradeData?.broker_id ?? ''}
+              onChange={handleChange}
+              disabled={brokersLoading}
+            >
+              {brokersLoading ? (
+                <option value="">⏳ در حال بارگذاری بروکرها...</option>
+              ) : (
+                <>
+                  <option value="">انتخاب بروکر</option>
+                  {brokers.length === 0 ? (
+                    <option value="" disabled>هیچ بروکری یافت نشد</option>
+                  ) : (
+                    brokers.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))
+                  )}
+                </>
+              )}
+            </select>
+            <small className="hint-text">کارگزار یا صرافی که معامله در آن انجام شده است</small>
+          </div>
+        </div>
+        <div className="form-row">
           <div className="form-group">
             <label>یادداشت پروفایل هفتگی</label>
             <textarea name="weekly_profile_note" value={tradeData.weekly_profile_note || ''} onChange={handleChange} placeholder="توضیحات مربوط به پروفایل هفتگی..." rows="2" />
@@ -656,13 +820,13 @@ const TradeEditForm = () => {
         <h3>📋 برنامه و بایاس روزانه</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>جهت‌گیری کلی</label>
+            <label>جهت‌گیری کلی <HelpTooltip text={helpTexts.bias.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
             <select name="bias" value={tradeData.bias || 'Neutral'} onChange={handleChange}>
               <option value="Bullish">صعودی (Bullish)</option><option value="Bearish">نزولی (Bearish)</option><option value="Neutral">خنثی (Neutral)</option>
             </select>
           </div>
           <div className="form-group">
-            <label>نوع استراتژی</label>
+            <label>نوع استراتژی <HelpTooltip text={helpTexts.strategy_type.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
             <select name="strategy_type" value={tradeData.strategy_type || 'LTP'} onChange={handleChange}>
               <option value="LTP">LTP</option><option value="ITP">ITP</option><option value="STP">STP</option>
             </select>
@@ -680,7 +844,7 @@ const TradeEditForm = () => {
           </div>
         </div>
         <div className="form-group">
-          <label>مدل ورودی</label>
+          <label>مدل ورودی <HelpTooltip text={helpTexts.retirement_model.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
           <input type="text" name="retirement_model" value={tradeData.retirement_model || ''} onChange={handleChange} placeholder="مثلاً: ERL TO IRL" />
         </div>
         <div className="form-group">
@@ -755,7 +919,7 @@ const TradeEditForm = () => {
           <input type="number" name="close_price" value={tradeData.close_price || ''} onChange={handleChange} step="0.00001" placeholder="0.00000" />
         </div>
         <div className="form-group">
-          <label>حد خورده شده</label>
+          <label>حد خورده شده <HelpTooltip text={helpTexts.tp_sl_hit.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
           <select name="tp_sl_hit" value={tradeData.tp_sl_hit || ''} onChange={handleChange}>
             <option value="">انتخاب کنید</option>
             <option value="TP1">TP1</option>
@@ -817,7 +981,7 @@ const TradeEditForm = () => {
         </div>
       </div>
       <div className="form-group">
-        <label>امتیاز کیفیت اجرا (۱-۱۰)</label>
+        <label>امتیاز کیفیت اجرا <HelpTooltip text={helpTexts.execution_quality.items.map((item, i) => <div key={i}>{item}</div>)} /></label>
         <input type="number" name="execution_quality_score" value={tradeData.execution_quality_score || 5} onChange={handleChange} min="1" max="10" placeholder="5" />
       </div>
       <div className="checkbox-grid">
@@ -833,28 +997,58 @@ const TradeEditForm = () => {
     </div>
   );
 
-  const renderICTStep = () => (
-    <div className="form-step">
-      <h3>📊 تحلیل ICT</h3>
-      <div className="form-row">
-        <div className="form-group"><label>FVG (Fair Value Gap)</label><input type="text" name="fvg" value={tradeData.fvg || ''} onChange={handleChange} placeholder="مثلاً: FVG خرید" /></div>
-        <div className="form-group"><label>Order Block</label><input type="text" name="order_block" value={tradeData.order_block || ''} onChange={handleChange} placeholder="مثلاً: OB فروش" /></div>
+  const renderICTStep = () => {
+    const ictHelp = helpTexts.ict.items;
+    return (
+      <div className="form-step">
+        <h3>📊 تحلیل ICT</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>FVG (Fair Value Gap) <HelpTooltip text={ictHelp.fvg} /></label>
+            <input type="text" name="fvg" value={tradeData.fvg || ''} onChange={handleChange} placeholder="مثلاً: FVG خرید" />
+          </div>
+          <div className="form-group">
+            <label>Order Block <HelpTooltip text={ictHelp.order_block} /></label>
+            <input type="text" name="order_block" value={tradeData.order_block || ''} onChange={handleChange} placeholder="مثلاً: OB فروش" />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>BOS (Break of Structure) <HelpTooltip text={ictHelp.bos} /></label>
+            <input type="text" name="bos" value={tradeData.bos || ''} onChange={handleChange} placeholder="مثلاً: BOS صعودی" />
+          </div>
+          <div className="form-group">
+            <label>CHOCH (Change of Character) <HelpTooltip text={ictHelp.choch} /></label>
+            <input type="text" name="choch" value={tradeData.choch || ''} onChange={handleChange} placeholder="مثلاً: CHOCH نزولی" />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>MSS (Market Structure Shift) <HelpTooltip text={ictHelp.mss} /></label>
+            <input type="text" name="mss" value={tradeData.mss || ''} onChange={handleChange} placeholder="مثلاً: MSS تایید شده" />
+          </div>
+          <div className="form-group">
+            <label>Liquidity Sweep <HelpTooltip text={ictHelp.liquidity_sweep} /></label>
+            <input type="text" name="liquidity_sweep" value={tradeData.liquidity_sweep || ''} onChange={handleChange} placeholder="مثلاً: Sweep High" />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>POI (Point of Interest) <HelpTooltip text={ictHelp.poi} /></label>
+            <input type="text" name="poi" value={tradeData.poi || ''} onChange={handleChange} placeholder="مثلاً: POI ورود" />
+          </div>
+          <div className="form-group">
+            <label>Demand Zone <HelpTooltip text={ictHelp.demand_zone} /></label>
+            <input type="text" name="demand_zone" value={tradeData.demand_zone || ''} onChange={handleChange} placeholder="مثلاً: 1.0850-1.0870" />
+          </div>
+        </div>
+        <div className="form-group">
+          <label>Supply Zone <HelpTooltip text={ictHelp.supply_zone} /></label>
+          <input type="text" name="supply_zone" value={tradeData.supply_zone || ''} onChange={handleChange} placeholder="مثلاً: 1.0920-1.0940" />
+        </div>
       </div>
-      <div className="form-row">
-        <div className="form-group"><label>BOS (Break of Structure)</label><input type="text" name="bos" value={tradeData.bos || ''} onChange={handleChange} placeholder="مثلاً: BOS صعودی" /></div>
-        <div className="form-group"><label>CHOCH (Change of Character)</label><input type="text" name="choch" value={tradeData.choch || ''} onChange={handleChange} placeholder="مثلاً: CHOCH نزولی" /></div>
-      </div>
-      <div className="form-row">
-        <div className="form-group"><label>MSS (Market Structure Shift)</label><input type="text" name="mss" value={tradeData.mss || ''} onChange={handleChange} placeholder="مثلاً: MSS تایید شده" /></div>
-        <div className="form-group"><label>Liquidity Sweep</label><input type="text" name="liquidity_sweep" value={tradeData.liquidity_sweep || ''} onChange={handleChange} placeholder="مثلاً: Sweep High" /></div>
-      </div>
-      <div className="form-row">
-        <div className="form-group"><label>POI (Point of Interest)</label><input type="text" name="poi" value={tradeData.poi || ''} onChange={handleChange} placeholder="مثلاً: POI ورود" /></div>
-        <div className="form-group"><label>Demand Zone</label><input type="text" name="demand_zone" value={tradeData.demand_zone || ''} onChange={handleChange} placeholder="مثلاً: 1.0850-1.0870" /></div>
-      </div>
-      <div className="form-group"><label>Supply Zone</label><input type="text" name="supply_zone" value={tradeData.supply_zone || ''} onChange={handleChange} placeholder="مثلاً: 1.0920-1.0940" /></div>
-    </div>
-  );
+    );
+  };
 
   const renderRulesStep = () => {
     if (rulesLoading) {
@@ -897,8 +1091,17 @@ const TradeEditForm = () => {
     return (
       <div className="form-step rules-step">
         <h3>📋 قوانین معاملاتی</h3>
+
+        <div className="rules-intro">
+          <p className="rules-intro-text">
+            💡 قوانین معاملاتی به شما کمک می‌کنند تا یک چارچوب مشخص برای معاملات خود داشته باشید.
+            قبل از ثبت ترید، قوانین رعایت‌شده را علامت بزنید.
+            <strong> قوانین با * اجباری هستند</strong> و در صورت عدم رعایت، ترید ثبت نخواهد شد.
+          </p>
+        </div>
+
         <p className="rules-hint">
-          قوانین رعایت‌شده در این ترید را علامت بزنید.
+          قوانین رعایت‌شده را علامت بزنید.
           <span className="required-hint">قوانین با * اجباری هستند.</span>
         </p>
 
@@ -1097,12 +1300,12 @@ const TradeEditForm = () => {
         <div className="form-actions">
           {currentStep > 1 && (
             <button type="button" className="btn-prev" onClick={prevStep} disabled={saving}>
-              ← قبلی
+              → قبلی
             </button>
           )}
           {currentStep < 10 && (
             <button type="button" className="btn-next" onClick={nextStep} disabled={saving}>
-              بعدی →
+              بعدی ←
             </button>
           )}
           {currentStep === 10 && (

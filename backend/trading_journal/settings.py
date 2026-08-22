@@ -315,6 +315,7 @@ INSTALLED_APPS = [
     'apps.subscriptions',
     'apps.messaging',
     'apps.admin_panel',
+    'apps.import',  # ✅ اضافه شد
     'django_cleanup.apps.CleanupConfig',  # حتماً آخرین اپ باشد
 ]
 

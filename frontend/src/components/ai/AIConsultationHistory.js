@@ -162,7 +162,7 @@ const AIConsultationHistory = () => {
         <h2>🤖 تاریخچه مشاوره هوشمند</h2>
         <div className="header-actions">
           <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            ↩️ بازگشت به داشبورد
+            ↩️ بازگشت
           </button>
           <button
             className="btn-consult"

@@ -139,4 +139,19 @@ urlpatterns = [
     path('portfolios/compare/', views.PortfolioComparisonView.as_view(), name='portfolio_compare'),
     path('portfolios/compare/summary/', views.PortfolioComparisonSummaryView.as_view(), name='portfolio_compare_summary'),
     path('portfolios/compare/chart/', views.PortfolioComparisonChartView.as_view(), name='portfolio_compare_chart'),
+    # ============================================
+    # ابزارهای انضباطی (Discipline Tools)
+    # ============================================
+    path('discipline/status/', views.DisciplineStatusView.as_view(), name='discipline_status'),
+    path('discipline/check/', views.DisciplineCheckView.as_view(), name='discipline_check'),
+    path('discipline/report/', views.DisciplineReportView.as_view(), name='discipline_report'),
+    path('discipline/settings/', views.DisciplineSettingsView.as_view(), name='discipline_settings'),
+    path('discipline/heatmap/', views.DisciplineHeatmapView.as_view(), name='discipline_heatmap'),
+    path('discipline/reflection/', views.ReflectionView.as_view(), name='discipline_reflection'),
+    path('discipline/habits/', views.HabitView.as_view(), name='discipline_habits'),
+    path('discipline/violations/', views.DisciplineViolationsView.as_view(), name='discipline_violations'),
+# ============================================
+    # ✅ بروکرها (کارگزاران)
+    # ============================================
+    path('brokers/', views.BrokerListView.as_view(), name='broker_list'),
 ]

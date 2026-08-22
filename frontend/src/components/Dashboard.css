@@ -90,14 +90,10 @@
 }
 
 /* ============================================
-   کلیدهای دسترسی سریع هدر - یکدست
+   کلیدهای دسترسی سریع هدر - رنگ‌های متمایز
    ============================================ */
 
-/* ============================================
-   کلیدهای دسترسی سریع هدر - یکدست
-   ============================================ */
-
-/* ===== کلیدهای معمولی (پورتفولیو، تم، خروج) ===== */
+/* ===== استایل پایه همه کلیدها ===== */
 .header-btn {
   display: flex;
   align-items: center;
@@ -105,8 +101,6 @@
   padding: 8px 14px;
   border: none;
   border-radius: 8px;
-  background: #e8eaed !important;
-  color: #1a1a2e !important;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -117,12 +111,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.header-btn:hover {
-  background: #d5d8dd !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
 .header-btn .btn-icon {
   font-size: 18px;
   line-height: 1;
@@ -130,27 +118,14 @@
 
 .header-btn .btn-text {
   font-size: 13px;
-  color: #1a1a2e !important;
 }
 
-/* ===== حالت تاریک ===== */
-.dark-theme .header-btn,
-.dark .header-btn {
-  background: #333333 !important;
-  color: #e8e8e8 !important;
+.header-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.dark-theme .header-btn .btn-text,
-.dark .header-btn .btn-text {
-  color: #e8e8e8 !important;
-}
-
-.dark-theme .header-btn:hover,
-.dark .header-btn:hover {
-  background: #444444 !important;
-}
-
-/* ===== دکمه شاخص‌ها (اول از راست) ===== */
+/* ===== ۱. کلید شاخص‌ها (آبی تیره) ===== */
 .metrics-btn {
   background: #1a237e !important;
   color: #ffffff !important;
@@ -173,7 +148,101 @@
   color: #ffffff !important;
 }
 
-/* ===== حالت تاریک برای شاخص‌ها ===== */
+/* ===== ۲. کلید مقایسه پورتفولیوها (سبز-آبی) ===== */
+.comparison-btn {
+  background: #00897b !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 137, 123, 0.25);
+}
+
+.comparison-btn .btn-text,
+.comparison-btn .btn-icon {
+  color: #ffffff !important;
+}
+
+.comparison-btn:hover {
+  background: #00695c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(0, 137, 123, 0.35);
+}
+
+.comparison-btn:hover .btn-text,
+.comparison-btn:hover .btn-icon {
+  color: #ffffff !important;
+}
+
+/* ===== ۳. کلید انضباط (بنفش) ===== */
+.discipline-btn {
+  background: #6a1b9a !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(106, 27, 154, 0.25);
+}
+
+.discipline-btn .btn-text,
+.discipline-btn .btn-icon {
+  color: #ffffff !important;
+}
+
+.discipline-btn:hover {
+  background: #4a148c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(106, 27, 154, 0.35);
+}
+
+.discipline-btn:hover .btn-text,
+.discipline-btn:hover .btn-icon {
+  color: #ffffff !important;
+}
+
+/* ===== ۴. کلید تم روز/شب (نارنجی/طلایی) ===== */
+.theme-btn {
+  background: #e65100 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(230, 81, 0, 0.25);
+}
+
+.theme-btn .btn-text,
+.theme-btn .btn-icon {
+  color: #ffffff !important;
+}
+
+.theme-btn:hover {
+  background: #bf360c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(230, 81, 0, 0.35);
+}
+
+.theme-btn:hover .btn-text,
+.theme-btn:hover .btn-icon {
+  color: #ffffff !important;
+}
+
+/* ===== ۵. کلید خروج (قرمز تیره) ===== */
+.logout-btn {
+  background: #c62828 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.25);
+}
+
+.logout-btn .btn-text,
+.logout-btn .btn-icon {
+  color: #ffffff !important;
+}
+
+.logout-btn:hover {
+  background: #b71c1c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(198, 40, 40, 0.35);
+}
+
+.logout-btn:hover .btn-text,
+.logout-btn:hover .btn-icon {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   حالت تاریک برای کلیدها
+   ============================================ */
 .dark-theme .metrics-btn,
 .dark .metrics-btn {
   background: #303f9f !important;
@@ -185,59 +254,52 @@
   background: #1a237e !important;
 }
 
-/* ===== دکمه خروج - فقط هاور قرمز، بدون کادر ===== */
-.logout-btn {
-  background: #e8eaed !important;
-  color: #1a1a2e !important;
+.dark-theme .comparison-btn,
+.dark .comparison-btn {
+  background: #26a69a !important;
+  color: #ffffff !important;
 }
 
-.logout-btn .btn-text,
-.logout-btn .btn-icon {
-  color: #1a1a2e !important;
+.dark-theme .comparison-btn:hover,
+.dark .comparison-btn:hover {
+  background: #00897b !important;
 }
 
-.logout-btn:hover {
-  background: #ffebee !important;
-  color: #c62828 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important; /* همانند بقیه */
+.dark-theme .discipline-btn,
+.dark .discipline-btn {
+  background: #7b1fa2 !important;
+  color: #ffffff !important;
 }
 
-.logout-btn:hover .btn-text,
-.logout-btn:hover .btn-icon {
-  color: #c62828 !important;
+.dark-theme .discipline-btn:hover,
+.dark .discipline-btn:hover {
+  background: #6a1b9a !important;
 }
 
-/* ===== حالت تاریک برای خروج ===== */
+.dark-theme .theme-btn,
+.dark .theme-btn {
+  background: #f57f17 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .theme-btn:hover,
+.dark .theme-btn:hover {
+  background: #e65100 !important;
+}
+
 .dark-theme .logout-btn,
 .dark .logout-btn {
-  background: #333333 !important;
-  color: #e8e8e8 !important;
-}
-
-.dark-theme .logout-btn .btn-text,
-.dark .logout-btn .btn-text,
-.dark-theme .logout-btn .btn-icon,
-.dark .logout-btn .btn-icon {
-  color: #e8e8e8 !important;
+  background: #c62828 !important;
+  color: #ffffff !important;
 }
 
 .dark-theme .logout-btn:hover,
 .dark .logout-btn:hover {
-  background: #3a1a1a !important;
-  color: #ef5350 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  background: #b71c1c !important;
 }
 
-.dark-theme .logout-btn:hover .btn-text,
-.dark .logout-btn:hover .btn-text,
-.dark-theme .logout-btn:hover .btn-icon,
-.dark .logout-btn:hover .btn-icon {
-  color: #ef5350 !important;
-}
 /* ============================================
-   Quick Actions – ۶ دکمه
+   Quick Actions – ۶ دکمه + Dropdown
    ============================================ */
 .quick-actions {
   display: grid;
@@ -263,6 +325,8 @@
   color: white;
   transition: all 0.3s ease;
   font-family: inherit;
+  width: 100%;
+  min-width: 0;
 }
 
 .quick-actions .action-btn:hover {
@@ -279,6 +343,7 @@
   background: linear-gradient(135deg, #1a237e, #0d47a1);
 }
 .quick-actions .action-btn.primary:hover {
+  background: linear-gradient(135deg, #1a237e, #0d47a1);
   box-shadow: 0 4px 12px rgba(26, 35, 126, 0.5);
 }
 
@@ -286,6 +351,7 @@
   background: linear-gradient(135deg, #00897b, #00695c);
 }
 .quick-actions .action-btn.secondary:hover {
+  background: linear-gradient(135deg, #00897b, #00695c);
   box-shadow: 0 4px 12px rgba(0, 105, 92, 0.5);
 }
 
@@ -293,6 +359,8 @@
   background: linear-gradient(135deg, #7b1fa2, #4a148c);
 }
 .quick-actions .action-btn.success:hover {
+  background: linear-gradient(135deg, #7b1fa2, #4a148c) !important;
+  color: #ffffff !important;
   box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
 }
 
@@ -300,6 +368,7 @@
   background: linear-gradient(135deg, #f57f17, #e65100);
 }
 .quick-actions .action-btn.warning:hover {
+  background: linear-gradient(135deg, #f57f17, #e65100);
   box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5);
 }
 
@@ -307,6 +376,7 @@
   background: linear-gradient(135deg, #6a1b9a, #4a148c);
 }
 .quick-actions .action-btn.ai:hover {
+  background: linear-gradient(135deg, #6a1b9a, #4a148c);
   box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
 }
 .quick-actions .action-btn.ai:disabled {
@@ -319,6 +389,7 @@
   background: linear-gradient(135deg, #2e7d32, #1b5e20);
 }
 .quick-actions .action-btn.info:hover {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
   box-shadow: 0 4px 12px rgba(27, 94, 32, 0.5);
 }
 
@@ -326,20 +397,208 @@
 .dark-theme .quick-actions .action-btn.primary {
   background: linear-gradient(135deg, #3949ab, #1a237e);
 }
+.dark-theme .quick-actions .action-btn.primary:hover {
+  background: linear-gradient(135deg, #3949ab, #1a237e);
+}
+
 .dark-theme .quick-actions .action-btn.secondary {
   background: linear-gradient(135deg, #26a69a, #00897b);
 }
+.dark-theme .quick-actions .action-btn.secondary:hover {
+  background: linear-gradient(135deg, #26a69a, #00897b);
+}
+
 .dark-theme .quick-actions .action-btn.success {
   background: linear-gradient(135deg, #ab47bc, #7b1fa2);
 }
+.dark-theme .quick-actions .action-btn.success:hover {
+  background: linear-gradient(135deg, #ab47bc, #7b1fa2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
+}
+
 .dark-theme .quick-actions .action-btn.warning {
   background: linear-gradient(135deg, #ffa726, #f57f17);
 }
+.dark-theme .quick-actions .action-btn.warning:hover {
+  background: linear-gradient(135deg, #ffa726, #f57f17);
+}
+
 .dark-theme .quick-actions .action-btn.ai {
   background: linear-gradient(135deg, #ab47bc, #6a1b9a);
 }
+.dark-theme .quick-actions .action-btn.ai:hover {
+  background: linear-gradient(135deg, #ab47bc, #6a1b9a);
+}
+
 .dark-theme .quick-actions .action-btn.info {
   background: linear-gradient(135deg, #43a047, #2e7d32);
+}
+.dark-theme .quick-actions .action-btn.info:hover {
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+}
+
+/* ============================================
+   Dropdown برای دکمه "ترید جدید" - نسخه نهایی
+   ============================================ */
+.action-btn-wrapper {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  direction: ltr; /* برای کنترل دقیق ترتیب */
+}
+
+/* ===== فلش (سمت چپ) ===== */
+/* گوشه‌های راست ۹۰ درجه، گوشه‌های چپ گرد */
+.dropdown-toggle {
+  flex: 0 0 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 10px 0 0 10px !important; /* چپ گرد، راست تیز */
+  padding: 0 4px !important;
+  font-size: 18px !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  font-family: inherit;
+  line-height: 1;
+  margin-right: 0;
+  order: 1; /* فلش در سمت چپ */
+}
+
+/* بزرگتر شدن محتوای فلش */
+.dropdown-toggle .arrow-icon {
+  display: inline-block;
+  transform: scale(1.4);
+  font-size: inherit;
+  line-height: 1;
+}
+
+.dropdown-toggle:hover {
+  background: linear-gradient(135deg, #0d47a1, #1a237e) !important;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4) !important;
+}
+
+.dark-theme .dropdown-toggle {
+  background: linear-gradient(135deg, #3949ab, #1a237e) !important;
+}
+
+.dark-theme .dropdown-toggle:hover {
+  background: linear-gradient(135deg, #1a237e, #3949ab) !important;
+}
+
+/* ===== دکمه اصلی "ترید جدید" (سمت راست) ===== */
+/* گوشه‌های راست گرد، گوشه‌های چپ ۹۰ درجه */
+.action-btn-wrapper .action-btn.primary {
+  flex: 1;
+  border-radius: 0 10px 10px 0 !important; /* راست گرد، چپ تیز */
+  padding: 12px 8px 12px 10px;
+  justify-content: center;
+  min-width: 0;
+  gap: 4px;
+  font-size: 14px;
+  background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
+  color: white !important;
+  order: 2; /* دکمه اصلی در سمت راست */
+}
+
+.action-btn-wrapper .action-btn.primary:hover {
+  background: linear-gradient(135deg, #0d47a1, #1a237e) !important;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.5) !important;
+}
+
+.dark-theme .action-btn-wrapper .action-btn.primary {
+  background: linear-gradient(135deg, #3949ab, #1a237e) !important;
+}
+
+.dark-theme .action-btn-wrapper .action-btn.primary:hover {
+  background: linear-gradient(135deg, #1a237e, #3949ab) !important;
+}
+
+/* ===== منوی Dropdown ===== */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-color, #d0d4e0);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary, #1a1a2e);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover, #eef0f5);
+}
+
+.dropdown-item:first-child {
+  border-radius: 10px 10px 0 0;
+}
+
+.dropdown-item:last-child {
+  border-radius: 0 0 10px 10px;
+}
+
+.dropdown-item .dropdown-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+/* ===== حالت تاریک dropdown ===== */
+.dark-theme .dropdown-menu {
+  background: #1e1e1e;
+  border-color: #333;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .dropdown-item {
+  color: #e0e0e0;
+}
+
+.dark-theme .dropdown-item:hover {
+  background: #2a2a2a;
 }
 
 /* ============================================
@@ -1254,9 +1513,63 @@
     display: none;
   }
 
+  .comparison-btn .btn-text {
+    display: none;
+  }
+
+  .discipline-btn .btn-text {
+    display: none;
+  }
+
   .header-version {
     font-size: 10px;
     padding: 1px 6px;
+  }
+
+  /* ===== ریسپانسیو: Quick Actions و Dropdown ===== */
+  .quick-actions {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .quick-actions .action-btn {
+    padding: 10px 8px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .quick-actions .action-btn .action-icon {
+    font-size: 18px;
+  }
+
+  .dropdown-toggle {
+    flex: 0 0 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    font-size: 16px !important;
+    border-radius: 8px 0 0 8px !important;
+    padding: 0 3px !important;
+  }
+
+  .dropdown-toggle .arrow-icon {
+    transform: scale(1.2);
+  }
+
+  .action-btn-wrapper .action-btn.primary {
+    border-radius: 0 8px 8px 0 !important;
+    padding: 10px 6px 10px 6px;
+    font-size: 13px;
+  }
+
+  .dropdown-menu {
+    min-width: 150px;
+    right: -2px;
+  }
+
+  .dropdown-item {
+    font-size: 13px;
+    padding: 8px 12px;
   }
 
   .three-column-layout {
@@ -1289,17 +1602,6 @@
     grid-template-columns: repeat(2, 1fr);
     padding: 12px 16px;
     gap: 10px;
-  }
-
-  .quick-actions {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 12px 16px;
-    gap: 8px;
-  }
-
-  .quick-actions .action-btn {
-    padding: 10px;
-    font-size: 13px;
   }
 
   .stats-cards .stat-card {
@@ -1359,12 +1661,55 @@
     font-size: 18px;
   }
 
+  /* ===== ریسپانسیو: Quick Actions و Dropdown موبایل کوچک ===== */
   .quick-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 8px 10px;
   }
 
-  .stats-cards {
-    grid-template-columns: 1fr;
+  .quick-actions .action-btn {
+    padding: 8px 6px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .quick-actions .action-btn .action-icon {
+    font-size: 16px;
+  }
+
+  .dropdown-toggle {
+    flex: 0 0 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    font-size: 14px !important;
+    border-radius: 6px 0 0 6px !important;
+    padding: 0 2px !important;
+  }
+
+  .dropdown-toggle .arrow-icon {
+    transform: scale(1.1);
+  }
+
+  .action-btn-wrapper .action-btn.primary {
+    border-radius: 0 6px 6px 0 !important;
+    padding: 8px 4px 8px 4px;
+    font-size: 12px;
+  }
+
+  .dropdown-menu {
+    min-width: 130px;
+    right: -6px;
+  }
+
+  .dropdown-item {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .dropdown-item .dropdown-icon {
+    font-size: 15px;
+    width: 18px;
   }
 
   .three-column-layout {
@@ -1381,6 +1726,20 @@
 
   .three-column-layout .col-details {
     min-height: 300px;
+  }
+
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .stats-cards .stat-card {
+    padding: 8px 12px;
+  }
+
+  .stats-cards .stat-value {
+    font-size: 15px;
   }
 
   .modal-content {
@@ -1493,39 +1852,38 @@
     display: none !important;
   }
 }
-/* frontend/src/components/Dashboard.css */
 
-/* ===== دکمه مقایسه پورتفولیوها ===== */
-.comparison-btn {
-    background: #00897b !important;  /* سبز-آبی متمایز */
-    color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(0, 137, 123, 0.25);
+/* ============================================
+   اصلاح فاصله کلیدهای سریع هدر در موبایل
+   ============================================ */
+@media (max-width: 768px) {
+  .header-right {
+    gap: 2px !important;
+  }
+
+  .header-btn {
+    padding: 4px 6px !important;
+    font-size: 12px !important;
+    min-width: 32px;
+    justify-content: center;
+  }
+
+  .header-btn .btn-icon {
+    font-size: 16px !important;
+  }
+
+  .header-btn .btn-text {
+    display: none !important;
+  }
 }
-
-.comparison-btn .btn-text,
-.comparison-btn .btn-icon {
-    color: #ffffff !important;
-}
-
-.comparison-btn:hover {
-    background: #00695c !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 16px rgba(0, 137, 123, 0.35);
-}
-
-.comparison-btn:hover .btn-text,
-.comparison-btn:hover .btn-icon {
-    color: #ffffff !important;
-}
-
-/* ===== حالت تاریک ===== */
-.dark-theme .comparison-btn,
-.dark .comparison-btn {
-    background: #26a69a !important;
-    color: #ffffff !important;
-}
-
-.dark-theme .comparison-btn:hover,
-.dark .comparison-btn:hover {
-    background: #00897b !important;
+.trade-broker {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--border-color);
+  padding: 0 6px;
+  border-radius: 4px;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

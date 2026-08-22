@@ -17,7 +17,8 @@
 
 .chart-container {
   width: 100%;
-  min-height: 200px;
+  min-height: 280px;
+  height: 320px; /* ✅ افزایش ارتفاع برای جلوگیری از تداخل */
 }
 
 .chart-empty {
@@ -45,7 +46,8 @@
   }
 
   .chart-container {
-    min-height: 150px;
+    height: 260px;
+    min-height: 200px;
   }
 }
 

@@ -1263,3 +1263,137 @@
   background: linear-gradient(135deg, #5c6bc0, #3949ab);
   box-shadow: 0 6px 20px rgba(57, 73, 171, 0.5);
 }
+/* ============================================
+   استایل Tooltip راهنما (مشابه AIConsultation)
+   ============================================ */
+.help-tooltip {
+  display: inline-block;
+  position: relative;
+  margin-right: 4px;
+  cursor: help;
+}
+
+.help-tooltip .help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1a237e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+  transition: all 0.2s;
+  user-select: none;
+  line-height: 1;
+}
+
+.help-tooltip .help-icon:hover {
+  background: #0d1445;
+  transform: scale(1.1);
+}
+
+.help-tooltip .help-content {
+  display: block;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%);
+  min-width: 240px;
+  max-width: 320px;
+  padding: 10px 14px;
+  background: #1a1a2e;
+  color: #f0f0f0;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  text-align: right;
+  white-space: normal;
+  font-weight: 400;
+  pointer-events: none;
+}
+
+.help-tooltip .help-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 50%;
+  transform: translateX(50%);
+  border: 6px solid transparent;
+  border-top-color: #1a1a2e;
+}
+
+/* ===== حالت تاریک ===== */
+.dark .help-tooltip .help-icon {
+  background: #303f9f;
+}
+
+.dark .help-tooltip .help-icon:hover {
+  background: #1a237e;
+}
+
+.dark .help-tooltip .help-content {
+  background: #2d2d44;
+  color: #e8e8e8;
+}
+
+.dark .help-tooltip .help-content::after {
+  border-top-color: #2d2d44;
+}
+
+/* ===== واکنش‌گرایی ===== */
+@media (max-width: 768px) {
+  .help-tooltip .help-content {
+    min-width: 180px;
+    max-width: 260px;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-tooltip .help-content {
+    min-width: 150px;
+    max-width: 220px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+/* ============================================
+   توضیح راهنما در تب قوانین معاملاتی فرم‌های ترید
+   ============================================ */
+.rules-intro {
+  background: var(--info-bg, #e3f2fd);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border-right: 4px solid #1a237e;
+}
+
+.dark .rules-intro {
+  background: rgba(26, 35, 126, 0.15);
+  border-right-color: #7986cb;
+}
+
+.rules-intro-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary, #555);
+  line-height: 1.6;
+}
+
+.dark .rules-intro-text {
+  color: #ccc;
+}
+
+.rules-intro-text strong {
+  color: #c62828;
+}
+
+.dark .rules-intro-text strong {
+  color: #ef5350;
+}
