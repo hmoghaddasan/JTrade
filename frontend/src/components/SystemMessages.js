@@ -1,43 +1,100 @@
 // frontend/src/components/SystemMessages.js
 
 import React, { useState, useEffect } from 'react';
+import api from '../services/apiService';
 import './SystemMessages.css';
 
 const SystemMessages = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dismissedIds, setDismissedIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dismissedSystemMessages');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [showResetBanner, setShowResetBanner] = useState(true); // ✅ کنترل نمایش بنر ریست
 
   useEffect(() => {
-    const loadMessages = () => {
+    const loadMessages = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const savedMessages = localStorage.getItem('systemMessages');
-        if (savedMessages) {
-          setMessages(JSON.parse(savedMessages));
-        } else {
-          // پیام‌های نمونه
-          const sampleMessages = [
-            {
-              id: 1,
-              title: '🎉 خوش آمدید',
-              message: 'به ژورنال حرفه‌ای ترید خوش آمدید. امیدواریم تجربه‌ی خوبی داشته باشید.',
-              isActive: true,
-              startDate: '2024-01-01',
-              endDate: '2024-12-31'
-            },
-            {
-              id: 2,
-              title: '📢 به‌روزرسانی جدید',
-              message: 'نسخه 1.4.1 نرم‌افزار منتشر شد. برای مشاهده تغییرات به بخش پروفایل مراجعه کنید.',
-              isActive: true,
-              startDate: '2024-10-01',
-              endDate: '2024-11-01'
+        console.log('📢 Fetching system messages from API...');
+        const response = await api.get('messages/system/public/');
+        console.log('📢 System messages response:', response.data);
+
+        let data = response.data;
+
+        if (!Array.isArray(data)) {
+          if (data && typeof data === 'object') {
+            if (data.results && Array.isArray(data.results)) {
+              data = data.results;
+            } else if (data.data && Array.isArray(data.data)) {
+              data = data.data;
+            } else {
+              data = [data];
             }
-          ];
-          setMessages(sampleMessages);
-          localStorage.setItem('systemMessages', JSON.stringify(sampleMessages));
+          } else {
+            data = [];
+          }
         }
+
+        console.log('📅 Raw messages count:', data.length);
+
+        // ============================================
+        // ✅ فیلتر پیام‌های فعال
+        // ============================================
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const todayStr = today.toISOString().split('T')[0];
+
+        const activeMessages = data.filter(msg => {
+          if (msg.is_active === false || msg.is_active === 0) {
+            console.log(`❌ Message ${msg.id} (${msg.title}) is INACTIVE`);
+            return false;
+          }
+
+          if (msg.start_date) {
+            try {
+              const startDate = new Date(msg.start_date);
+              const startDateStr = startDate.toISOString().split('T')[0];
+              if (startDateStr > todayStr) {
+                console.log(`❌ Message ${msg.id} start_date (${startDateStr}) > today (${todayStr})`);
+                return false;
+              }
+            } catch (e) {
+              console.error(`Error parsing start_date for message ${msg.id}:`, e);
+            }
+          }
+
+          if (msg.end_date) {
+            try {
+              const endDate = new Date(msg.end_date);
+              const endDateStr = endDate.toISOString().split('T')[0];
+              if (endDateStr < todayStr) {
+                console.log(`❌ Message ${msg.id} end_date (${endDateStr}) < today (${todayStr}) - EXPIRED`);
+                return false;
+              }
+            } catch (e) {
+              console.error(`Error parsing end_date for message ${msg.id}:`, e);
+            }
+          }
+
+          console.log(`✅ Message ${msg.id} (${msg.title}) is ACTIVE`);
+          return true;
+        });
+
+        console.log('📢 Active messages count:', activeMessages.length);
+        setMessages(activeMessages);
+
       } catch (error) {
-        console.error('Error loading system messages:', error);
+        console.error('❌ Error loading system messages from API:', error);
+        setError('خطا در بارگذاری پیام‌های سیستمی');
+        setMessages([]);
       } finally {
         setLoading(false);
       }
@@ -46,27 +103,88 @@ const SystemMessages = () => {
     loadMessages();
   }, []);
 
-  const activeMessages = messages.filter(msg => {
-    if (!msg.isActive) return false;
-    const today = new Date().toISOString().split('T')[0];
-    if (msg.startDate && msg.startDate > today) return false;
-    if (msg.endDate && msg.endDate < today) return false;
-    return true;
-  });
+  const handleDismiss = (messageId) => {
+    const newDismissed = [...dismissedIds, messageId];
+    setDismissedIds(newDismissed);
+    localStorage.setItem('dismissedSystemMessages', JSON.stringify(newDismissed));
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  };
 
-  if (loading || activeMessages.length === 0) {
+  // ✅ ریست همه پیام‌های بسته شده
+  const handleResetDismissed = () => {
+    localStorage.removeItem('dismissedSystemMessages');
+    setDismissedIds([]);
+    setShowResetBanner(false); // ✅ مخفی کردن بنر ریست
+    window.location.reload();
+  };
+
+  // ✅ بستن بنر ریست
+  const handleDismissResetBanner = () => {
+    setShowResetBanner(false);
+  };
+
+  // ✅ فقط پیام‌هایی که بسته نشده‌اند نمایش داده شوند
+  const visibleMessages = messages.filter(msg => !dismissedIds.includes(msg.id));
+
+  console.log('📢 visibleMessages count:', visibleMessages.length);
+  console.log('📢 dismissedIds:', dismissedIds);
+
+  if (loading) {
+    return (
+      <div className="system-messages-loading">
+        <span className="loading-dots">⏳</span>
+      </div>
+    );
+  }
+
+  if (error || visibleMessages.length === 0) {
+    // ✅ اگر پیامی وجود ندارد اما قبلاً بسته شده‌اند و بنر نمایش داده شود
+    if (messages.length > 0 && dismissedIds.length > 0 && showResetBanner) {
+      return (
+        <div className="system-messages-reset">
+          <div className="reset-message">
+            <span className="reset-icon">📢</span>
+            <span>همه پیام‌ها بسته شده‌اند</span>
+            <button className="reset-btn" onClick={handleResetDismissed}>
+              🔄 مشاهده مجدد
+            </button>
+            <button className="reset-dismiss-btn" onClick={handleDismissResetBanner} title="بستن">
+              ✕
+            </button>
+          </div>
+        </div>
+      );
+    }
     return null;
   }
 
   return (
     <div className="system-messages">
-      {activeMessages.map((msg, index) => (
-        <div key={msg.id} className={`system-message ${index === 0 ? 'primary' : 'secondary'}`}>
+      {visibleMessages.map((msg, index) => (
+        <div key={msg.id || index} className={`system-message ${index === 0 ? 'primary' : 'secondary'}`}>
           <div className="message-icon">📢</div>
           <div className="message-content">
-            <h4>{msg.title}</h4>
-            <p>{msg.message}</p>
+            <h4>{msg.title || 'پیام سیستم'}</h4>
+            <p>{msg.message || ''}</p>
+            {msg.start_date && msg.end_date && (
+              <div className="message-date-range">
+                <span className="date-label">📅 بازه:</span>
+                <span className="date-value">
+                  {new Date(msg.start_date).toLocaleDateString('fa-IR')}
+                  تا
+                  {new Date(msg.end_date).toLocaleDateString('fa-IR')}
+                </span>
+              </div>
+            )}
           </div>
+          <button
+            className="message-dismiss-btn"
+            onClick={() => handleDismiss(msg.id)}
+            title="بستن پیام"
+            aria-label="بستن پیام"
+          >
+            ✕
+          </button>
         </div>
       ))}
     </div>

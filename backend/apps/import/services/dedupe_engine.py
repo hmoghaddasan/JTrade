@@ -1,53 +1,71 @@
-from django.db.models import Q
+# backend/apps/import/services/dedupe_engine.py
 from apps.trading.models import Trade
+from datetime import timedelta
+import datetime as dt
 
 
 class DedupeEngine:
-    """
-    تشخیص تریدهای تکراری بر اساس فیلدهای کلیدی
-    """
+    """موتور تشخیص تریدهای تکراری"""
 
     @classmethod
     def is_duplicate(cls, user, trade_data):
         """
-        بررسی اینکه آیا تریدی با این داده‌ها قبلاً برای کاربر ثبت شده است.
-        معیارها: تاریخ، نماد، قیمت ورود، قیمت خروج، سود (با تلورانس کوچک)
+        بررسی تکراری بودن ترید بر اساس ترکیب:
+        - symbol
+        - trade_date (با بازه ۲ روز قبل و بعد)
+        - time_ny (دقیقاً برابر – تحمل صفر)
+        - entry_price (با ۲٪ تحمل)
+        - trade_type
         """
-        trade_date = trade_data.get('trade_date')
         symbol = trade_data.get('symbol')
+        trade_date = trade_data.get('trade_date')
+        time_ny = trade_data.get('time_ny')
         entry_price = trade_data.get('entry_price')
-        close_price = trade_data.get('close_price')
-        profit = trade_data.get('profit')
+        trade_type = trade_data.get('trade_type')
 
-        if not trade_date or not symbol:
+        # اگر هر کدام از فیلدهای کلیدی وجود نداشت، تکراری در نظر نگیر
+        if not all([symbol, trade_date, entry_price, trade_type]):
             return False
 
-        # ساخت Query
-        query = Q(user=user, is_deleted=False, trade_date=trade_date, symbol=symbol)
+        # تبدیل تاریخ به شیء تاریخ (اگر رشته است)
+        if isinstance(trade_date, str):
+            try:
+                trade_date = dt.date.fromisoformat(trade_date)
+            except:
+                return False
 
-        if entry_price is not None:
-            # تلورانس 0.1%
-            tolerance = abs(entry_price) * 0.001 if entry_price else 0.001
-            query &= Q(entry_price__range=(entry_price - tolerance, entry_price + tolerance))
+        # بازه تاریخی: ۲ روز قبل تا ۲ روز بعد
+        start_date = trade_date - timedelta(days=2)
+        end_date = trade_date + timedelta(days=2)
 
-        if close_price is not None:
-            tolerance = abs(close_price) * 0.001 if close_price else 0.001
-            query &= Q(close_price__range=(close_price - tolerance, close_price + tolerance))
+        # جستجوی تریدهای مشابه در دیتابیس
+        similar_trades = Trade.objects.filter(
+            user=user,
+            symbol=symbol,
+            trade_type=trade_type,
+            trade_date__range=[start_date, end_date],
+            is_deleted=False
+        )
 
-        if profit is not None:
-            tolerance = abs(profit) * 0.01 if profit else 0.01
-            query &= Q(profit__range=(profit - tolerance, profit + tolerance))
+        # تحمل قیمت ورود: ۲٪ اختلاف
+        tolerance = abs(float(entry_price) * 0.02) if entry_price else 0.1
 
-        return Trade.objects.filter(query).exists()
+        for trade in similar_trades:
+            if trade.entry_price is not None:
+                price_diff = abs(float(trade.entry_price) - float(entry_price))
+                if price_diff <= tolerance:
+                    # ============================================
+                    # ✅ بررسی دقیق زمان (تحمل صفر)
+                    # ============================================
+                    if time_ny and trade.time_ny:
+                        # اگر زمان‌ها دقیقاً برابر نباشند، تکراری نیست
+                        if trade.time_ny != time_ny:
+                            continue
+                    elif time_ny or trade.time_ny:
+                        # اگر یکی زمان دارد و دیگری ندارد، تکراری نیست
+                        continue
 
-    @classmethod
-    def find_duplicates_bulk(cls, user, trade_list):
-        """
-        پیدا کردن تریدهای تکراری در یک لیست از داده‌ها
-        بازگشت لیست ایندکس‌های تکراری
-        """
-        duplicates = []
-        for idx, trade_data in enumerate(trade_list):
-            if cls.is_duplicate(user, trade_data):
-                duplicates.append(idx)
-        return duplicates
+                    # اگر همه چیز یکسان بود، تکراری است
+                    return True
+
+        return False

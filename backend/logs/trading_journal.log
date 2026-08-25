@@ -258232,3 +258232,1461 @@ Traceback (most recent call last):
 django.db.utils.OperationalError: (1054, "Unknown column 'trading_trade.broker_id' in 'field list'")
 ERROR 2026-08-20 15:37:07,350 basehttp 32344 18028 "GET /api/trading/trades/?page_size=1000 HTTP/1.1" 500 31801
 INFO 2026-08-20 16:56:00,809 signals 28752 17460 ✅ Trade used: 09155511393
+INFO 2026-08-20 17:22:50,485 signals 28752 28576 ✅ Trade used: 09155511393
+ERROR 2026-08-20 17:27:39,944 log 28752 33224 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: Binance>.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 242, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 274, in perform_create
+    trade = serializer.save(user=user, group=group)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 981, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Trade.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Trade.objects.create()`. You may need to make the field read-only, or override the TradeCreateSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: Binance>.
+
+ERROR 2026-08-20 17:27:39,977 basehttp 28752 33224 "POST /api/trading/trades/ HTTP/1.1" 500 40774
+ERROR 2026-08-20 17:29:16,634 log 28752 33224 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: OKX>.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 242, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 274, in perform_create
+    trade = serializer.save(user=user, group=group)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 981, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Trade.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Trade.objects.create()`. You may need to make the field read-only, or override the TradeCreateSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: OKX>.
+
+ERROR 2026-08-20 17:29:16,683 basehttp 28752 33224 "POST /api/trading/trades/ HTTP/1.1" 500 40762
+ERROR 2026-08-20 17:30:17,225 log 2852 34392 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: OKX>.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 242, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 274, in perform_create
+    trade = serializer.save(user=user, group=group)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 981, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Trade.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Trade.objects.create()`. You may need to make the field read-only, or override the TradeCreateSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: OKX>.
+
+ERROR 2026-08-20 17:30:17,251 basehttp 2852 34392 "POST /api/trading/trades/ HTTP/1.1" 500 40762
+ERROR 2026-08-20 19:00:44,715 log 2852 25308 Internal Server Error: /api/trading/trades/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: OKX>.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\generics.py", line 242, in post
+    return self.create(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 274, in perform_create
+    trade = serializer.save(user=user, group=group)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 981, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Trade.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Trade.objects.create()`. You may need to make the field read-only, or override the TradeCreateSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'Broker'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\serializers.py", line 962, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1881, in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1804, in as_sql
+    value_rows = [
+                 ^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1805, in <listcomp>
+    [
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1806, in <listcomp>
+    self.prepare_value(field, self.pre_save_val(field, obj))
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1741, in prepare_value
+    return field.get_db_prep_save(value, connection=self.connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\related.py", line 1190, in get_db_prep_save
+    return self.target_field.get_db_prep_save(value, connection=connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 1012, in get_db_prep_save
+    return self.get_db_prep_value(value, connection=connection, prepared=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2820, in get_db_prep_value
+    value = self.get_prep_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <Broker: OKX>.
+
+ERROR 2026-08-20 19:00:44,746 basehttp 2852 25308 "POST /api/trading/trades/ HTTP/1.1" 500 40762
+INFO 2026-08-20 19:05:54,061 signals 7360 16216 ✅ Trade used: 09155511393
+ERROR 2026-08-20 23:23:16,497 sms 34176 24352 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))
+WARNING 2026-08-21 11:33:16,358 views 18240 32656 ⚠️ Row 2: Invalid date - 2025-06-30T01:37:01.328000
+WARNING 2026-08-21 11:33:16,363 views 18240 32656 ⚠️ Row 3: Invalid date - 2025-06-30T00:56:14.975000
+WARNING 2026-08-21 11:36:14,512 views 12104 3720 ⚠️ Row 2: Invalid date - 2025-06-30T01:37:01.328000
+WARNING 2026-08-21 11:36:14,512 views 12104 3720 ⚠️ Row 3: Invalid date - 2025-06-30T00:56:14.975000
+WARNING 2026-08-21 11:39:40,338 views 40696 35808 ⚠️ Row 2: Invalid date - 2025-06-30T01:37:01.328000
+WARNING 2026-08-21 11:39:40,338 views 40696 35808 ⚠️ Row 3: Invalid date - 2025-06-30T00:56:14.975000
+WARNING 2026-08-21 11:41:29,392 views 40696 37668 ⚠️ Row 2: Invalid date - 2025-06-30T01:37:01.328000
+WARNING 2026-08-21 11:41:29,402 views 40696 37668 ⚠️ Row 3: Invalid date - 2025-06-30T00:56:14.975000
+WARNING 2026-08-21 11:42:55,525 views 33872 23236 ⚠️ Row 2: Invalid date - 2025-06-30T01:37:01.328000
+WARNING 2026-08-21 11:42:55,525 views 33872 23236 ⚠️ Row 3: Invalid date - 2025-06-30T00:56:14.975000
+WARNING 2026-08-21 11:46:28,149 views 40096 31040 ⚠️ Row 2: Invalid date - 2025-06-30T01:37:01.328000
+WARNING 2026-08-21 11:46:28,149 views 40096 31040 ⚠️ Row 3: Invalid date - 2025-06-30T00:56:14.975000
+ERROR 2026-08-21 11:48:35,523 views 36172 24352 ❌ Serializer error: {'group': [ErrorDetail(string='این مقدار لازم است.', code='required')]}
+ERROR 2026-08-21 11:48:35,523 views 36172 24352 ❌ Serializer error: {'group': [ErrorDetail(string='این مقدار لازم است.', code='required')]}
+INFO 2026-08-21 11:50:57,110 signals 17804 34828 ✅ Trade used: 09155511393
+INFO 2026-08-21 11:50:57,141 signals 17804 34828 ✅ Trade used: 09155511393
+ERROR 2026-08-21 23:19:57,221 log 3884 18500 Internal Server Error: /api/trading/discipline/status/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 255, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'trading_trade.trade_time' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 1899, in get
+    status_data = engine.get_today_status()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\discipline_engine.py", line 496, in get_today_status
+    state = self.today_state
+            ^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\discipline_engine.py", line 75, in today_state
+    self._refresh_today_stats()
+  File "C:\Trade_Journal\backend\apps\trading\discipline_engine.py", line 98, in _refresh_today_stats
+    self._today_state.consecutive_losses = self._calculate_consecutive_losses()
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\discipline_engine.py", line 112, in _calculate_consecutive_losses
+    for trade in trades_today:
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 386, in __iter__
+    self._fetch_all()
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 255, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'trading_trade.trade_time' in 'field list'")
+ERROR 2026-08-21 23:19:57,263 basehttp 3884 18500 "GET /api/trading/discipline/status/ HTTP/1.1" 500 276157
+ERROR 2026-08-21 23:28:53,616 sms 8500 38580 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))
+ERROR 2026-08-21 23:31:23,874 sms 8500 38448 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))
+ERROR 2026-08-21 23:44:55,614 views 24528 26020 ❌ Serializer error: {'profit': [ErrorDetail(string='بیشتر از 2 ممیز اعشار نباید وجود داشته باشد', code='max_decimal_places')]}
+INFO 2026-08-21 23:44:55,629 signals 24528 26020 ✅ Trade used: 09155511393
+WARNING 2026-08-21 23:48:03,277 views 30140 26296 ⚠️ Row 3: Duplicate trade - BTCUSD on 2025-06-26
+INFO 2026-08-21 23:48:03,314 signals 30140 26296 ✅ Trade used: 09155511393
+ERROR 2026-08-21 23:52:02,368 sms 30140 38580 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))
+ERROR 2026-08-21 23:56:02,058 sms 30140 21820 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))
+ERROR 2026-08-22 15:13:20,639 sms 17376 14760 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))
+ERROR 2026-08-22 18:23:37,815 sms 17352 12276 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+INFO 2026-08-23 16:24:27,772 signals 21956 10536 ✅ AI consultation used: 09155511393
+INFO 2026-08-23 16:24:27,772 tasks 21956 10536 🚀 [TASK START] Starting background task for consultation 126
+INFO 2026-08-23 16:24:27,772 tasks 21956 16744 🚀 [START] Processing consultation 126
+INFO 2026-08-23 16:24:27,772 tasks 21956 10536 ✅ [TASK STARTED] Thread 'OllamaWorker-126' started
+INFO 2026-08-23 16:24:27,781 tasks 21956 16744 📊 [STEP 1] Consultation 126 retrieved
+INFO 2026-08-23 16:24:27,796 tasks 21956 16744 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-23 16:24:27,944 tasks 21956 16744 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-23 16:24:27,991 tasks 21956 16744 ✅ [STEP 4] Prompt built, length: 1715
+INFO 2026-08-23 16:24:27,991 tasks 21956 16744 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-23 16:24:27,991 ai_service 21956 16744 🔄 Calling Ollama with model: gemma4:e4b, url: http://localhost:11434/api/generate, timeout: 600s
+ERROR 2026-08-23 16:26:16,803 ai_service 21956 16744 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-23 16:26:16,803 tasks 21956 16744 ✅ [STEP 5] Ollama responded, length: 699
+ERROR 2026-08-23 16:26:16,803 tasks 21956 16744 ❌ [STEP 6] Ollama returned error response
+INFO 2026-08-23 16:26:17,052 tasks 21956 16744 ❌ Consultation 126 marked as 'failed'
+ERROR 2026-08-23 19:02:09,042 sms 21956 17660 SMS request exception: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+ERROR 2026-08-23 19:26:27,610 sms 21956 20412 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+ERROR 2026-08-24 16:26:52,896 log 10652 5948 Internal Server Error: /api/trading/ai-consult-stream/
+ERROR 2026-08-24 16:26:52,911 basehttp 10652 5948 "POST /api/trading/ai-consult-stream/ HTTP/1.1" 500 137
+INFO 2026-08-24 16:41:56,905 signals 16508 17324 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 16:47:21,855 signals 16764 19772 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 16:53:23,104 signals 16764 16424 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 16:56:39,405 signals 16764 24188 ✅ AI consultation used: 09155511393
+ERROR 2026-08-24 17:03:26,781 sms 16764 17796 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+INFO 2026-08-24 17:04:32,464 signals 16764 15400 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 17:28:33,197 signals 14540 23800 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 17:55:14,117 signals 16920 10444 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 17:55:14,117 tasks 16920 10444 🚀 [TASK START] Starting background task for consultation 133
+INFO 2026-08-24 17:55:14,117 tasks 16920 23432 🚀 [START] Processing consultation 133
+INFO 2026-08-24 17:55:14,117 tasks 16920 10444 ✅ [TASK STARTED] Thread 'OllamaWorker-133' started
+INFO 2026-08-24 17:55:14,136 tasks 16920 23432 📊 [STEP 1] Consultation 133 retrieved
+INFO 2026-08-24 17:55:14,141 tasks 16920 23432 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 17:55:14,293 tasks 16920 23432 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 17:55:14,327 tasks 16920 23432 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 17:55:14,338 tasks 16920 23432 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-24 17:55:14,383 ai_service 16920 23432 🔄 Calling Ollama with model: gemma4:e4b, url: http://localhost:11434/api/generate, timeout: 600s
+ERROR 2026-08-24 17:56:26,780 ai_service 16920 23432 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 17:56:26,780 tasks 16920 23432 ✅ [STEP 5] Ollama responded, length: 699
+ERROR 2026-08-24 17:56:26,780 tasks 16920 23432 ❌ [STEP 6] Ollama returned error response
+INFO 2026-08-24 17:56:26,788 tasks 16920 23432 ❌ Consultation 133 marked as 'failed'
+INFO 2026-08-24 17:58:50,020 signals 16920 10444 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 17:58:50,020 tasks 16920 10444 🚀 [TASK START] Starting background task for consultation 134
+INFO 2026-08-24 17:58:50,020 tasks 16920 15680 🚀 [START] Processing consultation 134
+INFO 2026-08-24 17:58:50,020 tasks 16920 10444 ✅ [TASK STARTED] Thread 'OllamaWorker-134' started
+INFO 2026-08-24 17:58:50,035 tasks 16920 15680 📊 [STEP 1] Consultation 134 retrieved
+INFO 2026-08-24 17:58:50,049 tasks 16920 15680 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 17:58:50,200 tasks 16920 15680 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 17:58:50,266 tasks 16920 15680 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 17:58:50,275 tasks 16920 15680 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-24 17:58:50,278 ai_service 16920 15680 🔄 Calling Ollama with model: gemma4:e4b, url: http://localhost:11434/api/generate, timeout: 600s
+ERROR 2026-08-24 18:00:01,494 ai_service 16920 15680 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:00:01,494 tasks 16920 15680 ✅ [STEP 5] Ollama responded, length: 699
+ERROR 2026-08-24 18:00:01,494 tasks 16920 15680 ❌ [STEP 6] Ollama returned error response
+INFO 2026-08-24 18:00:01,507 tasks 16920 15680 ❌ Consultation 134 marked as 'failed'
+INFO 2026-08-24 18:16:54,082 signals 10080 23464 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 18:16:54,082 tasks 10080 23464 🚀 [TASK START] Starting background task for consultation 135
+INFO 2026-08-24 18:16:54,082 tasks 10080 23968 🚀 [START] Processing consultation 135
+INFO 2026-08-24 18:16:54,082 tasks 10080 23464 ✅ [TASK STARTED] Thread 'OllamaWorker-135' started
+INFO 2026-08-24 18:16:54,098 tasks 10080 23968 📊 [STEP 1] Consultation 135 retrieved
+INFO 2026-08-24 18:16:54,098 tasks 10080 23968 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 18:16:54,262 tasks 10080 23968 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 18:16:54,292 tasks 10080 23968 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 18:16:54,292 tasks 10080 23968 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-24 18:16:54,292 ai_service 10080 23968 🔄 Calling Ollama with model: gemma4:e4b, url: http://localhost:11434/api/generate, timeout: 600s
+ERROR 2026-08-24 18:18:01,781 ai_service 10080 23968 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:18:01,783 tasks 10080 23968 ✅ [STEP 5] Ollama responded, length: 699
+ERROR 2026-08-24 18:18:01,785 tasks 10080 23968 ❌ [STEP 6] Ollama returned error response
+INFO 2026-08-24 18:18:01,787 tasks 10080 23968 ❌ Consultation 135 marked as 'failed'
+INFO 2026-08-24 18:26:13,242 signals 1288 19528 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 18:26:13,242 tasks 1288 19528 🚀 [TASK START] Starting background task for consultation 136
+INFO 2026-08-24 18:26:13,242 tasks 1288 11484 🚀 [START] Processing consultation 136
+INFO 2026-08-24 18:26:13,242 tasks 1288 19528 ✅ [TASK STARTED] Thread 'OllamaWorker-136' started
+INFO 2026-08-24 18:26:13,257 tasks 1288 11484 📊 [STEP 1] Consultation 136 retrieved
+INFO 2026-08-24 18:26:13,257 tasks 1288 11484 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 18:26:13,377 tasks 1288 11484 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 18:26:13,467 tasks 1288 11484 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 18:26:13,482 tasks 1288 11484 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-24 18:26:13,482 ai_service 1288 11484 🔄 Calling Ollama (attempt 1/3) with model: gemma4:e4b
+ERROR 2026-08-24 18:27:20,093 ai_service 1288 11484 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:27:20,123 ai_service 1288 11484 🔄 Retrying in 5 seconds...
+INFO 2026-08-24 18:27:25,133 ai_service 1288 11484 🔄 Calling Ollama (attempt 2/3) with model: gemma4:e4b
+ERROR 2026-08-24 18:28:29,964 ai_service 1288 11484 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:28:29,967 ai_service 1288 11484 🔄 Retrying in 10 seconds...
+INFO 2026-08-24 18:28:39,968 ai_service 1288 11484 🔄 Calling Ollama (attempt 3/3) with model: gemma4:e4b
+ERROR 2026-08-24 18:29:46,172 ai_service 1288 11484 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:29:46,175 tasks 1288 11484 ✅ [STEP 5] Ollama responded, length: 699
+ERROR 2026-08-24 18:29:46,175 tasks 1288 11484 ❌ [STEP 6] Ollama returned error response
+INFO 2026-08-24 18:29:46,182 tasks 1288 11484 ❌ Consultation 136 marked as 'failed'
+INFO 2026-08-24 18:55:27,238 signals 22144 13304 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 18:55:27,238 tasks 22144 13304 🚀 [TASK START] Starting background task for consultation 137
+INFO 2026-08-24 18:55:27,253 tasks 22144 20260 🚀 [START] Processing consultation 137
+INFO 2026-08-24 18:55:27,253 tasks 22144 13304 ✅ [TASK STARTED] Thread 'OllamaWorker-137' started
+INFO 2026-08-24 18:55:27,268 tasks 22144 20260 📊 [STEP 1] Consultation 137 retrieved
+INFO 2026-08-24 18:55:27,268 tasks 22144 20260 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 18:55:27,418 tasks 22144 20260 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 18:55:27,439 tasks 22144 20260 ✅ [STEP 4] Prompt built, length: 1722
+INFO 2026-08-24 18:55:27,448 tasks 22144 20260 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-24 18:55:27,448 ai_service 22144 20260 🔄 Calling Ollama (attempt 1/3) with model: gemma4:e4b
+ERROR 2026-08-24 18:56:31,595 ai_service 22144 20260 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:56:31,595 ai_service 22144 20260 🔄 Retrying in 5 seconds...
+INFO 2026-08-24 18:56:36,599 ai_service 22144 20260 🔄 Calling Ollama (attempt 2/3) with model: gemma4:e4b
+ERROR 2026-08-24 18:57:41,651 ai_service 22144 20260 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:57:41,658 ai_service 22144 20260 🔄 Retrying in 10 seconds...
+INFO 2026-08-24 18:57:51,662 ai_service 22144 20260 🔄 Calling Ollama (attempt 3/3) with model: gemma4:e4b
+ERROR 2026-08-24 18:58:57,169 ai_service 22144 20260 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 18:58:57,170 tasks 22144 20260 ✅ [STEP 5] Ollama responded, length: 699
+ERROR 2026-08-24 18:58:57,173 tasks 22144 20260 ❌ [STEP 6] Ollama returned error response
+INFO 2026-08-24 18:58:57,185 tasks 22144 20260 ❌ Consultation 137 marked as 'failed'
+INFO 2026-08-24 22:29:21,217 signals 17056 20100 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 22:29:21,217 tasks 17056 20100 🚀 [TASK START] Starting background task for consultation 138
+INFO 2026-08-24 22:29:21,217 tasks 17056 8128 🚀 [START] Processing consultation 138
+INFO 2026-08-24 22:29:21,217 tasks 17056 20100 ✅ [TASK STARTED] Thread 'OllamaWorker-138' started
+INFO 2026-08-24 22:29:21,232 tasks 17056 8128 📊 [STEP 1] Consultation 138 retrieved
+INFO 2026-08-24 22:29:21,247 tasks 17056 8128 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 22:29:21,383 tasks 17056 8128 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 22:29:21,401 tasks 17056 8128 ✅ [STEP 4] Prompt built, length: 1722
+INFO 2026-08-24 22:29:21,412 tasks 17056 8128 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-24 22:29:21,412 ai_service 17056 8128 🔄 Calling Ollama (attempt 1/3) with model: gemma4:e4b
+INFO 2026-08-24 22:29:21,427 ai_service 17056 8128 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-24 22:30:49,144 ai_service 17056 8128 📊 Response status: 500
+INFO 2026-08-24 22:30:49,144 ai_service 17056 8128 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Mon, 24 Aug 2026 19:00:49 GMT', 'Content-Length': '304'}
+ERROR 2026-08-24 22:30:49,147 ai_service 17056 8128 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 22:30:49,147 ai_service 17056 8128 🔄 Retrying in 5 seconds...
+INFO 2026-08-24 22:30:54,150 ai_service 17056 8128 🔄 Calling Ollama (attempt 2/3) with model: gemma4:e4b
+INFO 2026-08-24 22:30:54,150 ai_service 17056 8128 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-24 22:32:07,848 ai_service 17056 8128 📊 Response status: 500
+INFO 2026-08-24 22:32:07,851 ai_service 17056 8128 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Mon, 24 Aug 2026 19:02:07 GMT', 'Content-Length': '239'}
+ERROR 2026-08-24 22:32:07,851 ai_service 17056 8128 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 22:32:07,851 ai_service 17056 8128 🔄 Retrying in 10 seconds...
+INFO 2026-08-24 22:32:17,866 ai_service 17056 8128 🔄 Calling Ollama (attempt 3/3) with model: gemma4:e4b
+INFO 2026-08-24 22:32:17,866 ai_service 17056 8128 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-24 22:33:29,463 ai_service 17056 8128 📊 Response status: 500
+INFO 2026-08-24 22:33:29,463 ai_service 17056 8128 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Mon, 24 Aug 2026 19:03:29 GMT', 'Content-Length': '239'}
+ERROR 2026-08-24 22:33:29,467 ai_service 17056 8128 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-24 22:33:29,467 tasks 17056 8128 ✅ [STEP 5] Ollama responded, length: 699
+INFO 2026-08-24 22:33:29,467 tasks 17056 8128 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق...
+ERROR 2026-08-24 22:33:29,471 tasks 17056 8128 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-24 22:33:29,471 tasks 17056 8128 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-24 22:33:29,481 tasks 17056 8128 ❌ Consultation 138 marked as 'failed'
+INFO 2026-08-24 22:41:02,163 signals 17056 19932 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 22:41:02,163 tasks 17056 19932 🚀 [TASK START] Starting background task for consultation 139
+INFO 2026-08-24 22:41:02,165 tasks 17056 21980 🚀 [START] Processing consultation 139
+INFO 2026-08-24 22:41:02,165 tasks 17056 19932 ✅ [TASK STARTED] Thread 'OllamaWorker-139' started
+INFO 2026-08-24 22:41:02,180 tasks 17056 21980 📊 [STEP 1] Consultation 139 retrieved
+INFO 2026-08-24 22:41:02,180 tasks 17056 21980 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 22:41:02,361 tasks 17056 21980 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 22:41:02,391 tasks 17056 21980 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 22:41:02,391 tasks 17056 21980 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 22:41:02,391 ai_service 17056 21980 🔄 Calling Ollama (attempt 1/3) with model: llama3.1:8b
+INFO 2026-08-24 22:41:02,391 ai_service 17056 21980 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-24 22:47:34,057 ai_service 17056 21980 📊 Response status: 200
+INFO 2026-08-24 22:47:34,181 ai_service 17056 21980 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Mon, 24 Aug 2026 19:17:34 GMT', 'Transfer-Encoding': 'chunked'}
+INFO 2026-08-24 22:47:34,281 ai_service 17056 21980 ✅ Ollama response received, length: 1695
+INFO 2026-08-24 22:47:34,404 tasks 17056 21980 ✅ [STEP 5] Ollama responded, length: 1695
+INFO 2026-08-24 22:47:34,557 tasks 17056 21980 📝 [STEP 5] Response preview: **امتیاز اعتبار (۰-۱۰۰) برای این ترید:** ۷۵
+
+این امتیاز به دلیل اینکه کاربر در حال حاضر دارای عملکرد نسبتاً خوب و تجربه معاملاتی قوی است، داده شده است. با توجه به میانگین سود هر ترید ($331.53)، نرخ برد کلی (58.5%) و فاکتور سود (165.76) که نشان‌دهندهٔ استراتژی‌های موفق در گذشته هستند، این ترید از نظر آمار و ارقام قابل اعتماد به نظر می‌رسد.
+
+**نقاط قوت:**
+
+* **تجربه معاملاتی کاربر:** با توجه به داده‌های ارائه شده، کاربر دارای تجربه معاملاتی مناسبی است. کل تریدها (41) و نرخ برد کلی (58.5%) نشان‌دهن...
+INFO 2026-08-24 22:47:34,722 tasks 17056 21980 ✅ [STEP 7] Response parsed, score: 75
+INFO 2026-08-24 22:47:34,857 tasks 17056 21980 ✅ [DONE] Consultation 139 completed successfully! Status: completed
+INFO 2026-08-24 22:47:34,992 tasks 17056 21980 ✅ Usage counted: 106
+INFO 2026-08-24 23:14:27,940 ai_model_manager 23724 23944 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:14:27,955 ai_model_manager 23724 12044 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:14:37,225 ai_model_manager 23724 12044 ✅ ollama: 0 models available
+INFO 2026-08-24 23:14:37,225 ai_model_manager 23724 12044 ✅ Total 0 AI models available
+INFO 2026-08-24 23:14:37,854 ai_model_manager 23724 23944 ✅ ollama: 0 models available
+INFO 2026-08-24 23:14:37,855 ai_model_manager 23724 23944 ✅ Total 0 AI models available
+INFO 2026-08-24 23:15:18,703 ai_model_manager 23724 20484 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:15:18,733 ai_model_manager 23724 5904 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:15:27,829 ai_model_manager 23724 20484 ✅ ollama: 0 models available
+INFO 2026-08-24 23:15:27,829 ai_model_manager 23724 20484 ✅ Total 0 AI models available
+INFO 2026-08-24 23:15:27,860 ai_model_manager 23724 5904 ✅ ollama: 0 models available
+INFO 2026-08-24 23:15:27,860 ai_model_manager 23724 5904 ✅ Total 0 AI models available
+INFO 2026-08-24 23:28:02,110 signals 23724 16552 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 23:28:02,110 tasks 23724 16552 🚀 [TASK START] Starting background task for consultation 140
+INFO 2026-08-24 23:28:02,110 tasks 23724 24364 🚀 [START] Processing consultation 140
+INFO 2026-08-24 23:28:02,110 tasks 23724 16552 ✅ [TASK STARTED] Thread 'OllamaWorker-140' started
+INFO 2026-08-24 23:28:02,125 tasks 23724 24364 📊 [STEP 1] Consultation 140 retrieved
+INFO 2026-08-24 23:28:02,125 tasks 23724 24364 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 23:28:02,245 tasks 23724 24364 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 23:28:02,265 tasks 23724 24364 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 23:28:02,265 tasks 23724 24364 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 23:28:02,265 ai_service 23724 24364 🔄 Calling AI model: llama3.1:8b
+INFO 2026-08-24 23:28:02,265 tasks 23724 24364 ✅ [STEP 5] Ollama responded, length: 619
+INFO 2026-08-24 23:28:02,265 tasks 23724 24364 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+...
+ERROR 2026-08-24 23:28:02,265 tasks 23724 24364 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-24 23:28:02,265 tasks 23724 24364 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-24 23:28:02,273 tasks 23724 24364 ❌ Consultation 140 marked as 'failed'
+INFO 2026-08-24 23:28:17,317 ai_model_manager 23724 3712 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:28:26,406 ai_model_manager 23724 3712 ✅ ollama: 0 models available
+INFO 2026-08-24 23:28:26,406 ai_model_manager 23724 3712 ✅ Total 0 AI models available
+INFO 2026-08-24 23:28:26,423 ai_model_manager 23724 6904 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:28:35,514 ai_model_manager 23724 6904 ✅ ollama: 0 models available
+INFO 2026-08-24 23:28:35,544 ai_model_manager 23724 6904 ✅ Total 0 AI models available
+INFO 2026-08-24 23:29:38,361 signals 23724 16552 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 23:29:38,362 tasks 23724 16552 🚀 [TASK START] Starting background task for consultation 141
+INFO 2026-08-24 23:29:38,367 tasks 23724 17344 🚀 [START] Processing consultation 141
+INFO 2026-08-24 23:29:38,367 tasks 23724 16552 ✅ [TASK STARTED] Thread 'OllamaWorker-141' started
+INFO 2026-08-24 23:29:38,381 tasks 23724 17344 📊 [STEP 1] Consultation 141 retrieved
+INFO 2026-08-24 23:29:38,385 tasks 23724 17344 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 23:29:38,524 tasks 23724 17344 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 23:29:38,606 tasks 23724 17344 ✅ [STEP 4] Prompt built, length: 1719
+INFO 2026-08-24 23:29:38,610 tasks 23724 17344 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 23:29:38,615 ai_service 23724 17344 🔄 Calling AI model: llama3.1:8b
+INFO 2026-08-24 23:29:38,619 tasks 23724 17344 ✅ [STEP 5] Ollama responded, length: 619
+INFO 2026-08-24 23:29:38,620 tasks 23724 17344 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+...
+ERROR 2026-08-24 23:29:38,657 tasks 23724 17344 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-24 23:29:38,658 tasks 23724 17344 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-24 23:29:38,674 tasks 23724 17344 ❌ Consultation 141 marked as 'failed'
+INFO 2026-08-24 23:36:49,435 ai_model_manager 23724 16776 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:36:49,462 ai_model_manager 23724 4088 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:36:58,546 ai_model_manager 23724 16776 ✅ ollama: 0 models available
+INFO 2026-08-24 23:36:58,546 ai_model_manager 23724 16776 ✅ Total 0 AI models available
+INFO 2026-08-24 23:36:58,576 ai_model_manager 23724 4088 ✅ ollama: 0 models available
+INFO 2026-08-24 23:36:58,589 ai_model_manager 23724 4088 ✅ Total 0 AI models available
+INFO 2026-08-24 23:37:10,530 signals 23724 16552 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 23:37:10,534 tasks 23724 16552 🚀 [TASK START] Starting background task for consultation 142
+INFO 2026-08-24 23:37:10,534 tasks 23724 9936 🚀 [START] Processing consultation 142
+INFO 2026-08-24 23:37:10,534 tasks 23724 16552 ✅ [TASK STARTED] Thread 'OllamaWorker-142' started
+INFO 2026-08-24 23:37:10,545 tasks 23724 9936 📊 [STEP 1] Consultation 142 retrieved
+INFO 2026-08-24 23:37:10,552 tasks 23724 9936 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 23:37:10,666 tasks 23724 9936 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 23:37:10,696 tasks 23724 9936 ✅ [STEP 4] Prompt built, length: 1720
+INFO 2026-08-24 23:37:10,730 tasks 23724 9936 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 23:37:10,734 ai_service 23724 9936 🔄 Calling AI model: llama3.1:8b
+INFO 2026-08-24 23:37:10,741 tasks 23724 9936 ✅ [STEP 5] Ollama responded, length: 619
+INFO 2026-08-24 23:37:10,756 tasks 23724 9936 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+...
+ERROR 2026-08-24 23:37:10,771 tasks 23724 9936 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-24 23:37:10,786 tasks 23724 9936 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-24 23:37:10,816 tasks 23724 9936 ❌ Consultation 142 marked as 'failed'
+INFO 2026-08-24 23:37:34,873 ai_model_manager 23724 23864 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:37:34,911 ai_model_manager 23724 5272 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:37:43,992 ai_model_manager 23724 23864 ✅ ollama: 0 models available
+INFO 2026-08-24 23:37:43,992 ai_model_manager 23724 23864 ✅ Total 0 AI models available
+INFO 2026-08-24 23:37:44,022 ai_model_manager 23724 5272 ✅ ollama: 0 models available
+INFO 2026-08-24 23:37:44,024 ai_model_manager 23724 5272 ✅ Total 0 AI models available
+INFO 2026-08-24 23:37:53,491 signals 23724 24264 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 23:37:53,491 tasks 23724 24264 🚀 [TASK START] Starting background task for consultation 143
+INFO 2026-08-24 23:37:53,491 tasks 23724 19288 🚀 [START] Processing consultation 143
+INFO 2026-08-24 23:37:53,491 tasks 23724 24264 ✅ [TASK STARTED] Thread 'OllamaWorker-143' started
+INFO 2026-08-24 23:37:53,506 tasks 23724 19288 📊 [STEP 1] Consultation 143 retrieved
+INFO 2026-08-24 23:37:53,506 tasks 23724 19288 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 23:37:53,646 tasks 23724 19288 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 23:37:53,691 tasks 23724 19288 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 23:37:53,691 tasks 23724 19288 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 23:37:53,691 ai_service 23724 19288 🔄 Calling AI model: llama3.1:8b
+INFO 2026-08-24 23:37:53,702 tasks 23724 19288 ✅ [STEP 5] Ollama responded, length: 619
+INFO 2026-08-24 23:37:53,702 tasks 23724 19288 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+...
+ERROR 2026-08-24 23:37:53,717 tasks 23724 19288 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-24 23:37:53,719 tasks 23724 19288 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-24 23:37:53,732 tasks 23724 19288 ❌ Consultation 143 marked as 'failed'
+ERROR 2026-08-24 23:45:42,810 sms 23724 13156 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+INFO 2026-08-24 23:46:03,338 ai_model_manager 23724 16640 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:46:03,346 ai_model_manager 23724 23352 🔄 Refreshing AI models from all providers...
+INFO 2026-08-24 23:46:12,477 ai_model_manager 23724 16640 ✅ ollama: 0 models available
+INFO 2026-08-24 23:46:12,481 ai_model_manager 23724 16640 ✅ Total 0 AI models available
+INFO 2026-08-24 23:46:12,492 ai_model_manager 23724 23352 ✅ ollama: 0 models available
+INFO 2026-08-24 23:46:12,492 ai_model_manager 23724 23352 ✅ Total 0 AI models available
+INFO 2026-08-24 23:46:24,450 signals 23724 18484 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 23:46:24,450 tasks 23724 18484 🚀 [TASK START] Starting background task for consultation 144
+INFO 2026-08-24 23:46:24,450 tasks 23724 4556 🚀 [START] Processing consultation 144
+INFO 2026-08-24 23:46:24,450 tasks 23724 18484 ✅ [TASK STARTED] Thread 'OllamaWorker-144' started
+INFO 2026-08-24 23:46:24,465 tasks 23724 4556 📊 [STEP 1] Consultation 144 retrieved
+INFO 2026-08-24 23:46:24,482 tasks 23724 4556 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 23:46:24,615 tasks 23724 4556 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 23:46:24,720 tasks 23724 4556 ✅ [STEP 4] Prompt built, length: 1722
+INFO 2026-08-24 23:46:24,750 tasks 23724 4556 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 23:46:24,765 ai_service 23724 4556 🔄 Calling AI model: llama3.1:8b
+INFO 2026-08-24 23:46:24,765 tasks 23724 4556 ✅ [STEP 5] Ollama responded, length: 619
+INFO 2026-08-24 23:46:24,820 tasks 23724 4556 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+...
+ERROR 2026-08-24 23:46:24,840 tasks 23724 4556 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-24 23:46:24,840 tasks 23724 4556 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ مدل 'llama3.1:8b' در دسترس نیست
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-24 23:46:24,855 tasks 23724 4556 ❌ Consultation 144 marked as 'failed'
+INFO 2026-08-24 23:47:32,209 signals 17360 21584 ✅ AI consultation used: 09155511393
+INFO 2026-08-24 23:47:32,209 tasks 17360 21584 🚀 [TASK START] Starting background task for consultation 145
+INFO 2026-08-24 23:47:32,224 tasks 17360 13268 🚀 [START] Processing consultation 145
+INFO 2026-08-24 23:47:32,224 tasks 17360 21584 ✅ [TASK STARTED] Thread 'OllamaWorker-145' started
+INFO 2026-08-24 23:47:32,229 tasks 17360 13268 📊 [STEP 1] Consultation 145 retrieved
+INFO 2026-08-24 23:47:32,239 tasks 17360 13268 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-24 23:47:32,344 tasks 17360 13268 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-24 23:47:32,374 tasks 17360 13268 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-24 23:47:32,374 tasks 17360 13268 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-24 23:47:32,389 ai_service 17360 13268 🔄 Calling Ollama (attempt 1/3) with model: llama3.1:8b
+INFO 2026-08-24 23:47:32,404 ai_service 17360 13268 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-24 23:53:30,981 ai_service 17360 13268 📊 Response status: 200
+INFO 2026-08-24 23:53:30,999 ai_service 17360 13268 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Mon, 24 Aug 2026 20:23:30 GMT', 'Transfer-Encoding': 'chunked'}
+INFO 2026-08-24 23:53:31,104 ai_service 17360 13268 ✅ Ollama response received, length: 1208
+INFO 2026-08-24 23:53:31,211 tasks 17360 13268 ✅ [STEP 5] Ollama responded, length: 1208
+INFO 2026-08-24 23:53:31,217 tasks 17360 13268 📝 [STEP 5] Response preview: **امتیاز:** ۶۰
+
+**نقاط قوت:**
+- **حفظ نرخ برد عالی در نماد BTCUSD**: با ۴۰۰% نرخ برد، این تریدر در این نماد عملکرد بسیار خوب را دارد و می‌تواند از این تجربیات برای آینده استفاده کند.
+- **پایبندی به قوانین معاملاتی در حالت احساسی غالب (آرامش)**: این کاربر در هنگام احساس آرامش، ۱۰۰% نرخ برد را گزارش کرده که نشان‌دهنده یک مدیریت خوب معاملات است.
+
+**هشدارها:**
+- **میزان پایبندی به قوانین معاملاتی پایین**: با پیگیری‌های انجام شده، مشخص شد که این کاربر دارای پایبندی به قوانین معاملاتی ۴۴.۸% در کل دارد...
+INFO 2026-08-24 23:53:31,232 tasks 17360 13268 ✅ [STEP 7] Response parsed, score: 60
+INFO 2026-08-24 23:53:31,247 tasks 17360 13268 ✅ [DONE] Consultation 145 completed successfully! Status: completed
+INFO 2026-08-24 23:53:31,277 tasks 17360 13268 ✅ Usage counted: 113
+ERROR 2026-08-24 23:57:14,896 sms 17360 24404 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+ERROR 2026-08-25 00:43:05,918 sms 17360 22636 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+INFO 2026-08-25 03:50:02,390 signals 17360 20664 ✅ AI consultation used: 09155511393
+INFO 2026-08-25 03:50:02,390 tasks 17360 20664 🚀 [TASK START] Starting background task for consultation 146
+INFO 2026-08-25 03:50:02,390 tasks 17360 19068 🚀 [START] Processing consultation 146
+INFO 2026-08-25 03:50:02,390 tasks 17360 20664 ✅ [TASK STARTED] Thread 'OllamaWorker-146' started
+INFO 2026-08-25 03:50:02,415 tasks 17360 19068 📊 [STEP 1] Consultation 146 retrieved
+INFO 2026-08-25 03:50:02,419 tasks 17360 19068 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-25 03:50:02,535 tasks 17360 19068 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-25 03:50:02,535 tasks 17360 19068 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-25 03:50:02,550 tasks 17360 19068 🔄 [STEP 5] Calling Ollama with model: gemma4:e4b, timeout: 600s
+INFO 2026-08-25 03:50:02,550 ai_service 17360 19068 🔄 Calling Ollama (attempt 1/3) with model: gemma4:e4b
+INFO 2026-08-25 03:50:02,550 ai_service 17360 19068 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 03:51:09,240 ai_service 17360 19068 📊 Response status: 500
+INFO 2026-08-25 03:51:09,240 ai_service 17360 19068 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 00:21:09 GMT', 'Content-Length': '239'}
+ERROR 2026-08-25 03:51:09,242 ai_service 17360 19068 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 03:51:09,242 ai_service 17360 19068 🔄 Retrying in 5 seconds...
+INFO 2026-08-25 03:51:14,243 ai_service 17360 19068 🔄 Calling Ollama (attempt 2/3) with model: gemma4:e4b
+INFO 2026-08-25 03:51:14,247 ai_service 17360 19068 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 03:52:16,427 ai_service 17360 19068 📊 Response status: 500
+INFO 2026-08-25 03:52:16,428 ai_service 17360 19068 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 00:22:16 GMT', 'Content-Length': '304'}
+ERROR 2026-08-25 03:52:16,428 ai_service 17360 19068 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 03:52:16,428 ai_service 17360 19068 🔄 Retrying in 10 seconds...
+INFO 2026-08-25 03:52:26,429 ai_service 17360 19068 🔄 Calling Ollama (attempt 3/3) with model: gemma4:e4b
+INFO 2026-08-25 03:52:26,429 ai_service 17360 19068 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 03:53:34,336 ai_service 17360 19068 📊 Response status: 500
+INFO 2026-08-25 03:53:34,337 ai_service 17360 19068 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 00:23:34 GMT', 'Content-Length': '304'}
+ERROR 2026-08-25 03:53:34,337 ai_service 17360 19068 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 03:53:34,337 tasks 17360 19068 ✅ [STEP 5] Ollama responded, length: 699
+INFO 2026-08-25 03:53:34,341 tasks 17360 19068 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق...
+ERROR 2026-08-25 03:53:34,342 tasks 17360 19068 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-25 03:53:34,342 tasks 17360 19068 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-25 03:53:34,351 tasks 17360 19068 ❌ Consultation 146 marked as 'failed'

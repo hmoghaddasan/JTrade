@@ -1,7 +1,9 @@
+# backend/apps/import/views.py
 import base64
 import csv
 import io
 import json
+import logging
 from datetime import datetime
 from decimal import Decimal
 
@@ -12,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.permissions import IsAuthenticatedWithSubscription
-from apps.trading.models import Trade, TradeGroup, Portfolio
+from apps.trading.models import Trade, TradeGroup, Portfolio, CurrencyPair
 from apps.trading.serializers import TradeCreateSerializer
 
 from .models import ImportMapping, ImportLog
@@ -25,12 +27,10 @@ from .serializers import (
 from .services.csv_parser import CSVParser
 from .services.dedupe_engine import DedupeEngine
 
+logger = logging.getLogger(__name__)
+
 
 class CSVPreviewView(APIView):
-    """
-    دریافت پیش‌نمایش داده‌های CSV بدون ذخیره‌سازی
-    POST /api/import/csv/preview/
-    """
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def post(self, request):
@@ -44,13 +44,12 @@ class CSVPreviewView(APIView):
             headers = parsed['headers']
             rows = parsed['rows']
 
-            # تشخیص کارگزار
-            detected_broker = CSVParser.detect_broker(headers)
+            logger.info(f"📄 CSV Preview - Headers: {headers}")
+            logger.info(f"📄 CSV Preview - Total rows: {parsed['total_rows']}")
 
-            # ساخت نگاشت پیشنهادی
+            detected_broker = CSVParser.detect_broker(headers)
             suggested_mapping = CSVParser.build_suggested_mapping(headers)
 
-            # نمایش حداکثر ۵۰ ردیف برای پیش‌نمایش
             preview_rows = rows[:50]
 
             return Response({
@@ -62,14 +61,11 @@ class CSVPreviewView(APIView):
             })
 
         except Exception as e:
+            logger.error(f"❌ CSV Preview error: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ImportCSVView(APIView):
-    """
-    وارد کردن داده‌ها از فایل CSV
-    POST /api/import/csv/
-    """
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def post(self, request):
@@ -77,17 +73,54 @@ class ImportCSVView(APIView):
         if not file:
             return Response({'error': 'فایل CSV ارسال نشده است'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # اعتبارسنجی داده‌های ورودی
-        serializer = ImportRequestSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # ============================================================
+        # ✅ دریافت column_mapping از request.POST
+        # ============================================================
+        column_mapping_str = request.POST.get('column_mapping')
+        logger.info(f"📥 Raw column_mapping_str: {column_mapping_str}")
 
-        column_mapping = serializer.validated_data['column_mapping']
-        broker_name = serializer.validated_data.get('broker_name', '')
-        save_mapping = serializer.validated_data.get('save_mapping', False)
-        preview_only = serializer.validated_data.get('preview_only', False)
-        portfolio_id = serializer.validated_data.get('portfolio_id')
-        group_id = serializer.validated_data.get('group_id')
+        if column_mapping_str:
+            try:
+                column_mapping = json.loads(column_mapping_str)
+                logger.info(f"✅ Parsed column_mapping: {column_mapping}")
+            except json.JSONDecodeError as e:
+                logger.error(f"❌ JSON decode error: {e}")
+                return Response(
+                    {'error': 'column_mapping معتبر نیست. فرمت JSON باید باشد.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            column_mapping = {}
+            logger.warning("⚠️ column_mapping not found in request.POST")
+
+        # ============================================================
+        # دریافت سایر پارامترها
+        # ============================================================
+        broker_name = request.POST.get('broker_name', '')
+        save_mapping = request.POST.get('save_mapping') == 'true'
+        preview_only = request.POST.get('preview_only') == 'true'
+        portfolio_id = request.POST.get('portfolio_id')
+        group_id = request.POST.get('group_id')
+
+        # تبدیل به عدد
+        if portfolio_id:
+            try:
+                portfolio_id = int(portfolio_id)
+            except ValueError:
+                portfolio_id = None
+
+        if group_id:
+            try:
+                group_id = int(group_id)
+            except ValueError:
+                group_id = None
+
+        logger.info("=" * 60)
+        logger.info("📥 ImportCSVView - Request received")
+        logger.info(f"📥 Column Mapping: {column_mapping}")
+        logger.info(f"📥 Portfolio ID: {portfolio_id}")
+        logger.info(f"📥 Group ID: {group_id}")
+        logger.info("=" * 60)
 
         # ایجاد لاگ
         import_log = ImportLog.objects.create(
@@ -103,58 +136,98 @@ class ImportCSVView(APIView):
             parsed = CSVParser.parse_csv_content(content)
             rows = parsed['rows']
 
+            logger.info(f"📄 Total rows in CSV: {len(rows)}")
+
             if not rows:
                 import_log.mark_failed("فایل CSV خالی است")
                 return Response({'error': 'فایل CSV خالی است'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # ساخت لیست تریدها بر اساس mapping
+            if rows:
+                logger.info(f"📄 First row raw data: {rows[0]}")
+
             trade_list = []
             skipped = 0
             errors = []
             warnings = []
 
+            valid_symbols = list(CurrencyPair.objects.filter(is_active=True).values_list('symbol', flat=True))
+            logger.info(f"📊 Valid symbols count: {len(valid_symbols)}")
+
             for idx, row in enumerate(rows):
                 try:
-                    trade_data = {}
-                    for model_field, csv_column in column_mapping.items():
-                        if csv_column in row:
-                            value = row[csv_column]
-                            # تبدیل نوع بر اساس فیلد
-                            field_type = model_field
-                            normalized = CSVParser.normalize_value(value, field_type)
-                            if normalized is not None:
-                                trade_data[model_field] = normalized
+                    raw_date = row.get('opening_time_utc') or row.get('trade_date') or row.get('date')
+                    raw_symbol = row.get('symbol')
 
-                    # فیلدهای ضروری
-                    if 'trade_date' not in trade_data or 'symbol' not in trade_data:
-                        warnings.append(f"ردیف {idx+2}: تاریخ یا نماد نامعتبر")
+                    logger.info(f"🔍 Row {idx+2} - Raw date: '{raw_date}'")
+                    logger.info(f"🔍 Row {idx+2} - Raw symbol: '{raw_symbol}'")
+
+                    # نرمال‌سازی ردیف
+                    normalized_row = CSVParser.normalize_row(row, column_mapping)
+
+                    normalized_date = normalized_row.get('trade_date')
+                    normalized_symbol = normalized_row.get('symbol')
+
+                    logger.info(f"✅ Row {idx+2} - Normalized date: '{normalized_date}'")
+                    logger.info(f"✅ Row {idx+2} - Normalized symbol: '{normalized_symbol}'")
+
+                    trade_date = normalized_row.get('trade_date')
+                    symbol = normalized_row.get('symbol')
+
+                    if not trade_date:
+                        warnings.append(f"ردیف {idx+2}: تاریخ نامعتبر - {raw_date}")
+                        logger.warning(f"⚠️ Row {idx+2}: Invalid date - {raw_date}")
                         skipped += 1
                         continue
 
-                    # اختصاص کاربر
-                    trade_data['user_id'] = request.user.id
+                    if not symbol:
+                        warnings.append(f"ردیف {idx+2}: نماد نامعتبر - {raw_symbol}")
+                        logger.warning(f"⚠️ Row {idx+2}: Invalid symbol - {raw_symbol}")
+                        skipped += 1
+                        continue
 
-                    # پورتفولیو
-                    if portfolio_id:
-                        trade_data['portfolio_id'] = portfolio_id
+                    if symbol not in valid_symbols:
+                        warnings.append(f"ردیف {idx+2}: نماد '{symbol}' در دیتابیس یافت نشد")
+                        logger.warning(f"⚠️ Row {idx+2}: Symbol '{symbol}' not found in database")
+                        skipped += 1
+                        continue
 
-                    # گروه (اگر مشخص شده)
+                    # ============================================================
+                    # ✅ افزودن فیلدهای اجباری و انتخابی
+                    # ============================================================
+                    normalized_row['user_id'] = request.user.id
+
+                    # گروه (اجباری)
                     if group_id:
-                        trade_data['group_id'] = group_id
-
-                    # بررسی تکراری
-                    if DedupeEngine.is_duplicate(request.user, trade_data):
-                        warnings.append(f"ردیف {idx+2}: ترید تکراری - {trade_data.get('symbol')} در تاریخ {trade_data.get('trade_date')}")
+                        normalized_row['group'] = group_id
+                    else:
+                        warnings.append(f"ردیف {idx+2}: گروه انتخاب نشده است")
+                        logger.warning(f"⚠️ Row {idx+2}: Group not selected")
                         skipped += 1
                         continue
 
-                    trade_list.append(trade_data)
+                    # پورتفولیو (اختیاری)
+                    if portfolio_id:
+                        normalized_row['portfolio'] = portfolio_id
+
+                    # ============================================================
+                    # بررسی تکراری
+                    # ============================================================
+                    if DedupeEngine.is_duplicate(request.user, normalized_row):
+                        warnings.append(f"ردیف {idx+2}: ترید تکراری - {symbol} در تاریخ {trade_date}")
+                        logger.warning(f"⚠️ Row {idx+2}: Duplicate trade - {symbol} on {trade_date}")
+                        skipped += 1
+                        continue
+
+                    trade_list.append(normalized_row)
+                    logger.info(f"✅ Row {idx+2}: Added to import list")
 
                 except Exception as e:
                     errors.append(f"ردیف {idx+2}: {str(e)}")
+                    logger.error(f"❌ Row {idx+2}: Error - {str(e)}")
                     skipped += 1
 
-            # اگر فقط پیش‌نمایش باشد
+            logger.info(f"📊 Summary - Valid trades: {len(trade_list)}, Skipped: {skipped}")
+
             if preview_only:
                 return Response({
                     'total_rows': len(rows),
@@ -165,15 +238,28 @@ class ImportCSVView(APIView):
                     'sample': trade_list[:5],
                 })
 
+            # ============================================================
             # ذخیره‌سازی تریدها
+            # ============================================================
             imported = 0
             with transaction.atomic():
                 for trade_data in trade_list:
-                    # حذف فیلدهای اضافی که در مدل نیستند
+                    # فیلدهای مدل را فیلتر کن
                     model_fields = [f.name for f in Trade._meta.get_fields()]
                     clean_data = {k: v for k, v in trade_data.items() if k in model_fields}
 
-                    # ایجاد ترید با استفاده از TradeCreateSerializer
+                    # ============================================================
+                    # ✅ اطمینان از وجود group (اگر به هر دلیلی در clean_data نبود)
+                    # ============================================================
+                    if 'group' not in clean_data and 'group' in trade_data:
+                        clean_data['group'] = trade_data['group']
+
+                    if 'portfolio' not in clean_data and 'portfolio' in trade_data:
+                        clean_data['portfolio'] = trade_data['portfolio']
+
+                    logger.info(f"💾 Saving trade: {clean_data.get('symbol')} - {clean_data.get('trade_date')}")
+                    logger.info(f"📦 Clean data: {clean_data}")
+
                     trade_serializer = TradeCreateSerializer(
                         data=clean_data,
                         context={'request': request}
@@ -181,11 +267,15 @@ class ImportCSVView(APIView):
                     if trade_serializer.is_valid():
                         trade_serializer.save(user=request.user)
                         imported += 1
+                        logger.info(f"✅ Trade saved successfully")
                     else:
                         errors.append(f"خطا در ذخیره‌سازی: {trade_serializer.errors}")
+                        logger.error(f"❌ Serializer error: {trade_serializer.errors}")
                         skipped += 1
 
-            # ذخیره mapping اگر درخواست شده باشد
+            # ============================================================
+            # ذخیره نگاشت اگر درخواست شده باشد
+            # ============================================================
             if save_mapping and column_mapping:
                 ImportMapping.objects.update_or_create(
                     user=request.user,
@@ -195,31 +285,29 @@ class ImportCSVView(APIView):
                         'is_default': not ImportMapping.objects.filter(user=request.user, is_default=True).exists(),
                     }
                 )
+                logger.info(f"💾 Mapping saved for user {request.user.id}")
 
             import_log.mark_completed(imported, skipped, errors, warnings)
+
+            logger.info(f"🎉 Import completed: {imported} imported, {skipped} skipped")
+            logger.info("=" * 60)
 
             return Response({
                 'status': 'completed',
                 'imported': imported,
                 'skipped': skipped,
-                'errors': errors,
-                'warnings': warnings,
+                'errors': errors[:20],
+                'warnings': warnings[:20],
                 'log_id': import_log.id,
             })
 
         except Exception as e:
+            logger.error(f"❌ Import failed: {str(e)}")
             import_log.mark_failed(str(e))
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ImportMappingView(APIView):
-    """
-    مدیریت نگاشت‌های ذخیره‌شده
-    GET /api/import/mappings/
-    POST /api/import/mappings/
-    PUT /api/import/mappings/<id>/
-    DELETE /api/import/mappings/<id>/
-    """
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
     def get(self, request):
@@ -268,10 +356,6 @@ class ImportMappingDetailView(APIView):
 
 
 class ImportLogsView(APIView):
-    """
-    دریافت تاریخچه واردات
-    GET /api/import/logs/
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):

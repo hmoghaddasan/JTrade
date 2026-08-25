@@ -1,6 +1,6 @@
 // frontend/src/contexts/PortfolioContext.js
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { portfolioService } from '../services/apiService';
 
 const PortfolioContext = createContext();
@@ -19,7 +19,8 @@ export const PortfolioProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadPortfolios = async () => {
+  // ✅ استفاده از useCallback برای تثبیت تابع
+  const loadPortfolios = useCallback(async () => {
     setLoading(true);
     try {
       const response = await portfolioService.getPortfolios();
@@ -38,7 +39,7 @@ export const PortfolioProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const createPortfolio = async (data) => {
     try {
@@ -76,9 +77,10 @@ export const PortfolioProvider = ({ children }) => {
     return portfolios.find(p => p.id === currentPortfolioId) || null;
   };
 
+  // بارگذاری اولیه فقط یک بار
   useEffect(() => {
     loadPortfolios();
-  }, []);
+  }, [loadPortfolios]);
 
   const value = {
     portfolios,

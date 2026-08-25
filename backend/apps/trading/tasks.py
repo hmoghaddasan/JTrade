@@ -72,12 +72,36 @@ def process_consultation(consultation_id, user_input):
         # ===== ۵. فراخوانی اولاما =====
         model = consultation.model_used or AIService.OLLAMA_MODEL
         logger.info(f"🔄 [STEP 5] Calling Ollama with model: {model}, timeout: {AIService.OLLAMA_TIMEOUT}s")
-        response_text = AIService.call_ollama(prompt, model=model)
-        logger.info(f"✅ [STEP 5] Ollama responded, length: {len(response_text)}")
+
+        try:
+            response_text = AIService.call_ollama(prompt, model=model)
+            logger.info(f"✅ [STEP 5] Ollama responded, length: {len(response_text)}")
+
+            # ✅ نمایش ۵۰۰ کاراکتر اول پاسخ برای دیباگ
+            logger.info(f"📝 [STEP 5] Response preview: {response_text[:500]}...")
+
+        except Exception as e:
+            logger.error(f"❌ [STEP 5] Ollama call failed: {str(e)}")
+            logger.error(f"❌ [STEP 5] Full traceback: {traceback.format_exc()}")
+            consultation.status = 'failed'
+            consultation.ai_response = {
+                'error': str(e),
+                'score': 0,
+                'strengths': [],
+                'warnings': ['⚠️ خطا در ارتباط با Ollama'],
+                'suggestion': 'لطفاً دوباره تلاش کنید.',
+                'tip': 'همیشه به مدیریت ریسک توجه کنید.',
+                'psychology': 'تحلیل روانشناختی موجود نیست.',
+                'is_connection_error': True,
+            }
+            consultation.save(update_fields=['status', 'ai_response'])
+            logger.info(f"❌ Consultation {consultation_id} marked as 'failed'")
+            return
 
         # ===== ۶. بررسی خطا بودن پاسخ =====
         if '❌ خطای اتصال به سرویس هوش مصنوعی' in response_text or '❌ پاسخ نامعتبر' in response_text:
             logger.error(f"❌ [STEP 6] Ollama returned error response")
+            logger.error(f"📝 [STEP 6] Full error response: {response_text}")  # ✅ نمایش کامل خطا
             consultation.status = 'failed'
             consultation.ai_response = {
                 'error': response_text,

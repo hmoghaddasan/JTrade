@@ -1,6 +1,7 @@
 {
   "name": "trading-journal-frontend",
-  "version": "1.0.0",
+  "version": "1.9.7",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@fontsource/vazirmatn": "^5.3.0",

@@ -893,46 +893,58 @@ const AIConsultation = () => {
       }
 
     } catch (error) {
-      console.error('Error starting consultation:', error);
-      stopProgressTimers();
+    console.error('Error starting consultation:', error);
+    stopProgressTimers();
 
-      let errorMessage = '❌ خطا در شروع مشاوره';
-      let errorTitle = '❌ خطا';
-      let errorDetails = null;
+    let errorMessage = '❌ خطا در شروع مشاوره';
+    let errorTitle = '❌ خطا';
+    let errorDetails = null;
 
-      if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
-        setIsTimeout(true);
-        errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
-        errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
-      } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
-        errorTitle = '🔌 خطای اتصال به AI';
-        errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
-      } else if (error.response?.data) {
-        const data = error.response.data;
-        if (data.message) errorMessage = data.message;
-        else if (data.error) errorMessage = data.error;
-        else if (data.detail) errorMessage = data.detail;
-        else if (typeof data === 'object') {
-          const fieldErrors = Object.entries(data)
-            .filter(([key, value]) => key !== 'error' && key !== 'message')
-            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
-            .join(' | ');
-          if (fieldErrors) {
-            errorMessage = `خطا در فیلدها: ${fieldErrors}`;
-            errorDetails = data;
-          }
+    // ✅ اضافه کردن لاگ کامل خطا در کنسول
+    console.error('❌ [AIConsultation] Full error details:');
+    console.error('   - Error object:', error);
+    console.error('   - Error name:', error.name);
+    console.error('   - Error message:', error.message);
+    console.error('   - Error stack:', error.stack);
+    if (error.response) {
+      console.error('   - Response data:', error.response.data);
+      console.error('   - Response status:', error.response.status);
+      console.error('   - Response headers:', error.response.headers);
+    }
+
+    if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
+      setIsTimeout(true);
+      errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
+      errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
+    } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
+      errorTitle = '🔌 خطای اتصال به AI';
+      errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
+    } else if (error.response?.data) {
+      const data = error.response.data;
+      if (data.message) errorMessage = data.message;
+      else if (data.error) errorMessage = data.error;
+      else if (data.detail) errorMessage = data.detail;
+      else if (typeof data === 'object') {
+        const fieldErrors = Object.entries(data)
+          .filter(([key, value]) => key !== 'error' && key !== 'message')
+          .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+          .join(' | ');
+        if (fieldErrors) {
+          errorMessage = `خطا در فیلدها: ${fieldErrors}`;
+          errorDetails = data;
         }
-      } else if (error.message) {
-        errorMessage = error.message;
       }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
 
-      setErrorModal({
-        open: true,
-        title: errorTitle,
-        message: errorMessage,
-        details: errorDetails
-      });
-    } finally {
+    setErrorModal({
+      open: true,
+      title: errorTitle,
+      message: errorMessage,
+      details: errorDetails
+    });
+  } finally {
       setConsulting(false);
     }
   };
@@ -2041,6 +2053,7 @@ const AIConsultation = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

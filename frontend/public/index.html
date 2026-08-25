@@ -5,15 +5,76 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="theme-color" content="#1a237e" />
     <meta name="description" content="ژورنال حرفه‌ای ترید - ثبت و تحلیل تریدهای شما" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="JTrade" />
+    <meta name="keywords" content="ترید, معامله, ژورنال, تحلیل, مالی, JTrade" />
+    <meta name="author" content="JTrade Team" />
+
+    <!-- PWA Manifest -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/service-worker.js')
+            .then((registration) => {
+              console.log('✅ Service Worker registered successfully:', registration);
+
+              // بررسی به‌روزرسانی
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      console.log('🔄 New version available!');
+                      // نمایش پیام به کاربر برای به‌روزرسانی
+                      const event = new CustomEvent('newVersionAvailable', {
+                        detail: { message: 'نسخه جدیدی موجود است. برای به‌روزرسانی صفحه را رفرش کنید.' }
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  });
+                }
+              });
+            })
+            .catch((error) => {
+              console.error('❌ Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+
     <title>ژورنال حرفه‌ای ترید</title>
   </head>
   <body>
     <noscript>برای استفاده از این برنامه نیاز به فعال کردن جاوااسکریپت دارید.</noscript>
     <div id="root"></div>
+
+    <!-- Fallback for offline status -->
+    <script>
+      // نمایش پیام در صورت قطع اتصال
+      window.addEventListener('offline', () => {
+        const event = new CustomEvent('connectionChange', {
+          detail: { status: 'offline', message: '⚠️ اتصال اینترنت قطع شد. برخی از امکانات ممکن است در دسترس نباشند.' }
+        });
+        window.dispatchEvent(event);
+      });
+
+      window.addEventListener('online', () => {
+        const event = new CustomEvent('connectionChange', {
+          detail: { status: 'online', message: '✅ اتصال اینترنت برقرار شد.' }
+        });
+        window.dispatchEvent(event);
+      });
+    </script>
   </body>
 </html>

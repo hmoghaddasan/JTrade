@@ -1,5 +1,7 @@
 # backend/apps/trading/views.py
 
+import requests
+from django.conf import settings
 from rest_framework import status, generics, permissions, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,7 +15,9 @@ import io
 import json
 from .models import (
     CurrencyPair, TradeGroup, Trade, AIConsultation, AIPromptVersion,
-    AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio
+    AIConsultationAnalytics, TradingRule, TradeRuleCheck, Portfolio,
+    Broker, DisciplineSettings, DailyDisciplineState,
+    DisciplineViolation, Reflection, DailyHabit
 )
 from .serializers import (
     CurrencyPairSerializer,
@@ -34,12 +38,12 @@ from .serializers import (
     PortfolioDetailSerializer,
     MetricsSerializer,
     MetricsTrendSerializer,
+    BrokerSerializer,
 )
 from .ai_service import AIService, AIFeedbackService, AIAnalyticsService
 from .analytics import AdvancedMetricsCalculator, MetricsCache
 from apps.accounts.permissions import IsAuthenticatedWithSubscription, CanTrade
 from apps.subscriptions.models import UserSubscription
-from django.conf import settings
 
 # ===== اضافه کردن importهای جدید برای ابزارهای انضباطی =====
 from .discipline_engine import DisciplineEngine
@@ -54,10 +58,6 @@ from .discipline_serializers import (
     DailyHabitSerializer,
     DailyHabitStatusSerializer,
 )
-from .models import (
-    DisciplineSettings, DailyDisciplineState,
-    DisciplineViolation, Reflection, DailyHabit
-)
 
 # ============================================
 # ✅ importهای جدید برای گزارش‌های ترکیبی پورتفولیو
@@ -71,12 +71,6 @@ from .comparison_serializers import (
     BarDataItemSerializer,
 )
 
-# backend/apps/trading/views.py
-# اضافه کردن ویو جدید
-
-from .models import Broker
-from .serializers import BrokerSerializer
-
 
 # ============================================
 # ✅ ویو لیست بروکرها
@@ -87,6 +81,54 @@ class BrokerListView(generics.ListAPIView):
     serializer_class = BrokerSerializer
     queryset = Broker.objects.filter(is_active=True).order_by('category', 'order_index', 'name')
     pagination_class = None
+
+
+# ============================================
+# ✅ دریافت لیست مدل‌های Ollama به‌صورت پویا
+# ============================================
+class AvailableModelsView(APIView):
+    """
+    دریافت لیست مدل‌های هوش مصنوعی قابل انتخاب توسط کاربر
+    - مستقیماً از Ollama API دریافت می‌کند
+    - در صورت خطا، مقدار پیش‌فرض را برمی‌گرداند
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # ===== دریافت از Ollama API =====
+        try:
+            ollama_base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
+            tags_url = f"{ollama_base}/api/tags"
+
+            print(f"🔍 Fetching models from Ollama: {tags_url}")
+
+            response = requests.get(tags_url, timeout=5)
+
+            if response.status_code == 200:
+                data = response.json()
+                models = [model['name'] for model in data.get('models', [])]
+
+                if models:
+                    print(f"✅ Models fetched from Ollama: {models}")
+                    return Response(models)
+                else:
+                    print("⚠️ No models found in Ollama response")
+            else:
+                print(f"⚠️ Ollama returned status {response.status_code}")
+
+        except requests.exceptions.ConnectionError:
+            print("❌ Could not connect to Ollama. Is it running?")
+        except requests.exceptions.Timeout:
+            print("❌ Ollama connection timed out")
+        except Exception as e:
+            print(f"❌ Error fetching models from Ollama: {e}")
+
+        # ===== در صورت خطا، مقدار پیش‌فرض =====
+        fallback_models = ['llama3.1:8b']
+        print(f"⚠️ Using fallback models: {fallback_models}")
+        return Response(fallback_models)
+
+
 # ============================================
 # جفت ارزها
 # ============================================
@@ -1172,19 +1214,6 @@ class RulesReportView(APIView):
 
 
 # ============================================
-# ✅ دریافت لیست مدل‌های هوش مصنوعی موجود
-# ============================================
-class AvailableModelsView(APIView):
-    """دریافت لیست مدل‌های هوش مصنوعی قابل انتخاب توسط کاربر"""
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        models_str = getattr(settings, 'OLLAMA_AVAILABLE_MODELS', 'llama3.1:8b')
-        models = [m.strip() for m in models_str.split(',') if m.strip()]
-        return Response(models)
-
-
-# ============================================
 # مشاوره AI (غیراستریم)
 # ============================================
 class AIConsultationView(APIView):
@@ -1883,6 +1912,7 @@ class PortfolioComparisonChartView(APIView):
 
         return Response(serializer.data)
 
+
 # ============================================
 # ✅ ابزارهای انضباطی (Discipline Tools)
 # ============================================
@@ -2036,7 +2066,7 @@ class DisciplineViolationsView(APIView):
 
     def get(self, request):
         days = int(request.query_params.get('days', 30))
-        start_date = timezone.now().date() - timezone.timedelta(days=days)
+        start_date = datetime.now().date() - timedelta(days=days)
 
         violations = DisciplineViolation.objects.filter(
             user=request.user,

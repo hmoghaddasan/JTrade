@@ -41,17 +41,23 @@
 }
 
 /* ============================================
-   استایل‌های پایه
+   استایل‌های پایه - تمام صفحه
    ============================================ */
 .ai-consultation {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 24px;
   font-family: 'Vazir', Tahoma, sans-serif;
   direction: rtl;
   min-height: 100vh;
   background: var(--bg-primary);
   color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.ai-consultation * {
+  box-sizing: border-box;
 }
 
 /* ============================================
@@ -1846,6 +1852,7 @@
     min-height: 300px;
   }
 }
+
 .consulting-notice {
   margin-top: 8px;
   padding: 8px 12px;

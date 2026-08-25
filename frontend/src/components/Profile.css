@@ -156,14 +156,23 @@
 }
 
 /* ============================================
-   بقیه استایل‌های پروفایل (بدون تغییر)
+   Profile Container - تمام صفحه (اصلاح شده)
    ============================================ */
 .profile-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  min-height: 80vh;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary, #f5f7fa);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.profile-container * {
+  box-sizing: border-box;
 }
 
 .profile-container.light {
@@ -176,13 +185,25 @@
   color: #e0e0e0;
 }
 
+/* ============================================
+   Header - تمام عرض
+   ============================================ */
 .profile-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid rgba(26, 35, 126, 0.2);
+  padding: 16px 32px;
+  background: var(--bg-secondary, #ffffff);
+  border-bottom: 2px solid rgba(26, 35, 126, 0.15);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.dark .profile-header {
+  background: #2d2d44;
+  border-bottom-color: rgba(121, 134, 203, 0.2);
 }
 
 .profile-header h2 {
@@ -196,49 +217,53 @@
 }
 
 .btn-back {
-  padding: 8px 16px;
+  padding: 8px 20px;
   background: #e8eaf6;
   border: none;
   border-radius: 8px;
   color: #1a237e;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
   transition: all 0.2s;
   font-family: inherit;
 }
 
 .btn-back:hover {
   background: #c5cae9;
+  transform: translateY(-1px);
 }
 
 .dark .btn-back {
-  background: #2d2d44;
+  background: #3d3d5c;
   color: #e0e0e0;
 }
 
 .dark .btn-back:hover {
-  background: #3d3d5c;
+  background: #4d4d6c;
 }
 
-/* ===== تب‌های پروفایل ===== */
+/* ============================================
+   تب‌های پروفایل - تمام عرض
+   ============================================ */
 .profile-tabs {
   display: flex;
   gap: 6px;
-  margin-bottom: 24px;
-  padding: 4px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px 32px;
+  background: var(--bg-secondary, #ffffff);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .dark .profile-tabs {
-  background: rgba(255, 255, 255, 0.04);
+  background: #2d2d44;
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .profile-tab-btn {
-  flex: 1;
-  padding: 12px 20px;
+  padding: 10px 24px;
   border: none;
   border-radius: 10px;
   background: transparent;
@@ -275,23 +300,48 @@
   box-shadow: 0 2px 12px rgba(26, 35, 126, 0.3);
 }
 
+/* ============================================
+   Content - تمام عرض
+   ============================================ */
 .profile-content {
+  flex: 1;
+  padding: 24px 32px;
+  background: var(--bg-primary, #f5f7fa);
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 100%;
 }
 
+.dark .profile-content {
+  background: #1a1a2e;
+}
+
+/* ============================================
+   Cards - تمام عرض
+   ============================================ */
 .profile-card {
-  background: white;
+  background: var(--bg-secondary, #ffffff);
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 24px 28px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  width: 100%;
+}
+
+.profile-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .dark .profile-card {
   background: #2d2d44;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .profile-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 .card-header {
@@ -301,6 +351,8 @@
   margin-bottom: 16px;
   padding-bottom: 10px;
   border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .dark .card-header {
@@ -348,7 +400,9 @@
   background: #4d4d6c;
 }
 
-/* ===== فرم ===== */
+/* ============================================
+   فرم
+   ============================================ */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -450,6 +504,7 @@
   cursor: pointer;
   transition: all 0.3s;
   font-family: inherit;
+  align-self: flex-start;
 }
 
 .btn-save:hover {
@@ -462,7 +517,9 @@
   cursor: not-allowed;
 }
 
-/* ===== پیام‌ها ===== */
+/* ============================================
+   پیام‌ها
+   ============================================ */
 .message {
   padding: 10px 16px;
   border-radius: 8px;
@@ -491,10 +548,12 @@
   color: #ef5350;
 }
 
-/* ===== آمار سریع ===== */
+/* ============================================
+   آمار سریع
+   ============================================ */
 .quick-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
 }
 
@@ -503,13 +562,15 @@
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  background: #f5f7fa;
+  background: var(--bg-primary, #f5f7fa);
   border-radius: 8px;
   transition: all 0.2s;
+  border: 1px solid var(--border-color, transparent);
 }
 
 .dark .stat-item {
   background: #1e1e2e;
+  border-color: #3d3d5c;
 }
 
 .stat-item:hover {
@@ -519,12 +580,18 @@
 
 .stat-icon {
   font-size: 24px;
+  flex-shrink: 0;
+}
+
+.stat-item div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .stat-label {
   font-size: 12px;
   color: #888;
-  display: block;
 }
 
 .dark .stat-label {
@@ -535,7 +602,6 @@
   font-size: 16px;
   font-weight: 700;
   color: #1a237e;
-  display: block;
 }
 
 .dark .stat-value {
@@ -558,10 +624,12 @@
   color: #ef5350;
 }
 
-/* ===== اشتراک ===== */
+/* ============================================
+   اشتراک
+   ============================================ */
 .subscription-info {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -570,12 +638,14 @@
   display: flex;
   flex-direction: column;
   padding: 10px 14px;
-  background: #f5f7fa;
+  background: var(--bg-primary, #f5f7fa);
   border-radius: 8px;
+  border: 1px solid var(--border-color, transparent);
 }
 
 .dark .sub-item {
   background: #1e1e2e;
+  border-color: #3d3d5c;
 }
 
 .sub-label {
@@ -700,7 +770,9 @@
   background: #4d4d6c;
 }
 
-/* ===== نسخه‌ها ===== */
+/* ============================================
+   نسخه‌ها
+   ============================================ */
 .version-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -712,12 +784,14 @@
   display: flex;
   flex-direction: column;
   padding: 10px 14px;
-  background: #f5f7fa;
+  background: var(--bg-primary, #f5f7fa);
   border-radius: 8px;
+  border: 1px solid var(--border-color, transparent);
 }
 
 .dark .version-item {
   background: #1e1e2e;
+  border-color: #3d3d5c;
 }
 
 .version-label {
@@ -752,7 +826,7 @@
 }
 
 .versions-table th {
-  background: #f5f7fa;
+  background: var(--bg-primary, #f5f7fa);
   color: #555;
   padding: 8px 12px;
   text-align: right;
@@ -801,7 +875,9 @@
   color: #888;
 }
 
-/* ===== تماس با ما ===== */
+/* ============================================
+   تماس با ما
+   ============================================ */
 .contact-info {
   display: flex;
   flex-direction: column;
@@ -876,44 +952,67 @@
 }
 
 /* ============================================
-   واکنش‌گرا
+   واکنش‌گرا (اصلاح شده)
    ============================================ */
-@media (max-width: 768px) {
-  .profile-container {
-    padding: 12px;
-  }
-
-  .profile-header {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 992px) {
   .quick-stats {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 
   .subscription-info {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
   }
 
-  .version-info {
-    grid-template-columns: 1fr;
+  .profile-header h2 {
+    font-size: 20px;
   }
 
   .profile-tabs {
-    flex-direction: column;
+    padding: 6px 12px;
     gap: 4px;
   }
 
   .profile-tab-btn {
-    width: 100%;
-    padding: 10px 16px;
-    justify-content: center;
+    padding: 8px 14px;
+    font-size: 13px;
+    flex: 1;
+  }
+
+  .profile-content {
+    padding: 16px;
+  }
+
+  .profile-card {
+    padding: 16px 18px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* ✅ اصلاح: دو ستون برای تبلت */
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .subscription-info {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .version-info {
+    grid-template-columns: 1fr;
   }
 
   .contact-buttons {
@@ -924,6 +1023,11 @@
   .btn-messages {
     width: 100%;
     text-align: center;
+  }
+
+  .btn-save {
+    width: 100%;
+    justify-content: center;
   }
 
   .rules-guide-toggle {
@@ -947,11 +1051,110 @@
 }
 
 @media (max-width: 480px) {
+  .profile-header {
+    padding: 8px 12px;
+  }
+
+  .profile-header h2 {
+    font-size: 17px;
+  }
+
+  .btn-back {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .profile-tabs {
+    flex-direction: column;
+    padding: 4px 8px;
+    gap: 3px;
+  }
+
+  .profile-tab-btn {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 12px;
+    justify-content: center;
+  }
+
+  .profile-content {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .profile-card {
+    padding: 12px 14px;
+  }
+
+  .card-header h3 {
+    font-size: 15px;
+  }
+
+  /* ✅ اصلاح: دو ستون برای موبایل */
+  .quick-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .subscription-info {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-item {
+    padding: 8px 10px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  .sub-item {
+    padding: 8px 10px;
+  }
+
+  .sub-value {
+    font-size: 13px;
+  }
+
+  .versions-table {
+    font-size: 12px;
+  }
+
+  .versions-table th,
+  .versions-table td {
+    padding: 6px 8px;
+  }
+}
+
+/* ============================================
+   صفحه‌های خیلی کوچک (اضافه شده)
+   ============================================ */
+@media (max-width: 360px) {
   .quick-stats {
     grid-template-columns: 1fr;
+    gap: 6px;
   }
 
   .subscription-info {
     grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .stat-item {
+    padding: 6px 8px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+  }
+
+  .profile-card {
+    padding: 10px 12px;
+  }
+
+  .profile-content {
+    padding: 8px;
+    gap: 10px;
   }
 }

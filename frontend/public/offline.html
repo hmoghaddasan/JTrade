@@ -1,0 +1,247 @@
+<!-- frontend/public/offline.html -->
+
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a237e">
+  <title>آفلاین - ژورنال حرفه‌ای ترید</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      direction: rtl;
+      padding: 20px;
+    }
+
+    .offline-container {
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .offline-icon {
+      font-size: 72px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .offline-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 8px;
+    }
+
+    .offline-subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    .offline-message {
+      background: #fff8e1;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border-right: 4px solid #f57c00;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 24px;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    .offline-message .emoji {
+      font-size: 18px;
+    }
+
+    .btn-retry {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #1a237e, #0d47a1);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-retry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(26, 35, 126, 0.4);
+    }
+
+    .btn-retry:active {
+      transform: translateY(0);
+    }
+
+    .offline-footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .offline-footer a {
+      color: #1a237e;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .offline-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .offline-status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.offline {
+      background: #c62828;
+    }
+
+    .status-dot.checking {
+      background: #f57c00;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    @media (max-width: 480px) {
+      .offline-container {
+        padding: 28px 20px;
+      }
+
+      .offline-title {
+        font-size: 20px;
+      }
+
+      .offline-icon {
+        font-size: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <span class="offline-icon">📡</span>
+    <h1 class="offline-title">اتصال اینترنت برقرار نیست</h1>
+    <p class="offline-subtitle">
+      برای استفاده از ژورنال حرفه‌ای ترید، به اتصال اینترنت نیاز دارید.
+    </p>
+    <div class="offline-message">
+      <span class="emoji">🔄</span> لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید.
+      <br>
+      <span style="font-size:13px;color:#888;display:block;margin-top:4px;">
+        پس از برقراری اتصال، صفحه به‌طور خودکار بارگذاری می‌شود.
+      </span>
+    </div>
+    <button class="btn-retry" onclick="window.location.reload()">
+      🔄 تلاش مجدد
+    </button>
+    <div class="offline-footer">
+      <a href="/dashboard">↩️ بازگشت به داشبورد</a>
+    </div>
+    <div class="offline-status">
+      <span class="status-dot offline"></span>
+      <span id="statusText">آفلاین</span>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // تلاش خودکار برای اتصال مجدد
+    // ============================================
+    let retryCount = 0;
+    const maxRetries = 10;
+    const statusText = document.getElementById('statusText');
+    const statusDot = document.querySelector('.status-dot');
+
+    function updateStatus(message, type) {
+      if (statusText) {
+        statusText.textContent = message;
+      }
+      if (statusDot) {
+        statusDot.className = 'status-dot ' + type;
+      }
+    }
+
+    function checkConnection() {
+      if (navigator.onLine) {
+        updateStatus('✅ آنلاین - در حال بارگذاری...', 'online');
+        window.location.reload();
+        return;
+      }
+
+      if (retryCount < maxRetries) {
+        retryCount++;
+        updateStatus(`⏳ تلاش ${retryCount} از ${maxRetries}...`, 'checking');
+        setTimeout(checkConnection, 5000);
+      } else {
+        updateStatus('❌ اتصال برقرار نشد. دستی تلاش کنید.', 'offline');
+      }
+    }
+
+    // شروع بررسی اتصال پس از 3 ثانیه
+    setTimeout(checkConnection, 3000);
+
+    // ============================================
+    // گوش دادن به تغییرات اتصال
+    // ============================================
+    window.addEventListener('online', () => {
+      updateStatus('✅ آنلاین - در حال بارگذاری...', 'online');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    });
+
+    window.addEventListener('offline', () => {
+      updateStatus('📡 آفلاین', 'offline');
+    });
+
+    // ============================================
+    // نمایش وضعیت اتصال در کنسول
+    // ============================================
+    console.log('📡 Offline page loaded. Connection status:', navigator.onLine ? 'Online' : 'Offline');
+  </script>
+</body>
+</html>

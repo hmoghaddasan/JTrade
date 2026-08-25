@@ -24,7 +24,7 @@ const TradeList = () => {
     dateFrom: '',
     dateTo: '',
     category: '',
-    portfolio: '' // ✅ اضافه شد
+    portfolio: ''
   });
   const [selectedTrade, setSelectedTrade] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -50,10 +50,64 @@ const TradeList = () => {
         const tradesResponse = await RealApiService.getTrades();
         const tradesData = tradesResponse.data.results || tradesResponse.data || [];
         console.log('📊 Trades loaded:', tradesData.length);
-        if (tradesData.length > 0) {
-          console.log('🔍 Sample trade fields:', Object.keys(tradesData[0]));
-        }
-        setTrades(tradesData);
+
+        // ✅ محاسبه و تکمیل مقادیر缺失 برای هر ترید
+        const enrichedTrades = tradesData.map(trade => {
+          const entry = parseFloat(trade.entry_price) || 0;
+          const close = parseFloat(trade.close_price) || 0;
+          const sl = parseFloat(trade.stop_loss) || 0;
+          const tp1 = parseFloat(trade.take_profit_1) || 0;
+          const tp2 = parseFloat(trade.take_profit_2) || 0;
+          const tp3 = parseFloat(trade.take_profit_3) || 0;
+
+          // ===== ۱. محاسبه سود/زیان =====
+          let profit = parseFloat(trade.profit);
+          if (isNaN(profit) || profit === 0) {
+            if (trade.trade_type === 'Buy' && entry > 0 && close > 0) {
+              profit = parseFloat((close - entry).toFixed(2));
+            } else if (trade.trade_type === 'Sell' && entry > 0 && close > 0) {
+              profit = parseFloat((entry - close).toFixed(2));
+            } else {
+              profit = 0;
+            }
+          }
+
+          // ===== ۲. محاسبه R:R =====
+          let rr = parseFloat(trade.risk_reward_ratio);
+          if (isNaN(rr) || rr === 0) {
+            if (entry > 0 && sl > 0) {
+              const risk = Math.abs(entry - sl);
+              // از بین سه حد سود، اولین حد سود معتبر را انتخاب کن
+              let reward = 0;
+              if (tp1 > 0) {
+                reward = Math.abs(tp1 - entry);
+              } else if (tp2 > 0) {
+                reward = Math.abs(tp2 - entry);
+              } else if (tp3 > 0) {
+                reward = Math.abs(tp3 - entry);
+              }
+              rr = (risk > 0 && reward > 0) ? parseFloat((reward / risk).toFixed(2)) : 0;
+            } else {
+              rr = 0;
+            }
+          }
+
+          // ===== ۳. کیفیت اجرا =====
+          let quality = parseInt(trade.execution_quality_score);
+          if (isNaN(quality) || quality === 0) {
+            quality = 5;
+          }
+
+          return {
+            ...trade,
+            profit: profit,
+            risk_reward_ratio: rr,
+            execution_quality_score: quality,
+            _result: profit > 0 ? 'win' : (profit < 0 ? 'loss' : 'breakeven')
+          };
+        });
+
+        setTrades(enrichedTrades);
 
       } catch (error) {
         console.error('Error loading data:', error);
@@ -116,7 +170,6 @@ const TradeList = () => {
       );
     }
 
-    // ✅ فیلتر بر اساس پورتفولیو
     if (filter.portfolio) {
       result = result.filter(t => {
         const p = t.portfolio_info || t.portfolio;
@@ -159,7 +212,7 @@ const TradeList = () => {
       dateFrom: '',
       dateTo: '',
       category: '',
-      portfolio: '' // ✅ اضافه شد
+      portfolio: ''
     });
     setCurrentPage(1);
   };
@@ -195,7 +248,6 @@ const TradeList = () => {
     }
   };
 
-  // ===== تابع دریافت نام پورتفولیو =====
   const getPortfolioDisplay = (trade) => {
     const p = trade.portfolio_info || trade.portfolio;
     if (p && p.name) {
@@ -515,16 +567,17 @@ const TradeList = () => {
 
   return (
     <div className={`tradelist-container ${isDark ? 'dark' : 'light'}`}>
-      <div className="tradelist-header">
-        <h2>📈 لیست تریدها</h2>
-        <div className="header-actions">
-          <button className="btn-print-list" onClick={handlePrintList} title="چاپ لیست تریدها">
+      {/* ===== هدر با راه‌حل قطعی ===== */}
+      <div className="tradelist-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+        <h2 style={{ fontSize: '18px', margin: 0, flexShrink: 0 }}>📈 لیست تریدها</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap', flexShrink: 0 }}>
+          <button className="btn-print-list" onClick={handlePrintList} style={{ padding: '5px 10px', border: 'none', borderRadius: '6px', background: '#1a237e', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', height: '30px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             🖨️ چاپ
           </button>
-          <button className="btn-excel-list" onClick={handleExportExcel} title="خروجی اکسل کامل">
+          <button className="btn-excel-list" onClick={handleExportExcel} style={{ padding: '5px 10px', border: 'none', borderRadius: '6px', background: '#2e7d32', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', height: '30px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             📄 اکسل
           </button>
-          <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
+          <button className="btn-secondary" onClick={() => navigate('/dashboard')} style={{ padding: '5px 10px', border: 'none', borderRadius: '6px', background: '#e0e0e0', color: '#333', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', height: '30px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             ↩️ بازگشت
           </button>
         </div>
@@ -605,7 +658,6 @@ const TradeList = () => {
             ))}
           </select>
         </div>
-        {/* ✅ فیلتر پورتفولیو */}
         {portfolioOptions.length > 0 && (
           <div className="filter-group">
             <select
@@ -671,7 +723,7 @@ const TradeList = () => {
                   <th>نتیجه</th>
                   <th>R:R</th>
                   <th>کیفیت</th>
-                  <th>عملیات</th>
+                  <th style={{ minWidth: '140px', width: '140px', whiteSpace: 'nowrap' }}>عملیات</th>
                 </tr>
               </thead>
               <tbody>
@@ -705,10 +757,10 @@ const TradeList = () => {
                         </span>
                       </div>
                     </td>
-                    <td>
-                      <div className="action-buttons">
+                    <td style={{ minWidth: '140px', width: '140px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '4px', justifyContent: 'center', alignItems: 'center' }}>
                         <button
-                          className="btn-view"
+                          style={{ border: '1.5px solid #444', background: 'transparent', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontSize: '14px', minWidth: '32px', height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewDetails(trade.id);
@@ -718,7 +770,7 @@ const TradeList = () => {
                           👁️
                         </button>
                         <button
-                          className="btn-edit"
+                          style={{ border: '1.5px solid #444', background: 'transparent', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontSize: '14px', minWidth: '32px', height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditTrade(trade.id);
@@ -728,7 +780,7 @@ const TradeList = () => {
                           ✏️
                         </button>
                         <button
-                          className="btn-delete"
+                          style={{ border: '1.5px solid #444', background: 'transparent', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontSize: '14px', minWidth: '32px', height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(trade.id);

@@ -5,6 +5,7 @@ import decimal
 import requests
 import logging
 import re
+import time
 from datetime import datetime
 from django.db.models import Avg, Count, Sum, Q, Max, Min
 from django.conf import settings
@@ -22,7 +23,7 @@ class AIService:
 
     OLLAMA_URL = getattr(settings, 'OLLAMA_URL', 'http://localhost:11434/api/generate')
     OLLAMA_MODEL = getattr(settings, 'OLLAMA_MODEL', 'llama3.1:8b')
-    OLLAMA_TIMEOUT = getattr(settings, 'OLLAMA_TIMEOUT', 600)
+    OLLAMA_TIMEOUT = getattr(settings, 'OLLAMA_TIMEOUT', 900)
 
     LIVE_PRICE_PROVIDER = getattr(settings, 'LIVE_PRICE_PROVIDER', 'none')
     ALPHA_VANTAGE_API_KEY = getattr(settings, 'ALPHA_VANTAGE_API_KEY', '')
@@ -60,7 +61,8 @@ class AIService:
         total_loss = trades.filter(profit__lt=0).aggregate(total=Sum('profit'))['total'] or 0
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
         avg_quality = \
-        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+            trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))[
+                'avg'] or 0
         avg_profit_per_trade = trades.aggregate(avg=Avg('profit'))['avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
@@ -134,7 +136,7 @@ class AIService:
                     'emotion': current_emotion,
                     'count': current_emotion_trades.count(),
                     'win_rate': (
-                                ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
+                            ce_win / current_emotion_trades.count() * 100) if current_emotion_trades.count() > 0 else 0,
                     'total_profit': current_emotion_trades.aggregate(total=Sum('profit'))['total'] or 0,
                 }
 
@@ -150,7 +152,7 @@ class AIService:
                                'judas_lo_identified']
             total_checks = sum(1 for t in trades for item in checklist_items if getattr(t, item, False))
             checklist_compliance = (
-                        total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
+                    total_checks / (total_trades * len(checklist_items)) * 100) if total_trades > 0 else 0
 
         # بهترین ساعت
         hour_stats = None
@@ -275,7 +277,7 @@ class AIService:
                 if live_price:
                     entry = float(entry_price)
                     diff = ((entry - live_price) / live_price) * 100
-                    if diff > 999999:  # اگر بیشتر از ۹۹۹۹۹۹ باشد
+                    if diff > 999999:
                         diff = 999999
                     elif diff < -999999:
                         diff = -999999
@@ -566,104 +568,181 @@ class AIService:
 
     @classmethod
     def call_ollama(cls, prompt, model=None):
-        """فراخوانی همزمان Ollama با تایم‌اوت پویا از settings"""
+        """فراخوانی همزمان Ollama با تایم‌اوت پویا و لاگ کامل"""
         model = model or cls.OLLAMA_MODEL
-        timeout = cls.OLLAMA_TIMEOUT
-        logger.info(f"🔄 Calling Ollama with model: {model}, url: {cls.OLLAMA_URL}, timeout: {timeout}s")
-        try:
-            payload = {
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.6,
-                    "max_tokens": 2000,
+        timeout = cls.OLLAMA_TIMEOUT or 600
+
+        max_retries = 3
+        retry_delay = 5
+
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"🔄 Calling Ollama (attempt {attempt + 1}/{max_retries}) with model: {model}")
+
+                payload = {
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.6,
+                        "max_tokens": 2000,
+                    }
                 }
-            }
 
-            response = requests.post(cls.OLLAMA_URL, json=payload, timeout=timeout)
-            response.raise_for_status()
+                # ✅ نمایش پرامپت برای دیباگ (فقط ۲۰۰ کاراکتر اول)
+                logger.info(f"📝 Prompt preview: {prompt[:200]}...")
 
-            result = response.json()
-            response_text = result.get('response', '')
-            logger.info(f"✅ Ollama response received, length: {len(response_text)}")
+                response = requests.post(
+                    cls.OLLAMA_URL,
+                    json=payload,
+                    timeout=timeout + 30,
+                    headers={'Content-Type': 'application/json'}
+                )
 
-            if not response_text or len(response_text.strip()) < 30:
-                return cls._get_empty_response_error()
+                # ✅ نمایش status code و headers
+                logger.info(f"📊 Response status: {response.status_code}")
+                logger.info(f"📊 Response headers: {dict(response.headers)}")
 
-            return response_text
+                response.raise_for_status()
 
-        except requests.exceptions.Timeout as e:
-            logger.error(f"⏰ Ollama timeout after {timeout} seconds: {str(e)}")
-            return cls._get_connection_error_response(
-                f"⏰ زمان پاسخگویی به پایان رسید (بیش از {timeout} ثانیه). لطفاً دوباره تلاش کنید.")
-        except requests.exceptions.ConnectionError as e:
-            logger.error(f"🔌 Ollama connection error: {str(e)}")
-            return cls._get_connection_error_response(
-                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست و آدرس صحیح است.")
-        except requests.exceptions.HTTPError as e:
-            logger.error(f"❌ Ollama HTTP error: {str(e)}")
-            if "404" in str(e):
+                result = response.json()
+                response_text = result.get('response', '')
+
+                # ✅ نمایش کامل پاسخ در صورت خطا
+                if not response_text or len(response_text.strip()) < 30:
+                    logger.error(f"❌ Empty or invalid response: {result}")
+                    return cls._get_empty_response_error()
+
+                logger.info(f"✅ Ollama response received, length: {len(response_text)}")
+
+                # ✅ اگر پاسخ حاوی خطا است، لاگ کامل کن
+                if 'error' in result:
+                    logger.error(f"❌ Ollama returned error: {result['error']}")
+                    logger.error(f"📝 Full response: {result}")
+                    return cls._get_connection_error_response(f"Ollama error: {result['error']}")
+
+                return response_text
+
+            except requests.exceptions.HTTPError as e:
+                # ✅ نمایش کامل پاسخ خطا
+                logger.error(f"❌ Ollama HTTP error: {str(e)}")
+                if hasattr(e, 'response') and e.response:
+                    try:
+                        error_body = e.response.text
+                        logger.error(f"📝 Error response body: {error_body}")
+                        try:
+                            error_json = e.response.json()
+                            logger.error(f"📝 Error JSON: {error_json}")
+                        except:
+                            pass
+                    except:
+                        pass
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
+
+            except requests.exceptions.Timeout as e:
+                logger.error(f"⏰ Ollama timeout (attempt {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    return cls._get_connection_error_response(
+                        f"⏰ زمان پاسخگویی به پایان رسید (بیش از {timeout} ثانیه). لطفاً دوباره تلاش کنید."
+                    )
+
+            except requests.exceptions.ConnectionError as e:
+                logger.error(f"🔌 Ollama connection error: {str(e)}")
                 return cls._get_connection_error_response(
-                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
-            return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
-        except Exception as e:
-            logger.error(f"❌ Ollama error: {str(e)}")
-            return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
+                    "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست."
+                )
+
+            except Exception as e:
+                logger.error(f"❌ Ollama error: {str(e)}")
+                return cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
+
+        return cls._get_connection_error_response("❌ حداکثر تلاش برای اتصال به Ollama انجام شد.")
 
     @classmethod
     def call_ollama_stream(cls, prompt, model=None):
-        """فراخوانی استریم Ollama با تایم‌اوت پویا از settings"""
+        """فراخوانی استریم Ollama با تایم‌اوت پویا و مکانیزم Retry"""
         model = model or cls.OLLAMA_MODEL
         timeout = cls.OLLAMA_TIMEOUT
-        logger.info(f"🔄 Calling Ollama (stream) with model: {model}, url: {cls.OLLAMA_URL}, timeout: {timeout}s")
-        try:
-            payload = {
-                "model": model,
-                "prompt": prompt,
-                "stream": True,
-                "options": {
-                    "temperature": 0.6,
-                    "max_tokens": 2000,
+
+        max_retries = 2
+        retry_delay = 3
+
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"🔄 Calling Ollama (stream) attempt {attempt + 1}/{max_retries}")
+
+                payload = {
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": True,
+                    "options": {
+                        "temperature": 0.6,
+                        "max_tokens": 2000,
+                    }
                 }
-            }
 
-            response = requests.post(cls.OLLAMA_URL, json=payload, stream=True, timeout=timeout)
-            response.raise_for_status()
+                response = requests.post(cls.OLLAMA_URL, json=payload, stream=True, timeout=timeout + 30)
+                response.raise_for_status()
 
-            has_content = False
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        data = json.loads(line.decode('utf-8'))
-                        if 'response' in data and data['response']:
-                            has_content = True
-                            yield data['response']
-                        if data.get('done', False):
-                            break
-                    except json.JSONDecodeError:
-                        continue
+                has_content = False
+                for line in response.iter_lines():
+                    if line:
+                        try:
+                            data = json.loads(line.decode('utf-8'))
+                            if 'response' in data and data['response']:
+                                has_content = True
+                                yield data['response']
+                            if data.get('done', False):
+                                break
+                        except json.JSONDecodeError:
+                            continue
 
-            if not has_content:
-                yield cls._get_empty_response_error()
+                if not has_content:
+                    yield cls._get_empty_response_error()
+                return
 
-        except requests.exceptions.Timeout as e:
-            logger.error(f"⏰ Ollama stream timeout after {timeout} seconds: {str(e)}")
-            yield cls._get_connection_error_response(
-                f"⏰ زمان پاسخگویی به پایان رسید (بیش از {timeout} ثانیه). لطفاً دوباره تلاش کنید.")
-        except requests.exceptions.ConnectionError as e:
-            logger.error(f"🔌 Ollama connection error: {str(e)}")
-            yield cls._get_connection_error_response(
-                "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست.")
-        except requests.exceptions.HTTPError as e:
-            logger.error(f"❌ Ollama HTTP error: {str(e)}")
-            if "404" in str(e):
+            except requests.exceptions.Timeout as e:
+                logger.error(f"⏰ Ollama stream timeout (attempt {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    yield cls._get_connection_error_response(
+                        f"⏰ زمان پاسخگویی به پایان رسید (بیش از {timeout} ثانیه). لطفاً دوباره تلاش کنید."
+                    )
+
+            except requests.exceptions.ConnectionError as e:
+                logger.error(f"🔌 Ollama connection error: {str(e)}")
                 yield cls._get_connection_error_response(
-                    f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید.")
-            yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
-        except Exception as e:
-            logger.error(f"❌ Ollama error: {str(e)}")
-            yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
+                    "🔌 اتصال به سرویس AI برقرار نشد. لطفاً مطمئن شوید که Ollama در حال اجراست."
+                )
+
+            except requests.exceptions.HTTPError as e:
+                logger.error(f"❌ Ollama HTTP error: {str(e)}")
+                if "404" in str(e):
+                    yield cls._get_connection_error_response(
+                        f"❌ مدل '{model}' در Ollama موجود نیست. لطفاً مدل را با 'ollama pull {model}' نصب کنید."
+                    )
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
+
+            except Exception as e:
+                logger.error(f"❌ Ollama error: {str(e)}")
+                yield cls._get_connection_error_response(f"❌ خطا در ارتباط با سرویس AI: {str(e)}")
 
     @classmethod
     def _get_connection_error_response(cls, message):
@@ -1302,7 +1381,7 @@ class AIService:
             live_price=live_price,
             price_warning=price_warning or user_input.get('price_warning'),
             price_diff_percent=price_diff_percent,
-            internal_analytics=analytics,  # ذخیره کل analytics بدون Decimal
+            internal_analytics=analytics,
         )
 
         # راه‌اندازی تسک پس‌زمینه
@@ -1510,7 +1589,7 @@ class AIFeedbackService:
             prompt_score = (feedback_score / 5 * 70) + trade_bonus
 
             total_score = (best_prompt.performance_score * best_prompt.usage_count + prompt_score) / (
-                        best_prompt.usage_count + 1)
+                    best_prompt.usage_count + 1)
             best_prompt.performance_score = max(0, min(100, total_score))
             best_prompt.save()
 

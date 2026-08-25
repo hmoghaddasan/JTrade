@@ -1,12 +1,21 @@
 /* frontend/src/pages/PortfolioComparisonPage.css */
 
+/* ============================================
+   Comparison Page - تمام صفحه (اصلاح شده)
+   ============================================ */
 .comparison-page {
-    padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px 24px;
     min-height: 100vh;
     direction: rtl;
     font-family: inherit;
+    box-sizing: border-box;
+}
+
+.comparison-page * {
+    box-sizing: border-box;
 }
 
 /* ===== هدر ===== */
@@ -36,42 +45,59 @@
     color: var(--text-primary);
 }
 
-.btn-back {
-    padding: 8px 16px;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-    font-family: inherit;
-}
-
-.btn-back:hover {
-    background: var(--bg-hover);
-}
-
+/* ============================================
+   هدر راست - دکمه‌ها در یک ردیف
+   ============================================ */
 .header-right {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
+/* ============================================
+   دکمه‌های هدر - استایل یکسان
+   ============================================ */
+.btn-back,
 .btn-print {
-    padding: 8px 20px;
-    background: #2e7d32;
+    padding: 8px 16px;
     border: none;
     border-radius: 8px;
-    color: #fff;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     transition: all 0.2s;
     font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    min-width: 80px;
+    white-space: nowrap;
+}
+
+.btn-back {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-back:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-print {
+    background: #2e7d32;
+    color: #fff;
 }
 
 .btn-print:hover {
     background: #1b5e20;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
 }
 
 /* ===== انتخاب نوع نمودار ===== */
@@ -190,96 +216,9 @@
     to { transform: rotate(360deg); }
 }
 
-/* ===== واکنش‌گرایی ===== */
-@media (max-width: 768px) {
-    .comparison-page {
-        padding: 12px;
-    }
-
-    .comparison-page-header {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px 16px;
-    }
-
-    .header-left {
-        flex-wrap: wrap;
-    }
-
-    .header-left h1 {
-        font-size: 18px;
-    }
-
-    .combined-info {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .comparison-page {
-        padding: 8px;
-    }
-
-    .combined-info {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .combined-value {
-        font-size: 16px;
-    }
-
-    .chart-type-selector {
-        gap: 4px;
-    }
-
-    .chart-type-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-        flex: 1;
-        text-align: center;
-    }
-}
-
-/* ===== چاپ ===== */
-@media print {
-    .btn-back,
-    .btn-print,
-    .btn-expand-chart,
-    .chart-type-selector {
-        display: none !important;
-    }
-
-    .comparison-page {
-        padding: 0 !important;
-        background: #fff !important;
-    }
-
-    .comparison-page-header {
-        border: none !important;
-        background: #fff !important;
-        padding: 10px 0 !important;
-    }
-
-    .comparison-summary-cards {
-        break-inside: avoid;
-    }
-
-    .comparison-chart {
-        break-inside: avoid;
-        border: 1px solid #ddd !important;
-    }
-
-    .comparison-table-container {
-        border: 1px solid #ddd !important;
-    }
-
-    .combined-info {
-        border: 1px solid #ddd !important;
-    }
-}
-/* frontend/src/pages/PortfolioComparisonPage.css */
-
-/* ===== دکمه راهنما ===== */
+/* ============================================
+   دکمه راهنما
+   ============================================ */
 .guide-toggle-wrapper {
     text-align: right;
     margin-bottom: 12px;
@@ -405,8 +344,48 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== واکنش‌گرایی ===== */
+/* ============================================
+   واکنش‌گرایی
+   ============================================ */
 @media (max-width: 768px) {
+    .comparison-page {
+        padding: 12px 16px;
+    }
+
+    .comparison-page-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px;
+    }
+
+    .header-left {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .header-left h1 {
+        font-size: 18px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-back,
+    .btn-print {
+        font-size: 13px;
+        padding: 6px 12px;
+        height: 34px;
+        min-width: 60px;
+        flex: 0 1 auto;
+    }
+
+    .combined-info {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
     .guide-container {
         padding: 14px;
     }
@@ -435,30 +414,81 @@
 }
 
 @media (max-width: 480px) {
+    .comparison-page {
+        padding: 8px 12px;
+    }
+
+    .header-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-back,
+    .btn-print {
+        width: 100%;
+        justify-content: center;
+        min-width: unset;
+    }
+
+    .combined-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .combined-value {
+        font-size: 16px;
+    }
+
+    .chart-type-selector {
+        gap: 4px;
+    }
+
+    .chart-type-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        flex: 1;
+        text-align: center;
+    }
+
     .guide-table {
         min-width: 400px;
     }
 }
-/* frontend/src/pages/PortfolioComparisonPage.css */
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* فاصله بین دکمه‌ها */
-}
+/* ===== چاپ ===== */
+@media print {
+    .btn-back,
+    .btn-print,
+    .btn-expand-chart,
+    .chart-type-selector,
+    .guide-toggle-wrapper {
+        display: none !important;
+    }
 
-.btn-back {
-    padding: 8px 16px;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-    font-family: inherit;
-}
+    .comparison-page {
+        padding: 0 !important;
+        background: #fff !important;
+    }
 
-.btn-back:hover {
-    background: var(--bg-hover);
+    .comparison-page-header {
+        border: none !important;
+        background: #fff !important;
+        padding: 10px 0 !important;
+    }
+
+    .comparison-summary-cards {
+        break-inside: avoid;
+    }
+
+    .comparison-chart {
+        break-inside: avoid;
+        border: 1px solid #ddd !important;
+    }
+
+    .comparison-table-container {
+        border: 1px solid #ddd !important;
+    }
+
+    .combined-info {
+        border: 1px solid #ddd !important;
+    }
 }

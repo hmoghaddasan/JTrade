@@ -11,6 +11,8 @@ from apps.subscriptions.models import SubscriptionPlan, UserSubscription, Discou
 from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, Portfolio  # ✅ Portfolio اضافه شد
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from .models import AdminActionLog
+from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, Portfolio, Broker
+
 
 User = get_user_model()
 
@@ -799,3 +801,36 @@ class AdminPortfolioSerializer(serializers.ModelSerializer):
 
     def get_created_at_fa(self, obj):
         return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
+
+# ================================
+# مدیریت بروکرها (کارگزاران) - جدید
+# ================================
+class AdminBrokerSerializer(serializers.ModelSerializer):
+    """سریالایزر بروکر برای ادمین"""
+    category_display = serializers.SerializerMethodField()
+    trades_count = serializers.SerializerMethodField()
+    created_at_fa = serializers.SerializerMethodField()
+    updated_at_fa = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Broker
+        fields = [
+            'id', 'name', 'category', 'category_display',
+            'is_active', 'order_index',
+            'trades_count',
+            'created_at', 'created_at_fa',
+            'updated_at', 'updated_at_fa'
+        ]
+
+    def get_category_display(self, obj):
+        return obj.get_category_label()
+
+    def get_trades_count(self, obj):
+        return obj.trades.count()
+
+    def get_created_at_fa(self, obj):
+        return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
+
+    def get_updated_at_fa(self, obj):
+        return obj.updated_at.strftime('%Y/%m/%d %H:%M') if obj.updated_at else None
+

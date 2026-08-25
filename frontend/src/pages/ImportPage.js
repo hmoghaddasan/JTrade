@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { usePortfolio } from '../contexts/PortfolioContext';
 import importService from '../services/importService';
 import RealApiService from '../services/realApiService';
 import CSVUploader from '../components/import/CSVUploader';
@@ -14,8 +15,9 @@ const ImportPage = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { portfolios, currentPortfolio, loadPortfolios } = usePortfolio();
 
-  const [step, setStep] = useState(1); // 1: upload, 2: mapping, 3: preview, 4: result
+  const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
@@ -23,7 +25,6 @@ const ImportPage = () => {
   const [detectedBroker, setDetectedBroker] = useState(null);
   const [suggestedMapping, setSuggestedMapping] = useState({});
   const [columnMapping, setColumnMapping] = useState({});
-  const [portfolios, setPortfolios] = useState([]);
   const [groups, setGroups] = useState([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -32,22 +33,56 @@ const ImportPage = () => {
   const [importResult, setImportResult] = useState(null);
   const [savedMappings, setSavedMappings] = useState([]);
 
-  // بارگذاری پورتفولیوها و گروه‌ها
+  // بارگذاری گروه‌ها و نگاشت‌های ذخیره‌شده
   useEffect(() => {
     const loadData = async () => {
       try {
-        const portfoliosRes = await RealApiService.getPortfolios();
-        setPortfolios(portfoliosRes.data || []);
         const groupsRes = await RealApiService.getTradeGroups();
-        setGroups(groupsRes.data.results || groupsRes.data || []);
+        const groupsData = groupsRes.data.results || groupsRes.data || [];
+        setGroups(groupsData);
+        if (groupsData.length > 0) {
+          const defaultGroup = groupsData.find(g => g.is_default) || groupsData[0];
+          setSelectedGroup(defaultGroup.id);
+        }
         const mappingsRes = await importService.getMappings();
         setSavedMappings(mappingsRes.data || []);
       } catch (error) {
         console.error('Error loading data:', error);
+        showToast('❌ خطا در بارگذاری داده‌های اولیه', 'error');
       }
     };
     loadData();
-  }, []);
+  }, [showToast]);
+
+  // بارگذاری پورتفولیوها از Context
+  useEffect(() => {
+    if (portfolios.length === 0) {
+      loadPortfolios();
+    }
+  }, [portfolios, loadPortfolios]);
+
+  // تنظیم selectedPortfolio
+  useEffect(() => {
+    if (portfolios.length === 0) return;
+    let selected = null;
+    if (currentPortfolio && portfolios.some(p => p.id === currentPortfolio.id)) {
+      selected = currentPortfolio.id;
+    } else {
+      const defaultPortfolio = portfolios.find(p => p.is_default) || portfolios[0];
+      selected = defaultPortfolio.id;
+    }
+    setSelectedPortfolio(selected);
+  }, [portfolios, currentPortfolio]);
+
+  // ✅ به‌روزرسانی columnMapping با suggestedMapping در صورت خالی بودن
+  useEffect(() => {
+    if (suggestedMapping && Object.keys(suggestedMapping).length > 0) {
+      if (!columnMapping || Object.keys(columnMapping).length === 0) {
+        console.log('📤 Setting columnMapping from suggestedMapping:', suggestedMapping);
+        setColumnMapping(suggestedMapping);
+      }
+    }
+  }, [suggestedMapping]);
 
   const handleFileUpload = async (file) => {
     setFile(file);
@@ -60,6 +95,7 @@ const ImportPage = () => {
       setTotalRows(data.total_rows || 0);
       setDetectedBroker(data.detected_broker || null);
       setSuggestedMapping(data.suggested_mapping || {});
+      // ✅ مقداردهی اولیه columnMapping با suggestedMapping
       setColumnMapping(data.suggested_mapping || {});
       setStep(2);
       showToast('✅ فایل با موفقیت بارگذاری شد', 'success');
@@ -71,17 +107,38 @@ const ImportPage = () => {
   };
 
   const handleMappingChange = (newMapping) => {
+    console.log('📤 handleMappingChange called with:', newMapping);
     setColumnMapping(newMapping);
   };
 
   const handleImport = async () => {
     if (!file) return;
 
-    // بررسی وجود فیلدهای ضروری
-    const required = ['trade_date', 'symbol'];
-    const missing = required.filter(f => !columnMapping[f]);
-    if (missing.length > 0) {
-      showToast(`لطفاً ستون‌های ${missing.join(', ')} را مشخص کنید`, 'warning');
+    // ✅ استفاده از columnMapping یا fallback به suggestedMapping
+    const finalMapping = (columnMapping && Object.keys(columnMapping).length > 0)
+      ? columnMapping
+      : suggestedMapping;
+
+    console.log('📤 finalMapping being sent:', finalMapping);
+    console.log('📤 finalMapping keys:', Object.keys(finalMapping));
+
+    if (!finalMapping || Object.keys(finalMapping).length === 0) {
+      showToast('⚠️ لطفاً ابتدا نگاشت ستون‌ها را انجام دهید', 'warning');
+      return;
+    }
+
+    // ✅ بررسی وجود trade_date و symbol در mapping
+    if (!finalMapping.trade_date) {
+      showToast('⚠️ لطفاً ستون تاریخ (trade_date) را مشخص کنید', 'warning');
+      return;
+    }
+    if (!finalMapping.symbol) {
+      showToast('⚠️ لطفاً ستون نماد (symbol) را مشخص کنید', 'warning');
+      return;
+    }
+
+    if (!selectedGroup) {
+      showToast('⚠️ لطفاً یک گروه برای تریدها انتخاب کنید', 'warning');
       return;
     }
 
@@ -89,7 +146,7 @@ const ImportPage = () => {
     try {
       const response = await importService.importCSV(
         file,
-        columnMapping,
+        finalMapping,  // ✅ ارسال finalMapping
         {
           broker_name: detectedBroker || '',
           save_mapping: saveMapping,
@@ -105,6 +162,7 @@ const ImportPage = () => {
         showToast(`⚠️ هیچ ترید جدیدی وارد نشد (${response.data.skipped} مورد تکراری یا خطا)`, 'warning');
       }
     } catch (error) {
+      console.error('Import error:', error);
       showToast('❌ خطا در وارد کردن داده‌ها', 'error');
     } finally {
       setIsProcessing(false);
@@ -122,6 +180,7 @@ const ImportPage = () => {
     setHeaders([]);
     setRows([]);
     setColumnMapping({});
+    setSuggestedMapping({});
     setImportResult(null);
   };
 
@@ -140,7 +199,6 @@ const ImportPage = () => {
       </div>
 
       <div className="import-content">
-        {/* مرحله ۱: آپلود */}
         {step === 1 && (
           <CSVUploader
             onUpload={handleFileUpload}
@@ -148,7 +206,6 @@ const ImportPage = () => {
           />
         )}
 
-        {/* مرحله ۲: نگاشت ستون‌ها */}
         {step === 2 && (
           <ColumnMapper
             headers={headers}
@@ -163,7 +220,6 @@ const ImportPage = () => {
           />
         )}
 
-        {/* مرحله ۳: پیش‌نمایش و تنظیمات نهایی */}
         {step === 3 && (
           <ImportPreview
             headers={headers}
@@ -184,7 +240,6 @@ const ImportPage = () => {
           />
         )}
 
-        {/* مرحله ۴: نتیجه */}
         {step === 4 && importResult && (
           <div className="import-result">
             <div className="result-icon">

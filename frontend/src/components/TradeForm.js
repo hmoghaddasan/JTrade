@@ -31,7 +31,7 @@ const TradeForm = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const { portfolios, loadPortfolios } = usePortfolio();
+  const { portfolios } = usePortfolio();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -191,8 +191,12 @@ const TradeForm = () => {
     loadBrokers();
   }, []);
 
+  // ================================================================
+  // ✅ state با فیلد broker (نه broker_id)
+  // ================================================================
   const [formData, setFormData] = useState({
     trade_date: new Date().toISOString().split('T')[0],
+    trade_time: '00:00:00',  // ✅ اضافه شد
     day_of_week: '',
     month: new Date().getMonth() + 1,
     time_ny: '',
@@ -202,7 +206,7 @@ const TradeForm = () => {
     weekly_profile_note: '',
     group_id: '',
     portfolio_id: '',
-    broker_id: '',
+    broker: '',                       // ← فقط broker (نه broker_id)
     sleep_quality: 'خوب',
     food_status: false,
     focus: false,
@@ -537,7 +541,9 @@ const TradeForm = () => {
     return validationErrors.length === 0;
   };
 
-  // ===== ارسال فرم =====
+  // ================================================================
+  // ✅ ارسال فرم (فقط broker)
+  // ================================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -574,15 +580,21 @@ const TradeForm = () => {
       return;
     }
 
+    // ============================================
+    // ✅ فقط broker را با مقدار عددی ارسال می‌کنیم
+    // ============================================
+    const brokerValue = formData.broker ? parseInt(formData.broker) : null;
+
     const payload = {
       ...formData,
       group: groupId,
       group_id: groupId,
       portfolio: portfolioId,
-      broker_id: formData.broker_id || null,
+      broker: brokerValue,          // ← فقط broker (نه broker_id)
       day_of_week: day_of_week,
       month: month,
       rule_checks: ruleCheckIds,
+      trade_time: formData.trade_time && formData.trade_time !== '00:00:00' ? formData.trade_time : null,
     };
 
     if (screenshotFile) {
@@ -657,11 +669,18 @@ const TradeForm = () => {
       <div className="form-row">
         <div className="form-group">
           <label>تاریخ معامله <span style={{ color: 'red' }}>(اجباری)</span></label>
-          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required disabled={showLimitWarning} />
+          <input type="date" name="trade_date" value={formData.trade_date} onChange={handleChange} required />
         </div>
         <div className="form-group">
-          <label>ساعت به وقت نیویورک</label>
-          <input type="time" name="time_ny" value={formData.time_ny} onChange={handleChange} disabled={showLimitWarning} />
+          <label>زمان معامله (اختیاری)</label>
+          <input
+            type="time"
+            name="trade_time"
+            value={formData.trade_time || '00:00:00'}
+            onChange={handleChange}
+            step="1"  // برای نمایش ثانیه‌ها
+          />
+          <small className="hint-text">ساعت، دقیقه و ثانیه (پیش‌فرض ۰۰:۰۰:۰۰)</small>
         </div>
       </div>
     </div>
@@ -734,9 +753,17 @@ const TradeForm = () => {
             </select>
             <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
           </div>
+          {/* ============================================
+              ✅ سلکتور بروکر با نام broker
+              ============================================ */}
           <div className="form-group">
             <label>بروکر / کارگزار</label>
-            <select name="broker_id" value={formData.broker_id || ''} onChange={handleChange} disabled={showLimitWarning || brokersLoading}>
+            <select
+              name="broker"
+              value={formData.broker || ''}
+              onChange={handleChange}
+              disabled={showLimitWarning || brokersLoading}
+            >
               {brokersLoading ? (
                 <option value="">⏳ در حال بارگذاری بروکرها...</option>
               ) : (

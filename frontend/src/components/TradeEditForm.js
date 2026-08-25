@@ -314,6 +314,9 @@ const TradeEditForm = () => {
     loadScreenshotSettings();
   }, []);
 
+  // ================================================================
+  // ✅ بارگذاری داده‌های ترید برای ویرایش (با فیلد broker)
+  // ================================================================
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -322,6 +325,7 @@ const TradeEditForm = () => {
         const trade = tradeResponse.data;
         console.log('📊 Trade loaded:', trade);
 
+        // استخراج group_id
         if (trade.group && typeof trade.group === 'object' && trade.group.id) {
           trade.group_id = trade.group.id;
         } else if (typeof trade.group === 'number') {
@@ -330,6 +334,7 @@ const TradeEditForm = () => {
           trade.group_id = null;
         }
 
+        // استخراج portfolio_id
         if (trade.portfolio && typeof trade.portfolio === 'object') {
           trade.portfolio_id = trade.portfolio.id;
         } else if (trade.portfolio) {
@@ -337,21 +342,21 @@ const TradeEditForm = () => {
         }
 
         // ============================================
-        // ✅ تنظیم broker_id (اصلاح‌شده - اولویت با broker_id مستقیم)
+        // ✅ استخراج broker (از هر دو شکل ممکن)
         // ============================================
-        if (trade.broker_id) {
-          // اگر broker_id مستقیماً در پاسخ وجود دارد، از آن استفاده کن
-          trade.broker_id = trade.broker_id;
-        } else if (trade.broker && typeof trade.broker === 'object') {
-          trade.broker_id = trade.broker.id;
+        if (trade.broker && typeof trade.broker === 'object' && trade.broker.id) {
+          trade.broker = trade.broker.id;
         } else if (trade.broker) {
-          trade.broker_id = trade.broker;
+          trade.broker = trade.broker;
+        } else if (trade.broker_id) {
+          trade.broker = trade.broker_id;
         } else {
-          trade.broker_id = null;
+          trade.broker = null;
         }
 
         setTradeData(trade);
 
+        // بارگذاری قوانین
         setRulesLoading(true);
         try {
           const rulesResponse = await RuleService.getRules();
@@ -390,6 +395,7 @@ const TradeEditForm = () => {
     }
   }, [id, navigate, showToast]);
 
+  // ===== توابع تغییرات =====
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'symbol') {
@@ -500,6 +506,9 @@ const TradeEditForm = () => {
     return validationErrors.length === 0;
   };
 
+  // ================================================================
+  // ✅ ارسال فرم (فقط broker)
+  // ================================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -529,13 +538,17 @@ const TradeEditForm = () => {
 
       const portfolioId = tradeData.portfolio_id ? parseInt(tradeData.portfolio_id) : null;
 
+      // ============================================
+      // ✅ فقط broker را با مقدار عددی ارسال می‌کنیم
+      // ============================================
+      const brokerValue = tradeData.broker ? parseInt(tradeData.broker) : null;
+
       const payload = {
         ...tradeData,
         group: groupId,
         group_id: groupId,
         portfolio: portfolioId,
-        // ✅ تبدیل broker_id به عدد
-        broker_id: tradeData.broker_id ? parseInt(tradeData.broker_id) : null,
+        broker: brokerValue,          // ← فقط broker (نه broker_id)
         rule_checks: checkedRules.filter(r => r.checked).map(r => r.id),
       };
 
@@ -610,6 +623,7 @@ const TradeEditForm = () => {
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 10));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
+  // ===== رندر مراحل =====
   const renderStep1 = () => (
     <div className="form-step">
       <h3>📅 شناسه و تاریخ</h3>
@@ -641,6 +655,11 @@ const TradeEditForm = () => {
     const portfolioValue = tradeData.portfolio_id || '';
     const symbolGroups = getSymbolGroups();
     const currentSymbol = tradeData?.symbol || '';
+
+    // ============================================
+    // ✅ مقدار broker برای سلکتور
+    // ============================================
+    const brokerValue = tradeData?.broker ?? '';
 
     return (
       <div className="form-step">
@@ -720,12 +739,14 @@ const TradeEditForm = () => {
             </select>
             <small className="hint-text">انتخاب پورتفولیو برای تفکیک آمار</small>
           </div>
-          {/* ✅ سلکتور بروکر با مقدار اصلاح‌شده */}
+          {/* ============================================
+              ✅ سلکتور بروکر با نام broker
+              ============================================ */}
           <div className="form-group">
             <label>بروکر / کارگزار</label>
             <select
-              name="broker_id"
-              value={tradeData?.broker_id ?? ''}
+              name="broker"
+              value={brokerValue}
               onChange={handleChange}
               disabled={brokersLoading}
             >

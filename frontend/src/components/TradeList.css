@@ -1,18 +1,27 @@
 /* frontend/src/components/TradeList.css */
 
+/* ============================================
+   TradeList - تمام صفحه
+   ============================================ */
 .tradelist-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 24px;
   background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  min-height: 80vh;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100vh;
   transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.tradelist-container * {
+  box-sizing: border-box;
 }
 
 /* ============================================
-   Header - اصلاح شده
+   Header - اصلاح شده برای یک خط
    ============================================ */
 .tradelist-header {
   display: flex;
@@ -32,12 +41,13 @@
   flex-shrink: 0;
 }
 
-/* ✅ هدر اکشن‌ها - دکمه‌ها در یک ردیف */
+/* ✅ هدر اکشن‌ها - دکمه‌ها در یک ردیف (دسکتاپ) */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 /* ============================================
@@ -46,7 +56,7 @@
 .header-actions .btn-print-list,
 .header-actions .btn-excel-list,
 .header-actions .btn-secondary {
-  padding: 6px 14px;
+  padding: 6px 12px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -57,10 +67,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  height: 36px;
-  min-width: 70px;
+  gap: 4px;
+  height: 34px;
+  min-width: 60px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* دکمه چاپ */
@@ -377,39 +388,71 @@
 }
 
 /* ============================================
-   Action Buttons
+   Action Buttons - مخصوص TradeList (با کلاس والد)
    ============================================ */
-.action-buttons {
+.tradelist-container .action-buttons {
   display: flex;
   gap: 4px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
-.btn-view,
-.btn-edit,
-.btn-delete {
+.tradelist-container .btn-view,
+.tradelist-container .btn-edit,
+.tradelist-container .btn-delete {
   padding: 4px 8px;
-  border: none;
+  border: 1.5px solid #444444 !important;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   transition: all 0.3s ease;
-  background: transparent;
+  background: transparent !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  color: var(--text-primary);
+  box-shadow: none !important;
 }
 
-.btn-view:hover {
-  background: #e3f2fd;
-  transform: scale(1.1);
+.dark-theme .tradelist-container .btn-view,
+.dark-theme .tradelist-container .btn-edit,
+.dark-theme .tradelist-container .btn-delete {
+  border-color: #888888 !important;
+  color: #e0e0e0;
 }
 
-.btn-edit:hover {
-  background: #fff3e0;
+.tradelist-container .btn-view:hover {
+  background: #e3f2fd !important;
   transform: scale(1.1);
+  border-color: #1a237e !important;
 }
 
-.btn-delete:hover {
-  background: #ffebee;
+.dark-theme .tradelist-container .btn-view:hover {
+  background: #1a237e !important;
+  border-color: #64b5f6 !important;
+}
+
+.tradelist-container .btn-edit:hover {
+  background: #fff3e0 !important;
   transform: scale(1.1);
+  border-color: #e65100 !important;
+}
+
+.dark-theme .tradelist-container .btn-edit:hover {
+  background: #3e2a00 !important;
+  border-color: #ffa726 !important;
+}
+
+.tradelist-container .btn-delete:hover {
+  background: #ffebee !important;
+  transform: scale(1.1);
+  border-color: #c62828 !important;
+}
+
+.dark-theme .tradelist-container .btn-delete:hover {
+  background: #3a1a1a !important;
+  border-color: #ef5350 !important;
 }
 
 /* ============================================
@@ -730,7 +773,7 @@
    ============================================ */
 @media (max-width: 992px) {
   .tradelist-container {
-    padding: 12px;
+    padding: 12px 16px;
   }
 
   .filters-bar {
@@ -747,6 +790,10 @@
 }
 
 @media (max-width: 768px) {
+  .tradelist-container {
+    padding: 12px 16px;
+  }
+
   .tradelist-header {
     flex-direction: column;
     align-items: stretch;
@@ -758,21 +805,20 @@
     font-size: 18px;
   }
 
-  /* ✅ در موبایل دکمه‌ها در یک ردیف و با عرض مناسب */
   .header-actions {
     width: 100%;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
+    flex-wrap: wrap;
   }
 
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
   .header-actions .btn-secondary {
     font-size: 12px;
-    padding: 4px 10px;
-    height: 32px;
-    min-width: 60px;
-    flex: 0 1 auto;
+    padding: 4px 8px;
+    height: 30px;
+    min-width: 50px;
   }
 
   .stats-bar {
@@ -794,16 +840,18 @@
     padding: 6px 8px;
   }
 
-  .action-buttons {
-    flex-direction: column;
+  .tradelist-container .action-buttons {
+    flex-direction: row;
     gap: 3px;
   }
 
-  .btn-view,
-  .btn-edit,
-  .btn-delete {
+  .tradelist-container .btn-view,
+  .tradelist-container .btn-edit,
+  .tradelist-container .btn-delete {
     padding: 3px 6px;
     font-size: 12px;
+    min-width: 28px;
+    height: 28px;
   }
 
   .pagination {
@@ -813,18 +861,21 @@
 }
 
 @media (max-width: 480px) {
-  /* ✅ در موبایل بسیار کوچک، دکمه‌ها به صورت ستونی */
+  .tradelist-container {
+    padding: 8px 12px;
+  }
+
   .header-actions {
-    flex-direction: column;
-    width: 100%;
+    gap: 3px;
   }
 
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
   .header-actions .btn-secondary {
-    width: 100%;
-    justify-content: center;
-    min-width: unset;
+    font-size: 11px;
+    padding: 3px 6px;
+    height: 28px;
+    min-width: 40px;
   }
 
   .stats-bar {
@@ -843,5 +894,39 @@
   .modal-content {
     padding: 20px;
     margin: 12px;
+  }
+
+  .tradelist-container .action-buttons {
+    gap: 2px;
+  }
+
+  .tradelist-container .btn-view,
+  .tradelist-container .btn-edit,
+  .tradelist-container .btn-delete {
+    padding: 2px 4px;
+    font-size: 11px;
+    min-width: 24px;
+    height: 24px;
+    border-width: 1px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .header-actions .btn-print-list,
+  .header-actions .btn-excel-list,
+  .header-actions .btn-secondary {
+    font-size: 10px;
+    padding: 2px 4px;
+    height: 24px;
+    min-width: 32px;
+  }
+
+  .tradelist-container .btn-view,
+  .tradelist-container .btn-edit,
+  .tradelist-container .btn-delete {
+    padding: 2px 3px;
+    font-size: 10px;
+    min-width: 20px;
+    height: 20px;
   }
 }

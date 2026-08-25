@@ -102,7 +102,7 @@ AI_TIMEOUT = get_db_int('ai_timeout', 600)
 OLLAMA_URL = get_db_setting('ollama_url', 'http://127.0.0.1:11434/api/generate')
 OLLAMA_AVAILABLE_MODELS = get_db_setting('ollama_available_models', 'llama3.1:8b,mistral:7b,deepseek-r1:7b')
 OLLAMA_MODEL = get_db_setting('ollama_model', 'llama3.1:8b')
-OLLAMA_TIMEOUT = get_db_int('ollama_timeout', 600)
+OLLAMA_TIMEOUT = get_db_int('ollama_timeout', 900)
 
 # -- تصاویر --
 MAX_IMAGE_WIDTH = get_db_int('max_image_width', 2000)
@@ -146,8 +146,9 @@ ADMIN_PHONE_NUMBER = get_db_setting('admin_phone_number', os.environ.get('ADMIN_
 
 
 # ============================================
-# ✅ تنظیمات CORS (کامل و صحیح)
+# ✅ تنظیمات CORS (کامل و صحیح - اصلاح شده)
 # ============================================
+# ✅ فعال‌سازی CORS برای همه دامنه‌ها (برای تست)
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
@@ -182,6 +183,14 @@ CORS_EXPOSE_HEADERS = [
 ]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
+
+# ✅ برای اطمینان بیشتر، لیست دامنه‌های مجاز
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
 
 
 # ============================================
@@ -225,23 +234,23 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console', 'file'],
-        'level': 'WARNING',  # فقط هشدارها و خطاها (حذف لاگ‌های INFO اضافی)
+        'level': 'WARNING',
     },
     'loggers': {
         # ======== لاگ‌های اصلی Django ========
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',  # فقط خطاها و هشدارها
+            'level': 'WARNING',
             'propagate': False,
         },
         'django.request': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',   # فقط خطاهای سرور (۵xx)
+            'level': 'ERROR',
             'propagate': False,
         },
         'django.server': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',   # فقط خطاهای سرور
+            'level': 'ERROR',
             'propagate': False,
         },
         'django.security': {
@@ -253,12 +262,12 @@ LOGGING = {
         # ======== لاگ‌های اپلیکیشن‌ها ========
         'apps.trading': {
             'handlers': ['console', 'ai_file', 'file'],
-            'level': 'INFO',   # نمایش لاگ‌های مشاوره AI
+            'level': 'INFO',
             'propagate': False,
         },
         'apps.subscriptions': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',  # فقط خطاهای اشتراک
+            'level': 'WARNING',
             'propagate': False,
         },
         'apps.accounts': {
@@ -315,8 +324,8 @@ INSTALLED_APPS = [
     'apps.subscriptions',
     'apps.messaging',
     'apps.admin_panel',
-    'apps.import',  # ✅ اضافه شد
-    'django_cleanup.apps.CleanupConfig',  # حتماً آخرین اپ باشد
+    'apps.import',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 

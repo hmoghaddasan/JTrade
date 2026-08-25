@@ -23,7 +23,7 @@ from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation,
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from apps.accounts.permissions import IsAdminUser
 from apps.subscriptions.sms import GhasedakSMS
-
+from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics, Portfolio, Broker
 from .models import AdminActionLog
 from .serializers import (
     AdminUserSerializer, AdminUserUpdateSerializer, AdminUserDetailSerializer,
@@ -39,6 +39,7 @@ from .serializers import (
     AdminActionLogSerializer,
     AdminSubscriptionPlanSerializer,
     AdminPortfolioSerializer,  # ✅ اضافه شد
+    AdminBrokerSerializer,  # ✅ اضافه کنید
 )
 
 logger = logging.getLogger(__name__)
@@ -1509,3 +1510,63 @@ class AdminPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
     serializer_class = AdminPortfolioSerializer
     queryset = Portfolio.objects.all()
+
+# ================================
+# مدیریت بروکرها (کارگزاران) - جدید
+# ================================
+class AdminBrokerListView(generics.ListCreateAPIView):
+    """لیست و ایجاد بروکر"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminBrokerSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name', 'category', 'order_index']
+    ordering = ['category', 'order_index', 'name']
+
+    def get_queryset(self):
+        queryset = Broker.objects.all()
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category=category)
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        return queryset
+
+    def perform_create(self, serializer):
+        broker = serializer.save()
+        AdminActionLog.objects.create(
+            admin=self.request.user,
+            action_type='create',
+            target_model='Broker',
+            target_id=broker.id,
+            description=f'ایجاد بروکر {broker.name}'
+        )
+
+
+class AdminBrokerDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """جزئیات، ویرایش و حذف بروکر"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminBrokerSerializer
+    queryset = Broker.objects.all()
+
+    def perform_update(self, serializer):
+        broker = serializer.save()
+        AdminActionLog.objects.create(
+            admin=self.request.user,
+            action_type='update',
+            target_model='Broker',
+            target_id=broker.id,
+            description=f'به‌روزرسانی بروکر {broker.name}'
+        )
+
+    def perform_destroy(self, instance):
+        AdminActionLog.objects.create(
+            admin=self.request.user,
+            action_type='delete',
+            target_model='Broker',
+            target_id=instance.id,
+            description=f'حذف بروکر {instance.name}'
+        )
+        instance.delete()
+

@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ConsultationProvider } from './contexts/ConsultationContext';
+import { PortfolioProvider, usePortfolio } from './contexts/PortfolioContext';
 import ConsultationProgressWidget from './components/ai/ConsultationProgressWidget';
 import SubscriptionRenewal from './components/auth/SubscriptionRenewal';
 import PaymentVerify from './components/PaymentVerify';
@@ -31,7 +32,7 @@ import TradeDetail from './components/TradeDetail';
 // Reports Components
 import ReportDashboard from './components/reports/ReportDashboard';
 
-// ✅ Advanced Metrics - جدید
+// Advanced Metrics
 import AdvancedMetricsReport from './components/reports/AdvancedMetricsReport';
 
 // Analytics
@@ -42,12 +43,16 @@ import AIConsultation from './components/ai/AIConsultation';
 import AIConsultationHistory from './components/ai/AIConsultationHistory';
 import AIConsultationDetail from './components/ai/AIConsultationDetail';
 import ConsultationCompletedBanner from './components/ai/ConsultationCompletedBanner';
-
+import BrokerList from './pages/Admin/Brokers/BrokerList';
 import PortfolioList from './pages/Admin/Portfolios/PortfolioList';
-import { PortfolioProvider } from './contexts/PortfolioContext';
-import ImportPage from './pages/ImportPage';  // ✅ اضافه شد
+import ImportPage from './pages/ImportPage';
+
+// ===== پیام‌های سیستمی =====
+import SystemMessageList from './pages/Admin/Messages/SystemMessageList';
+import SystemMessageForm from './pages/Admin/Messages/SystemMessageForm';
+
 // ============================================
-// ✅ Admin Panel Components
+// Admin Panel Components
 // ============================================
 import AdminLayout from './pages/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
@@ -99,6 +104,7 @@ function App() {
 
 function AppRoutes() {
   const { isAuthenticated, loading, user } = useAuth();
+  const { loadPortfolios } = usePortfolio();
   const [showVerify, setShowVerify] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -106,6 +112,20 @@ function AppRoutes() {
   const [isSubscriptionChecked, setIsSubscriptionChecked] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [isSubscriptionExpired, setIsSubscriptionExpired] = useState(false);
+
+  // ✅ جلوگیری از بارگذاری مکرر پورتفولیوها
+  const hasLoadedPortfolios = useRef(false);
+
+  // ============================================
+  // ✅ بارگذاری پورتفولیوها فقط یک بار پس از احراز هویت
+  // ============================================
+  useEffect(() => {
+    if (isAuthenticated && !loading && user && !hasLoadedPortfolios.current) {
+      console.log('🔄 Loading portfolios once after authentication...');
+      hasLoadedPortfolios.current = true;
+      loadPortfolios();
+    }
+  }, [isAuthenticated, loading, user, loadPortfolios]);
 
   // ============================================
   // بررسی وضعیت اشتراک
@@ -224,6 +244,9 @@ function AppRoutes() {
     console.log('✅ Verification successful');
     setShowVerify(false);
     hasRedirected.current = false;
+    // اجازه بارگذاری مجدد پس از ورود مجدد
+    hasLoadedPortfolios.current = false;
+    loadPortfolios();
     navigate('/dashboard', { replace: true });
   };
 
@@ -251,7 +274,6 @@ function AppRoutes() {
         <Route path="/reports" element={<ReportDashboard />} />
         <Route path="/import" element={<ImportPage />} />
         <Route path="/discipline" element={<DisciplineDashboard />} />
-        {/* ===== ✅ مسیر شاخص‌های پیشرفته ===== */}
         <Route path="/advanced-metrics" element={<AdvancedMetricsReport />} />
         <Route path="/portfolio-comparison" element={<PortfolioComparisonPage />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
@@ -259,34 +281,42 @@ function AppRoutes() {
         <Route path="/messages/new" element={<MessageForm />} />
         <Route path="/ai-consultation" element={<AIConsultation />} />
         <Route path="/ai-history" element={<AIConsultationHistory />} />
-        <Route path="/ai-consultation/detail/:id" element={<AIConsultationDetail />} />
-        <Route path="/discipline" element={<DisciplineDashboard />} />
+
+        {/* ✅ اصلاح مسیر - بدون /detail اضافی */}
+        <Route path="/ai-consultation/:id" element={<AIConsultationDetail />} />
 
         {/* ========================================== */}
         {/* مسیرهای پنل ادمین */}
         {/* ========================================== */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="portfolios" element={<PortfolioList />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserList />} />
           <Route path="users/:id" element={<UserDetail />} />
           <Route path="users/:id/edit" element={<UserEdit />} />
           <Route path="subscriptions" element={<SubscriptionList />} />
           <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
+          <Route path="subscription-plans" element={<PlanList />} />
           <Route path="finance" element={<TransactionList />} />
           <Route path="finance/report" element={<SalesReport />} />
           <Route path="discounts" element={<DiscountList />} />
           <Route path="symbols" element={<SymbolList />} />
+          <Route path="brokers" element={<BrokerList />} />
           <Route path="consultations" element={<ConsultationList />} />
           <Route path="consultations/:id" element={<ConsultationDetail />} />
           <Route path="consultations/analytics" element={<ConsultationAnalytics />} />
           <Route path="trades" element={<AdminTradeList />} />
           <Route path="trades/:id" element={<AdminTradeDetail />} />
           <Route path="messages" element={<AdminMessageList />} />
+
+          {/* ✅ مسیرهای پیام‌های سیستمی - داخل /admin */}
+          <Route path="system-messages" element={<SystemMessageList />} />
+          <Route path="system-messages/new" element={<SystemMessageForm />} />
+          <Route path="system-messages/:id/edit" element={<SystemMessageForm />} />
+
+          <Route path="portfolios" element={<PortfolioList />} />
           <Route path="versions" element={<VersionList />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="subscription-plans" element={<PlanList />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

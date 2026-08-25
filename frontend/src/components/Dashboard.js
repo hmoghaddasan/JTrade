@@ -152,6 +152,7 @@ const Dashboard = () => {
       try {
         console.log('📁 Loading data for user:', user.id);
 
+        // دریافت گروه‌ها
         const groupsResponse = await RealApiService.getTradeGroups();
         let groupsData = groupsResponse.data.results || groupsResponse.data || [];
         console.log('📁 All groups:', groupsData);
@@ -182,19 +183,45 @@ const Dashboard = () => {
         console.log('📁 Final categories:', categoriesData);
         setCategories(categoriesData);
 
-        const tradesResponse = await RealApiService.getTrades();
-        const tradesData = tradesResponse.data.results || tradesResponse.data || [];
-        console.log('📊 Trades loaded:', tradesData.length);
+        // ============================================
+        // ✅ دریافت همه تریدها (تمام صفحات)
+        // ============================================
+        let allTrades = [];
+        let nextPage = null;
+        let page = 1;
+        const pageSize = 100;
 
-        tradesData.forEach(t => {
-          console.log(`📊 Trade ${t.id}: ${t.symbol} -> group: ${t.group || t.group_id}`);
-        });
+        do {
+          console.log(`📊 Fetching page ${page}...`);
+          const response = await RealApiService.getTrades({
+            page: page,
+            page_size: pageSize
+          });
 
-        setTrades(tradesData);
-        console.log('📊 Trades set in state:', tradesData.length);
-        tradesData.forEach(t => {
-          console.log(`📊 Trade ${t.id}: portfolio_id=${t.portfolio_id}, portfolio=${t.portfolio?.id}`);
-        });
+          const data = response.data;
+          const results = data.results || data || [];
+          console.log(`📊 Page ${page} has ${results.length} trades`);
+
+          allTrades = [...allTrades, ...results];
+
+          // بررسی وجود صفحه بعدی
+          if (data.next) {
+            const url = new URL(data.next);
+            const pageParam = url.searchParams.get('page');
+            nextPage = pageParam ? parseInt(pageParam) : null;
+          } else {
+            nextPage = null;
+          }
+
+          page++;
+          // جلوگیری از حلقه بی‌نهایت
+          if (page > 50) break; // حداکثر ۵۰ صفحه
+        } while (nextPage !== null);
+
+        console.log(`📊 Total trades loaded: ${allTrades.length}`);
+        setTrades(allTrades);
+
+        // انتخاب دسته‌بندی پیش‌فرض
         if (categoriesData.length > 0) {
           setSelectedCategory(categoriesData[0]);
         }
@@ -212,60 +239,66 @@ const Dashboard = () => {
   }, [user, showToast]);
 
   // ============================================
-  // فیلتر تریدها بر اساس دسته‌بندی و پورتفولیو
+  // ✅ فیلتر تریدها بر اساس پورتفولیو (با اولویت آبجکت)
   // ============================================
-  const filteredTrades = useMemo(() => {
+  const tradesByPortfolio = useMemo(() => {
     if (!trades || trades.length === 0) return [];
 
-    console.log('🔍 ==== FILTER DEBUG ====');
+    console.log('🔍 ==== TRADES BY PORTFOLIO DEBUG ====');
     console.log('📊 Total trades:', trades.length);
     console.log('📍 currentPortfolioId:', currentPortfolioId);
-    console.log('📍 currentPortfolioId type:', typeof currentPortfolioId);
-    console.log('📁 selectedCategory:', selectedCategory?.name);
-
-    if (trades.length > 0) {
-      console.log('📋 Sample trade:', {
-        id: trades[0].id,
-        symbol: trades[0].symbol,
-        portfolio_id: trades[0].portfolio_id,
-        portfolio: trades[0].portfolio,
-        group: trades[0].group,
-        group_id: trades[0].group_id
-      });
-    }
 
     let result = trades;
 
     if (currentPortfolioId && currentPortfolioId !== 'all' && currentPortfolioId !== 'none') {
-      const portfolioIdStr = String(currentPortfolioId);
-      console.log('🔍 Filtering by portfolio:', portfolioIdStr);
-
+      const portfolioIdNum = Number(currentPortfolioId);
       result = result.filter(t => {
-        const tradePortfolioId = t.portfolio_id || t.portfolio?.id;
-        const match = String(tradePortfolioId) === portfolioIdStr;
-        console.log(`   Trade ${t.id}: ${tradePortfolioId} === ${portfolioIdStr} -> ${match}`);
-        return match;
+        // اولویت با portfolio.id (اگر آبجکت است) سپس portfolio_id
+        const tradePortfolioId = Number(t.portfolio?.id ?? t.portfolio_id);
+        return tradePortfolioId === portfolioIdNum;
       });
     } else if (currentPortfolioId === 'none') {
-      console.log('🔍 Filtering by: without portfolio');
-      result = result.filter(t => !t.portfolio_id && !t.portfolio);
-    } else {
-      console.log('🔍 No portfolio filter applied (showing all)');
+      result = result.filter(t => !t.portfolio && !t.portfolio_id);
     }
 
+    console.log('🔍 Trades by portfolio count:', result.length);
+    return result;
+  }, [trades, currentPortfolioId]);
+
+  // ============================================
+  // ✅ فیلتر نهایی بر اساس دسته‌بندی (با اولویت آبجکت)
+  // ============================================
+  const filteredTrades = useMemo(() => {
+    const source = tradesByPortfolio.length > 0 ? tradesByPortfolio : trades;
+    if (!source || source.length === 0) return [];
+
+    let result = source;
+
     if (selectedCategory?.id !== 0) {
-      console.log('🔍 Filtering by category:', selectedCategory?.name, '(ID:', selectedCategory?.id, ')');
+      const categoryIdNum = Number(selectedCategory.id);
       result = result.filter(t => {
-        const tradeGroupId = t.group || t.group_id;
-        return tradeGroupId === selectedCategory?.id;
+        // ✅ مستقیماً از t.group استفاده کن (چون عدد است)
+        const tradeGroupId = Number(t.group);
+        return tradeGroupId === categoryIdNum;
       });
     }
 
-    console.log('🔍 Final filtered trades count:', result.length);
-    console.log('🔍 ==== END DEBUG ====');
-
     return result;
-  }, [trades, selectedCategory, currentPortfolioId]);
+  }, [tradesByPortfolio, trades, selectedCategory]);
+
+  // ============================================
+  // ✅ محاسبه تعداد تریدهای هر دسته‌بندی (با اولویت آبجکت)
+  // ============================================
+  const getTradeCount = useCallback((categoryId) => {
+    const source = tradesByPortfolio.length > 0 ? tradesByPortfolio : trades;
+    if (categoryId === 0) return source.length;
+    const categoryIdNum = Number(categoryId);
+    return source.filter(t => {
+      // ✅ مستقیماً از t.group استفاده کن (چون عدد است)
+      const tradeGroupId = Number(t.group);
+      return tradeGroupId === categoryIdNum;
+    }).length;
+  }, [tradesByPortfolio, trades]);
 
   // ============================================
   // نمایش داده‌های محدود شده
@@ -442,19 +475,58 @@ const Dashboard = () => {
   };
 
   // ============================================
-  // حذف دسته‌بندی
+  // ✅ حذف دسته‌بندی (نسخه نهایی با بررسی همه پورتفولیوها)
+  // ============================================
+  // ============================================
+  // ✅ حذف دسته‌بندی (نسخه نهایی با بررسی همه پورتفولیوها)
   // ============================================
   const handleDeleteCategory = async () => {
     if (!categoryToDelete) return;
 
-    const categoryTrades = trades.filter(t => t.group === categoryToDelete.id || t.group_id === categoryToDelete.id);
+    // ✅ بررسی وجود ترید در این دسته‌بندی در تمام پورتفولیوها
+    const categoryTrades = trades.filter(t => {
+      // بررسی چند حالت مختلف برای اطمینان
+      const tradeGroupId = t.group || t.group_id || t.group?.id;
+      return Number(tradeGroupId) === Number(categoryToDelete.id);
+    });
+
+    // ✅ اگر ترید وجود دارد، پیام دقیق نمایش داده شود
     if (categoryTrades.length > 0) {
-      showToast(`⚠️ این دسته‌بندی دارای ${categoryTrades.length} ترید است. ابتدا تریدهای آن را حذف کنید.`, 'warning');
+      // ✅ دریافت لیست پورتفولیوهای دارای ترید
+      const portfoliosWithTrades = new Set();
+      categoryTrades.forEach(t => {
+        // ✅ استخراج نام پورتفولیو از هر سه حالت ممکن
+        let portfolioName = 'بدون پورتفولیو';
+
+        if (t.portfolio && typeof t.portfolio === 'object') {
+          // حالت اول: portfolio آبجکت کامل است
+          portfolioName = t.portfolio.name || t.portfolio.portfolio_name || 'بدون پورتفولیو';
+        } else if (t.portfolio_name) {
+          // حالت دوم: portfolio_name مستقیماً وجود دارد
+          portfolioName = t.portfolio_name;
+        } else if (t.portfolio_id) {
+          // حالت سوم: فقط portfolio_id وجود دارد، باید از لیست پورتفولیوها نام را پیدا کنیم
+          const foundPortfolio = portfolios.find(p => Number(p.id) === Number(t.portfolio_id));
+          portfolioName = foundPortfolio?.name || 'بدون پورتفولیو';
+        }
+
+        portfoliosWithTrades.add(portfolioName);
+      });
+
+      const portfolioList = Array.from(portfoliosWithTrades).join('، ');
+
+      showToast(
+        `⚠️ این دسته‌بندی در ${categoryTrades.length} ترید در پورتفولیوهای (${portfolioList}) استفاده شده است. ابتدا تریدهای آن را حذف یا به دسته‌بندی دیگری منتقل کنید.`,
+        'warning',
+        5000
+      );
+
       setShowDeleteCategoryModal(false);
       setCategoryToDelete(null);
       return;
     }
 
+    // ✅ اگر ترید وجود نداشت، حذف انجام شود
     try {
       await RealApiService.deleteTradeGroup(categoryToDelete.id);
 
@@ -472,7 +544,6 @@ const Dashboard = () => {
       showToast('❌ خطا در حذف دسته‌بندی', 'error');
     }
   };
-
   // ============================================
   // چاپ و اکسل
   // ============================================
@@ -546,14 +617,6 @@ const Dashboard = () => {
     link.click();
     URL.revokeObjectURL(link.href);
   };
-
-  // ============================================
-  // محاسبه تعداد تریدهای هر دسته‌بندی
-  // ============================================
-  const getTradeCount = useCallback((categoryId) => {
-    if (categoryId === 0) return filteredTrades.length;
-    return filteredTrades.filter(t => t.group === categoryId || t.group_id === categoryId).length;
-  }, [filteredTrades]);
 
   // ============================================
   // خروج از سیستم
@@ -635,7 +698,7 @@ const Dashboard = () => {
             <span className="btn-text">شاخص‌ها</span>
           </button>
 
-          {/* ===== کلید پورتفولیو - اصلاح شده با کلاس portfolio-selector ===== */}
+          {/* ===== کلید پورتفولیو ===== */}
           <div className="portfolio-selector">
             <PortfolioSelector />
           </div>
@@ -684,7 +747,6 @@ const Dashboard = () => {
 
       {/* ===== دکمه‌های اقدام سریع ===== */}
       <div className="quick-actions">
-        {/* ✅ دکمه "ترید جدید" با Dropdown */}
         <div className="action-btn-wrapper" ref={dropdownRef}>
           <button
             className="action-btn primary"
@@ -698,7 +760,7 @@ const Dashboard = () => {
             onClick={() => setShowTradeDropdown(!showTradeDropdown)}
             aria-label="گزینه‌های بیشتر"
           >
-              <span className="arrow-icon">▾</span>
+            <span className="arrow-icon">▾</span>
           </button>
           {showTradeDropdown && (
             <div className="dropdown-menu">
@@ -880,7 +942,6 @@ const Dashboard = () => {
                 ))}
               </div>
               <div className="detail-content">
-                {/* تب عمومی */}
                 {activeTab === 'general' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -900,13 +961,14 @@ const Dashboard = () => {
                     <div className="detail-row">
                       <span className="detail-label">دسته‌بندی</span>
                       <span className="detail-value">
-                        {categories.find(c => c.id === (selectedTrade.group || selectedTrade.group_id))?.name || 'بدون دسته‌بندی'}
+                        {categories.find(c => c.id === (selectedTrade.group?.id ?? selectedTrade.group_id))?.name || 'بدون دسته‌بندی'}
                       </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">سود/زیان</span>
                       <span className={`detail-value ${parseFloat(selectedTrade.profit) >= 0 ? 'profit' : 'loss'}`}>
-                        {parseFloat(selectedTrade.profit) >= 0 ? '+' : ''}{parseFloat(selectedTrade.profit) || 0}$</span>
+                        {parseFloat(selectedTrade.profit) >= 0 ? '+' : ''}{parseFloat(selectedTrade.profit) || 0}$
+                      </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">کیفیت اجرا</span>
@@ -933,7 +995,6 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* تب اجرا */}
                 {activeTab === 'execution' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -985,7 +1046,6 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* تب روانشناسی */}
                 {activeTab === 'psychology' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -1036,7 +1096,6 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* تب چک‌لیست */}
                 {activeTab === 'checklist' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -1094,7 +1153,6 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* تب بازبینی */}
                 {activeTab === 'review' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -1156,7 +1214,6 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* تب ICT */}
                 {activeTab === 'ict' && (
                   <div className="tab-panel">
                     <div className="detail-row">
@@ -1317,19 +1374,75 @@ const Dashboard = () => {
       )}
 
       {showDeleteCategoryModal && categoryToDelete && (
-        <div className="modal-overlay" onClick={() => setShowDeleteCategoryModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">🗑️</div>
-            <h3>حذف دسته‌بندی</h3>
-            <p>آیا از حذف دسته‌بندی <strong>{categoryToDelete.name}</strong> اطمینان دارید؟</p>
-            <p className="modal-warning">این عمل غیرقابل بازگشت است!</p>
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>انصراف</button>
-              <button className="btn-confirm-delete" onClick={handleDeleteCategory}>حذف دسته‌بندی</button>
-            </div>
-          </div>
+      <div className="modal-overlay" onClick={() => setShowDeleteCategoryModal(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-icon">🗑️</div>
+          <h3>حذف دسته‌بندی</h3>
+          <p>آیا از حذف دسته‌بندی <strong>{categoryToDelete.name}</strong> اطمینان دارید؟</p>
+
+          {(() => {
+            const categoryTrades = trades.filter(t => {
+              const tradeGroupId = t.group || t.group_id || t.group?.id;
+              return Number(tradeGroupId) === Number(categoryToDelete.id);
+            });
+
+            if (categoryTrades.length > 0) {
+              const portfoliosWithTrades = new Set();
+              categoryTrades.forEach(t => {
+                let portfolioName = 'بدون پورتفولیو';
+
+                if (t.portfolio && typeof t.portfolio === 'object') {
+                  portfolioName = t.portfolio.name || t.portfolio.portfolio_name || 'بدون پورتفولیو';
+                } else if (t.portfolio_name) {
+                  portfolioName = t.portfolio_name;
+                } else if (t.portfolio_id) {
+                  const foundPortfolio = portfolios.find(p => Number(p.id) === Number(t.portfolio_id));
+                  portfolioName = foundPortfolio?.name || 'بدون پورتفولیو';
+                }
+
+                portfoliosWithTrades.add(portfolioName);
+              });
+
+              const portfolioList = Array.from(portfoliosWithTrades).join('، ');
+
+              return (
+                <>
+                  <p className="modal-warning" style={{ color: '#c62828', fontWeight: 'bold' }}>
+                    ⚠️ این دسته‌بندی در {categoryTrades.length} ترید استفاده شده است.
+                  </p>
+                  <p className="modal-warning" style={{ color: '#c62828' }}>
+                    📂 پورتفولیوهای دارای ترید: {portfolioList}
+                  </p>
+                  <p className="modal-warning" style={{ color: '#c62828', fontSize: '14px' }}>
+                    ❌ برای حذف این دسته‌بندی، ابتدا تمام تریدهای آن را در تمام پورتفولیوها
+                    حذف یا به دسته‌بندی دیگری منتقل کنید.
+                  </p>
+                  <div className="modal-actions">
+                    <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>
+                      بستن
+                    </button>
+                  </div>
+                </>
+              );
+            }
+
+            return (
+              <>
+                <p className="modal-warning">⚠️ این عمل غیرقابل بازگشت است!</p>
+                <div className="modal-actions">
+                  <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>
+                    انصراف
+                  </button>
+                  <button className="btn-confirm-delete" onClick={handleDeleteCategory}>
+                    حذف دسته‌بندی
+                  </button>
+                </div>
+              </>
+            );
+          })()}
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 };

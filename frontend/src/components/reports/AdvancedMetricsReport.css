@@ -1,12 +1,21 @@
 /* frontend/src/components/reports/AdvancedMetricsReport.css */
 
+/* ============================================
+   Metrics Report - تمام صفحه
+   ============================================ */
 .metrics-report {
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   min-height: 100vh;
   direction: rtl;
   font-family: 'Vazirmatn', 'IRANSans', sans-serif;
+  box-sizing: border-box;
+}
+
+.metrics-report * {
+  box-sizing: border-box;
 }
 
 /* ============================================
@@ -562,7 +571,7 @@
 
 @media (max-width: 768px) {
   .metrics-report {
-    padding: 12px;
+    padding: 12px 16px;
   }
 
   .metrics-header {
@@ -679,7 +688,7 @@
 
 @media (max-width: 480px) {
   .metrics-report {
-    padding: 8px;
+    padding: 8px 12px;
   }
 
   .metrics-header-left h1 {

@@ -26,7 +26,7 @@ urlpatterns = [
     path('subscriptions/gift/', views.AdminSubscriptionGiftView.as_view(), name='admin_subscription_gift'),
     path('subscriptions/export-excel/', views.ExportSubscriptionsExcelView.as_view(), name='export_subscriptions_excel'),
 
-    # ===== مدیریت پلن‌های اشتراک (جدید) =====
+    # ===== مدیریت پلن‌های اشتراک =====
     path('subscription-plans/', views.AdminSubscriptionPlanListView.as_view(), name='admin_subscription_plans'),
     path('subscription-plans/<int:pk>/', views.AdminSubscriptionPlanDetailView.as_view(), name='admin_subscription_plan_detail'),
 
@@ -43,6 +43,10 @@ urlpatterns = [
     # ===== مدیریت نمادها (جفت ارزها) =====
     path('symbols/', views.AdminCurrencyPairListView.as_view(), name='admin_symbols'),
     path('symbols/<int:pk>/', views.AdminCurrencyPairDetailView.as_view(), name='admin_symbol_detail'),
+
+    # ===== مدیریت بروکرها (کارگزاران) - جدید =====
+    path('brokers/', views.AdminBrokerListView.as_view(), name='admin_brokers'),
+    path('brokers/<int:pk>/', views.AdminBrokerDetailView.as_view(), name='admin_broker_detail'),
 
     # ===== مدیریت مشاوره‌های AI =====
     path('consultations/', views.AdminAIConsultationListView.as_view(), name='admin_consultations'),
@@ -69,6 +73,7 @@ urlpatterns = [
     # ===== تنظیمات سیستم =====
     path('settings/', views.AdminSettingsListView.as_view(), name='admin_settings'),
     path('settings/update/', views.AdminSettingsUpdateView.as_view(), name='admin_settings_update'),
+
     # ===== مدیریت پورتفولیوها (ادمین) =====
     path('portfolios/', views.AdminPortfolioListView.as_view(), name='admin_portfolios'),
     path('portfolios/<int:pk>/', views.AdminPortfolioDetailView.as_view(), name='admin_portfolio_detail'),

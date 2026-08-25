@@ -13,8 +13,10 @@ const ColumnMapper = ({
   onNext,
   onBack,
 }) => {
+  // ✅ اضافه شدن time_ny به لیست فیلدها
   const modelFields = [
     { key: 'trade_date', label: '📅 تاریخ', required: true },
+    { key: 'time_ny', label: '⏰ ساعت (به وقت نیویورک)', required: false },   // ← اضافه شد
     { key: 'symbol', label: '🔠 نماد', required: true },
     { key: 'trade_type', label: '🔄 جهت (Buy/Sell)' },
     { key: 'entry_price', label: '💰 قیمت ورود' },
@@ -22,10 +24,13 @@ const ColumnMapper = ({
     { key: 'stop_loss', label: '🛑 حد ضرر' },
     { key: 'take_profit', label: '🎯 حد سود' },
     { key: 'profit', label: '📊 سود/زیان' },
-    { key: 'volume', label: '📦 حجم (لات)' },
+    { key: 'lots', label: '📦 حجم (لات)' },
     { key: 'commission', label: '🧾 کارمزد' },
     { key: 'swap', label: '🔄 سواپ' },
-    { key: 'comment', label: '📝 توضیحات' },
+    { key: 'ticket', label: '🎫 شماره ترید' },
+    { key: 'close_reason', label: '📝 دلیل بسته شدن' },
+    { key: 'bias', label: '📈 جهت‌گیری (Bullish/Bearish/Neutral)' },
+    { key: 'strategy_type', label: '📋 نوع استراتژی (LTP/ITP/STP)' },
   ];
 
   const handleFieldChange = (fieldKey, value) => {
@@ -102,8 +107,8 @@ const ColumnMapper = ({
       </div>
 
       <div className="mapper-actions">
-        <button className="btn-secondary" onClick={onBack}>← بازگشت</button>
-        <button className="btn-primary" onClick={onNext}>مرحله بعد →</button>
+        <button className="btn-secondary" onClick={onBack}>→ قبلی</button>
+        <button className="btn-primary" onClick={onNext}>بعدی ←</button>
       </div>
     </div>
   );
