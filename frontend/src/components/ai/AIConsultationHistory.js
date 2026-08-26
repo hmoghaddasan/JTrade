@@ -91,7 +91,7 @@ const AIConsultationHistory = () => {
     }
   };
 
-  // ===== ترجمه فیلدها (مورد ۱۰) =====
+  // ===== ترجمه فیلدها =====
   const translateSessionType = (type) => {
     const map = { 'High Pro': 'حرفه‌ای', 'Low Pro': 'مبتدی' };
     return map[type] || type;
@@ -127,7 +127,6 @@ const AIConsultationHistory = () => {
   };
 
   const getFeedbackStatus = (consultation) => {
-    // مورد ۱۲: دکمه ثبت بازخورد در صورت ثبت نشدن
     if (consultation.feedback_score) {
       return <span className="feedback-done">✅ امتیاز {consultation.feedback_score}/۵</span>;
     }
@@ -138,11 +137,9 @@ const AIConsultationHistory = () => {
     );
   };
 
-  // ... سایر توابع کمکی ...
-
   const hasActiveConsultation = activeConsultations.length > 0;
 
-  // ===== تابع چاپ (مورد ۱۱) =====
+  // ===== تابع چاپ =====
   const handlePrint = () => {
     window.print();
   };
@@ -167,7 +164,7 @@ const AIConsultationHistory = () => {
           <button
             className="btn-consult"
             onClick={() => navigate('/ai-consultation')}
-            disabled={hasActiveConsultation}  // ✅ غیرفعال در صورت وجود مشاوره فعال
+            disabled={hasActiveConsultation}
           >
             {hasActiveConsultation ? '⏳ مشاوره در حال انجام...' : '🧠 مشاوره جدید'}
           </button>
@@ -175,7 +172,7 @@ const AIConsultationHistory = () => {
         </div>
       </div>
 
-      {/* مورد ۷: نمایش هشدار مشاوره فعال */}
+      {/* هشدار مشاوره فعال */}
       {hasActiveConsultation && (
         <div className="active-consultation-warning">
           <span className="warning-icon">⏳</span>
@@ -253,7 +250,6 @@ const AIConsultationHistory = () => {
                   )}
                 </div>
 
-                {/* مورد ۱۲: دکمه ثبت بازخورد در صورت عدم ثبت */}
                 <div className="item-feedback">
                   {item.is_followed && (
                     <span className="follow-status">
@@ -271,7 +267,8 @@ const AIConsultationHistory = () => {
                 <div className="item-actions">
                   <button
                     className="btn-view-detail"
-                    onClick={() => navigate(`/ai-consultation/detail/${item.id}`)}
+                    // ✅ اصلاح: مسیر صحیح بدون /detail اضافی
+                    onClick={() => navigate(`/ai-consultation/${item.id}`)}
                   >
                     👁️ مشاهده تحلیل کامل
                   </button>
@@ -310,7 +307,6 @@ const AIConsultationHistory = () => {
                 <p><strong>امتیاز AI:</strong> {selectedConsultation.ai_score}/۱۰۰</p>
               </div>
               <div className="feedback-form">
-                {/* ... فیلدهای فرم بازخورد ... */}
                 <div className="form-group">
                   <label>آیا از پیشنهاد AI پیروی کردید؟</label>
                   <select name="is_followed" value={feedbackForm.is_followed} onChange={handleFeedbackChange}>

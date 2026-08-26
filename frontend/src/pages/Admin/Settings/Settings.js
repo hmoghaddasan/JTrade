@@ -171,56 +171,69 @@ const Settings = () => {
     );
   };
 
- const handleSubmit = async (e) => {
+  // ============================================
+  // ✅ اصلاح شده: متد handleSubmit با آدرس صحیح و متد POST
+  // ============================================
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
     setSuccess(null);
 
     try {
-        const data = {};
-        settings.forEach(s => {
-            if (s.is_editable !== false) {
-                data[s.setting_key] = s.setting_value;
-            }
-        });
+      const data = {};
+      settings.forEach(s => {
+        if (s.is_editable !== false) {
+          data[s.setting_key] = s.setting_value;
+        }
+      });
 
-        // ✅ لاگ کامل برای دیباگ
-        console.log('📤 ===== SENDING SETTINGS =====');
-        console.log('📤 All keys:', Object.keys(data));
-        console.log('📤 gapgpt_api_key:', data.gapgpt_api_key);
-        console.log('📤 gapgpt_api_key type:', typeof data.gapgpt_api_key);
-        console.log('📤 gapgpt_api_key length:', data.gapgpt_api_key?.length || 0);
-        console.log('📤 Full data:', JSON.stringify(data, null, 2));
+      // ✅ لاگ کامل برای دیباگ
+      console.log('📤 ===== SENDING SETTINGS =====');
+      console.log('📤 All keys:', Object.keys(data));
+      console.log('📤 gapgpt_api_key:', data.gapgpt_api_key);
+      console.log('📤 gapgpt_api_key type:', typeof data.gapgpt_api_key);
+      console.log('📤 gapgpt_api_key length:', data.gapgpt_api_key?.length || 0);
+      console.log('📤 Full data:', JSON.stringify(data, null, 2));
 
-        const token = localStorage.getItem('token');
-        const response = await axios.put('/api/admin/settings/', data, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
+      const token = localStorage.getItem('token');
 
-        console.log('📥 ===== RESPONSE =====');
-        console.log('📥 Response:', response.data);
+      // ✅ اصلاح: آدرس صحیح و متد POST
+      const response = await axios({
+        method: 'POST',
+        url: '/api/admin/settings/update/',
+        data: data,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-        setSuccess(response.data.message || 'تنظیمات با موفقیت ذخیره شد');
-        setTimeout(() => setSuccess(null), 5000);
+      console.log('📥 ===== RESPONSE =====');
+      console.log('📥 Response:', response.data);
 
-        // ✅ بعد از ذخیره، دوباره بارگذاری کن
-        loadSettings();
+      setSuccess(response.data.message || 'تنظیمات با موفقیت ذخیره شد');
+      setTimeout(() => setSuccess(null), 5000);
+
+      // ✅ بعد از ذخیره، دوباره بارگذاری کن
+      await loadSettings();
 
     } catch (error) {
-        console.error('❌ ===== ERROR =====');
-        console.error('❌ Error saving settings:', error);
-        console.error('❌ Error response:', error.response?.data);
-        console.error('❌ Error status:', error.response?.status);
-        setError(error.response?.data?.error || 'خطا در ذخیره تنظیمات');
-    } finally {
-        setSaving(false);
-    }
-};
+      console.error('❌ ===== ERROR =====');
+      console.error('❌ Error saving settings:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
 
+      // نمایش پیام خطای دقیق‌تر
+      const errorMessage = error.response?.data?.detail ||
+                          error.response?.data?.error ||
+                          error.response?.data?.message ||
+                          'خطا در ذخیره تنظیمات';
+      setError(errorMessage);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleReset = () => {
     if (window.confirm('آیا از بازنشانی تنظیمات به مقادیر پیش‌فرض اطمینان دارید؟')) {

@@ -15,8 +15,9 @@ const ConsultationCompletedBanner = () => {
     return null;
   }
 
+  // ✅ اصلاح: مسیر بدون /detail اضافی
   const handleView = (consultationId) => {
-    navigate(`/ai-consultation/detail/${consultationId}`);
+    navigate(`/ai-consultation/${consultationId}`);
     dismissCompleted(consultationId);
   };
 

@@ -493,22 +493,27 @@ class TradeRuleCheckSerializer(serializers.ModelSerializer):
 # سریالایزرهای هوش مصنوعی
 # ============================================
 class AIConsultationInputSerializer(serializers.Serializer):
-    symbol = serializers.CharField(max_length=20)
+    symbol = serializers.CharField(max_length=50)
     direction = serializers.ChoiceField(choices=['Buy', 'Sell'])
     entry_price = serializers.DecimalField(max_digits=15, decimal_places=5)
     stop_loss = serializers.DecimalField(max_digits=15, decimal_places=5, required=False, allow_null=True)
     take_profit = serializers.DecimalField(max_digits=15, decimal_places=5, required=False, allow_null=True)
-    market_condition = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
-    emotion = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
+    market_condition = serializers.ChoiceField(choices=['trending', 'ranging', 'neutral', 'volatile'], required=False,
+                                               allow_null=True)
+    emotion = serializers.ChoiceField(
+        choices=['calm', 'excited', 'fear', 'greed', 'patient', 'stress', 'confident', 'uncertain'], required=False,
+        allow_null=True)
     time_ny = serializers.TimeField(required=False, allow_null=True)
     user_question = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    model = serializers.CharField(max_length=50, required=False, allow_null=True, allow_blank=True)
-    session_type = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
-    strategy_type = serializers.CharField(max_length=10, required=False, allow_null=True, allow_blank=True)
-    timeframes = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
+
+    # ✅ اضافه کردن فیلد model
+    model = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+
+    session_type = serializers.ChoiceField(choices=['High Pro', 'Low Pro'], required=False, allow_null=True)
+    strategy_type = serializers.ChoiceField(choices=['LTP', 'ITP', 'STP'], required=False, allow_null=True)
+    timeframes = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     risk_percent = serializers.DecimalField(max_digits=5, decimal_places=2, required=False, allow_null=True)
     volume = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
-
 
 class AIConsultationResponseSerializer(serializers.Serializer):
     score = serializers.IntegerField(min_value=0, max_value=100)

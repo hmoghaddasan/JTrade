@@ -69,26 +69,58 @@ def process_consultation(consultation_id, user_input):
         consultation.save(update_fields=['prompt_used'])
         logger.info(f"✅ [STEP 4] Prompt built, length: {len(prompt)}")
 
-        # ===== ۵. فراخوانی اولاما =====
+        # ===== ۵. فراخوانی AI با انتخاب provider مناسب =====
         model = consultation.model_used or AIService.OLLAMA_MODEL
-        logger.info(f"🔄 [STEP 5] Calling Ollama with model: {model}, timeout: {AIService.OLLAMA_TIMEOUT}s")
+        logger.info(f"🔄 [STEP 5] Original model from consultation: {model}")
+
+        # ✅ اگر mode online است و مدل llama3.1:8b است، به o4-mini تغییر کن
+        try:
+            mode = AIService._get_provider_mode()
+            if mode == 'online' and model == 'llama3.1:8b':
+                model = 'o4-mini'
+                logger.info(f"🔄 [STEP 5] Changed model to {model} because mode is online")
+        except Exception as e:
+            logger.warning(f"⚠️ [STEP 5] Could not check provider mode: {str(e)}")
+
+        logger.info(f"🔄 [STEP 5] Calling AI with model: {model}, timeout: {AIService.OLLAMA_TIMEOUT}s")
 
         try:
-            response_text = AIService.call_ollama(prompt, model=model)
-            logger.info(f"✅ [STEP 5] Ollama responded, length: {len(response_text)}")
+            # ✅ اصلاح: استفاده از model_name به جای model
+            response_text = AIService.get_ai_response(prompt, model_name=model)
+
+            # بررسی اینکه آیا پاسخ خطای اتصال است
+            if response_text and '❌ خطای اتصال به سرویس هوش مصنوعی' in response_text:
+                logger.error(f"❌ [STEP 5] AI returned connection error")
+                logger.error(f"📝 [STEP 5] Full error: {response_text[:500]}")
+                consultation.status = 'failed'
+                consultation.ai_response = {
+                    'error': response_text,
+                    'score': 0,
+                    'strengths': [],
+                    'warnings': ['⚠️ سرویس هوش مصنوعی در دسترس نیست'],
+                    'suggestion': 'لطفاً اتصال به سرویس AI را بررسی کنید.',
+                    'tip': 'همیشه به مدیریت ریسک توجه کنید.',
+                    'psychology': 'تحلیل روانشناختی موجود نیست.',
+                    'is_connection_error': True,
+                }
+                consultation.save(update_fields=['status', 'ai_response'])
+                logger.info(f"❌ Consultation {consultation_id} marked as 'failed'")
+                return
+
+            logger.info(f"✅ [STEP 5] AI responded, length: {len(response_text)}")
 
             # ✅ نمایش ۵۰۰ کاراکتر اول پاسخ برای دیباگ
             logger.info(f"📝 [STEP 5] Response preview: {response_text[:500]}...")
 
         except Exception as e:
-            logger.error(f"❌ [STEP 5] Ollama call failed: {str(e)}")
+            logger.error(f"❌ [STEP 5] AI call failed: {str(e)}")
             logger.error(f"❌ [STEP 5] Full traceback: {traceback.format_exc()}")
             consultation.status = 'failed'
             consultation.ai_response = {
                 'error': str(e),
                 'score': 0,
                 'strengths': [],
-                'warnings': ['⚠️ خطا در ارتباط با Ollama'],
+                'warnings': ['⚠️ خطا در ارتباط با AI'],
                 'suggestion': 'لطفاً دوباره تلاش کنید.',
                 'tip': 'همیشه به مدیریت ریسک توجه کنید.',
                 'psychology': 'تحلیل روانشناختی موجود نیست.',
@@ -100,15 +132,15 @@ def process_consultation(consultation_id, user_input):
 
         # ===== ۶. بررسی خطا بودن پاسخ =====
         if '❌ خطای اتصال به سرویس هوش مصنوعی' in response_text or '❌ پاسخ نامعتبر' in response_text:
-            logger.error(f"❌ [STEP 6] Ollama returned error response")
-            logger.error(f"📝 [STEP 6] Full error response: {response_text}")  # ✅ نمایش کامل خطا
+            logger.error(f"❌ [STEP 6] AI returned error response")
+            logger.error(f"📝 [STEP 6] Full error response: {response_text}")
             consultation.status = 'failed'
             consultation.ai_response = {
                 'error': response_text,
                 'score': 0,
                 'strengths': [],
                 'warnings': ['⚠️ سرویس هوش مصنوعی در دسترس نیست'],
-                'suggestion': 'لطفاً اتصال به Ollama را بررسی کنید.',
+                'suggestion': 'لطفاً اتصال به سرویس AI را بررسی کنید.',
                 'tip': 'همیشه به مدیریت ریسک توجه کنید.',
                 'psychology': 'تحلیل روانشناختی موجود نیست.',
                 'is_connection_error': True,
@@ -144,7 +176,7 @@ def process_consultation(consultation_id, user_input):
         # ===== ۸. ذخیره نتیجه و تغییر وضعیت به completed =====
         consultation.ai_score = parsed_response.get('score', 0)
         consultation.ai_response = parsed_response
-        consultation.status = 'completed'  # ✅ تغییر وضعیت به completed
+        consultation.status = 'completed'
         consultation.save(update_fields=['ai_score', 'ai_response', 'status'])
         logger.info(f"✅ [DONE] Consultation {consultation_id} completed successfully! Status: {consultation.status}")
 

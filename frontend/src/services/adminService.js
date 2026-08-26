@@ -1,120 +1,132 @@
 // frontend/src/services/adminService.js
+
 import api from './apiService';
 
+// ✅ اصلاح: حذف /api از BASE_URL (apiService قبلاً /api دارد)
 const BASE_URL = '/admin';
 
-
+// ============================================
+// ✅ تعریف adminService با const
+// ============================================
 const adminService = {
-  // ===== داشبورد =====
-  getDashboard: () => {
-    console.log('✅ getDashboard called!');
-    return api.get(`${BASE_URL}/dashboard/`);
-  },
+    // ============================================
+    // ===== داشبورد =====
+    // ============================================
+    getDashboard: () => api.get(`${BASE_URL}/dashboard/`),
 
-  // ===== کاربران =====
-  getUsers: (params) => {
-    console.log('✅ getUsers called!');
-    return api.get(`${BASE_URL}/users/`, { params });
-  },
-  getUser: (id) => api.get(`${BASE_URL}/users/${id}/`),
-  updateUser: (id, data) => api.put(`${BASE_URL}/users/${id}/update/`, data),
-  toggleUser: (id) => api.post(`${BASE_URL}/users/${id}/toggle/`),
-  deleteUser: (id) => api.delete(`${BASE_URL}/users/${id}/delete/`),
-  sendSMS: (data) => api.post(`${BASE_URL}/users/send-sms/`, data),
-  exportUsers: (params) => api.get(`${BASE_URL}/users/export-excel/`, { params, responseType: 'blob' }),
+    // ============================================
+    // ===== کاربران =====
+    // ============================================
+    getUsers: (params) => api.get(`${BASE_URL}/users/`, { params }),
+    getUser: (id) => api.get(`${BASE_URL}/users/${id}/`),
+    updateUser: (id, data) => api.put(`${BASE_URL}/users/${id}/update/`, data),
+    toggleUser: (id) => api.post(`${BASE_URL}/users/${id}/toggle/`),
+    deleteUser: (id) => api.delete(`${BASE_URL}/users/${id}/delete/`),
+    sendSms: (data) => api.post(`${BASE_URL}/users/send-sms/`, data),
+    exportUsers: () => api.get(`${BASE_URL}/users/export-excel/`, { responseType: 'blob' }),
 
-  // ===== اشتراک‌ها =====
-  getSubscriptions: (params) => api.get(`${BASE_URL}/subscriptions/`, { params }),
-  getSubscription: (id) => api.get(`${BASE_URL}/subscriptions/${id}/`),
-  extendSubscription: (id, data) => api.post(`${BASE_URL}/subscriptions/${id}/extend/`, data),
-  cancelSubscription: (id) => api.post(`${BASE_URL}/subscriptions/${id}/cancel/`),
-  giftSubscription: (data) => api.post(`${BASE_URL}/subscriptions/gift/`, data),
-  exportSubscriptions: (params) => api.get(`${BASE_URL}/subscriptions/export-excel/`, { params, responseType: 'blob' }),
+    // ============================================
+    // ===== اشتراک‌ها =====
+    // ============================================
+    getSubscriptions: (params) => api.get(`${BASE_URL}/subscriptions/`, { params }),
+    getSubscription: (id) => api.get(`${BASE_URL}/subscriptions/${id}/`),
+    extendSubscription: (id, data) => api.post(`${BASE_URL}/subscriptions/${id}/extend/`, data),
+    cancelSubscription: (id) => api.post(`${BASE_URL}/subscriptions/${id}/cancel/`),
+    giftSubscription: (data) => api.post(`${BASE_URL}/subscriptions/gift/`, data),
+    exportSubscriptions: () => api.get(`${BASE_URL}/subscriptions/export-excel/`, { responseType: 'blob' }),
 
-  // ===== مالی =====
-  getTransactions: (params) => api.get(`${BASE_URL}/transactions/`, { params }),
-  getSalesReport: (params) => api.get(`${BASE_URL}/sales/report/`, { params }),
-  exportSales: (params) => api.get(`${BASE_URL}/sales/export/`, { params, responseType: 'blob' }),
+    // ============================================
+    // ===== پلن‌های اشتراک =====
+    // ============================================
+    getPlans: () => api.get(`${BASE_URL}/subscription-plans/`),
+    getPlan: (id) => api.get(`${BASE_URL}/subscription-plans/${id}/`),
+    createPlan: (data) => api.post(`${BASE_URL}/subscription-plans/`, data),
+    updatePlan: (id, data) => api.put(`${BASE_URL}/subscription-plans/${id}/`, data),
+    deletePlan: (id) => api.delete(`${BASE_URL}/subscription-plans/${id}/`),
 
-  // ===== تخفیف‌ها =====
-  getDiscounts: (params) => api.get(`${BASE_URL}/discounts/`, { params }),
-  getDiscount: (id) => api.get(`${BASE_URL}/discounts/${id}/`),
-  deleteDiscount: (id) => api.delete(`${BASE_URL}/discounts/${id}/delete/`),
+    // ============================================
+    // ===== مالی =====
+    // ============================================
+    getTransactions: (params) => api.get(`${BASE_URL}/transactions/`, { params }),
+    getSalesReport: (params) => api.get(`${BASE_URL}/sales/report/`, { params }),
+    exportSales: (params) => api.get(`${BASE_URL}/sales/export/`, { params, responseType: 'blob' }),
 
-  // ===== نمادها =====
-  getSymbols: (params) => api.get(`${BASE_URL}/symbols/`, { params }),
-  getSymbol: (id) => api.get(`${BASE_URL}/symbols/${id}/`),
-  createSymbol: (data) => api.post(`${BASE_URL}/symbols/`, data),
-  updateSymbol: (id, data) => api.put(`${BASE_URL}/symbols/${id}/`, data),
-  deleteSymbol: (id) => api.delete(`${BASE_URL}/symbols/${id}/`),
+    // ============================================
+    // ===== تخفیف‌ها =====
+    // ============================================
+    getDiscounts: (params) => api.get(`${BASE_URL}/discounts/`, { params }),
+    getDiscount: (id) => api.get(`${BASE_URL}/discounts/${id}/`),
+    createDiscount: (data) => api.post(`${BASE_URL}/discounts/`, data),
+    updateDiscount: (id, data) => api.put(`${BASE_URL}/discounts/${id}/`, data),
+    deleteDiscount: (id) => api.delete(`${BASE_URL}/discounts/${id}/delete/`),
 
-  // ===== بروکرها =====
-  getBrokers: (params) => api.get(`${BASE_URL}/brokers/`, { params }),
-  getBroker: (id) => api.get(`${BASE_URL}/brokers/${id}/`),
-  createBroker: (data) => api.post(`${BASE_URL}/brokers/`, data),
-  updateBroker: (id, data) => api.put(`${BASE_URL}/brokers/${id}/`, data),
-  deleteBroker: (id) => api.delete(`${BASE_URL}/brokers/${id}/`),
+    // ============================================
+    // ===== نمادها =====
+    // ============================================
+    getSymbols: (params) => api.get(`${BASE_URL}/symbols/`, { params }),
+    getSymbol: (id) => api.get(`${BASE_URL}/symbols/${id}/`),
+    createSymbol: (data) => api.post(`${BASE_URL}/symbols/`, data),
+    updateSymbol: (id, data) => api.put(`${BASE_URL}/symbols/${id}/`, data),
+    deleteSymbol: (id) => api.delete(`${BASE_URL}/symbols/${id}/`),
 
-  // ===== مشاوره‌ها =====
-  getConsultations: (params) => api.get(`${BASE_URL}/consultations/`, { params }),
-  getConsultation: (id) => api.get(`${BASE_URL}/consultations/${id}/`),
-  getConsultationAnalytics: () => api.get(`${BASE_URL}/consultations/analytics/`),
+    // ============================================
+    // ===== بروکرها =====
+    // ============================================
+    getBrokers: (params) => api.get(`${BASE_URL}/brokers/`, { params }),
+    getBroker: (id) => api.get(`${BASE_URL}/brokers/${id}/`),
+    createBroker: (data) => api.post(`${BASE_URL}/brokers/`, data),
+    updateBroker: (id, data) => api.put(`${BASE_URL}/brokers/${id}/`, data),
+    deleteBroker: (id) => api.delete(`${BASE_URL}/brokers/${id}/`),
 
-  // ===== تریدها =====
-  getTrades: (params) => api.get(`${BASE_URL}/trades/`, { params }),
-  getTrade: (id) => api.get(`${BASE_URL}/trades/${id}/`),
-  deleteTrade: (id) => api.delete(`${BASE_URL}/trades/${id}/delete/`),
-  exportTrades: (params) => api.get(`${BASE_URL}/trades/export-excel/`, { params, responseType: 'blob' }),
+    // ============================================
+    // ===== مشاوره‌های AI =====
+    // ============================================
+    getConsultations: (params) => api.get(`${BASE_URL}/consultations/`, { params }),
+    getConsultation: (id) => api.get(`${BASE_URL}/consultations/${id}/`),
+    getConsultationAnalytics: () => api.get(`${BASE_URL}/consultations/analytics/`),
 
-  // ============================================
-  // ===== پیام‌های کاربران (ادمین) =====
-  // ============================================
-  getMessages: (params) => api.get(`${BASE_URL}/messages/`, { params }),
-  getMessage: (id) => api.get(`${BASE_URL}/messages/${id}/`),
-  replyMessage: (id, data) => api.post(`${BASE_URL}/messages/${id}/reply/`, data),
-  deleteMessage: (id) => api.delete(`${BASE_URL}/messages/${id}/delete/`),
+    // ============================================
+    // ===== تریدها =====
+    // ============================================
+    getTrades: (params) => api.get(`${BASE_URL}/trades/`, { params }),
+    getTrade: (id) => api.get(`${BASE_URL}/trades/${id}/`),
+    deleteTrade: (id) => api.delete(`${BASE_URL}/trades/${id}/delete/`),
+    exportTrades: (params) => api.get(`${BASE_URL}/trades/export-excel/`, { params, responseType: 'blob' }),
 
-  // ============================================
-  // ===== 📢 پیام‌های سیستمی =====
-  // ============================================
-  // ✅ استفاده از 'messages' (همخوان با مسیر بک‌اند)
-  getSystemMessages: (params) => {
-    console.log('✅ getSystemMessages called!');
-    return api.get('messages/system/', { params });
-  },
-  getSystemMessage: (id) => {
-    return api.get(`messages/system/${id}/`);
-  },
-  createSystemMessage: (data) => {
-    return api.post('messages/system/create/', data);
-  },
-  updateSystemMessage: (id, data) => {
-    return api.put(`messages/system/${id}/update/`, data);
-  },
-  deleteSystemMessage: (id) => {
-    return api.delete(`messages/system/${id}/delete/`);
-  },
-  toggleSystemMessage: (id) => {
-    return api.post(`messages/system/${id}/toggle/`);
-  },
+    // ============================================
+    // ===== پیام‌ها =====
+    // ============================================
+    getMessages: (params) => api.get(`${BASE_URL}/messages/`, { params }),
+    getMessage: (id) => api.get(`${BASE_URL}/messages/${id}/`),
+    replyMessage: (id, data) => api.post(`${BASE_URL}/messages/${id}/reply/`, data),
+    deleteMessage: (id) => api.delete(`${BASE_URL}/messages/${id}/delete/`),
 
-  // ============================================
-  // ===== نسخه‌ها =====
-  // ============================================
-  getVersions: () => api.get(`${BASE_URL}/versions/`),
-  getVersion: (id) => api.get(`${BASE_URL}/versions/${id}/`),
-  createVersion: (data) => api.post(`${BASE_URL}/versions/`, data),
-  updateVersion: (id, data) => api.put(`${BASE_URL}/versions/${id}/`),
-  deleteVersion: (id) => api.delete(`${BASE_URL}/versions/${id}/delete/`),
+    // ============================================
+    // ===== نسخه‌ها =====
+    // ============================================
+    getVersions: () => api.get(`${BASE_URL}/versions/`),
+    getVersion: (id) => api.get(`${BASE_URL}/versions/${id}/`),
+    createVersion: (data) => api.post(`${BASE_URL}/versions/`, data),
+    updateVersion: (id, data) => api.put(`${BASE_URL}/versions/${id}/`, data),
+    deleteVersion: (id) => api.delete(`${BASE_URL}/versions/${id}/delete/`),
 
-  // ============================================
-  // ===== تنظیمات =====
-  // ============================================
-  getSettings: () => api.get(`${BASE_URL}/settings/`),
-  updateSettings: (data) => api.put(`${BASE_URL}/settings/update/`, data),
+    // ============================================
+    // ===== پورتفولیوها =====
+    // ============================================
+    getPortfolios: (params) => api.get(`${BASE_URL}/portfolios/`, { params }),
+    getPortfolio: (id) => api.get(`${BASE_URL}/portfolios/${id}/`),
+    createPortfolio: (data) => api.post(`${BASE_URL}/portfolios/`, data),
+    updatePortfolio: (id, data) => api.put(`${BASE_URL}/portfolios/${id}/`, data),
+    deletePortfolio: (id) => api.delete(`${BASE_URL}/portfolios/${id}/`),
+
+    // ============================================
+    // ===== تنظیمات سیستم =====
+    // ============================================
+    getSettings: () => api.get(`${BASE_URL}/settings/`),
+    updateSettings: (data) => api.post(`${BASE_URL}/settings/update/`, data),
 };
 
-// ✅ برای دسترسی در کنسول (دیباگ)
-window.adminService = adminService;
-
+// ============================================
+// ✅ export default
+// ============================================
 export default adminService;

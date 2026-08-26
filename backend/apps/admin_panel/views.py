@@ -1,16 +1,18 @@
 # backend/apps/admin_panel/views.py
-# backend/apps/admin_panel/views.py
 
-from rest_framework import status, generics, permissions, filters
+from rest_framework import status, generics, permissions, filters, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.decorators import action
 from django.utils import timezone
 from django.db.models import Q, Sum, Count, Avg, Max, Min
 from django.db.models.functions import TruncDate, TruncMonth, TruncDay, ExtractWeekDay
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 import csv
 import io
 import json
@@ -19,11 +21,10 @@ import logging
 
 from apps.accounts.models import User, SystemSetting, AppVersion
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription, DiscountCode, Transaction, DiscountCodeUsage
-from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics, Portfolio
+from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics, Portfolio, Broker
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from apps.accounts.permissions import IsAdminUser
 from apps.subscriptions.sms import GhasedakSMS
-from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics, Portfolio, Broker
 from .models import AdminActionLog
 from .serializers import (
     AdminUserSerializer, AdminUserUpdateSerializer, AdminUserDetailSerializer,
@@ -38,8 +39,8 @@ from .serializers import (
     AdminTradeSerializer,
     AdminActionLogSerializer,
     AdminSubscriptionPlanSerializer,
-    AdminPortfolioSerializer,  # ✅ اضافه شد
-    AdminBrokerSerializer,  # ✅ اضافه کنید
+    AdminPortfolioSerializer,
+    AdminBrokerSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -235,7 +236,6 @@ class AdminDashboardView(APIView):
             'recent_logs': AdminActionLogSerializer(recent_logs, many=True).data,
             'current_version': AdminAppVersionSerializer(current_version).data if current_version else None,
         })
-
 
 
 # ================================
@@ -1078,8 +1078,9 @@ class AdminAppVersionDeleteView(APIView):
         except AppVersion.DoesNotExist:
             return Response({'error': 'نسخه یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
+
 # ================================
-# ۱۳. مدیریت پلن‌های اشتراک - جدید
+# ۹. مدیریت پلن‌های اشتراک - جدید
 # ================================
 class AdminSubscriptionPlanListView(generics.ListCreateAPIView):
     """لیست و ایجاد پلن اشتراک"""
@@ -1142,43 +1143,46 @@ class AdminSubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
             description=f'حذف پلن {instance.plan_name}'
         )
         instance.delete()
+
+
 # ================================
-# ۹. مدیریت تنظیمات سیستم - توسعه کامل
+# ۹. مدیریت تنظیمات سیستم - نسخه نهایی با ViewSet + پشتیبانی از روش قبلی
 # ================================
-class AdminSettingsListView(generics.ListAPIView):
-    """لیست تنظیمات سیستم"""
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+
+# ===== قسمت ۱: ViewSet جدید برای تنظیمات =====
+class SystemSettingViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet برای مدیریت تنظیمات سیستم
+    """
+    queryset = SystemSetting.objects.all()
     serializer_class = AdminSystemSettingSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['setting_key', 'description']
     ordering_fields = ['setting_key']
     ordering = ['setting_key']
 
-    def get_queryset(self):
-        return SystemSetting.objects.all()
-
-
-# backend/apps/admin_panel/views.py
-
-class AdminSettingsUpdateView(APIView):
-    """به‌روزرسانی تنظیمات (دسته‌ای)"""
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
-
-    def put(self, request):
-        """✅ این متد باید وجود داشته باشد"""
+    @action(detail=False, methods=['put', 'post', 'patch'], url_path='update')
+    def update_settings(self, request):
+        """
+        به‌روزرسانی دسته‌ای تنظیمات
+        پشتیبانی از PUT, POST, PATCH
+        """
         data = request.data
         updated = []
         errors = []
         created = []
 
         logger.info("=" * 60)
-        logger.info("📥 RECEIVED SETTINGS UPDATE")
+        logger.info("📥 RECEIVED SETTINGS UPDATE (ViewSet)")
+        logger.info(f"📥 Method: {request.method}")
         logger.info(f"📥 All keys: {list(data.keys())}")
         logger.info(f"📥 gapgpt_api_key: {data.get('gapgpt_api_key', 'NOT FOUND')}")
         logger.info("=" * 60)
 
         for key, value in data.items():
             try:
+                # تبدیل boolean به string
                 if isinstance(value, bool):
                     value = str(value).lower()
 
@@ -1192,6 +1196,7 @@ class AdminSettingsUpdateView(APIView):
                     else:
                         errors.append(f"{key}: قابل ویرایش نیست")
                 except SystemSetting.DoesNotExist:
+                    # اگر تنظیم وجود ندارد، ایجاد کن
                     setting = SystemSetting.objects.create(
                         setting_key=key,
                         setting_value=str(value),
@@ -1206,19 +1211,120 @@ class AdminSettingsUpdateView(APIView):
                 errors.append(f"{key}: {str(e)}")
                 logger.error(f"❌ Error updating {key}: {str(e)}")
 
-        AdminActionLog.objects.create(
-            admin=request.user,
-            action_type='update',
-            target_model='SystemSetting',
-            description=f'به‌روزرسانی {len(updated)} تنظیم، ایجاد {len(created)} تنظیم جدید'
-        )
+        # ثبت لاگ
+        try:
+            AdminActionLog.objects.create(
+                admin=request.user,
+                action_type='update',
+                target_model='SystemSetting',
+                description=f'به‌روزرسانی {len(updated)} تنظیم، ایجاد {len(created)} تنظیم جدید'
+            )
+        except Exception as e:
+            logger.error(f"❌ Error creating AdminActionLog: {str(e)}")
 
         return Response({
             'message': f'{len(updated)} تنظیم به‌روزرسانی و {len(created)} تنظیم جدید ایجاد شد',
             'updated': updated,
             'created': created,
-            'errors': errors if errors else None
+            'errors': errors if errors else None,
+            'method': request.method
         })
+
+
+# ===== قسمت ۲: کلاس قبلی برای لیست تنظیمات =====
+class AdminSettingsListView(generics.ListAPIView):
+    """لیست تنظیمات سیستم"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    serializer_class = AdminSystemSettingSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['setting_key', 'description']
+    ordering_fields = ['setting_key']
+    ordering = ['setting_key']
+
+    def get_queryset(self):
+        return SystemSetting.objects.all()
+
+
+# ===== قسمت ۳: کلاس پشتیبان برای سازگاری با مسیر قبلی =====
+@method_decorator(csrf_exempt, name='dispatch')
+class AdminSettingsUpdateView(APIView):
+    """به‌روزرسانی تنظیمات (دسته‌ای) - نسخه پشتیبان برای سازگاری"""
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+
+    def put(self, request):
+        return self._update_settings(request)
+
+    def post(self, request):
+        return self._update_settings(request)
+
+    def patch(self, request):
+        return self._update_settings(request)
+
+    def _update_settings(self, request):
+        """هسته اصلی به‌روزرسانی تنظیمات - نسخه پشتیبان"""
+        data = request.data
+        updated = []
+        errors = []
+        created = []
+
+        logger.info("=" * 60)
+        logger.info("📥 RECEIVED SETTINGS UPDATE (Fallback)")
+        logger.info(f"📥 Method: {request.method}")
+        logger.info(f"📥 All keys: {list(data.keys())}")
+        logger.info(f"📥 gapgpt_api_key: {data.get('gapgpt_api_key', 'NOT FOUND')}")
+        logger.info("=" * 60)
+
+        for key, value in data.items():
+            try:
+                # تبدیل boolean به string
+                if isinstance(value, bool):
+                    value = str(value).lower()
+
+                try:
+                    setting = SystemSetting.objects.get(setting_key=key)
+                    if setting.is_editable:
+                        setting.setting_value = str(value)
+                        setting.save()
+                        updated.append(key)
+                        logger.info(f"✅ Updated setting: {key} = {value}")
+                    else:
+                        errors.append(f"{key}: قابل ویرایش نیست")
+                except SystemSetting.DoesNotExist:
+                    # اگر تنظیم وجود ندارد، ایجاد کن
+                    setting = SystemSetting.objects.create(
+                        setting_key=key,
+                        setting_value=str(value),
+                        setting_type='string',
+                        description=f'تنظیم {key}',
+                        is_editable=True
+                    )
+                    created.append(key)
+                    logger.info(f"✅ Created setting: {key} = {value}")
+
+            except Exception as e:
+                errors.append(f"{key}: {str(e)}")
+                logger.error(f"❌ Error updating {key}: {str(e)}")
+
+        # ثبت لاگ
+        try:
+            AdminActionLog.objects.create(
+                admin=request.user,
+                action_type='update',
+                target_model='SystemSetting',
+                description=f'به‌روزرسانی {len(updated)} تنظیم، ایجاد {len(created)} تنظیم جدید'
+            )
+        except Exception as e:
+            logger.error(f"❌ Error creating AdminActionLog: {str(e)}")
+
+        return Response({
+            'message': f'{len(updated)} تنظیم به‌روزرسانی و {len(created)} تنظیم جدید ایجاد شد',
+            'updated': updated,
+            'created': created,
+            'errors': errors if errors else None,
+            'method': request.method
+        })
+
+
 # ================================
 # ۱۰. مدیریت پیام‌های کاربران - توسعه کامل
 # ================================
@@ -1508,6 +1614,7 @@ class ExportSubscriptionsExcelView(APIView):
         response['Content-Disposition'] = f'attachment; filename="subscriptions_export_{datetime.now().strftime("%Y%m%d")}.csv"'
         return response
 
+
 # ================================
 # مدیریت پورتفولیوها (ادمین)
 # ================================
@@ -1536,6 +1643,7 @@ class AdminPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
     serializer_class = AdminPortfolioSerializer
     queryset = Portfolio.objects.all()
+
 
 # ================================
 # مدیریت بروکرها (کارگزاران) - جدید
@@ -1595,4 +1703,3 @@ class AdminBrokerDetailView(generics.RetrieveUpdateDestroyAPIView):
             description=f'حذف بروکر {instance.name}'
         )
         instance.delete()
-

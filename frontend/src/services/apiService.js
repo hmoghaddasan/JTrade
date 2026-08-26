@@ -2,8 +2,8 @@
 
 import axios from 'axios';
 
-// ✅ baseURL با اسلش انتهایی برای ترکیب صحیح
-const API_BASE_URL = 'http://localhost:8000/api/';
+// ✅ اصلاح: حذف اسلش انتهایی برای جلوگیری از double slash
+const API_BASE_URL = 'http://localhost:8000/api';  // ← اسلش انتهایی حذف شد
 
 // ایجاد نمونه axios
 const apiClient = axios.create({
@@ -57,7 +57,7 @@ apiClient.interceptors.response.use(
         }
 
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}auth/refresh/`, {
+          const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
             refresh: refreshToken,
           });
           const { access } = response.data;
@@ -88,13 +88,13 @@ apiClient.interceptors.response.use(
 // سرویس‌های پورتفولیو (با مسیرهای صحیح - بدون اسلش ابتدایی)
 // ============================================
 export const portfolioService = {
-  getPortfolios: () => apiClient.get('trading/portfolios/'),
-  createPortfolio: (data) => apiClient.post('trading/portfolios/', data),
-  getPortfolio: (id) => apiClient.get(`trading/portfolios/${id}/`),
-  updatePortfolio: (id, data) => apiClient.put(`trading/portfolios/${id}/`, data),
-  deletePortfolio: (id) => apiClient.delete(`trading/portfolios/${id}/`),
-  getPortfolioAnalytics: (id) => apiClient.get(`trading/portfolios/${id}/analytics/`),
-  getCombinedAnalytics: () => apiClient.get('trading/portfolios/combined-analytics/'),
+  getPortfolios: () => apiClient.get('/trading/portfolios/'),
+  createPortfolio: (data) => apiClient.post('/trading/portfolios/', data),
+  getPortfolio: (id) => apiClient.get(`/trading/portfolios/${id}/`),
+  updatePortfolio: (id, data) => apiClient.put(`/trading/portfolios/${id}/`, data),
+  deletePortfolio: (id) => apiClient.delete(`/trading/portfolios/${id}/`),
+  getPortfolioAnalytics: (id) => apiClient.get(`/trading/portfolios/${id}/analytics/`),
+  getCombinedAnalytics: () => apiClient.get('/trading/portfolios/combined-analytics/'),
 };
 
 // ✅ برای دسترسی در کنسول (دیباگ)
@@ -107,7 +107,7 @@ window.apiClient = apiClient;
 export const aiModelService = {
   getAvailableModels: () => {
     console.log('📡 Fetching available AI models...');
-    return apiClient.get('trading/ai/models/');
+    return apiClient.get('/trading/ai/models/');
   },
 };
 

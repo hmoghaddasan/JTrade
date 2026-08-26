@@ -1326,17 +1326,25 @@ class AIConsultationStatusView(APIView):
 # ============================================
 # مشاوره AI با استریم (نسخه ناهمگام جدید)
 # ============================================
-class AIConsultationStreamView(APIView):
-    """
-    شروع مشاوره به‌صورت ناهمگام – بلافاصله consultation_id را برمی‌گرداند.
-    کاربر می‌تواند با پولینگ وضعیت را بررسی کند.
-    """
-    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedWithSubscription]
 
+class AIConsultationStreamView(APIView):
     def post(self, request):
         serializer = AIConsultationInputSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ اطمینان از دریافت مدل از درخواست
+        validated_data = serializer.validated_data
+        model_value = request.data.get('model') or validated_data.get('model')
+        if model_value:
+            validated_data['model'] = model_value
+            logger.info(f"🔍 [AIConsultationStreamView] model received: {model_value}")
+        else:
+            # اگر مدل ارسال نشده، از پیش‌فرض استفاده کن
+            from apps.accounts.models import SystemSetting
+            default_model = SystemSetting.objects.get(setting_key='gapgpt_default_model').setting_value or 'o4-mini'
+            validated_data['model'] = default_model
+            logger.info(f"🔍 [AIConsultationStreamView] Using default model: {default_model}")
 
         try:
             subscription = UserSubscription.objects.filter(
@@ -1356,7 +1364,7 @@ class AIConsultationStreamView(APIView):
             }, status=status.HTTP_403_FORBIDDEN)
 
         try:
-            result = AIService.start_async_consultation(request.user, serializer.validated_data)
+            result = AIService.start_async_consultation(request.user, validated_data)
 
             if isinstance(result, dict) and 'error' in result:
                 return Response({
@@ -1371,17 +1379,10 @@ class AIConsultationStreamView(APIView):
             }, status=status.HTTP_202_ACCEPTED)
 
         except Exception as e:
+            logger.error(f"❌ Error in AIConsultationStreamView: {str(e)}")
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def options(self, request, *args, **kwargs):
-        response = Response()
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-Requested-With'
-        response['Access-Control-Max-Age'] = '86400'
-        return response
 
 
 # ============================================

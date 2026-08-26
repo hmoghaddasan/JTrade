@@ -115,8 +115,13 @@ const AIConsultation = () => {
   const [symbols, setSymbols] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
 
+  // ===== Stateهای مدیریت کش مدل‌ها =====
   const [availableModels, setAvailableModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
+  const [modelsLastFetched, setModelsLastFetched] = useState(null);
+  const [isModelsCacheValid, setIsModelsCacheValid] = useState(false);
+  const [isRefreshingModels, setIsRefreshingModels] = useState(false);
+  const MODELS_CACHE_DURATION = 30 * 60 * 1000; // 30 دقیقه به میلی‌ثانیه
 
   const stages = [
     { id: 0, label: '📊 دریافت قیمت لحظه‌ای', threshold: 10 },
@@ -180,6 +185,169 @@ const AIConsultation = () => {
       result = result.replace(new RegExp(`\\b${en}\\b`, 'gi'), fa);
     }
     return result;
+  };
+
+  // ============================================
+  // ✅ تابع کوتاه‌سازی نام مدل
+  // ============================================
+  const getShortModelName = (model) => {
+    if (!model || typeof model !== 'object') return 'مدل نامشخص';
+
+    const name = String(model.name || model.id || '');
+    const provider = String(model.provider || '');
+    const displayName = String(model.display_name || '');
+
+    // اگر نام مدل قبلاً کوتاه است، همان را برگردان
+    if (name.length < 15 && !name.includes(':')) {
+      return name;
+    }
+
+    // حذف پیشوندهای اضافی
+    let shortName = name;
+
+    // حذف بخش‌های اضافی مانند :latest, :8b
+    shortName = shortName.replace(/:[^:]*$/, '');
+
+    // اگر name خیلی بلند است و displayName دارد
+    if (shortName.length > 20 && displayName) {
+      return displayName;
+    }
+
+    // اگر فقط نام provider است، نام مدل را از id بگیریم
+    if (shortName === provider && name.length > 20) {
+      // از id استفاده کن
+      const idParts = name.split('/');
+      shortName = idParts[idParts.length - 1] || name;
+    }
+
+    // حذف پیشوندهای اضافی
+    const prefixes = ['openai/', 'anthropic/', 'google/', 'meta/', 'mistral/', 'deepseek/'];
+    for (const prefix of prefixes) {
+      if (shortName.startsWith(prefix)) {
+        shortName = shortName.substring(prefix.length);
+        break;
+      }
+    }
+
+    // اگر هنوز طولانی است، 20 کاراکتر اول را بگیر
+    if (shortName.length > 25) {
+      shortName = shortName.substring(0, 22) + '...';
+    }
+
+    return shortName;
+  };
+
+  // ============================================
+  // ✅ تابع دریافت لیست مدل‌ها با کش
+  // ============================================
+  const fetchModels = async (forceRefresh = false) => {
+    // اگر کش معتبر است و نیرو دریافت نشده، از کش استفاده کن
+    const now = Date.now();
+    if (!forceRefresh && isModelsCacheValid && modelsLastFetched) {
+      const timeSinceLastFetch = now - modelsLastFetched;
+      if (timeSinceLastFetch < MODELS_CACHE_DURATION) {
+        console.log(`📡 Using cached models (${Math.round(timeSinceLastFetch / 60000)} minutes old)`);
+        return;
+      }
+    }
+
+    setModelsLoading(true);
+    setIsRefreshingModels(true);
+
+    try {
+      console.log('📡 Fetching models from API...');
+      const response = await apiClient.get('trading/ai/models/');
+      let data = response.data;
+
+      if (!Array.isArray(data)) {
+        if (data && typeof data === 'object') {
+          if (data.results && Array.isArray(data.results)) {
+            data = data.results;
+          } else if (data.data && Array.isArray(data.data)) {
+            data = data.data;
+          } else {
+            data = [data];
+          }
+        } else {
+          data = [];
+        }
+      }
+
+      const processedModels = data.map(model => ({
+        id: String(model.id || model.name || ''),
+        name: String(model.name || model.id || ''),
+        provider: String(model.provider || 'unknown'),
+        display_name: String(model.display_name || model.provider || ''),
+        online: Boolean(model.online),
+        free: Boolean(model.free),
+        category: String(model.category || ''),
+        category_label: String(model.category_label || ''),
+        cooldown: Number(model.cooldown || 10),
+        is_default: Boolean(model.is_default),
+        // ✅ اضافه کردن نام کوتاه برای نمایش
+        short_name: getShortModelName({
+          name: String(model.name || model.id || ''),
+          provider: String(model.provider || ''),
+          display_name: String(model.display_name || '')
+        })
+      })).filter(m => m.id && m.id.length > 0);
+
+      console.log('📡 Processed models:', processedModels);
+
+      if (processedModels.length > 0) {
+        setAvailableModels(processedModels);
+        const defaultModel = processedModels.find(m => m.is_default) || processedModels[0];
+        if (defaultModel && !selectedModel) {
+          setSelectedModel(defaultModel.id);
+        }
+        // به‌روزرسانی کش
+        setModelsLastFetched(Date.now());
+        setIsModelsCacheValid(true);
+      } else {
+        // Fallback
+        const fallback = [
+          { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true, short_name: 'Ollama' },
+          { id: 'o4-mini', name: 'o4-mini', provider: 'gapgpt', display_name: 'Gapgpt', online: true, free: true, category: 'free', category_label: '🟢 آنلاین', cooldown: 10, is_default: false, short_name: 'o4-mini' },
+        ];
+        setAvailableModels(fallback);
+        if (!selectedModel) {
+          setSelectedModel('llama3.1:8b');
+        }
+        setModelsLastFetched(Date.now());
+        setIsModelsCacheValid(true);
+      }
+    } catch (error) {
+      console.error('❌ Error loading models:', error);
+      // Fallback
+      const fallback = [
+        { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true, short_name: 'Ollama' },
+        { id: 'o4-mini', name: 'o4-mini', provider: 'gapgpt', display_name: 'Gapgpt', online: true, free: true, category: 'free', category_label: '🟢 آنلاین', cooldown: 10, is_default: false, short_name: 'o4-mini' },
+      ];
+      setAvailableModels(fallback);
+      if (!selectedModel) {
+        setSelectedModel('llama3.1:8b');
+      }
+    } finally {
+      setModelsLoading(false);
+      setIsRefreshingModels(false);
+    }
+  };
+
+  // ============================================
+  // ✅ بارگذاری مدل‌ها (با کش)
+  // ============================================
+  useEffect(() => {
+    fetchModels(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ============================================
+  // ✅ تابع رفرش دستی مدل‌ها (با دکمه)
+  // ============================================
+  const handleRefreshModels = () => {
+    if (isRefreshingModels) return;
+    showToast('🔄 در حال بروزرسانی لیست مدل‌ها...', 'info');
+    fetchModels(true);
   };
 
   // ============================================
@@ -624,87 +792,6 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // ✅ بارگذاری لیست مدل‌های AI (با پردازش صحیح داده‌ها)
-  // ============================================
-  useEffect(() => {
-    const loadModels = async () => {
-      setModelsLoading(true);
-      try {
-        // ✅ استفاده از API جدید برای دریافت مدل‌ها
-        const response = await apiClient.get('trading/ai/models/');
-        let data = response.data;
-
-        console.log('📡 Available models from API:', data);
-
-        // اگر data آرایه نیست، تبدیل کن
-        if (!Array.isArray(data)) {
-          if (data && typeof data === 'object') {
-            if (data.results && Array.isArray(data.results)) {
-              data = data.results;
-            } else if (data.data && Array.isArray(data.data)) {
-              data = data.data;
-            } else {
-              data = [data];
-            }
-          } else {
-            data = [];
-          }
-        }
-
-        // ✅ اطمینان از اینکه هر مدل یک آبجکت با فیلدهای لازم است
-        const processedModels = data.map(model => ({
-          id: String(model.id || model.name || ''),
-          name: String(model.name || model.id || ''),
-          provider: String(model.provider || 'unknown'),
-          display_name: String(model.display_name || model.provider || ''),
-          online: Boolean(model.online),
-          free: Boolean(model.free),
-          category: String(model.category || ''),
-          category_label: String(model.category_label || ''),
-          cooldown: Number(model.cooldown || 10),
-          is_default: Boolean(model.is_default),
-        })).filter(m => m.id && m.id.length > 0);
-
-        console.log('📡 Processed models:', processedModels);
-
-        if (processedModels.length > 0) {
-          setAvailableModels(processedModels);
-          // اگر مدل پیش‌فرض وجود دارد، آن را انتخاب کن
-          const defaultModel = processedModels.find(m => m.is_default) || processedModels[0];
-          if (defaultModel && !formData.model) {
-            setFormData(prev => ({ ...prev, model: defaultModel.id }));
-          }
-        } else {
-          // Fallback
-          const fallback = [
-            { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama (محلی)', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true },
-            { id: 'GapGPT 5.6 Lite', name: 'GapGPT 5.6 Lite', provider: 'gapgpt', display_name: 'Gapgpt.app (آنلاین)', online: true, free: true, category: 'free', category_label: '🟢 رایگان', cooldown: 10, is_default: false },
-          ];
-          setAvailableModels(fallback);
-          if (!formData.model) {
-            setFormData(prev => ({ ...prev, model: 'llama3.1:8b' }));
-          }
-        }
-      } catch (error) {
-        console.error('❌ Error loading models:', error);
-        // Fallback
-        const fallback = [
-          { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama (محلی)', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true },
-          { id: 'GapGPT 5.6 Lite', name: 'GapGPT 5.6 Lite', provider: 'gapgpt', display_name: 'Gapgpt.app (آنلاین)', online: true, free: true, category: 'free', category_label: '🟢 رایگان', cooldown: 10, is_default: false },
-        ];
-        setAvailableModels(fallback);
-        if (!formData.model) {
-          setFormData(prev => ({ ...prev, model: 'llama3.1:8b' }));
-        }
-      } finally {
-        setModelsLoading(false);
-      }
-    };
-    loadModels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ============================================
   // بررسی وضعیت اشتراک
   // ============================================
   useEffect(() => {
@@ -731,12 +818,13 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // تغییرات فرم (با لاگ برای model)
+  // تغییرات فرم
   // ============================================
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'model') {
       console.log('🔍 Model selected in handleChange:', value);
+      setSelectedModel(value);
     }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -826,6 +914,7 @@ const AIConsultation = () => {
     e.preventDefault();
 
     console.log('🔍 formData.model before request:', formData.model);
+    console.log('🔍 selectedModel before request:', selectedModel);
 
     if (!formData.symbol) {
       setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً نماد معاملاتی را انتخاب کنید.' });
@@ -894,7 +983,10 @@ const AIConsultation = () => {
     }
 
     try {
-      // ✅ استفاده از متد جدید startConsultation
+      // ✅ استفاده از selectedModel به جای formData.model
+      const modelToSend = selectedModel || formData.model || null;
+      console.log('✅ Model being sent to server:', modelToSend);
+
       const response = await AIService.startConsultation({
         symbol: formData.symbol,
         direction: formData.direction,
@@ -905,7 +997,7 @@ const AIConsultation = () => {
         emotion: formData.emotion || null,
         time_ny: formData.time_ny || null,
         user_question: formData.user_question || null,
-        model: formData.model || null,
+        model: modelToSend,
         session_type: formData.session_type || null,
         strategy_type: formData.strategy_type || null,
         timeframes: formData.timeframes || null,
@@ -918,16 +1010,13 @@ const AIConsultation = () => {
       const { consultation_id, status, message } = response;
 
       if (consultation_id) {
-        // ✅ افزودن به لیست فعال مشاوره‌ها (برای ویجت)
         console.log(`➕ [AIConsultation] Calling addConsultation with ${consultation_id}`);
         addConsultation(consultation_id, formData.symbol);
 
         showToast('🧠 مشاوره در حال پردازش است. می‌توانید به کارهای دیگر بپردازید.', 'info');
 
-        // هدایت کاربر به داشبورد یا صفحه قبلی
         navigate('/dashboard');
 
-        // به‌روزرسانی وضعیت اشتراک
         try {
           const subResponse = await RealApiService.getSubscriptionStatus();
           setSubscriptionStatus(subResponse.data);
@@ -950,7 +1039,6 @@ const AIConsultation = () => {
       let errorTitle = '❌ خطا';
       let errorDetails = null;
 
-      // ✅ اضافه کردن لاگ کامل خطا در کنسول
       console.error('❌ [AIConsultation] Full error details:');
       console.error('   - Error object:', error);
       console.error('   - Error name:', error.name);
@@ -1784,31 +1872,39 @@ const AIConsultation = () => {
         <div className="form-section">
           <h3>📝 شرایط فعلی خود را وارد کنید</h3>
           <form onSubmit={handleConsult}>
-            {/* ===== انتخاب مدل در اولین خط ===== */}
+            {/* ===== انتخاب مدل با نام کوتاه و دکمه رفرش ===== */}
             <div className="form-row model-first-row">
               <div className="form-group model-selector">
-                <label>🧠 مدل هوش مصنوعی <span className="required-star">*</span></label>
+                <label>
+                  🧠 مدل هوش مصنوعی
+                  <button
+                    type="button"
+                    className="btn-refresh-models"
+                    onClick={handleRefreshModels}
+                    disabled={isRefreshingModels || modelsLoading}
+                    title="بروزرسانی لیست مدل‌ها"
+                  >
+                    {isRefreshingModels || modelsLoading ? '⏳' : '🔄'}
+                  </button>
+                  <span className="required-star">*</span>
+                </label>
                 <select
                   name="model"
-                  value={formData.model || ''}
+                  value={selectedModel || formData.model || ''}
                   onChange={handleChange}
                   disabled={limitReached || modelsLoading}
                   className="model-select"
                 >
-                  <option value="">پیش‌فرض ({availableModels[0]?.name || 'llama3.1:8b'})</option>
+                  <option value="">انتخاب مدل...</option>
                   {Array.isArray(availableModels) && availableModels.map((model) => {
                     if (!model || typeof model !== 'object') return null;
 
                     const modelId = String(model.id || '');
-                    const modelName = String(model.name || modelId || 'نامشخص');
-                    const displayName = String(model.display_name || model.provider || '');
-                    const isOnline = Boolean(model.online);
+                    const shortName = String(model.short_name || model.name || modelId || 'نامشخص');
                     const categoryLabel = String(model.category_label || '');
+                    const isOnline = Boolean(model.online);
 
-                    let label = modelName;
-                    if (displayName && displayName !== modelName) {
-                      label = `${modelName} (${displayName})`;
-                    }
+                    let label = shortName;
                     if (isOnline) {
                       label = `🌐 ${label}`;
                     } else {
@@ -1827,7 +1923,20 @@ const AIConsultation = () => {
                 </select>
                 {modelsLoading && <span className="field-hint">⏳ در حال بارگذاری لیست مدل‌ها...</span>}
                 {!modelsLoading && Array.isArray(availableModels) && availableModels.length > 0 && (
-                  <span className="field-hint">🧠 {availableModels.length} مدل موجود است</span>
+                  <span className="field-hint">
+                    🧠 {availableModels.length} مدل موجود است
+                    {modelsLastFetched && (
+                      <span className="cache-info">
+                        {' '}
+                        (آخرین بروزرسانی: {new Date(modelsLastFetched).toLocaleTimeString('fa-IR')})
+                      </span>
+                    )}
+                  </span>
+                )}
+                {selectedModel && (
+                  <span className="field-hint selected-model">
+                    ✅ مدل انتخاب شده: <strong>{selectedModel}</strong>
+                  </span>
                 )}
               </div>
             </div>

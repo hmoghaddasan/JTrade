@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class AIService:
     """
-    سرویس یکپارچه‌سازی با Ollama برای مشاوره معاملاتی
+    سرویس یکپارچه‌سازی با Ollama و Gapgpt.app برای مشاوره معاملاتی
     """
 
     OLLAMA_URL = getattr(settings, 'OLLAMA_URL', 'http://localhost:11434/api/generate')
@@ -31,6 +31,217 @@ class AIService:
     TWELVEDATA_BASE_URL = getattr(settings, 'TWELVEDATA_BASE_URL', 'https://api.twelvedata.com')
     FINNHUB_API_KEY = getattr(settings, 'FINNHUB_API_KEY', '')
     FINNHUB_BASE_URL = getattr(settings, 'FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
+
+    # ===== لیست مدل‌های Gapgpt.app =====
+    GAPGPT_MODELS = [
+        'o4-mini', 'o4-mini-high',
+        'GapGPT 5.6 Lite', 'GPT-5.6 Luna',
+        'DeepSeek V4 Flash', 'Gemini 3.5 Flash Lite',
+        'GPT-5.4 nano', 'GPT-5.4 mini',
+        'Grok 4.1 Fast', 'Claude 4.5 Haiku',
+        'Gemini 3.7 Flash', 'DeepSeek',
+        'GPT-5.6 Terra', 'GapGPT 5.6',
+        'Claude 4.6 Sonnet', 'Claude 5 Sonnet',
+        'Gemini 3.1 Pro', 'Grok 4.3',
+        'DeepSeek V4 Pro', 'GPT-5.4',
+        'GPT-5.4 Pro', 'GPT-5.6 Sol',
+        'Claude Fable 5', 'Claude Opus 5',
+        'DeepSeek R1', 'Grok 4.6',
+        'Gemini 2.5 pro', 'o3', 'o3 pro',
+        'Perplexity', 'Qwen 3', 'Qwen 3 Max',
+        'Minimax M2', 'GLM 5', 'Kimi 2.5', 'Kimi K3'
+    ]
+
+    # ===== لیست مدل‌های Ollama (محلی) =====
+    OLLAMA_MODELS = [
+        'llama3.1:8b', 'llama3.1:70b',
+        'mistral:7b', 'deepseek-r1:7b',
+        'gemma4:e4b', 'gemma:latest'
+    ]
+
+    @classmethod
+    def _get_provider_mode(cls):
+        """دریافت حالت provider از تنظیمات"""
+        try:
+            setting = SystemSetting.objects.get(setting_key='ai_provider_mode')
+            return setting.setting_value or 'hybrid'
+        except SystemSetting.DoesNotExist:
+            return 'hybrid'
+        except Exception as e:
+            logger.warning(f"⚠️ Error getting ai_provider_mode: {str(e)}")
+            return 'hybrid'
+
+    @classmethod
+    def _get_gapgpt_api_key(cls):
+        """دریافت کلید API Gapgpt از تنظیمات"""
+        try:
+            setting = SystemSetting.objects.get(setting_key='gapgpt_api_key')
+            return setting.setting_value or ''
+        except SystemSetting.DoesNotExist:
+            return ''
+        except Exception as e:
+            logger.warning(f"⚠️ Error getting gapgpt_api_key: {str(e)}")
+            return ''
+
+    @classmethod
+    def _get_gapgpt_base_url(cls):
+        """دریافت آدرس پایه Gapgpt از تنظیمات"""
+        try:
+            setting = SystemSetting.objects.get(setting_key='gapgpt_base_url')
+            return setting.setting_value or 'https://api.gapgpt.app/v1'
+        except SystemSetting.DoesNotExist:
+            return 'https://api.gapgpt.app/v1'
+        except Exception as e:
+            logger.warning(f"⚠️ Error getting gapgpt_base_url: {str(e)}")
+            return 'https://api.gapgpt.app/v1'
+
+    @classmethod
+    def _get_gapgpt_timeout(cls):
+        """دریافت تایم‌اوت Gapgpt از تنظیمات"""
+        try:
+            setting = SystemSetting.objects.get(setting_key='gapgpt_timeout')
+            return int(setting.setting_value) if setting.setting_value else 120
+        except SystemSetting.DoesNotExist:
+            return 120
+        except Exception as e:
+            logger.warning(f"⚠️ Error getting gapgpt_timeout: {str(e)}")
+            return 120
+
+    # backend/apps/trading/ai_service.py
+
+    # backend/apps/trading/ai_service.py
+
+    # backend/apps/trading/ai_service.py
+
+    @classmethod
+    def _get_ai_provider(cls, model_name):
+        """
+        تشخیص provider بر اساس نام مدل و حالت سیستم
+
+        Args:
+            model_name: نام مدل
+
+        Returns:
+            'gapgpt', 'ollama', یا None
+        """
+        mode = cls._get_provider_mode()
+        logger.info(f"🔍 Provider mode: {mode}, model: {model_name}")
+
+        # اگر حالت online است، فقط از Gapgpt استفاده کن
+        if mode == 'online':
+            logger.info(f"✅ Mode is 'online', using gapgpt")
+            # ✅ اگر مدل llama3.1:8b است و mode online است، به o4-mini تغییر بده
+            if model_name == 'llama3.1:8b':
+                logger.info(f"⚠️ Model is llama3.1:8b but mode is online, using gapgpt with o4-mini")
+            return 'gapgpt'
+
+        # اگر حالت offline است، فقط از Ollama استفاده کن
+        if mode == 'offline':
+            logger.info(f"✅ Mode is 'offline', using ollama")
+            return 'ollama'
+
+        # حالت hybrid: تشخیص بر اساس نام مدل
+        if mode == 'hybrid':
+            # اگر مدل در لیست Gapgpt است
+            if model_name in cls.GAPGPT_MODELS:
+                logger.info(f"✅ Model '{model_name}' is in GapGPT list")
+                return 'gapgpt'
+            # اگر مدل با o4 شروع می‌شود (Gapgpt)
+            elif model_name and model_name.startswith('o4'):
+                logger.info(f"✅ Model '{model_name}' starts with 'o4', using gapgpt")
+                return 'gapgpt'
+            # اگر مدل در لیست Ollama است
+            elif model_name in cls.OLLAMA_MODELS:
+                logger.info(f"✅ Model '{model_name}' is in Ollama list")
+                return 'ollama'
+            # پیش‌فرض: از Gapgpt استفاده کن (اگر API Key موجود باشد)
+            else:
+                api_key = cls._get_gapgpt_api_key()
+                if api_key:
+                    logger.info(f"✅ Using gapgpt as fallback for model '{model_name}'")
+                    return 'gapgpt'
+                else:
+                    logger.info(f"✅ No API key, using ollama as fallback for model '{model_name}'")
+                    return 'ollama'
+
+        # پیش‌فرض: Ollama
+        logger.warning(f"⚠️ Unknown mode '{mode}', using ollama as fallback")
+        return 'ollama'
+
+    # backend/apps/trading/ai_service.py
+
+    @classmethod
+    def call_gapgpt(cls, prompt, model, **kwargs):
+        """
+        فراخوانی Gapgpt.app API
+
+        Args:
+            prompt: متن پرامپت
+            model: نام مدل
+
+        Returns:
+            str: پاسخ دریافتی یا None در صورت خطا
+        """
+        api_key = cls._get_gapgpt_api_key()
+        if not api_key:
+            logger.error("❌ Gapgpt API Key not set")
+            return None
+
+        base_url = cls._get_gapgpt_base_url()
+        timeout = cls._get_gapgpt_timeout()
+        url = f"{base_url}/chat/completions"
+
+        # ✅ لاگ برای دیباگ
+        logger.info(f"📡 [GapGPT] Calling with model: {model}")
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+
+        data = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": "شما یک مشاور معاملاتی حرفه‌ای هستید."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": kwargs.get('max_tokens', 4096),
+            "temperature": kwargs.get('temperature', 0.7),
+            "stream": kwargs.get('stream', False)
+        }
+
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                json=data,
+                timeout=timeout
+            )
+
+            logger.info(f"📡 [GapGPT] Response status: {response.status_code}")
+
+            if response.status_code == 200:
+                result = response.json()
+                content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+                if content:
+                    logger.info(f"✅ [GapGPT] Response received, length: {len(content)}")
+                    return content
+                else:
+                    logger.warning(f"⚠️ [GapGPT] Empty response content")
+                    return None
+            else:
+                logger.error(f"❌ [GapGPT] Error: {response.status_code} - {response.text[:500]}")
+                return None
+
+        except requests.exceptions.Timeout:
+            logger.error(f"⏰ [GapGPT] Timeout after {timeout}s")
+            return None
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"🔌 [GapGPT] Connection error: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ [GapGPT] Error: {str(e)}")
+            return None
 
     @classmethod
     def _convert_decimals(cls, data):
@@ -51,7 +262,10 @@ class AIService:
         بررسی آیا تنظیم ذخیره پرامپت فعال است یا خیر
         """
         try:
-            return SystemSetting.get_bool('save_ai_prompt', default=False)
+            setting = SystemSetting.objects.get(setting_key='save_ai_prompt')
+            return setting.setting_value.lower() == 'true'
+        except SystemSetting.DoesNotExist:
+            return False
         except Exception as e:
             logger.warning(f"⚠️ Error checking save_ai_prompt setting: {str(e)}")
             return False
@@ -494,91 +708,148 @@ class AIService:
 
         return "\n".join(lines)
 
+        # backend/apps/trading/ai_service.py
+
+        # ... تمام کدهای قبلی تا خط get_advanced_prompt_template ...
+
+        # backend/apps/trading/ai_service.py
+
+        @classmethod
+        def get_advanced_prompt_template(cls):
+            return """
+        شما یک مشاور معاملاتی حرفه‌ای و تحلیلگر ارشد بازارهای مالی با بیش از ۱۵ سال تجربه هستید.
+        شما باید بر اساس **داده‌های واقعی تاریخچه معاملاتی کاربر** و **شرایط فعلی**، تحلیلی عمیق و کاربردی ارائه دهید.
+        پاسخ شما باید به‌گونه‌ای باشد که کاربر بتواند از آن برای تصمیم‌گیری بهتر استفاده کند.
+
+        **مهم:** شما باید از داده‌های تاریخی کاربر برای نتیجه‌گیری استفاده کنید و تحلیل خود را بر اساس آن‌ها بنا کنید.
+
+        ---
+
+        📊 **داده‌های تاریخچه کاربر (از معاملات واقعی):**
+        {analytics}
+
+        📝 **شرایط فعلی کاربر برای معامله جدید:**
+        {user_conditions}
+
+        ---
+
+        🔍 **تحلیل جامع خود را بر اساس موارد زیر ارائه دهید:**
+
+        **۱. خلاصه اجرایی (یک پاراگراف کوتاه در ابتدا)**
+        - توصیه نهایی خود را در ۲-۳ جمله خلاصه کنید: ورود/خروج، حجم پیشنهادی، هدف اصلی و هشدار کلیدی.
+
+        **۲. امتیاز اعتبار (۰-۱۰۰)**
+        - این امتیاز را بر اساس **۳ عامل کلیدی** محاسبه کنید: 
+          ۱) همخوانی با بهترین استراتژی و احساسات موفق کاربر (حداکثر ۴۰ امتیاز)
+          ۲) انطباق R:R فعلی با میانگین سابقه (اگر R:R فعلی بیش از ۲ برابر میانگین باشد، ۱۰ امتیاز کسر کنید؛ اگر کمتر از ۰.۵ برابر باشد، ۵ امتیاز اضافه کنید)
+          ۳) وضعیت بازار (اگر بازار خنثی یا رنج باشد و هدف دور باشد، ۵ امتیاز کسر کنید؛ اگر رونددار و همجهت با معامله باشد، ۵ امتیاز اضافه کنید)
+        - توضیح دهید هر عامل چه تأثیری در امتیاز داشته است.
+
+        **۳. نقاط قوت این تصمیم (حداقل ۳ مورد)**
+        - **فقط** مواردی را بیاورید که با اعداد و ارقام از تاریخچه کاربر پشتیبانی می‌شوند.
+        - اگر تریدهای مشابه قبلی موفق بوده‌اند، به نرخ برد و سود آن‌ها اشاره کنید.
+        - به پایبندی کاربر در حوزه‌ای که بیش از ۷۰٪ بوده اشاره کنید.
+
+        **۴. هشدارها و نقاط ضعف (حداقل ۳ مورد)**
+        - **ناسازگاری‌های آماری** را بررسی کنید.
+        - اگر پایبندی به چک‌لیست کمتر از ۶۵٪ است، آن را به عنوان یک هشدار جدی مطرح کنید.
+        - اگر احساس فعلی کاربر در گذشته عملکرد ضعیفی داشته (نرخ برد کمتر از ۶۰٪)، حتماً هشدار دهید.
+        - اگر وضعیت بازار خنثی است و هدف بیش از ۲ برابر میانگین سود هر ترید است، آن را ریسک‌زا اعلام کنید.
+        - اگر کاربر در این نماد کمتر از ۳ ترید موفق دارد، این را به عنوان محدودیت داده‌ای مطرح کنید.
+
+        **۵. پیشنهاد عملی برای مدیریت معامله**
+        - **حد ضرر پیشنهادی:** عددی مشخص با ذکر دلیل تکنیکال (بر اساس سطوح کلیدی یا میانگین متحرک).
+        - **حد سود هدف اول:** عدد با درصد حجم (بر اساس میانگین R:R موفق کاربر).
+        - **حد سود هدف دوم:** عدد با درصد حجم باقیمانده (با فاصله منطقی از هدف اول).
+        - **اندازه پوزیشن:** بر اساس فرمول Kelly محاسبه کنید: 
+          `f = (نرخ_برد_کلی - (1 - نرخ_برد_کلی) / R:R_میانگین) * ضریب_پایبندی`
+          که ضریب پایبندی = (پایبندی_کلی / ۱۰۰) است.
+        - **زمان‌بندی:** بر اساس بهترین ساعت معاملاتی کاربر، زمان ورود/خروج را پیشنهاد دهید. برای خروج پله‌ای، زمان‌های متفاوتی برای هر هدف در نظر بگیرید.
+
+        **۶. تحلیل روانشناختی**
+        - احساس فعلی کاربر را با عملکرد گذشته‌اش مقایسه کنید.
+        - اگر احساس فعلی در گذشته نرخ برد بالایی داشته، آن را تأیید کنید و اگر ضعیف بوده، هشدار دهید.
+        - اگر احساس فعلی در داده‌های تاریخی وجود ندارد، به عدم قطعیت اشاره کنید.
+        - یک راهکار عملی برای حفظ احساس مطلوب در طول معامله ارائه دهید (مثلاً استفاده از آلرت، چک‌لیست لحظه‌ای یا تنفس عمیق قبل از تصمیم‌گیری).
+
+        **۷. تحلیل تکنیکال هوشمند**
+        - کاربر در گذشته با این نماد در سطوح قیمتی مشابه (محدوده ±۲٪ قیمت ورود) چه عملکردی داشته است؟
+        - بر اساس بهترین تایم‌فریم‌های کاربر (با بالاترین نرخ برد)، روند فعلی را ارزیابی کنید.
+        - محدوده حمایت/مقاومت تاریخی کاربر را از داده‌های ورود/خروج تریدهای موفق استخراج کنید.
+
+        **۸. تحلیل سناریو (۳ سناریو با احتمال)**
+        - **سناریو خوش‌بینانه:** قیمت به هدف اول می‌رسد. احتمال = نرخ برد کلی × ضریب بازار (اگر بازار رونددار، ۱.۲؛ اگر خنثی، ۰.۸).
+        - **سناریو محافظه‌کارانه:** قیمت به هدف دوم می‌رسد. احتمال = احتمال خوش‌بینانه × ۰.۷.
+        - **سناریو بدبینانه:** حد ضرر فعال می‌شود. احتمال = ۱ - (احتمال خوش‌بینانه + احتمال محافظه‌کارانه).
+        - برای هر سناریو، تأثیر بر حساب کاربری (سود/زیان بر حسب دلار) را محاسبه کنید.
+
+        **۹. یک نکته انگیزشی یا آموزشی**
+        - بر اساس **شرایط فعلی بازار (خنثی/رونددار)** و **رفتار تاریخی کاربر**، یک نکته تخصصی ارائه دهید.
+        - از جملات کلیشه‌ای خودداری کنید و مستقیماً به نقطه‌ای از داده‌های کاربر اشاره کنید که می‌تواند بهبود یابد.
+
+        ---
+
+        📌 **دستورالعمل‌های تحلیلی اجباری (حتماً رعایت شود):**
+
+        ۱. اگر R:R محاسبه‌شده بیش از **۲ برابر** میانگین سابقه کاربر است، در بخش هشدارها حتماً به آن اشاره کنید و در پیشنهاد، هدف را اصلاح کنید.
+
+        ۲. اگر پایبندی کلی به چک‌لیست کمتر از **۶۵٪** است، ضریب پایبندی را ۰.۸ در نظر بگیرید (کاهش ۲۰٪ حجم).
+
+        ۳. اگر وضعیت بازار **خنثی** است، هرگز هدفی بیشتر از **۲ برابر میانگین سود هر ترید** پیشنهاد ندهید.
+
+        ۴. اگر احساس فعلی کاربر در داده‌های تاریخی وجود **ندارد**، حتماً در تحلیل روانشناختی به عدم قطعیت اشاره کنید.
+
+        ۵. همیشه در پیشنهاد مدیریت معامله، **حداقل دو سناریو** (خوش‌بینانه و محافظه‌کارانه) ارائه دهید.
+
+        ۶. اگر کاربر در این نماد سابقه خوبی ندارد (کمتر از ۳ ترید موفق)، حجم معامله را ۳۰٪ کاهش دهید.
+
+        ۷. برای تخمین احتمال سناریوها، از نرخ برد کلی کاربر به عنوان مبنا استفاده کنید و بر اساس وضعیت بازار (رونددار/خنثی/رنج) ضریب تعدیل اعمال کنید.
+
+        ---
+
+        **سوال کاربر:** {user_question}
+
+        ---
+
+        **⚠️ ساختار پاسخ (بسیار مهم - دقیقاً به همین شکل بنویسید):**
+
+        **خلاصه اجرایی:** [۲-۳ جمله با توصیه نهایی]
+
+        **امتیاز:** [عدد ۰-۱۰۰] – [دلیل مختصر بر اساس سه عامل]
+
+        **نقاط قوت:**
+        - [مورد ۱ با ارجاع به داده‌های کاربر]
+        - [مورد ۲ با ارجاع به داده‌های کاربر]
+        - [مورد ۳ با ارجاع به داده‌های کاربر]
+
+        **هشدارها:**
+        - [مورد ۱ با ارجاع به داده‌های کاربر]
+        - [مورد ۲ با ارجاع به داده‌های کاربر]
+        - [مورد ۳ با ارجاع به داده‌های کاربر]
+
+        **پیشنهاد:**
+        - حد ضرر: [مقدار با دلیل تکنیکال]
+        - حد سود هدف اول: [مقدار] با [درصد] حجم
+        - حد سود هدف دوم: [مقدار] با [درصد] حجم
+        - اندازه پوزیشن: [عدد لات بر اساس فرمول Kelly و ضرایب]
+        - زمان‌بندی: [ورود/خروج بر اساس بهترین ساعت و خروج پله‌ای]
+
+        **تحلیل روانشناختی:** [تحلیل کامل با مقایسه داده‌های احساسی و راهکار عملی]
+
+        **تحلیل تکنیکال هوشمند:** [تحلیل بر اساس سابقه کاربر در این نماد و سطوح قیمتی]
+
+        **تحلیل سناریو:**
+        - خوش‌بینانه: [شرح + احتمال + سود دلاری]
+        - محافظه‌کارانه: [شرح + احتمال + سود دلاری]
+        - بدبینانه: [شرح + احتمال + زیان دلاری]
+
+        **نکته:** [نکته آموزشی یا انگیزشی مرتبط با شرایط بازار و داده‌های کاربر]
+
+        **توجه:** هر بخش را دقیقاً با همان عنوان (به صورت **bold**) و با یک خط فاصله از بخش قبلی جدا کنید. جملات هر بخش را کامل و با نقطه تمام کنید.
+        """
+
     @classmethod
-    def get_advanced_prompt_template(cls):
-        return """
-    شما یک مشاور معاملاتی حرفه‌ای و تحلیلگر ارشد بازارهای مالی با بیش از ۱۵ سال تجربه هستید.
-    شما باید بر اساس **داده‌های واقعی تاریخچه معاملاتی کاربر** و **شرایط فعلی**، تحلیلی عمیق و کاربردی ارائه دهید.
-    پاسخ شما باید به‌گونه‌ای باشد که کاربر بتواند از آن برای تصمیم‌گیری بهتر استفاده کند.
-
-    **مهم:** شما باید از داده‌های تاریخی کاربر برای نتیجه‌گیری استفاده کنید و تحلیل خود را بر اساس آن‌ها بنا کنید.
-
-    ---
-
-    📊 **داده‌های تاریخچه کاربر (از معاملات واقعی):**
-    {analytics}
-
-    📝 **شرایط فعلی کاربر برای معامله جدید:**
-    {user_conditions}
-
-    ---
-
-    🔍 **تحلیل جامع خود را بر اساس موارد زیر ارائه دهید:**
-
-    **۱. امتیاز اعتبار (۰-۱۰۰)**
-    - بر اساس شباهت این معامله به معاملات موفق قبلی کاربر محاسبه کنید.
-    - به مواردی مانند: نماد، جهت، محدوده قیمت، نوع استراتژی، احساسات مشابه توجه کنید.
-    - توضیح دهید چرا این امتیاز را داده‌اید.
-
-    **۲. نقاط قوت این تصمیم (حداقل ۳ مورد)**
-    - بر اساس داده‌های تاریخچه کاربر، چه عواملی این معامله را تقویت می‌کنند؟
-    - اگر تریدهای مشابه قبلی موفق بوده‌اند، به آن اشاره کنید.
-    - به پایبندی کاربر به قوانین و استراتژی اشاره کنید.
-
-    **۳. هشدارها و نقاط ضعف (حداقل ۳ مورد)**
-    - بر اساس الگوهای رفتاری کاربر، چه ریسک‌هایی وجود دارد؟
-    - آیا احساسات فعلی کاربر در گذشته باعث ضرر شده است؟
-    - نسبت R:R محاسبه‌شده را ارزیابی کنید.
-
-    **۴. پیشنهاد عملی برای مدیریت معامله**
-    - **حد ضرر پیشنهادی:** بر اساس تحلیل تکنیکال و داده‌های کاربر
-    - **حد سود پیشنهادی:** بر اساس سطوح کلیدی و نسبت ریسک به ریوارد مناسب
-    - **اندازه پوزیشن:** بر اساس تاریخچه کاربر و میزان ریسک‌پذیری او
-    - **زمان‌بندی:** بهترین زمان برای ورود/خروج بر اساس ساعت‌های موفق کاربر
-
-    **۵. تحلیل روانشناختی**
-    - احساسات فعلی کاربر را با عملکرد گذشته‌اش مقایسه کنید.
-    - آیا این احساسات در گذشته باعث ضرر شده‌اند؟
-    - توصیه‌های عملی برای مدیریت احساسات ارائه دهید.
-
-    **۶. یک نکته انگیزشی یا آموزشی**
-    - بر اساس شرایط کاربر، یک نکته کاربردی و انگیزشی ارائه دهید.
-
-    ---
-
-    **سوال کاربر:** {user_question}
-
-    ---
-
-    **⚠️ ساختار پاسخ (بسیار مهم - دقیقاً به همین شکل بنویسید):**
-
-    **امتیاز:** [عدد ۰-۱۰۰] – [دلیل مختصر بر اساس داده‌های کاربر]
-
-    **نقاط قوت:**
-    - [مورد ۱ با ارجاع به داده‌های کاربر]
-    - [مورد ۲ با ارجاع به داده‌های کاربر]
-    - [مورد ۳ با ارجاع به داده‌های کاربر]
-
-    **هشدارها:**
-    - [مورد ۱ با ارجاع به داده‌های کاربر]
-    - [مورد ۲ با ارجاع به داده‌های کاربر]
-    - [مورد ۳ با ارجاع به داده‌های کاربر]
-
-    **پیشنهاد:**
-    - حد ضرر: [مقدار پیشنهادی با دلیل]
-    - حد سود: [مقدار پیشنهادی با دلیل]
-    - اندازه پوزیشن: [پیشنهاد بر اساس تاریخچه کاربر]
-    - زمان‌بندی: [پیشنهاد بر اساس بهترین ساعت‌های معاملاتی کاربر]
-
-    **تحلیل روانشناختی:** [تحلیل کامل بر اساس داده‌های احساسی کاربر]
-
-    **نکته:** [نکته آموزشی یا انگیزشی مرتبط با شرایط کاربر]
-
-    **توجه:** هر بخش را دقیقاً با همان عنوان (به صورت **bold**) و با یک خط فاصله از بخش قبلی جدا کنید. جملات هر بخش را کامل و با نقطه تمام کنید.
-    """
-
-    @classmethod
-    def call_ollama(cls, prompt, model=None):
+    def call_ollama(cls, prompt, model=None, **kwargs):
         """فراخوانی همزمان Ollama با تایم‌اوت پویا و لاگ کامل"""
         model = model or cls.OLLAMA_MODEL
         timeout = cls.OLLAMA_TIMEOUT or 600
@@ -808,6 +1079,68 @@ class AIService:
 نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
 """
 
+    # ===== متد اصلی برای دریافت پاسخ از AI با انتخاب provider =====
+    # backend/apps/trading/ai_service.py
+
+    # backend/apps/trading/ai_service.py
+
+    @classmethod
+    def get_ai_response(cls, prompt, model_name=None, **kwargs):
+        """
+        دریافت پاسخ از AI با انتخاب provider مناسب
+
+        Args:
+            prompt: متن پرامپت
+            model_name: نام مدل
+
+        Returns:
+            str: پاسخ دریافتی
+        """
+        if model_name is None:
+            model_name = cls.OLLAMA_MODEL
+
+        # اگر model_name خالی یا None است، از پیش‌فرض استفاده کن
+        if not model_name:
+            model_name = cls.OLLAMA_MODEL
+
+        logger.info(f"🔍 [get_ai_response] model_name: {model_name}")
+
+        # تشخیص provider مناسب
+        provider = cls._get_ai_provider(model_name)
+
+        logger.info(f"🔄 Using provider: {provider} for model: {model_name}")
+
+        # ✅ حذف kwargs برای جلوگیری از تداخل
+        if provider == 'gapgpt':
+            # استفاده از Gapgpt.app
+            try:
+                logger.info(f"📡 [GapGPT] Calling with model: {model_name}")
+                # ✅ ارسال فقط prompt و model (بدون kwargs)
+                response = cls.call_gapgpt(prompt, model_name)
+                if response:
+                    logger.info(f"✅ [GapGPT] Response received, length: {len(response)}")
+                    return response
+                else:
+                    logger.warning(f"⚠️ [GapGPT] No response, falling back to Ollama")
+                    return cls.call_ollama(prompt, model='llama3.1:8b')
+            except Exception as e:
+                logger.error(f"❌ [GapGPT] Error: {str(e)}")
+                # اگر mode hybrid است و Gapgpt خطا داد، به Ollama fallback کن
+                mode = cls._get_provider_mode()
+                if mode == 'hybrid':
+                    logger.warning(f"⚠️ Falling back to Ollama after Gapgpt error")
+                    return cls.call_ollama(prompt, model='llama3.1:8b')
+                else:
+                    return cls._get_connection_error_response(f"Gapgpt error: {str(e)}")
+
+        elif provider == 'ollama':
+            # استفاده از Ollama
+            return cls.call_ollama(prompt, model=model_name)
+
+        # اگر provider مشخص نشد، از پیش‌فرض استفاده کن
+        logger.warning(f"⚠️ No provider found, using Ollama as fallback")
+        return cls.call_ollama(prompt, model='llama3.1:8b')
+
     @classmethod
     def parse_ai_response(cls, response_text, analytics=None, user_input=None):
         result = {
@@ -828,7 +1161,7 @@ class AIService:
             result['is_connection_error'] = True
             result['score'] = 0
             result['warnings'] = ['⚠️ سرویس هوش مصنوعی در دسترس نیست']
-            result['suggestion'] = 'لطفاً اتصال به Ollama را بررسی کنید.'
+            result['suggestion'] = 'لطفاً اتصال به سرویس AI را بررسی کنید.'
             return result
 
         if not response_text or not response_text.strip():
@@ -1366,6 +1699,11 @@ class AIService:
         if analytics:
             analytics = cls._convert_decimals(analytics)
 
+        # مدل کاربر
+        model_value = user_input.get('model')
+        if model_value == '':
+            model_value = None
+
         # ایجاد رکورد مشاوره با فیلدهای جدید
         consultation = AIConsultation.objects.create(
             user=user,
@@ -1384,7 +1722,7 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
-            model_used=user_input.get('model') or cls.OLLAMA_MODEL,
+            model_used=model_value or cls.OLLAMA_MODEL,
             status='pending',
             ai_score=0,
             ai_response={},
@@ -1394,12 +1732,6 @@ class AIService:
             price_diff_percent=price_diff_percent,
             internal_analytics=analytics,
         )
-
-        # ✅ ذخیره پرامپت فقط در صورت فعال بودن تنظیم
-        if cls._should_save_prompt():
-            # پرامپت قبلاً در tasks.py ساخته می‌شود، اما ما آن را اینجا ذخیره نمی‌کنیم
-            # زیرا در tasks.py پس از ساخت پرامپت، آن را در consultation.prompt_used ذخیره می‌کند
-            pass
 
         # راه‌اندازی تسک پس‌زمینه
         start_consultation_task(consultation.id, user_input)
@@ -1430,14 +1762,13 @@ class AIService:
 
         prompt = cls.build_prompt(analytics, user_input)
 
-        model = user_input.get('model') or None
-
         model_value = user_input.get('model')
         if model_value == '':
             model_value = None
         print(f"🔍 [get_consultation] model_used received: {model_value}")
 
-        response_text = cls.call_ollama(prompt, model=model)
+        # ✅ دریافت پاسخ از AI با انتخاب provider مناسب
+        response_text = cls.get_ai_response(prompt, model=model_value)
         parsed_response = cls.parse_ai_response(response_text, analytics, user_input)
 
         consultation = AIConsultation.objects.create(
@@ -1457,7 +1788,7 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
-            model_used=model_value,
+            model_used=model_value or cls.OLLAMA_MODEL,
             status='completed',
             ai_score=parsed_response.get('score', 0),
             ai_response=parsed_response,
@@ -1502,8 +1833,6 @@ class AIService:
 
         prompt = cls.build_prompt(analytics, user_input)
 
-        model = user_input.get('model') or None
-
         model_value = user_input.get('model')
         if model_value == '':
             model_value = None
@@ -1526,7 +1855,7 @@ class AIService:
             risk_percent=user_input.get('risk_percent'),
             volume=user_input.get('volume'),
             comparison_stats=analytics.get('similar_trades') if analytics else None,
-            model_used=model_value,
+            model_used=model_value or cls.OLLAMA_MODEL,
             status='pending',
             ai_score=50,
             ai_response={},
@@ -1540,10 +1869,13 @@ class AIService:
         def generate():
             full_response = ""
             has_content = False
-            for chunk in cls.call_ollama_stream(prompt, model=model):
-                full_response += chunk
+
+            # ✅ دریافت پاسخ از AI با انتخاب provider مناسب
+            response_text = cls.get_ai_response(prompt, model=model_value)
+            if response_text:
+                full_response = response_text
                 has_content = True
-                yield chunk
+                yield response_text
 
             if not has_content:
                 error_msg = cls._get_empty_response_error()

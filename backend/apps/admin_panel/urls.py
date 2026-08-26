@@ -1,9 +1,14 @@
 # backend/apps/admin_panel/urls.py
 
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
 app_name = 'admin_panel'
+
+# ===== ایجاد Router برای ViewSet تنظیمات =====
+router = DefaultRouter()
+router.register(r'settings', views.SystemSettingViewSet, basename='settings')
 
 urlpatterns = [
     # ===== داشبورد =====
@@ -21,16 +26,12 @@ urlpatterns = [
     # ===== اشتراک‌ها =====
     path('subscriptions/', views.AdminSubscriptionListView.as_view(), name='admin_subscriptions'),
     path('subscriptions/<int:pk>/', views.AdminSubscriptionDetailView.as_view(), name='admin_subscription_detail'),
-    path('subscriptions/<int:pk>/extend/', views.AdminSubscriptionExtendView.as_view(),
-         name='admin_subscription_extend'),
-    path('subscriptions/<int:pk>/cancel/', views.AdminSubscriptionCancelView.as_view(),
-         name='admin_subscription_cancel'),
+    path('subscriptions/<int:pk>/extend/', views.AdminSubscriptionExtendView.as_view(), name='admin_subscription_extend'),
+    path('subscriptions/<int:pk>/cancel/', views.AdminSubscriptionCancelView.as_view(), name='admin_subscription_cancel'),
     path('subscriptions/gift/', views.AdminSubscriptionGiftView.as_view(), name='admin_subscription_gift'),
-    path('subscriptions/export-excel/', views.ExportSubscriptionsExcelView.as_view(),
-         name='export_subscriptions_excel'),
+    path('subscriptions/export-excel/', views.ExportSubscriptionsExcelView.as_view(), name='export_subscriptions_excel'),
     path('subscription-plans/', views.AdminSubscriptionPlanListView.as_view(), name='admin_subscription_plans'),
-    path('subscription-plans/<int:pk>/', views.AdminSubscriptionPlanDetailView.as_view(),
-         name='admin_subscription_plan_detail'),
+    path('subscription-plans/<int:pk>/', views.AdminSubscriptionPlanDetailView.as_view(), name='admin_subscription_plan_detail'),
 
     # ===== مالی =====
     path('transactions/', views.AdminTransactionListView.as_view(), name='admin_transactions'),
@@ -77,8 +78,13 @@ urlpatterns = [
     path('portfolios/<int:pk>/', views.AdminPortfolioDetailView.as_view(), name='admin_portfolio_detail'),
 
     # ============================================
-    # ✅ تنظیمات سیستم - مسیر درست
+    # ✅ تنظیمات سیستم - مسیرهای قدیمی (برای سازگاری)
     # ============================================
     path('settings/', views.AdminSettingsListView.as_view(), name='admin_settings'),
     path('settings/update/', views.AdminSettingsUpdateView.as_view(), name='admin_settings_update'),
+
+    # ============================================
+    # ✅ مسیرهای جدید با Router (برای ViewSet)
+    # ============================================
+    path('', include(router.urls)),
 ]
