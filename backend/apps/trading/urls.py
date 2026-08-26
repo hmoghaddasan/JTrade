@@ -154,4 +154,8 @@ urlpatterns = [
     # ✅ بروکرها (کارگزاران)
     # ============================================
     path('brokers/', views.BrokerListView.as_view(), name='broker_list'),
+    # ============================================
+    # ✅ دریافت لیست مدل‌های AI (جدید)
+    # ============================================
+    path('ai/models/', views.AvailableModelsView.as_view(), name='ai_models'),
 ]

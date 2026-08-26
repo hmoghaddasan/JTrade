@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import { useConsultation } from '../../contexts/ConsultationContext'; // ✅ اضافه شده
+import { useConsultation } from '../../contexts/ConsultationContext';
 import AIService from '../../services/aiService';
 import RealApiService from '../../services/realApiService';
+import apiClient from '../../services/apiService';
 import {
   RadarChart,
   PolarGrid,
@@ -45,7 +46,7 @@ const AIConsultation = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const {addConsultation, hasActiveConsultation } = useConsultation(); // ✅ اضافه شد
+  const { addConsultation, hasActiveConsultation } = useConsultation();
 
   const [loading, setLoading] = useState(false);
   const [consulting, setConsulting] = useState(false);
@@ -58,6 +59,7 @@ const AIConsultation = () => {
   const [comparisonStats, setComparisonStats] = useState(null);
   const [consultationDetail, setConsultationDetail] = useState(null);
   const [selectedModel, setSelectedModel] = useState('');
+
   // ===== Stateهای مربوط به بازخورد =====
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackForm, setFeedbackForm] = useState({
@@ -622,27 +624,75 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // بارگذاری لیست مدل‌های AI (با تنظیم پیش‌فرض)
+  // ✅ بارگذاری لیست مدل‌های AI (با پردازش صحیح داده‌ها)
   // ============================================
   useEffect(() => {
     const loadModels = async () => {
       setModelsLoading(true);
       try {
-        const response = await RealApiService.getAvailableModels();
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setAvailableModels(response.data);
-          if (!formData.model) {
-            setFormData(prev => ({ ...prev, model: response.data[0] }));
+        // ✅ استفاده از API جدید برای دریافت مدل‌ها
+        const response = await apiClient.get('trading/ai/models/');
+        let data = response.data;
+
+        console.log('📡 Available models from API:', data);
+
+        // اگر data آرایه نیست، تبدیل کن
+        if (!Array.isArray(data)) {
+          if (data && typeof data === 'object') {
+            if (data.results && Array.isArray(data.results)) {
+              data = data.results;
+            } else if (data.data && Array.isArray(data.data)) {
+              data = data.data;
+            } else {
+              data = [data];
+            }
+          } else {
+            data = [];
+          }
+        }
+
+        // ✅ اطمینان از اینکه هر مدل یک آبجکت با فیلدهای لازم است
+        const processedModels = data.map(model => ({
+          id: String(model.id || model.name || ''),
+          name: String(model.name || model.id || ''),
+          provider: String(model.provider || 'unknown'),
+          display_name: String(model.display_name || model.provider || ''),
+          online: Boolean(model.online),
+          free: Boolean(model.free),
+          category: String(model.category || ''),
+          category_label: String(model.category_label || ''),
+          cooldown: Number(model.cooldown || 10),
+          is_default: Boolean(model.is_default),
+        })).filter(m => m.id && m.id.length > 0);
+
+        console.log('📡 Processed models:', processedModels);
+
+        if (processedModels.length > 0) {
+          setAvailableModels(processedModels);
+          // اگر مدل پیش‌فرض وجود دارد، آن را انتخاب کن
+          const defaultModel = processedModels.find(m => m.is_default) || processedModels[0];
+          if (defaultModel && !formData.model) {
+            setFormData(prev => ({ ...prev, model: defaultModel.id }));
           }
         } else {
-          setAvailableModels(['llama3.1:8b']);
+          // Fallback
+          const fallback = [
+            { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama (محلی)', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true },
+            { id: 'GapGPT 5.6 Lite', name: 'GapGPT 5.6 Lite', provider: 'gapgpt', display_name: 'Gapgpt.app (آنلاین)', online: true, free: true, category: 'free', category_label: '🟢 رایگان', cooldown: 10, is_default: false },
+          ];
+          setAvailableModels(fallback);
           if (!formData.model) {
             setFormData(prev => ({ ...prev, model: 'llama3.1:8b' }));
           }
         }
       } catch (error) {
         console.error('❌ Error loading models:', error);
-        setAvailableModels(['llama3.1:8b']);
+        // Fallback
+        const fallback = [
+          { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama (محلی)', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true },
+          { id: 'GapGPT 5.6 Lite', name: 'GapGPT 5.6 Lite', provider: 'gapgpt', display_name: 'Gapgpt.app (آنلاین)', online: true, free: true, category: 'free', category_label: '🟢 رایگان', cooldown: 10, is_default: false },
+        ];
+        setAvailableModels(fallback);
         if (!formData.model) {
           setFormData(prev => ({ ...prev, model: 'llama3.1:8b' }));
         }
@@ -869,7 +919,7 @@ const AIConsultation = () => {
 
       if (consultation_id) {
         // ✅ افزودن به لیست فعال مشاوره‌ها (برای ویجت)
-          console.log(`➕ [AIConsultation] Calling addConsultation with ${consultation_id}`);
+        console.log(`➕ [AIConsultation] Calling addConsultation with ${consultation_id}`);
         addConsultation(consultation_id, formData.symbol);
 
         showToast('🧠 مشاوره در حال پردازش است. می‌توانید به کارهای دیگر بپردازید.', 'info');
@@ -893,58 +943,58 @@ const AIConsultation = () => {
       }
 
     } catch (error) {
-    console.error('Error starting consultation:', error);
-    stopProgressTimers();
+      console.error('Error starting consultation:', error);
+      stopProgressTimers();
 
-    let errorMessage = '❌ خطا در شروع مشاوره';
-    let errorTitle = '❌ خطا';
-    let errorDetails = null;
+      let errorMessage = '❌ خطا در شروع مشاوره';
+      let errorTitle = '❌ خطا';
+      let errorDetails = null;
 
-    // ✅ اضافه کردن لاگ کامل خطا در کنسول
-    console.error('❌ [AIConsultation] Full error details:');
-    console.error('   - Error object:', error);
-    console.error('   - Error name:', error.name);
-    console.error('   - Error message:', error.message);
-    console.error('   - Error stack:', error.stack);
-    if (error.response) {
-      console.error('   - Response data:', error.response.data);
-      console.error('   - Response status:', error.response.status);
-      console.error('   - Response headers:', error.response.headers);
-    }
-
-    if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
-      setIsTimeout(true);
-      errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
-      errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
-    } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
-      errorTitle = '🔌 خطای اتصال به AI';
-      errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
-    } else if (error.response?.data) {
-      const data = error.response.data;
-      if (data.message) errorMessage = data.message;
-      else if (data.error) errorMessage = data.error;
-      else if (data.detail) errorMessage = data.detail;
-      else if (typeof data === 'object') {
-        const fieldErrors = Object.entries(data)
-          .filter(([key, value]) => key !== 'error' && key !== 'message')
-          .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
-          .join(' | ');
-        if (fieldErrors) {
-          errorMessage = `خطا در فیلدها: ${fieldErrors}`;
-          errorDetails = data;
-        }
+      // ✅ اضافه کردن لاگ کامل خطا در کنسول
+      console.error('❌ [AIConsultation] Full error details:');
+      console.error('   - Error object:', error);
+      console.error('   - Error name:', error.name);
+      console.error('   - Error message:', error.message);
+      console.error('   - Error stack:', error.stack);
+      if (error.response) {
+        console.error('   - Response data:', error.response.data);
+        console.error('   - Response status:', error.response.status);
+        console.error('   - Response headers:', error.response.headers);
       }
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
 
-    setErrorModal({
-      open: true,
-      title: errorTitle,
-      message: errorMessage,
-      details: errorDetails
-    });
-  } finally {
+      if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        setIsTimeout(true);
+        errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
+        errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
+      } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
+        errorTitle = '🔌 خطای اتصال به AI';
+        errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
+      } else if (error.response?.data) {
+        const data = error.response.data;
+        if (data.message) errorMessage = data.message;
+        else if (data.error) errorMessage = data.error;
+        else if (data.detail) errorMessage = data.detail;
+        else if (typeof data === 'object') {
+          const fieldErrors = Object.entries(data)
+            .filter(([key, value]) => key !== 'error' && key !== 'message')
+            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+            .join(' | ');
+          if (fieldErrors) {
+            errorMessage = `خطا در فیلدها: ${fieldErrors}`;
+            errorDetails = data;
+          }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrorModal({
+        open: true,
+        title: errorTitle,
+        message: errorMessage,
+        details: errorDetails
+      });
+    } finally {
       setConsulting(false);
     }
   };
@@ -1734,6 +1784,55 @@ const AIConsultation = () => {
         <div className="form-section">
           <h3>📝 شرایط فعلی خود را وارد کنید</h3>
           <form onSubmit={handleConsult}>
+            {/* ===== انتخاب مدل در اولین خط ===== */}
+            <div className="form-row model-first-row">
+              <div className="form-group model-selector">
+                <label>🧠 مدل هوش مصنوعی <span className="required-star">*</span></label>
+                <select
+                  name="model"
+                  value={formData.model || ''}
+                  onChange={handleChange}
+                  disabled={limitReached || modelsLoading}
+                  className="model-select"
+                >
+                  <option value="">پیش‌فرض ({availableModels[0]?.name || 'llama3.1:8b'})</option>
+                  {Array.isArray(availableModels) && availableModels.map((model) => {
+                    if (!model || typeof model !== 'object') return null;
+
+                    const modelId = String(model.id || '');
+                    const modelName = String(model.name || modelId || 'نامشخص');
+                    const displayName = String(model.display_name || model.provider || '');
+                    const isOnline = Boolean(model.online);
+                    const categoryLabel = String(model.category_label || '');
+
+                    let label = modelName;
+                    if (displayName && displayName !== modelName) {
+                      label = `${modelName} (${displayName})`;
+                    }
+                    if (isOnline) {
+                      label = `🌐 ${label}`;
+                    } else {
+                      label = `🖥️ ${label}`;
+                    }
+                    if (categoryLabel) {
+                      label = `${categoryLabel} ${label}`;
+                    }
+
+                    return (
+                      <option key={modelId} value={modelId}>
+                        {label}
+                      </option>
+                    );
+                  })}
+                </select>
+                {modelsLoading && <span className="field-hint">⏳ در حال بارگذاری لیست مدل‌ها...</span>}
+                {!modelsLoading && Array.isArray(availableModels) && availableModels.length > 0 && (
+                  <span className="field-hint">🧠 {availableModels.length} مدل موجود است</span>
+                )}
+              </div>
+            </div>
+
+            {/* ===== سایر فیلدها ===== */}
             <div className="form-row">
               <div className="form-group">
                 <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
@@ -1836,15 +1935,6 @@ const AIConsultation = () => {
                   <option value="uncertain">مردد</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label>مدل هوش مصنوعی</label>
-                <select name="model" value={formData.model} onChange={handleChange} disabled={limitReached || modelsLoading}>
-                  <option value="">پیش‌فرض ({availableModels[0] || 'llama3.1:8b'})</option>
-                  {availableModels.map((model) => <option key={model} value={model}>{model}</option>)}
-                </select>
-                {modelsLoading && <span className="field-hint">⏳ در حال بارگذاری لیست مدل‌ها...</span>}
-                {!modelsLoading && availableModels.length > 1 && <span className="field-hint">🧠 {availableModels.length} مدل موجود است.</span>}
-              </div>
             </div>
 
             <div className="form-group full-width">
@@ -1901,7 +1991,7 @@ const AIConsultation = () => {
                 disabled={
                   consulting ||
                   limitReached ||
-                  hasActiveConsultation ||  // ✅ غیرفعال در صورت وجود مشاوره فعال
+                  hasActiveConsultation ||
                   (subscriptionStatus?.remaining_ai_consultations !== undefined &&
                     subscriptionStatus.remaining_ai_consultations <= 0)
                 }

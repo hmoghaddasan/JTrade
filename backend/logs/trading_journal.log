@@ -259690,3 +259690,491 @@ ERROR 2026-08-25 03:53:34,342 tasks 17360 19068 📝 [STEP 6] Full error respons
 نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
 
 INFO 2026-08-25 03:53:34,351 tasks 17360 19068 ❌ Consultation 146 marked as 'failed'
+INFO 2026-08-25 10:45:29,722 signals 15532 7460 ✅ AI consultation used: 09155511393
+INFO 2026-08-25 10:45:29,722 tasks 15532 7460 🚀 [TASK START] Starting background task for consultation 147
+INFO 2026-08-25 10:45:29,737 tasks 15532 21964 🚀 [START] Processing consultation 147
+INFO 2026-08-25 10:45:29,737 tasks 15532 7460 ✅ [TASK STARTED] Thread 'OllamaWorker-147' started
+INFO 2026-08-25 10:45:29,752 tasks 15532 21964 📊 [STEP 1] Consultation 147 retrieved
+INFO 2026-08-25 10:45:29,752 tasks 15532 21964 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-25 10:45:29,981 tasks 15532 21964 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-25 10:45:30,017 tasks 15532 21964 ✅ [STEP 4] Prompt built, length: 1720
+INFO 2026-08-25 10:45:30,024 tasks 15532 21964 🔄 [STEP 5] Calling Ollama with model: gemma4:latest, timeout: 600s
+INFO 2026-08-25 10:45:30,024 ai_service 15532 21964 🔄 Calling Ollama (attempt 1/3) with model: gemma4:latest
+INFO 2026-08-25 10:45:30,039 ai_service 15532 21964 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 10:47:02,159 ai_service 15532 21964 📊 Response status: 500
+INFO 2026-08-25 10:47:02,159 ai_service 15532 21964 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 07:17:02 GMT', 'Content-Length': '304'}
+ERROR 2026-08-25 10:47:02,162 ai_service 15532 21964 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 10:47:02,168 ai_service 15532 21964 🔄 Retrying in 5 seconds...
+INFO 2026-08-25 10:47:07,172 ai_service 15532 21964 🔄 Calling Ollama (attempt 2/3) with model: gemma4:latest
+INFO 2026-08-25 10:47:07,172 ai_service 15532 21964 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 10:48:38,369 ai_service 15532 21964 📊 Response status: 500
+INFO 2026-08-25 10:48:38,371 ai_service 15532 21964 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 07:18:38 GMT', 'Content-Length': '239'}
+ERROR 2026-08-25 10:48:38,371 ai_service 15532 21964 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 10:48:38,372 ai_service 15532 21964 🔄 Retrying in 10 seconds...
+INFO 2026-08-25 10:48:48,373 ai_service 15532 21964 🔄 Calling Ollama (attempt 3/3) with model: gemma4:latest
+INFO 2026-08-25 10:48:48,373 ai_service 15532 21964 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 10:49:58,928 ai_service 15532 21964 📊 Response status: 500
+INFO 2026-08-25 10:49:58,928 ai_service 15532 21964 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 07:19:58 GMT', 'Content-Length': '304'}
+ERROR 2026-08-25 10:49:58,935 ai_service 15532 21964 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 10:49:58,935 tasks 15532 21964 ✅ [STEP 5] Ollama responded, length: 699
+INFO 2026-08-25 10:49:58,941 tasks 15532 21964 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق...
+ERROR 2026-08-25 10:49:58,944 tasks 15532 21964 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-25 10:49:58,944 tasks 15532 21964 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-25 10:49:58,957 tasks 15532 21964 ❌ Consultation 147 marked as 'failed'
+INFO 2026-08-25 10:50:40,922 signals 15532 7460 ✅ AI consultation used: 09155511393
+INFO 2026-08-25 10:50:40,922 tasks 15532 7460 🚀 [TASK START] Starting background task for consultation 148
+INFO 2026-08-25 10:50:40,931 tasks 15532 20844 🚀 [START] Processing consultation 148
+INFO 2026-08-25 10:50:40,931 tasks 15532 7460 ✅ [TASK STARTED] Thread 'OllamaWorker-148' started
+INFO 2026-08-25 10:50:40,947 tasks 15532 20844 📊 [STEP 1] Consultation 148 retrieved
+INFO 2026-08-25 10:50:40,947 tasks 15532 20844 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-25 10:50:41,128 tasks 15532 20844 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-25 10:50:41,174 tasks 15532 20844 ✅ [STEP 4] Prompt built, length: 1721
+INFO 2026-08-25 10:50:41,174 tasks 15532 20844 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-25 10:50:41,174 ai_service 15532 20844 🔄 Calling Ollama (attempt 1/3) with model: llama3.1:8b
+INFO 2026-08-25 10:50:41,188 ai_service 15532 20844 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 14:26:43,322 ai_service 15532 20844 📊 Response status: 200
+INFO 2026-08-25 14:26:43,512 ai_service 15532 20844 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 10:56:43 GMT', 'Transfer-Encoding': 'chunked'}
+INFO 2026-08-25 14:26:43,708 ai_service 15532 20844 ✅ Ollama response received, length: 942
+INFO 2026-08-25 14:26:43,831 tasks 15532 20844 ✅ [STEP 5] Ollama responded, length: 942
+INFO 2026-08-25 14:26:43,962 tasks 15532 20844 📝 [STEP 5] Response preview: **امتیاز:** 80
+**نقاط قوت:**
+- در این نماد معاملاتی (BTCUSD)، تریدر یک نرخ برد 40.0% و سود کل $2300.0 را تجربه کرده است.
+- در حالت احساسی غالب (آرامش)، تریدر دارای یک نرخ برد 100.0% و سود کل $3750.0 است.
+**هشدارها:**
+- پایبندی به قوانین معاملاتی اندک است، که می‌تواند منجر به زیان‌های بیشتر شود.
+- در شرایط مختلف (روزهای مشابه یا ساعت معاملات خاص)، تریدر عملکرد کمتری دارد و نیاز به بهبود داشته است.
+**پیشنهاد:** 
+- باید تلاش کرد تا پایبندی به قوانین معاملاتی افزایش یابد. این می‌تواند با تمرکز بر سط...
+INFO 2026-08-25 14:26:44,187 tasks 15532 20844 ✅ [STEP 7] Response parsed, score: 80
+INFO 2026-08-25 14:26:45,074 tasks 15532 20844 ✅ [DONE] Consultation 148 completed successfully! Status: completed
+INFO 2026-08-25 14:26:45,309 tasks 15532 20844 ✅ Usage counted: 117
+ERROR 2026-08-25 14:28:00,733 ai_service 15532 16328 ❌ Twelve Data error: HTTPSConnectionPool(host='api.twelvedata.com', port=443): Max retries exceeded with url: /price?symbol=ADAUSDC&apikey=188a21d543654f5eae181ccb896a7049 (Caused by NameResolutionError("HTTPSConnection(host='api.twelvedata.com', port=443): Failed to resolve 'api.twelvedata.com' ([Errno 11001] getaddrinfo failed)"))
+ERROR 2026-08-25 14:28:00,793 ai_service 15532 24224 ❌ Twelve Data error: HTTPSConnectionPool(host='api.twelvedata.com', port=443): Max retries exceeded with url: /price?symbol=ADAUSDC&apikey=188a21d543654f5eae181ccb896a7049 (Caused by NameResolutionError("HTTPSConnection(host='api.twelvedata.com', port=443): Failed to resolve 'api.twelvedata.com' ([Errno 11001] getaddrinfo failed)"))
+ERROR 2026-08-25 14:28:00,793 ai_service 15532 24224 ❌ Twelve Data error: HTTPSConnectionPool(host='api.twelvedata.com', port=443): Max retries exceeded with url: /price?symbol=ADAUSDC&apikey=188a21d543654f5eae181ccb896a7049 (Caused by NameResolutionError("HTTPSConnection(host='api.twelvedata.com', port=443): Failed to resolve 'api.twelvedata.com' ([Errno 11001] getaddrinfo failed)"))
+INFO 2026-08-25 14:28:00,912 signals 15532 24224 ✅ AI consultation used: 09155511393
+INFO 2026-08-25 14:28:00,912 tasks 15532 24224 🚀 [TASK START] Starting background task for consultation 149
+INFO 2026-08-25 14:28:00,912 tasks 15532 14136 🚀 [START] Processing consultation 149
+INFO 2026-08-25 14:28:00,912 tasks 15532 24224 ✅ [TASK STARTED] Thread 'OllamaWorker-149' started
+INFO 2026-08-25 14:28:00,942 tasks 15532 14136 📊 [STEP 1] Consultation 149 retrieved
+INFO 2026-08-25 14:28:00,947 tasks 15532 14136 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-25 14:28:01,138 tasks 15532 14136 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-25 14:28:01,198 tasks 15532 14136 ✅ [STEP 4] Prompt built, length: 1563
+INFO 2026-08-25 14:28:01,228 tasks 15532 14136 🔄 [STEP 5] Calling Ollama with model: gemma4:latest, timeout: 600s
+INFO 2026-08-25 14:28:01,228 ai_service 15532 14136 🔄 Calling Ollama (attempt 1/3) with model: gemma4:latest
+INFO 2026-08-25 14:28:01,228 ai_service 15532 14136 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 14:29:13,067 ai_service 15532 14136 📊 Response status: 500
+INFO 2026-08-25 14:29:13,071 ai_service 15532 14136 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 10:59:13 GMT', 'Content-Length': '304'}
+ERROR 2026-08-25 14:29:13,071 ai_service 15532 14136 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 14:29:13,071 ai_service 15532 14136 🔄 Retrying in 5 seconds...
+INFO 2026-08-25 14:29:18,075 ai_service 15532 14136 🔄 Calling Ollama (attempt 2/3) with model: gemma4:latest
+INFO 2026-08-25 14:29:18,075 ai_service 15532 14136 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 14:30:23,690 ai_service 15532 14136 📊 Response status: 500
+INFO 2026-08-25 14:30:23,691 ai_service 15532 14136 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 11:00:23 GMT', 'Content-Length': '239'}
+ERROR 2026-08-25 14:30:23,693 ai_service 15532 14136 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 14:30:23,693 ai_service 15532 14136 🔄 Retrying in 10 seconds...
+INFO 2026-08-25 14:30:33,698 ai_service 15532 14136 🔄 Calling Ollama (attempt 3/3) with model: gemma4:latest
+INFO 2026-08-25 14:30:33,703 ai_service 15532 14136 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 14:31:41,194 ai_service 15532 14136 📊 Response status: 500
+INFO 2026-08-25 14:31:41,199 ai_service 15532 14136 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 11:01:41 GMT', 'Content-Length': '304'}
+ERROR 2026-08-25 14:31:41,199 ai_service 15532 14136 ❌ Ollama HTTP error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+INFO 2026-08-25 14:31:41,199 tasks 15532 14136 ✅ [STEP 5] Ollama responded, length: 699
+INFO 2026-08-25 14:31:41,204 tasks 15532 14136 📝 [STEP 5] Response preview: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق...
+ERROR 2026-08-25 14:31:41,205 tasks 15532 14136 ❌ [STEP 6] Ollama returned error response
+ERROR 2026-08-25 14:31:41,205 tasks 15532 14136 📝 [STEP 6] Full error response: 
+❌ خطای اتصال به سرویس هوش مصنوعی
+
+❌ خطا در ارتباط با سرویس AI: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate
+
+لطفاً موارد زیر را بررسی کنید:
+1. آیا Ollama در حال اجراست؟ (دستور: ollama serve)
+2. آیا مدل مناسب نصب شده است؟ (دستور: ollama pull llama3.1:8b)
+3. آیا آدرس Ollama صحیح است؟ (پیش‌فرض: http://localhost:11434)
+
+امتیاز: ۰ – عدم دسترسی به سرویس AI
+
+نقاط قوت:
+- اطلاعاتی موجود نیست
+
+هشدارها:
+- ⚠️ سرویس هوش مصنوعی در دسترس نیست
+- ⚠️ امکان ارائه تحلیل دقیق وجود ندارد
+
+پیشنهاد:
+- لطفاً اتصال به Ollama را بررسی کنید و دوباره تلاش کنید.
+
+تحلیل روانشناختی: تحلیل روانشناختی در دسترس نیست.
+
+نکته: همیشه قبل از معامله، شرایط بازار را به‌صورت دستی بررسی کنید.
+
+INFO 2026-08-25 14:31:41,207 tasks 15532 14136 ❌ Consultation 149 marked as 'failed'
+ERROR 2026-08-25 14:35:01,085 ai_service 15532 3036 ❌ Twelve Data error: HTTPSConnectionPool(host='api.twelvedata.com', port=443): Max retries exceeded with url: /price?symbol=ADAUSDC&apikey=188a21d543654f5eae181ccb896a7049 (Caused by NameResolutionError("HTTPSConnection(host='api.twelvedata.com', port=443): Failed to resolve 'api.twelvedata.com' ([Errno 11001] getaddrinfo failed)"))
+ERROR 2026-08-25 14:35:01,160 ai_service 15532 12672 ❌ Twelve Data error: HTTPSConnectionPool(host='api.twelvedata.com', port=443): Max retries exceeded with url: /price?symbol=ADAUSDC&apikey=188a21d543654f5eae181ccb896a7049 (Caused by NameResolutionError("HTTPSConnection(host='api.twelvedata.com', port=443): Failed to resolve 'api.twelvedata.com' ([Errno 11001] getaddrinfo failed)"))
+ERROR 2026-08-25 14:35:01,160 ai_service 15532 12672 ❌ Twelve Data error: HTTPSConnectionPool(host='api.twelvedata.com', port=443): Max retries exceeded with url: /price?symbol=ADAUSDC&apikey=188a21d543654f5eae181ccb896a7049 (Caused by NameResolutionError("HTTPSConnection(host='api.twelvedata.com', port=443): Failed to resolve 'api.twelvedata.com' ([Errno 11001] getaddrinfo failed)"))
+INFO 2026-08-25 14:35:01,281 signals 15532 12672 ✅ AI consultation used: 09155511393
+INFO 2026-08-25 14:35:01,296 tasks 15532 12672 🚀 [TASK START] Starting background task for consultation 150
+INFO 2026-08-25 14:35:01,326 tasks 15532 19584 🚀 [START] Processing consultation 150
+INFO 2026-08-25 14:35:01,326 tasks 15532 12672 ✅ [TASK STARTED] Thread 'OllamaWorker-150' started
+INFO 2026-08-25 14:35:01,341 tasks 15532 19584 📊 [STEP 1] Consultation 150 retrieved
+INFO 2026-08-25 14:35:01,371 tasks 15532 19584 🔄 [STEP 2] Status changed to 'processing'
+INFO 2026-08-25 14:35:01,521 tasks 15532 19584 ✅ [STEP 3] Analytics fetched
+INFO 2026-08-25 14:35:01,661 tasks 15532 19584 ✅ [STEP 4] Prompt built, length: 1563
+INFO 2026-08-25 14:35:01,661 tasks 15532 19584 🔄 [STEP 5] Calling Ollama with model: llama3.1:8b, timeout: 600s
+INFO 2026-08-25 14:35:01,671 ai_service 15532 19584 🔄 Calling Ollama (attempt 1/3) with model: llama3.1:8b
+INFO 2026-08-25 14:35:01,695 ai_service 15532 19584 📝 Prompt preview: شما یک مشاور معاملاتی حرفه‌ای با تجربه هستید. بر اساس داده‌های واقعی یک تریدر،
+به سوال کاربر پاسخ دهید. لطفاً پاسخ خود را به فارسی بنویسید.
+
+📊 داده‌های تاریخچه کاربر:
+📊 **خلاصه عملکرد کلی شما:**
+- کل ...
+INFO 2026-08-25 14:41:28,372 ai_service 15532 19584 📊 Response status: 200
+INFO 2026-08-25 14:41:28,570 ai_service 15532 19584 📊 Response headers: {'Content-Type': 'application/json; charset=utf-8', 'Date': 'Tue, 25 Aug 2026 11:11:28 GMT', 'Transfer-Encoding': 'chunked'}
+INFO 2026-08-25 14:41:28,585 ai_service 15532 19584 ✅ Ollama response received, length: 1361
+INFO 2026-08-25 14:41:28,586 tasks 15532 19584 ✅ [STEP 5] Ollama responded, length: 1361
+INFO 2026-08-25 14:41:28,590 tasks 15532 19584 📝 [STEP 5] Response preview: **امتیاز اعتبار (۰-۱۰۰):**
+
+امتیاز اعتبار این ترید را ۸۰ می‌دهیم. چرا که کاربر با نرخ برد 58.5% و سود کل $8288.15 در مجموع عملکرد کلی خود، به یک استراتژی موثر دست یافته است. اما همچنان باید به نقاط ضعف آن توجه شود.
+
+**نقاط قوت:**
+
+- **عملکرد خوب در روزهای مشابه:** کاربر با نرخ برد 100.0% و سود کل $150.0 در روزهای مشابه (مثلاً دوشنبه‌ها) عملکرد خوبی داشته است.
+- **حالت آرامش:** کاربر در حالت احساسی غالب (آرامش) نیز خوب عمل کرده است. این نشان دهنده اینکه استراتژی‌های وی برای شرایط مختلف کارآمد هست...
+INFO 2026-08-25 14:41:28,590 tasks 15532 19584 ✅ [STEP 7] Response parsed, score: 65
+INFO 2026-08-25 14:41:28,616 tasks 15532 19584 ✅ [DONE] Consultation 150 completed successfully! Status: completed
+INFO 2026-08-25 14:41:28,645 tasks 15532 19584 ✅ Usage counted: 120
+ERROR 2026-08-26 16:15:34,285 sms 15532 8024 SMS request exception: 404 Client Error: Not Found for url: https://gateway.ghasedak.me/rest/api/v1/WebService/SendOtpWithParams
+INFO 2026-08-26 16:42:57,892 ai_model_manager 19628 22236 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 16:42:57,907 ai_model_manager 19628 22236 📌 Provider mode: hybrid
+INFO 2026-08-26 16:42:57,907 ai_model_manager 19628 22236 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 16:42:57,907 ai_model_manager 19628 22236 ✅ gapgpt: 0 models available
+INFO 2026-08-26 16:42:57,916 ai_model_manager 19628 22236 ✅ gemini: 0 models available
+INFO 2026-08-26 16:42:57,916 ai_model_manager 19628 22236 ✅ openrouter: 0 models available
+INFO 2026-08-26 16:42:57,916 ai_model_manager 19628 22236 ✅ huggingface: 0 models available
+INFO 2026-08-26 16:42:57,916 ollama_provider 19628 22236 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 16:42:59,992 ollama_provider 19628 22236 ✅ Found 3 Ollama models
+INFO 2026-08-26 16:42:59,992 ai_model_manager 19628 22236 ✅ ollama: 3 models available
+INFO 2026-08-26 16:42:59,995 ai_model_manager 19628 22236 ✅ Total 3 AI models available
+ERROR 2026-08-26 16:43:00,074 log 19628 22236 Internal Server Error: /api/trading/ai/models/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 2112, in get
+    logger.info(f"✅ AvailableModelsView: {len(result)} models returned")
+    ^^^^^^
+NameError: name 'logger' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 2116, in get
+    logger.error(f"❌ Error in AvailableModelsView: {str(e)}")
+    ^^^^^^
+NameError: name 'logger' is not defined
+ERROR 2026-08-26 16:43:00,092 basehttp 19628 22236 "GET /api/trading/ai/models/ HTTP/1.1" 500 27519
+INFO 2026-08-26 16:43:00,104 ai_model_manager 19628 18620 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 16:43:00,134 ai_model_manager 19628 18620 📌 Provider mode: hybrid
+INFO 2026-08-26 16:43:00,134 ai_model_manager 19628 18620 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 16:43:00,134 ai_model_manager 19628 18620 ✅ gapgpt: 0 models available
+INFO 2026-08-26 16:43:00,134 ai_model_manager 19628 18620 ✅ gemini: 0 models available
+INFO 2026-08-26 16:43:00,134 ai_model_manager 19628 18620 ✅ openrouter: 0 models available
+INFO 2026-08-26 16:43:00,134 ai_model_manager 19628 18620 ✅ huggingface: 0 models available
+INFO 2026-08-26 16:43:00,134 ollama_provider 19628 18620 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 16:43:02,199 ollama_provider 19628 18620 ✅ Found 3 Ollama models
+INFO 2026-08-26 16:43:02,199 ai_model_manager 19628 18620 ✅ ollama: 3 models available
+INFO 2026-08-26 16:43:02,201 ai_model_manager 19628 18620 ✅ Total 3 AI models available
+ERROR 2026-08-26 16:43:02,252 log 19628 18620 Internal Server Error: /api/trading/ai/models/
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 2112, in get
+    logger.info(f"✅ AvailableModelsView: {len(result)} models returned")
+    ^^^^^^
+NameError: name 'logger' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Trade_Journal\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Trade_Journal\backend\apps\trading\views.py", line 2116, in get
+    logger.error(f"❌ Error in AvailableModelsView: {str(e)}")
+    ^^^^^^
+NameError: name 'logger' is not defined
+ERROR 2026-08-26 16:43:02,256 basehttp 19628 18620 "GET /api/trading/ai/models/ HTTP/1.1" 500 27519
+INFO 2026-08-26 16:49:34,057 ai_model_manager 13096 18068 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 16:49:34,087 ai_model_manager 13096 18068 📌 Provider mode: hybrid
+INFO 2026-08-26 16:49:34,103 ai_model_manager 13096 18068 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 16:49:34,117 ai_model_manager 13096 18068 ✅ gapgpt: 0 models available
+INFO 2026-08-26 16:49:34,121 ai_model_manager 13096 18068 ✅ gemini: 0 models available
+INFO 2026-08-26 16:49:34,132 ai_model_manager 13096 18068 ✅ openrouter: 0 models available
+INFO 2026-08-26 16:49:34,132 ai_model_manager 13096 18068 ✅ huggingface: 0 models available
+INFO 2026-08-26 16:49:34,132 ollama_provider 13096 18068 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 16:49:34,147 ai_model_manager 13096 21544 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 16:49:34,147 ai_model_manager 13096 21544 📌 Provider mode: hybrid
+INFO 2026-08-26 16:49:34,147 ai_model_manager 13096 21544 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 16:49:34,147 ai_model_manager 13096 21544 ✅ gapgpt: 0 models available
+INFO 2026-08-26 16:49:34,147 ai_model_manager 13096 21544 ✅ gemini: 0 models available
+INFO 2026-08-26 16:49:34,147 ai_model_manager 13096 21544 ✅ openrouter: 0 models available
+INFO 2026-08-26 16:49:34,162 ai_model_manager 13096 21544 ✅ huggingface: 0 models available
+INFO 2026-08-26 16:49:34,162 ollama_provider 13096 21544 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 16:49:36,196 ollama_provider 13096 18068 ✅ Found 3 Ollama models
+INFO 2026-08-26 16:49:36,197 ai_model_manager 13096 18068 ✅ ollama: 3 models available
+INFO 2026-08-26 16:49:36,199 ai_model_manager 13096 18068 ✅ Total 3 AI models available
+INFO 2026-08-26 16:49:36,199 views 13096 18068 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 16:49:36,227 ollama_provider 13096 21544 ✅ Found 3 Ollama models
+INFO 2026-08-26 16:49:36,227 ai_model_manager 13096 21544 ✅ ollama: 3 models available
+INFO 2026-08-26 16:49:36,230 ai_model_manager 13096 21544 ✅ Total 3 AI models available
+INFO 2026-08-26 16:49:36,230 views 13096 21544 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:25:58,832 ai_model_manager 13096 12152 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:25:58,836 ai_model_manager 13096 20004 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:26:02,417 ai_model_manager 13096 12152 📌 Provider mode: hybrid
+INFO 2026-08-26 17:26:02,424 ai_model_manager 13096 20004 📌 Provider mode: hybrid
+INFO 2026-08-26 17:26:02,430 ai_model_manager 13096 12152 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:26:02,431 ai_model_manager 13096 20004 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:26:02,452 ai_model_manager 13096 12152 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:26:02,456 ai_model_manager 13096 20004 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:26:02,459 ai_model_manager 13096 20004 ✅ gemini: 0 models available
+INFO 2026-08-26 17:26:02,457 ai_model_manager 13096 12152 ✅ gemini: 0 models available
+INFO 2026-08-26 17:26:02,461 ai_model_manager 13096 20004 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:26:02,461 ai_model_manager 13096 12152 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:26:02,462 ai_model_manager 13096 20004 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:26:02,462 ai_model_manager 13096 12152 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:26:02,463 ollama_provider 13096 20004 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:26:02,464 ollama_provider 13096 12152 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:26:29,846 ai_model_manager 18376 18456 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:26:29,885 ai_model_manager 18376 18456 📌 Provider mode: hybrid
+INFO 2026-08-26 17:26:29,909 ai_model_manager 18376 18456 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:26:29,909 ai_model_manager 18376 18456 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:26:29,931 ai_model_manager 18376 18456 ✅ gemini: 0 models available
+INFO 2026-08-26 17:26:29,931 ai_model_manager 18376 18456 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:26:29,931 ai_model_manager 18376 18456 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:26:29,939 ollama_provider 18376 18456 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 📌 Provider mode: hybrid
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 ✅ gemini: 0 models available
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:26:29,960 ai_model_manager 18376 2548 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:26:29,960 ollama_provider 18376 2548 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:26:32,337 ollama_provider 18376 18456 ✅ Found 3 Ollama models
+INFO 2026-08-26 17:26:32,337 ai_model_manager 18376 18456 ✅ ollama: 3 models available
+INFO 2026-08-26 17:26:32,338 ai_model_manager 18376 18456 ✅ Total 3 AI models available
+INFO 2026-08-26 17:26:32,338 views 18376 18456 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:26:32,385 ollama_provider 18376 2548 ✅ Found 3 Ollama models
+INFO 2026-08-26 17:26:32,385 ai_model_manager 18376 2548 ✅ ollama: 3 models available
+INFO 2026-08-26 17:26:32,388 ai_model_manager 18376 2548 ✅ Total 3 AI models available
+INFO 2026-08-26 17:26:32,388 views 18376 2548 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:31:02,725 ai_model_manager 24132 19592 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:31:02,740 ai_model_manager 24132 19592 📌 Provider mode: hybrid
+INFO 2026-08-26 17:31:02,740 ai_model_manager 24132 19592 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:31:02,744 ai_model_manager 24132 19592 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:31:02,755 ai_model_manager 24132 19592 ✅ gemini: 0 models available
+INFO 2026-08-26 17:31:02,755 ai_model_manager 24132 19592 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:31:02,770 ai_model_manager 24132 19592 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:31:02,770 ollama_provider 24132 19592 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:31:04,824 ollama_provider 24132 19592 ✅ Found 3 Ollama models
+INFO 2026-08-26 17:31:04,824 ai_model_manager 24132 19592 ✅ ollama: 3 models available
+INFO 2026-08-26 17:31:04,825 ai_model_manager 24132 19592 ✅ Total 3 AI models available
+INFO 2026-08-26 17:31:04,826 views 24132 19592 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:31:04,833 ai_model_manager 24132 12628 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:31:04,833 ai_model_manager 24132 12628 📌 Provider mode: hybrid
+INFO 2026-08-26 17:31:04,833 ai_model_manager 24132 12628 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:31:04,848 ai_model_manager 24132 12628 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:31:04,848 ai_model_manager 24132 12628 ✅ gemini: 0 models available
+INFO 2026-08-26 17:31:04,848 ai_model_manager 24132 12628 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:31:04,848 ai_model_manager 24132 12628 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:31:04,848 ollama_provider 24132 12628 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:31:06,883 ollama_provider 24132 12628 ✅ Found 3 Ollama models
+INFO 2026-08-26 17:31:06,883 ai_model_manager 24132 12628 ✅ ollama: 3 models available
+INFO 2026-08-26 17:31:06,885 ai_model_manager 24132 12628 ✅ Total 3 AI models available
+INFO 2026-08-26 17:31:06,885 views 24132 12628 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:32:36,629 gapgpt_provider 1364 1732 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:32:36,630 gapgpt_provider 1364 1732 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:32:36,631 gapgpt_provider 1364 1732 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:32:46,301 gapgpt_provider 3740 5884 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:32:46,302 gapgpt_provider 3740 5884 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:32:46,302 gapgpt_provider 3740 5884 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:32:57,306 ai_model_manager 3740 15652 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:32:57,318 ai_model_manager 3740 15652 📌 Provider mode: hybrid
+INFO 2026-08-26 17:32:57,333 ai_model_manager 3740 15652 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:32:57,356 gapgpt_provider 3740 15652 🔍 [GapGPT] get_available_models called, API Key: ❌ وجود ندارد
+WARNING 2026-08-26 17:32:57,394 gapgpt_provider 3740 15652 ⚠️ Gapgpt.app API Key تنظیم نشده است
+INFO 2026-08-26 17:32:57,409 ai_model_manager 3740 23024 🔄 Refreshing AI models from all providers...
+INFO 2026-08-26 17:32:57,409 ai_model_manager 3740 15652 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:32:57,421 ai_model_manager 3740 23024 📌 Provider mode: hybrid
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 15652 ✅ gemini: 0 models available
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 23024 📌 Hybrid mode: online first, then offline
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 15652 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:32:57,424 gapgpt_provider 3740 23024 🔍 [GapGPT] get_available_models called, API Key: ❌ وجود ندارد
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 15652 ✅ huggingface: 0 models available
+WARNING 2026-08-26 17:32:57,424 gapgpt_provider 3740 23024 ⚠️ Gapgpt.app API Key تنظیم نشده است
+INFO 2026-08-26 17:32:57,424 ollama_provider 3740 15652 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 23024 ✅ gapgpt: 0 models available
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 23024 ✅ gemini: 0 models available
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 23024 ✅ openrouter: 0 models available
+INFO 2026-08-26 17:32:57,424 ai_model_manager 3740 23024 ✅ huggingface: 0 models available
+INFO 2026-08-26 17:32:57,424 ollama_provider 3740 23024 🔄 Fetching Ollama models from: http://localhost:11434/api/tags
+INFO 2026-08-26 17:32:59,465 ollama_provider 3740 15652 ✅ Found 3 Ollama models
+INFO 2026-08-26 17:32:59,465 ollama_provider 3740 23024 ✅ Found 3 Ollama models
+INFO 2026-08-26 17:32:59,467 ai_model_manager 3740 15652 ✅ ollama: 3 models available
+INFO 2026-08-26 17:32:59,468 ai_model_manager 3740 23024 ✅ ollama: 3 models available
+INFO 2026-08-26 17:32:59,468 ai_model_manager 3740 15652 ✅ Total 3 AI models available
+INFO 2026-08-26 17:32:59,468 ai_model_manager 3740 23024 ✅ Total 3 AI models available
+INFO 2026-08-26 17:32:59,469 views 3740 15652 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:32:59,469 views 3740 23024 ✅ AvailableModelsView: 3 models returned
+INFO 2026-08-26 17:41:32,290 gapgpt_provider 7736 4616 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:41:32,290 gapgpt_provider 7736 4616 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:41:32,290 gapgpt_provider 7736 4616 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:41:56,882 gapgpt_provider 3696 20084 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:41:56,882 gapgpt_provider 3696 20084 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:41:56,882 gapgpt_provider 3696 20084 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:50:59,686 gapgpt_provider 11608 15100 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:50:59,686 gapgpt_provider 11608 15100 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:50:59,686 gapgpt_provider 11608 15100 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:52:42,946 gapgpt_provider 21440 1752 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:52:42,949 gapgpt_provider 21440 1752 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:52:42,949 gapgpt_provider 21440 1752 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:55:14,984 gapgpt_provider 23360 23144 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:55:14,986 gapgpt_provider 23360 23144 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:55:14,986 gapgpt_provider 23360 23144 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:56:59,369 gapgpt_provider 6548 24040 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:56:59,369 gapgpt_provider 6548 24040 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:56:59,370 gapgpt_provider 6548 24040 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 17:59:35,634 gapgpt_provider 15956 17260 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 17:59:35,634 gapgpt_provider 15956 17260 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 17:59:35,635 gapgpt_provider 15956 17260 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1
+INFO 2026-08-26 18:00:01,996 gapgpt_provider 20952 10060 🔑 [GapGPT] API Key موجود: ❌ خیر
+INFO 2026-08-26 18:00:01,996 gapgpt_provider 20952 10060 🔑 [GapGPT] API Key length: 0
+INFO 2026-08-26 18:00:02,011 gapgpt_provider 20952 10060 🔑 [GapGPT] Base URL: https://api.gapgpt.app/v1

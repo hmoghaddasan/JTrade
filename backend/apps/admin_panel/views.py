@@ -1158,41 +1158,67 @@ class AdminSettingsListView(generics.ListAPIView):
         return SystemSetting.objects.all()
 
 
+# backend/apps/admin_panel/views.py
+
 class AdminSettingsUpdateView(APIView):
     """به‌روزرسانی تنظیمات (دسته‌ای)"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def put(self, request):
+        """✅ این متد باید وجود داشته باشد"""
         data = request.data
         updated = []
         errors = []
+        created = []
+
+        logger.info("=" * 60)
+        logger.info("📥 RECEIVED SETTINGS UPDATE")
+        logger.info(f"📥 All keys: {list(data.keys())}")
+        logger.info(f"📥 gapgpt_api_key: {data.get('gapgpt_api_key', 'NOT FOUND')}")
+        logger.info("=" * 60)
 
         for key, value in data.items():
             try:
-                setting = SystemSetting.objects.get(setting_key=key)
-                if setting.is_editable:
-                    setting.setting_value = str(value)
-                    setting.save()
-                    updated.append(key)
-                else:
-                    errors.append(f"{key}: قابل ویرایش نیست")
-            except SystemSetting.DoesNotExist:
-                errors.append(f"{key}: یافت نشد")
+                if isinstance(value, bool):
+                    value = str(value).lower()
+
+                try:
+                    setting = SystemSetting.objects.get(setting_key=key)
+                    if setting.is_editable:
+                        setting.setting_value = str(value)
+                        setting.save()
+                        updated.append(key)
+                        logger.info(f"✅ Updated setting: {key} = {value}")
+                    else:
+                        errors.append(f"{key}: قابل ویرایش نیست")
+                except SystemSetting.DoesNotExist:
+                    setting = SystemSetting.objects.create(
+                        setting_key=key,
+                        setting_value=str(value),
+                        setting_type='string',
+                        description=f'تنظیم {key}',
+                        is_editable=True
+                    )
+                    created.append(key)
+                    logger.info(f"✅ Created setting: {key} = {value}")
+
+            except Exception as e:
+                errors.append(f"{key}: {str(e)}")
+                logger.error(f"❌ Error updating {key}: {str(e)}")
 
         AdminActionLog.objects.create(
             admin=request.user,
             action_type='update',
             target_model='SystemSetting',
-            description=f'به‌روزرسانی {len(updated)} تنظیم سیستم'
+            description=f'به‌روزرسانی {len(updated)} تنظیم، ایجاد {len(created)} تنظیم جدید'
         )
 
         return Response({
-            'message': f'{len(updated)} تنظیم با موفقیت به‌روزرسانی شد',
+            'message': f'{len(updated)} تنظیم به‌روزرسانی و {len(created)} تنظیم جدید ایجاد شد',
             'updated': updated,
+            'created': created,
             'errors': errors if errors else None
         })
-
-
 # ================================
 # ۱۰. مدیریت پیام‌های کاربران - توسعه کامل
 # ================================

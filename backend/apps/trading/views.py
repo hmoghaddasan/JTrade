@@ -1,6 +1,7 @@
 # backend/apps/trading/views.py
 
 import requests
+import logging
 from django.conf import settings
 from rest_framework import status, generics, permissions, filters
 from rest_framework.response import Response
@@ -71,6 +72,14 @@ from .comparison_serializers import (
     BarDataItemSerializer,
 )
 
+# ===== اضافه کردن importهای جدید برای مدیریت مدل‌های AI =====
+from .services.ai_model_manager import model_manager
+
+# ============================================
+# ✅ تعریف logger
+# ============================================
+logger = logging.getLogger(__name__)
+
 
 # ============================================
 # ✅ ویو لیست بروکرها
@@ -84,49 +93,55 @@ class BrokerListView(generics.ListAPIView):
 
 
 # ============================================
-# ✅ دریافت لیست مدل‌های Ollama به‌صورت پویا
+# ✅ دریافت لیست مدل‌های AI (نسخه کامل با مدل‌های Gapgpt.app)
 # ============================================
 class AvailableModelsView(APIView):
     """
     دریافت لیست مدل‌های هوش مصنوعی قابل انتخاب توسط کاربر
-    - مستقیماً از Ollama API دریافت می‌کند
-    - در صورت خطا، مقدار پیش‌فرض را برمی‌گرداند
+    - بر اساس تنظیم ai_provider_mode (offline / online / hybrid)
+    - مدل‌های آنلاین از Gapgpt.app و مدل‌های آفلاین از Ollama
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # ===== دریافت از Ollama API =====
         try:
-            ollama_base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
-            tags_url = f"{ollama_base}/api/tags"
+            # بازخوانی مدل‌ها از مدل‌منیجر
+            models = model_manager.refresh_models()
 
-            print(f"🔍 Fetching models from Ollama: {tags_url}")
+            # ساختاردهی خروجی برای فرانت‌اند
+            result = []
+            for model in models:
+                result.append({
+                    'id': model['id'],
+                    'name': model['name'],
+                    'provider': model['provider'],
+                    'display_name': model.get('display_name', model['provider']),
+                    'online': model.get('online', False),
+                    'free': model.get('free', True),
+                    'category': model.get('category', ''),
+                    'category_label': model.get('category_label', ''),
+                    'cooldown': model.get('cooldown', 10),
+                    'is_default': model.get('rank', 999) == 1,
+                })
 
-            response = requests.get(tags_url, timeout=5)
+            logger.info(f"✅ AvailableModelsView: {len(result)} models returned")
+            return Response(result)
 
-            if response.status_code == 200:
-                data = response.json()
-                models = [model['name'] for model in data.get('models', [])]
-
-                if models:
-                    print(f"✅ Models fetched from Ollama: {models}")
-                    return Response(models)
-                else:
-                    print("⚠️ No models found in Ollama response")
-            else:
-                print(f"⚠️ Ollama returned status {response.status_code}")
-
-        except requests.exceptions.ConnectionError:
-            print("❌ Could not connect to Ollama. Is it running?")
-        except requests.exceptions.Timeout:
-            print("❌ Ollama connection timed out")
         except Exception as e:
-            print(f"❌ Error fetching models from Ollama: {e}")
+            logger.error(f"❌ Error in AvailableModelsView: {str(e)}")
+            # در صورت خطا، مدل‌های پیش‌فرض را برگردان
+            fallback_models = self._get_fallback_models()
+            return Response(fallback_models)
 
-        # ===== در صورت خطا، مقدار پیش‌فرض =====
-        fallback_models = ['llama3.1:8b']
-        print(f"⚠️ Using fallback models: {fallback_models}")
-        return Response(fallback_models)
+    def _get_fallback_models(self):
+        """مدل‌های پیش‌فرض در صورت خطا"""
+        return [
+            {'id': 'llama3.1:8b', 'name': 'Llama 3.1 8B', 'provider': 'ollama', 'display_name': 'Ollama (محلی)',
+             'online': False, 'free': True, 'category': 'local', 'category_label': '🟣 محلی', 'cooldown': 5},
+            {'id': 'GapGPT 5.6 Lite', 'name': 'GapGPT 5.6 Lite', 'provider': 'gapgpt',
+             'display_name': 'Gapgpt.app (آنلاین)', 'online': True, 'free': True, 'category': 'free',
+             'category_label': '🟢 رایگان', 'cooldown': 10},
+        ]
 
 
 # ============================================
@@ -716,7 +731,8 @@ class AnalyticsView(APIView):
         total_loss_abs = abs(total_loss)
         avg_rr = trades.filter(risk_reward_ratio__isnull=False).aggregate(avg=Avg('risk_reward_ratio'))['avg'] or 0
         avg_quality = \
-        trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))['avg'] or 0
+            trades.filter(execution_quality_score__isnull=False).aggregate(avg=Avg('execution_quality_score'))[
+                'avg'] or 0
 
         win_rate = (win_count / total_trades * 100) if total_trades > 0 else 0
         profit_factor = (total_profit / total_loss_abs) if total_loss_abs > 0 else (999 if total_profit > 0 else 0)

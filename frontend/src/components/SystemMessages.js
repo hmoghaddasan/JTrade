@@ -16,7 +16,7 @@ const SystemMessages = () => {
       return [];
     }
   });
-  const [showResetBanner, setShowResetBanner] = useState(true); // ✅ کنترل نمایش بنر ریست
+  const [showResetBanner, setShowResetBanner] = useState(true);
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -114,11 +114,11 @@ const SystemMessages = () => {
   const handleResetDismissed = () => {
     localStorage.removeItem('dismissedSystemMessages');
     setDismissedIds([]);
-    setShowResetBanner(false); // ✅ مخفی کردن بنر ریست
+    setShowResetBanner(false);
     window.location.reload();
   };
 
-  // ✅ بستن بنر ریست
+  // ✅ بستن بنر ریست (با دکمه انصراف)
   const handleDismissResetBanner = () => {
     setShowResetBanner(false);
   };
@@ -138,18 +138,20 @@ const SystemMessages = () => {
   }
 
   if (error || visibleMessages.length === 0) {
-    // ✅ اگر پیامی وجود ندارد اما قبلاً بسته شده‌اند و بنر نمایش داده شود
+    // ✅ بنر جدید با متن اصلاح‌شده و دکمه‌های مناسب (بدون ضربدر)
     if (messages.length > 0 && dismissedIds.length > 0 && showResetBanner) {
       return (
         <div className="system-messages-reset">
           <div className="reset-message">
             <span className="reset-icon">📢</span>
-            <span>همه پیام‌ها بسته شده‌اند</span>
+            <span className="reset-text">
+              همه پیام‌های فعال ارسالی از سیستم بسته شده‌ و در صفحه پروفایل کاربری قسمت پیام‌ها آرشیو شده‌اند.
+            </span>
             <button className="reset-btn" onClick={handleResetDismissed}>
-              🔄 مشاهده مجدد
+              🔄 نمایش مجدد
             </button>
-            <button className="reset-dismiss-btn" onClick={handleDismissResetBanner} title="بستن">
-              ✕
+            <button className="reset-dismiss-btn" onClick={handleDismissResetBanner}>
+              ✕ انصراف
             </button>
           </div>
         </div>

@@ -11,7 +11,7 @@ from django.db.models import Avg, Count, Sum, Q, Max, Min
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from .models import Trade, AIConsultation, AIPromptVersion
-from apps.accounts.models import User
+from apps.accounts.models import User, SystemSetting
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,17 @@ class AIService:
         elif isinstance(data, (list, tuple)):
             return [cls._convert_decimals(item) for item in data]
         return data
+
+    @classmethod
+    def _should_save_prompt(cls):
+        """
+        بررسی آیا تنظیم ذخیره پرامپت فعال است یا خیر
+        """
+        try:
+            return SystemSetting.get_bool('save_ai_prompt', default=False)
+        except Exception as e:
+            logger.warning(f"⚠️ Error checking save_ai_prompt setting: {str(e)}")
+            return False
 
     @classmethod
     def get_user_detailed_analytics(cls, user, symbol=None, user_input=None):
@@ -1384,6 +1395,12 @@ class AIService:
             internal_analytics=analytics,
         )
 
+        # ✅ ذخیره پرامپت فقط در صورت فعال بودن تنظیم
+        if cls._should_save_prompt():
+            # پرامپت قبلاً در tasks.py ساخته می‌شود، اما ما آن را اینجا ذخیره نمی‌کنیم
+            # زیرا در tasks.py پس از ساخت پرامپت، آن را در consultation.prompt_used ذخیره می‌کند
+            pass
+
         # راه‌اندازی تسک پس‌زمینه
         start_consultation_task(consultation.id, user_input)
 
@@ -1444,7 +1461,8 @@ class AIService:
             status='completed',
             ai_score=parsed_response.get('score', 0),
             ai_response=parsed_response,
-            prompt_used=prompt,
+            # ✅ ذخیره پرامپت فقط در صورت فعال بودن تنظیم
+            prompt_used=prompt if cls._should_save_prompt() else '',
             live_price=None,
             price_warning=user_input.get('price_warning'),
             price_diff_percent=None,
@@ -1512,7 +1530,7 @@ class AIService:
             status='pending',
             ai_score=50,
             ai_response={},
-            prompt_used=prompt,
+            prompt_used=prompt if cls._should_save_prompt() else '',
             live_price=None,
             price_warning=user_input.get('price_warning'),
             price_diff_percent=None,

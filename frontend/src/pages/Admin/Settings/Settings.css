@@ -1,5 +1,181 @@
 /* frontend/src/pages/Admin/Settings/Settings.css */
 
+/* ============================================
+   ✅ افسانه (Legend) ستاره‌ها
+   ============================================ */
+.settings-legend {
+  background: #f8f9fa;
+  border: 1px solid #e8ecf1;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dark-theme .settings-legend {
+  background: #1e1e32;
+  border-color: #333;
+}
+
+.legend-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 4px;
+}
+
+.dark-theme .legend-title {
+  color: #ccc;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
+.dark-theme .legend-item {
+  color: #aaa;
+}
+
+.legend-star {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.legend-star.blue {
+  color: #1976d2;
+}
+
+.legend-star.red {
+  color: #d32f2f;
+}
+
+.legend-star.none {
+  color: #999;
+  font-weight: 300;
+}
+
+.legend-text strong {
+  color: #333;
+}
+
+.dark-theme .legend-text strong {
+  color: #ddd;
+}
+
+/* ============================================
+   ✅ ستاره تأثیر در کنار هر تنظیم
+   ============================================ */
+.impact-star {
+  font-size: 16px;
+  font-weight: 700;
+  margin-left: 4px;
+  display: inline-block;
+  width: 20px;
+  text-align: center;
+}
+
+.impact-star.blue {
+  color: #1976d2;
+}
+
+.impact-star.red {
+  color: #d32f2f;
+}
+
+.impact-star.none {
+  color: #bbb;
+  font-weight: 300;
+}
+
+/* ============================================
+   ✅ استایل select برای تنظیمات
+   ============================================ */
+.setting-item select.setting-select {
+  padding: 8px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  background: #fff;
+  color: #212529;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.setting-item select.setting-select:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.setting-item select.setting-select:disabled {
+  background: #f8f9fa;
+  color: #868e96;
+  cursor: not-allowed;
+}
+
+.dark-theme .setting-item select.setting-select {
+  background: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.dark-theme .setting-item select.setting-select:focus {
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+}
+
+.dark-theme .setting-item select.setting-select:disabled {
+  background: #2a2a2a;
+  color: #666;
+}
+
+/* ============================================
+   ✅ استایل hint برای توضیحات
+   ============================================ */
+.setting-item .hint {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  line-height: 1.8;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-right: 3px solid #6c63ff;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dark-theme .setting-item .hint {
+  background: #1e1e32;
+  color: #aaa;
+  border-right-color: #6c63ff;
+}
+
+.setting-item .hint span {
+  display: block;
+  line-height: 1.6;
+}
+
+/* ============================================
+   ✅ بقیه استایل‌های قبلی
+   ============================================ */
+
 .settings-page {
   padding: 0;
   max-width: 100%;
@@ -415,6 +591,24 @@
     font-size: 13px;
     padding: 6px 10px;
   }
+
+  .settings-legend {
+    padding: 12px 16px;
+  }
+
+  .legend-items {
+    gap: 8px 16px;
+  }
+
+  .legend-item {
+    font-size: 12px;
+  }
+
+  .setting-item .hint {
+    font-size: 11px;
+    padding: 6px 10px;
+    max-height: 200px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -447,5 +641,20 @@
   .alert {
     font-size: 13px;
     padding: 10px 14px;
+  }
+
+  .settings-legend {
+    padding: 10px 12px;
+  }
+
+  .legend-items {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .setting-item .hint {
+    font-size: 11px;
+    padding: 4px 8px;
+    max-height: 150px;
   }
 }

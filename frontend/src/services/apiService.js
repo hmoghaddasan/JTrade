@@ -100,4 +100,19 @@ export const portfolioService = {
 // ✅ برای دسترسی در کنسول (دیباگ)
 window.apiClient = apiClient;
 
+
+// ============================================
+// ✅ دریافت لیست مدل‌های AI (از طریق API جدید)
+// ============================================
+export const aiModelService = {
+  getAvailableModels: () => {
+    console.log('📡 Fetching available AI models...');
+    return apiClient.get('trading/ai/models/');
+  },
+};
+
+// ✅ برای دسترسی در کنسول (دیباگ)
+window.aiModelService = aiModelService;
+
+
 export default apiClient;

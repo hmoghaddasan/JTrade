@@ -1,5 +1,104 @@
 /* frontend/src/components/SystemMessages.css */
 
+/* ===== بنر ریست پیام‌ها ===== */
+.system-messages-reset {
+  margin: 1px 1px 1px 1px;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  border: 1px dashed #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  direction: rtl;
+}
+
+.dark-theme .system-messages-reset {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.reset-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #666;
+  flex-wrap: wrap;
+  justify-content: center;
+  direction: rtl;
+  width: 100%;
+}
+
+.dark-theme .reset-message {
+  color: #aaa;
+}
+
+.reset-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.reset-text {
+  flex: 1;
+  min-width: 150px;
+  text-align: right;
+  line-height: 1.6;
+}
+
+.reset-btn {
+  padding: 6px 16px;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.reset-btn:hover {
+  background: #5a52d5;
+}
+
+/* ===== دکمه انصراف بنر ریست ===== */
+.reset-dismiss-btn {
+  padding: 6px 16px;
+  background: transparent;
+  color: #666;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reset-dismiss-btn:hover {
+  background: #f0f0f0;
+  border-color: #999;
+  color: #333;
+}
+
+.dark-theme .reset-dismiss-btn {
+  color: #aaa;
+  border-color: #555;
+}
+
+.dark-theme .reset-dismiss-btn:hover {
+  background: #3a3a55;
+  border-color: #777;
+  color: #fff;
+}
+
+/* ===== بقیه استایل‌ها (بدون تغییر) ===== */
+
 .system-messages {
   margin: 1px 1px 1px 1px;
   display: flex;
@@ -62,7 +161,6 @@
   line-height: 1.6;
 }
 
-/* ===== دکمه بستن (ضربدر) ===== */
 .message-dismiss-btn {
   flex-shrink: 0;
   width: 28px;
@@ -102,7 +200,6 @@
   color: #fff;
 }
 
-/* ===== بازه تاریخ ===== */
 .message-date-range {
   display: flex;
   align-items: center;
@@ -133,96 +230,6 @@
   color: #ccc;
 }
 
-/* ===== بنر ریست پیام‌ها ===== */
-.system-messages-reset {
-  margin: 1px 1px 1px 1px;
-  padding: 12px 16px;
-  background: #f5f5f5;
-  border-radius: 10px;
-  border: 1px dashed #ccc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.dark-theme .system-messages-reset {
-  background: #2a2a2a;
-  border-color: #444;
-}
-
-.reset-message {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: #666;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.dark-theme .reset-message {
-  color: #aaa;
-}
-
-.reset-icon {
-  font-size: 20px;
-}
-
-.reset-btn {
-  padding: 6px 16px;
-  background: #6c63ff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background 0.2s;
-}
-
-.reset-btn:hover {
-  background: #5a52d5;
-}
-
-/* ===== دکمه بستن بنر ریست ===== */
-.reset-dismiss-btn {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-  color: #666;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  padding: 0;
-  line-height: 1;
-}
-
-.reset-dismiss-btn:hover {
-  background: rgba(0, 0, 0, 0.15);
-  color: #333;
-  transform: scale(1.1);
-}
-
-.reset-dismiss-btn:active {
-  transform: scale(0.9);
-}
-
-.dark-theme .reset-dismiss-btn {
-  background: rgba(255, 255, 255, 0.1);
-  color: #aaa;
-}
-
-.dark-theme .reset-dismiss-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-/* ===== لودینگ ===== */
 .system-messages-loading {
   margin: 1px 1px 1px 1px;
   display: flex;
@@ -241,7 +248,6 @@
   50% { opacity: 0.3; }
 }
 
-/* ===== انیمیشن ===== */
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -253,7 +259,6 @@
   }
 }
 
-/* ===== ریسپانسیو (موبایل) ===== */
 @media (max-width: 768px) {
   .system-messages {
     margin: 1px 1px 1px 1px;
@@ -293,14 +298,19 @@
     gap: 8px;
   }
 
+  .reset-text {
+    font-size: 13px;
+    text-align: right;
+    min-width: 100px;
+  }
+
   .reset-btn {
     padding: 4px 12px;
     font-size: 12px;
   }
 
   .reset-dismiss-btn {
-    width: 24px;
-    height: 24px;
+    padding: 4px 12px;
     font-size: 12px;
   }
 
