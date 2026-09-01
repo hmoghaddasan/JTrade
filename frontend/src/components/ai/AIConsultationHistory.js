@@ -1,5 +1,5 @@
 // frontend/src/components/ai/AIConsultationHistory.js
-
+import LoadingBar from '../common/LoadingBar';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -147,8 +147,7 @@ const AIConsultationHistory = () => {
   if (loading) {
     return (
       <div className="ai-history-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال بارگذاری تاریخچه مشاوره‌ها...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

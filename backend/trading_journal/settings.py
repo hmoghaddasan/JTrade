@@ -60,8 +60,7 @@ SECRET_KEY = get_db_setting('secret_key', os.environ.get('SECRET_KEY', 'django-i
 
 DEBUG = get_db_bool('debug', os.environ.get('DEBUG', 'True') == 'True')
 
-ALLOWED_HOSTS = get_db_setting('allowed_hosts', os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0')).split(',')
-
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,213.108.241.154,c648c6e04a1a').split(',')
 # ============================================
 # تنظیمات دوره آزمایشی (از دیتابیس با fallback)
 # ============================================
@@ -139,8 +138,7 @@ FINNHUB_BASE_URL = get_db_setting('finnhub_base_url', os.environ.get('FINNHUB_BA
 ALPHA_VANTAGE_API_KEY = get_db_setting('alphavantage_api_key', os.environ.get('ALPHA_VANTAGE_API_KEY', ''))
 
 # -- CORS --
-CORS_ALLOWED_ORIGINS = get_db_setting('cors_allowed_origins', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173').split(',')
-
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5173,http://127.0.0.1:5173,http://213.108.241.154:3000,http://213.108.241.154:8000,http://213.108.241.154').split(',')
 # -- ادمین --
 ADMIN_PHONE_NUMBER = get_db_setting('admin_phone_number', os.environ.get('ADMIN_PHONE_NUMBER', '09155511393'))
 
@@ -188,8 +186,13 @@ CORS_PREFLIGHT_MAX_AGE = 86400
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://213.108.241.154:3000',  # ← اضافه شد
+    'http://213.108.241.154:8000',  # ← اضافه شد
+    'http://213.108.241.154',       # ← اضافه شد
 ]
 
 
@@ -451,7 +454,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    'PAGE_SIZE': 100,  # ✅ افزایش تعداد آیتم‌ها در هر صفحه
+    'MAX_PAGE_SIZE': 1000,  # ✅ حداکثر تعداد آیتم‌ها در هر صفحه
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
@@ -465,6 +469,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+
 
 
 # ============================================

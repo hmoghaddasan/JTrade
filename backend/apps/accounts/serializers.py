@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import re
+from datetime import datetime  # ✅ اضافه شد
 
 from .models import User, SystemMessage, AppVersion
 
@@ -174,10 +175,71 @@ class SystemMessageSerializer(serializers.ModelSerializer):
         fields = ['id', 'message_key', 'title', 'message', 'is_active', 'start_date', 'end_date', 'created_at']
 
 
+# ============================================
+# ✅ اصلاح شده - با تاریخ شمسی
+# ============================================
 class AppVersionSerializer(serializers.ModelSerializer):
+    """سریالایزر برای نسخه‌های نرم‌افزار با تاریخ شمسی"""
+    release_date_persian = serializers.SerializerMethodField()
+    release_date_gregorian = serializers.SerializerMethodField()
+
     class Meta:
         model = AppVersion
-        fields = ['id', 'version_number', 'release_date', 'release_notes', 'is_current', 'created_at']
+        fields = [
+            'id',
+            'version_number',
+            'release_date',
+            'release_date_gregorian',
+            'release_date_persian',
+            'release_notes',
+            'is_current',
+            'created_at',
+            'updated_at'
+        ]
+
+    def get_release_date_persian(self, obj):
+        """تبدیل تاریخ میلادی به شمسی با فرمت ۱۴۰۳/۰۲/۱۵"""
+        if not obj.release_date:
+            return None
+
+        try:
+            import jdatetime
+            # تبدیل datetime به jdatetime
+            if isinstance(obj.release_date, datetime):
+                jalali_date = jdatetime.datetime.fromgregorian(datetime=obj.release_date)
+                return jalali_date.strftime('%Y/%m/%d')
+            else:
+                # اگر string است، ابتدا به datetime تبدیل کن
+                from dateutil import parser
+                dt = parser.parse(str(obj.release_date))
+                jalali_date = jdatetime.datetime.fromgregorian(datetime=dt)
+                return jalali_date.strftime('%Y/%m/%d')
+        except Exception as e:
+            # اگر کتابخانه jdatetime نصب نبود، از فرمت جایگزین استفاده کن
+            try:
+                # تبدیل ساده به تاریخ شمسی (بدون کتابخانه)
+                from datetime import datetime as dt
+                if isinstance(obj.release_date, str):
+                    date_obj = dt.strptime(obj.release_date, '%Y-%m-%d')
+                else:
+                    date_obj = obj.release_date
+                return date_obj.strftime('%Y/%m/%d')
+            except:
+                return str(obj.release_date)
+
+    def get_release_date_gregorian(self, obj):
+        """تاریخ میلادی با فرمت خوانا"""
+        if not obj.release_date:
+            return None
+        try:
+            if isinstance(obj.release_date, datetime):
+                return obj.release_date.strftime('%Y-%m-%d')
+            else:
+                from dateutil import parser
+                dt = parser.parse(str(obj.release_date))
+                return dt.strftime('%Y-%m-%d')
+        except:
+            return str(obj.release_date)
 
 
 class ChangePasswordSerializer(serializers.Serializer):

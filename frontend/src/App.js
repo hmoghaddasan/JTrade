@@ -112,8 +112,6 @@ function AppRoutes() {
   const [isSubscriptionChecked, setIsSubscriptionChecked] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [isSubscriptionExpired, setIsSubscriptionExpired] = useState(false);
-
-  // ✅ جلوگیری از بارگذاری مکرر پورتفولیوها
   const hasLoadedPortfolios = useRef(false);
 
   // ============================================
@@ -226,7 +224,8 @@ function AppRoutes() {
   if (loading) {
     return (
       <div className="loading-screen">
-        <div className="loading-spinner"></div>
+        {/* ✅ اسپینر جدید - خطی مینیمال */}
+        <div className="loading-bar"></div>
         <p>در حال اتصال به سرور...</p>
       </div>
     );
@@ -242,9 +241,16 @@ function AppRoutes() {
 
   const handleVerifySuccess = () => {
     console.log('✅ Verification successful');
+
+    // ============================================
+    // ✅ پاک کردن localStorage در لاگین جدید
+    // برای نمایش پیام‌های سیستمی فقط در لاگین جدید
+    // ============================================
+    localStorage.removeItem('jtrade_system_messages_data');
+    console.log('🗑️ localStorage پیام‌های سیستمی پاک شد');
+
     setShowVerify(false);
     hasRedirected.current = false;
-    // اجازه بارگذاری مجدد پس از ورود مجدد
     hasLoadedPortfolios.current = false;
     loadPortfolios();
     navigate('/dashboard', { replace: true });
@@ -281,8 +287,6 @@ function AppRoutes() {
         <Route path="/messages/new" element={<MessageForm />} />
         <Route path="/ai-consultation" element={<AIConsultation />} />
         <Route path="/ai-history" element={<AIConsultationHistory />} />
-
-        {/* ✅ اصلاح مسیر - بدون /detail اضافی */}
         <Route path="/ai-consultation/:id" element={<AIConsultationDetail />} />
 
         {/* ========================================== */}
@@ -308,12 +312,9 @@ function AppRoutes() {
           <Route path="trades" element={<AdminTradeList />} />
           <Route path="trades/:id" element={<AdminTradeDetail />} />
           <Route path="messages" element={<AdminMessageList />} />
-
-          {/* ✅ مسیرهای پیام‌های سیستمی - داخل /admin */}
           <Route path="system-messages" element={<SystemMessageList />} />
           <Route path="system-messages/new" element={<SystemMessageForm />} />
           <Route path="system-messages/:id/edit" element={<SystemMessageForm />} />
-
           <Route path="portfolios" element={<PortfolioList />} />
           <Route path="versions" element={<VersionList />} />
           <Route path="settings" element={<Settings />} />

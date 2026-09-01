@@ -4,21 +4,29 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import RealApiService from '../../services/realApiService';
+import AuthBackground from './AuthBackground';
 import './auth.css';
 
 const LoginStep1 = ({ onCodeSent }) => {
-  const { setPhoneNumber } = useAuth();  // ✅ دریافت setPhoneNumber
+  const { setPhoneNumber } = useAuth();
   const { showToast } = useToast();
 
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -27,8 +35,16 @@ const LoginStep1 = ({ onCodeSent }) => {
     setLoading(true);
 
     const cleanedPhone = phone.replace(/[^0-9]/g, '');
-    if (cleanedPhone.length < 11) {
-      setError('شماره تلفن معتبر وارد کنید (حداقل ۱۱ رقم)');
+
+    // ✅ بررسی شماره تلفن: ۱۱ رقم و شروع با 09
+    if (cleanedPhone.length !== 11) {
+      setError('شماره تلفن باید ۱۱ رقم باشد');
+      setLoading(false);
+      return;
+    }
+
+    if (!cleanedPhone.startsWith('09')) {
+      setError('شماره تلفن باید با 09 شروع شود');
       setLoading(false);
       return;
     }
@@ -38,10 +54,9 @@ const LoginStep1 = ({ onCodeSent }) => {
       const response = await RealApiService.sendVerificationCode(cleanedPhone);
       console.log('📤 Response:', response.data);
 
-      // ✅ ذخیره شماره تلفن در AuthContext
       setPhoneNumber(cleanedPhone);
 
-      showToast('کد تایید با موفقیت ارسال شد', 'success');
+      showToast('کد تایید با موفقیت ارسال شد.', 'success');
 
       if (onCodeSent) {
         console.log('📱 Calling onCodeSent');
@@ -58,13 +73,23 @@ const LoginStep1 = ({ onCodeSent }) => {
   };
 
   return (
-    <div className="auth-container">
+    <AuthBackground>
       <div className="auth-card">
         <div className="auth-header">
           <h1>📊 ژورنال حرفه‌ای ترید</h1>
           <h2>🚀 ورود به حساب کاربری</h2>
-          <p>شماره تلفن خود را وارد کنید تا کد تایید برای شما ارسال شود</p>
+          <p>برای ورود یا ثبت نام، شماره همراه خود را وارد کنید.</p>
         </div>
+
+        {isMobile && (
+          <div className="auth-mobile-warning">
+            <span className="mobile-warning-icon">📱</span>
+            <div className="mobile-warning-text">
+              <strong>توصیه می‌شود از نسخه دسکتاپ استفاده کنید.</strong>
+              <span>برای تجربه بهتر و دسترسی کامل به امکانات، لطفاً از رایانه استفاده گردد.</span>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -87,17 +112,8 @@ const LoginStep1 = ({ onCodeSent }) => {
             {loading ? '⏳ در حال ارسال...' : '📲 ارسال کد تایید'}
           </button>
         </form>
-
-        <div className="auth-footer">
-          <p>
-            ثبت‌نام نکرده‌اید؟{' '}
-            <span className="auth-link" onClick={() => window.location.href = '/register'}>
-              ثبت‌نام
-            </span>
-          </p>
-        </div>
       </div>
-    </div>
+    </AuthBackground>
   );
 };
 

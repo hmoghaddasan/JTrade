@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingBar from './common/LoadingBar';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -9,8 +10,7 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="loading-screen">
-        <div className="loading-spinner"></div>
-        <p>در حال بارگذاری...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

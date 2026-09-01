@@ -6,7 +6,7 @@ import { useToast } from '../../contexts/ToastContext';
 import AnalyticsService from '../../services/analyticsService';
 import ExpandableChart from '../common/ExpandableChart';
 import './EmotionalPnL.css';
-
+import LoadingBar from '../common/LoadingBar';
 // رنگ‌های اختصاصی هر احساس
 const EMOTION_COLORS = {
   'آرامش': '#4caf50',
@@ -70,8 +70,7 @@ const EmotionalPnL = () => {
   if (loading) {
     return (
       <div className="emotional-pnl-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال تحلیل احساسات...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

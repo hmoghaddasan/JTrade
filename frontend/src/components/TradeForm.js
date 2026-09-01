@@ -12,6 +12,7 @@ import { usePortfolio } from '../contexts/PortfolioContext';
 import ImageZoom from './ImageZoom';
 import './TradeForm.css';
 import disciplineService from '../services/disciplineService';
+import LoadingBar from './common/LoadingBar';
 
 // ============================================
 // ✅ کامپوننت Tooltip راهنما
@@ -1090,7 +1091,7 @@ const TradeForm = () => {
       return (
         <div className="form-step">
           <h3>📋 قوانین معاملاتی</h3>
-          <div className="loading-spinner">⏳ در حال بارگذاری قوانین...</div>
+          <LoadingBar text="در حال بارگذاری..." />
         </div>
       );
     }

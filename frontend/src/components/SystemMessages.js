@@ -1,194 +1,250 @@
 // frontend/src/components/SystemMessages.js
 
 import React, { useState, useEffect } from 'react';
-import api from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import RealApiService from '../services/realApiService';
 import './SystemMessages.css';
 
+// کلید ذخیره‌سازی در localStorage
+const STORAGE_KEY = 'jtrade_system_messages_data';
+
 const SystemMessages = () => {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [dismissedIds, setDismissedIds] = useState(() => {
-    try {
-      const saved = localStorage.getItem('dismissedSystemMessages');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [showResetBanner, setShowResetBanner] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
+  // ============================================
+  // بررسی آیا باید پیام‌ها نمایش داده شوند
+  // ============================================
+  const shouldShowMessages = () => {
+    if (!user) return false;
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+
+      // اگر هیچ داده‌ای وجود ندارد => نمایش بده
+      if (!stored) {
+        console.log('📢 اولین بار است، نمایش پیام‌ها');
+        return true;
+      }
+
+      const data = JSON.parse(stored);
+
+      // اگر کاربر تغییر کرده => نمایش بده
+      if (data.userId !== user.id) {
+        console.log('🔄 کاربر تغییر کرده، نمایش پیام‌ها');
+        return true;
+      }
+
+      // اگر بیش از ۱ روز گذشته => نمایش بده
+      const oneDay = 24 * 60 * 60 * 1000;
+      const elapsed = Date.now() - data.timestamp;
+      if (elapsed > oneDay) {
+        console.log(`⏰ بیش از ۱ روز گذشته (${Math.round(elapsed / (24 * 60 * 60 * 1000))} روز)، نمایش پیام‌ها`);
+        return true;
+      }
+
+      // اگر پیام‌ها قبلاً نمایش داده شده‌اند => نمایش نده
+      if (data.shown === true) {
+        console.log(`⏭️ قبلاً نمایش داده شده (${Math.round(elapsed / (60 * 60 * 1000))} ساعت پیش)، عدم نمایش`);
+        return false;
+      }
+
+      // در غیر این صورت => نمایش بده
+      return true;
+
+    } catch (error) {
+      console.error('Error in shouldShowMessages:', error);
+      return true;
+    }
+  };
+
+  // ============================================
+  // ذخیره وضعیت نمایش
+  // ============================================
+  const markAsShown = () => {
+    const data = {
+      userId: user?.id,
+      shown: true,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    console.log('💾 در localStorage ذخیره شد (shown: true)');
+  };
+
+  // ============================================
+  // پاک کردن (برای دیباگ)
+  // ============================================
+  const clearStorage = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.reload();
+  };
+
+  // ============================================
+  // بارگذاری پیام‌ها
+  // ============================================
   useEffect(() => {
     const loadMessages = async () => {
-      setLoading(true);
-      setError(null);
+      if (!user) {
+        setLoading(false);
+        setVisible(false);
+        return;
+      }
+
       try {
-        console.log('📢 Fetching system messages from API...');
-        const response = await api.get('messages/system/public/');
-        console.log('📢 System messages response:', response.data);
+        // ✅ بررسی آیا باید نمایش داده شود
+        const show = shouldShowMessages();
+        console.log('📊 shouldShowMessages:', show);
 
-        let data = response.data;
-
-        if (!Array.isArray(data)) {
-          if (data && typeof data === 'object') {
-            if (data.results && Array.isArray(data.results)) {
-              data = data.results;
-            } else if (data.data && Array.isArray(data.data)) {
-              data = data.data;
-            } else {
-              data = [data];
-            }
-          } else {
-            data = [];
-          }
+        if (!show) {
+          setLoading(false);
+          setVisible(false);
+          return;
         }
 
-        console.log('📅 Raw messages count:', data.length);
+        console.log('📢 بارگذاری پیام‌های سیستمی...');
+        const response = await RealApiService.getSystemMessages();
+        const data = response.data.results || response.data || [];
 
-        // ============================================
-        // ✅ فیلتر پیام‌های فعال
-        // ============================================
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const todayStr = today.toISOString().split('T')[0];
-
-        const activeMessages = data.filter(msg => {
-          if (msg.is_active === false || msg.is_active === 0) {
-            console.log(`❌ Message ${msg.id} (${msg.title}) is INACTIVE`);
-            return false;
-          }
-
-          if (msg.start_date) {
-            try {
-              const startDate = new Date(msg.start_date);
-              const startDateStr = startDate.toISOString().split('T')[0];
-              if (startDateStr > todayStr) {
-                console.log(`❌ Message ${msg.id} start_date (${startDateStr}) > today (${todayStr})`);
-                return false;
-              }
-            } catch (e) {
-              console.error(`Error parsing start_date for message ${msg.id}:`, e);
-            }
-          }
-
-          if (msg.end_date) {
-            try {
-              const endDate = new Date(msg.end_date);
-              const endDateStr = endDate.toISOString().split('T')[0];
-              if (endDateStr < todayStr) {
-                console.log(`❌ Message ${msg.id} end_date (${endDateStr}) < today (${todayStr}) - EXPIRED`);
-                return false;
-              }
-            } catch (e) {
-              console.error(`Error parsing end_date for message ${msg.id}:`, e);
-            }
-          }
-
-          console.log(`✅ Message ${msg.id} (${msg.title}) is ACTIVE`);
-          return true;
-        });
-
-        console.log('📢 Active messages count:', activeMessages.length);
+        // فقط پیام‌های فعال
+        const activeMessages = data.filter(m => m.is_active === true);
         setMessages(activeMessages);
 
+        if (activeMessages.length > 0) {
+          console.log(`📢 نمایش ${activeMessages.length} پیام سیستمی`);
+          setVisible(true);
+          setCurrentIndex(0);
+          // ✅ بلافاصله ذخیره کن تا دوباره نمایش داده نشود
+          markAsShown();
+        } else {
+          console.log('📭 هیچ پیام فعالی وجود ندارد');
+          setVisible(false);
+          // اگر پیامی نبود، باز هم ذخیره کن تا دوباره چک نشود
+          markAsShown();
+        }
+
       } catch (error) {
-        console.error('❌ Error loading system messages from API:', error);
-        setError('خطا در بارگذاری پیام‌های سیستمی');
-        setMessages([]);
+        console.error('Error loading system messages:', error);
+        // اگر خطا بود، باز هم ذخیره کن تا دوباره تلاش نکند
+        markAsShown();
       } finally {
         setLoading(false);
       }
     };
 
     loadMessages();
-  }, []);
+  }, [user]);
 
-  const handleDismiss = (messageId) => {
-    const newDismissed = [...dismissedIds, messageId];
-    setDismissedIds(newDismissed);
-    localStorage.setItem('dismissedSystemMessages', JSON.stringify(newDismissed));
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  // ============================================
+  // بستن پیام
+  // ============================================
+  const handleClose = () => {
+    setVisible(false);
+    markAsShown();
   };
 
-  // ✅ ریست همه پیام‌های بسته شده
-  const handleResetDismissed = () => {
-    localStorage.removeItem('dismissedSystemMessages');
-    setDismissedIds([]);
-    setShowResetBanner(false);
-    window.location.reload();
+  // ============================================
+  // نمایش مجدد (برای مواقع نادر که کاربر بخواهد دوباره ببیند)
+  // ============================================
+  const handleShowAgain = () => {
+    clearStorage();
   };
 
-  // ✅ بستن بنر ریست (با دکمه انصراف)
-  const handleDismissResetBanner = () => {
-    setShowResetBanner(false);
-  };
-
-  // ✅ فقط پیام‌هایی که بسته نشده‌اند نمایش داده شوند
-  const visibleMessages = messages.filter(msg => !dismissedIds.includes(msg.id));
-
-  console.log('📢 visibleMessages count:', visibleMessages.length);
-  console.log('📢 dismissedIds:', dismissedIds);
-
-  if (loading) {
-    return (
-      <div className="system-messages-loading">
-        <span className="loading-dots">⏳</span>
-      </div>
-    );
-  }
-
-  if (error || visibleMessages.length === 0) {
-    // ✅ بنر جدید با متن اصلاح‌شده و دکمه‌های مناسب (بدون ضربدر)
-    if (messages.length > 0 && dismissedIds.length > 0 && showResetBanner) {
-      return (
-        <div className="system-messages-reset">
-          <div className="reset-message">
-            <span className="reset-icon">📢</span>
-            <span className="reset-text">
-              همه پیام‌های فعال ارسالی از سیستم بسته شده‌ و در صفحه پروفایل کاربری قسمت پیام‌ها آرشیو شده‌اند.
-            </span>
-            <button className="reset-btn" onClick={handleResetDismissed}>
-              🔄 نمایش مجدد
-            </button>
-            <button className="reset-dismiss-btn" onClick={handleDismissResetBanner}>
-              ✕ انصراف
-            </button>
-          </div>
-        </div>
-      );
+  // ============================================
+  // پیام بعدی
+  // ============================================
+  const handleNext = () => {
+    if (currentIndex < messages.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      handleClose();
     }
+  };
+
+  // ============================================
+  // پیام قبلی
+  // ============================================
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  if (loading || !visible || messages.length === 0) {
     return null;
   }
 
+  const currentMessage = messages[currentIndex];
+  const isLast = currentIndex === messages.length - 1;
+  const isFirst = currentIndex === 0;
+
   return (
-    <div className="system-messages">
-      {visibleMessages.map((msg, index) => (
-        <div key={msg.id || index} className={`system-message ${index === 0 ? 'primary' : 'secondary'}`}>
-          <div className="message-icon">📢</div>
-          <div className="message-content">
-            <h4>{msg.title || 'پیام سیستم'}</h4>
-            <p>{msg.message || ''}</p>
-            {msg.start_date && msg.end_date && (
-              <div className="message-date-range">
-                <span className="date-label">📅 بازه:</span>
-                <span className="date-value">
-                  {new Date(msg.start_date).toLocaleDateString('fa-IR')}
-                  تا
-                  {new Date(msg.end_date).toLocaleDateString('fa-IR')}
-                </span>
-              </div>
-            )}
-          </div>
+    <div className="system-messages-banner">
+      <div className="system-messages-content">
+        <div className="system-messages-header">
+          <span className="system-messages-icon">📢</span>
+          <span className="system-messages-title">
+            پیام سیستم ({currentIndex + 1} / {messages.length})
+          </span>
           <button
-            className="message-dismiss-btn"
-            onClick={() => handleDismiss(msg.id)}
-            title="بستن پیام"
-            aria-label="بستن پیام"
+            className="system-messages-close"
+            onClick={handleClose}
+            title="بستن پیام‌ها"
           >
             ✕
           </button>
         </div>
-      ))}
+
+        <div className="system-messages-body">
+          <h4>{currentMessage.title}</h4>
+          <p>{currentMessage.message}</p>
+          {currentMessage.start_date && currentMessage.end_date && (
+            <div className="system-messages-date">
+              📅 از {new Date(currentMessage.start_date).toLocaleDateString('fa-IR')}
+              تا {new Date(currentMessage.end_date).toLocaleDateString('fa-IR')}
+            </div>
+          )}
+        </div>
+
+        <div className="system-messages-footer">
+          <div className="system-messages-nav">
+            <button
+              className="system-messages-nav-btn"
+              onClick={handlePrev}
+              disabled={isFirst}
+            >
+              ◀
+            </button>
+            <span className="system-messages-counter">
+              {currentIndex + 1} / {messages.length}
+            </span>
+            <button
+              className="system-messages-nav-btn"
+              onClick={handleNext}
+            >
+              {isLast ? '✅ تمام' : '▶'}
+            </button>
+          </div>
+          <div className="system-messages-actions">
+            <button
+              className="system-messages-dismiss-btn"
+              onClick={handleClose}
+            >
+              {isLast ? '📌 بستن' : '⏭ رد کردن'}
+            </button>
+            <button
+              className="system-messages-show-again-btn"
+              onClick={handleShowAgain}
+            >
+              🔄 مشاهده مجدد
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

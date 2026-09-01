@@ -13,6 +13,212 @@ import {
 } from 'recharts';
 import './AIConsultationDetail.css';
 
+// ============================================
+// ✅ کامپوننت باکس تحلیل جداگانه (با فونت معمولی برای محتوا)
+// ============================================
+const AnalysisBox = ({ icon, title, content, type = 'text', color = '#6C63FF', bgColor = 'rgba(108, 99, 255, 0.06)' }) => {
+  if (!content) return null;
+
+  const formatBold = (text) => {
+    if (!text) return text;
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const content = part.slice(2, -2);
+        return <strong key={index}>{content}</strong>;
+      }
+      return part;
+    });
+  };
+
+  const boxStyle = {
+    borderRight: `4px solid ${color}`,
+    background: bgColor,
+  };
+
+  return (
+    <div className="analysis-box" style={boxStyle}>
+      <div className="analysis-box-header">
+        <span className="analysis-box-icon">{icon}</span>
+        <h4 className="analysis-box-title">{title}</h4>
+      </div>
+      <div className="analysis-box-content">
+        {type === 'list' ? (
+          <ul>
+            {Array.isArray(content) && content.map((item, idx) => (
+              <li key={idx}>{formatBold(item)}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>{formatBold(content)}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// ✅ کامپوننت رندر سناریو با سطرهای جداگانه (الگوریتم جدید)
+// ============================================
+const ScenarioRenderer = ({ scenarioText }) => {
+  if (!scenarioText) return null;
+
+  // تمیز کردن متن ورودی
+  const cleanText = scenarioText
+    .replace(/\*\*/g, '') // حذف **
+    .replace(/[،,.]/g, ' ') // تبدیل ویرگول به فاصله
+    .trim();
+
+  // پیدا کردن سناریوها با الگوی دقیق‌تر
+  const scenarios = [];
+
+  // الگوی 1: جستجوی عبارات کلیدی
+  const bullishMatch = cleanText.match(/(?:خوش‌بینانه|خوش بینانه)\s*[:]\s*([^]*?)(?=(?:محافظه‌کارانه|محافظه کارانه|بدبینانه|بد بینانه)|$)/i);
+  const conservativeMatch = cleanText.match(/(?:محافظه‌کارانه|محافظه کارانه)\s*[:]\s*([^]*?)(?=(?:خوش‌بینانه|خوش بینانه|بدبینانه|بد بینانه)|$)/i);
+  const bearishMatch = cleanText.match(/(?:بدبینانه|بد بینانه)\s*[:]\s*([^]*?)(?=(?:خوش‌بینانه|خوش بینانه|محافظه‌کارانه|محافظه کارانه)|$)/i);
+
+  // استخراج محتوای هر سناریو
+  const getContent = (match) => {
+    if (!match) return null;
+    let content = match[1].trim();
+    // حذف عبارات تکراری از ابتدای متن
+    content = content.replace(/^[-•*]\s*/, '');
+    // حذف برچسب‌های تکراری
+    content = content.replace(/^(خوش‌بینانه|خوش بینانه|محافظه‌کارانه|محافظه کارانه|بدبینانه|بد بینانه)\s*[:]\s*/i, '');
+    // حذف خط تیره‌های اضافی
+    content = content.replace(/^\s*[-•*]\s*/, '');
+    return content || null;
+  };
+
+  const bullishContent = getContent(bullishMatch);
+  const conservativeContent = getContent(conservativeMatch);
+  const bearishContent = getContent(bearishMatch);
+
+  // اگر با الگوی بالا چیزی پیدا نشد، از روش تقسیم با خط تیره استفاده کن
+  if (!bullishContent && !conservativeContent && !bearishContent) {
+    // تقسیم با خط تیره و ستون
+    const parts = cleanText.split(/\s*[-•*]\s*(?=(?:خوش‌بینانه|خوش بینانه|محافظه‌کارانه|محافظه کارانه|بدبینانه|بد بینانه)\s*[:])/i);
+
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
+
+      let content = trimmed;
+      let label = '';
+
+      if (trimmed.match(/(?:خوش‌بینانه|خوش بینانه)/i)) {
+        label = '🚀 خوش‌بینانه';
+        content = trimmed.replace(/(?:خوش‌بینانه|خوش بینانه)\s*[:]\s*/i, '').trim();
+      } else if (trimmed.match(/(?:محافظه‌کارانه|محافظه کارانه)/i)) {
+        label = '⚖️ محافظه‌کارانه';
+        content = trimmed.replace(/(?:محافظه‌کارانه|محافظه کارانه)\s*[:]\s*/i, '').trim();
+      } else if (trimmed.match(/(?:بدبینانه|بد بینانه)/i)) {
+        label = '⚠️ بدبینانه';
+        content = trimmed.replace(/(?:بدبینانه|بد بینانه)\s*[:]\s*/i, '').trim();
+      }
+
+      if (label && content && content.length > 3) {
+        scenarios.push({ label, content });
+      }
+    }
+  } else {
+    // اضافه کردن سناریوهای پیدا شده
+    if (bullishContent && bullishContent.length > 3) {
+      scenarios.push({ label: '🚀 خوش‌بینانه', content: bullishContent });
+    }
+    if (conservativeContent && conservativeContent.length > 3) {
+      scenarios.push({ label: '⚖️ محافظه‌کارانه', content: conservativeContent });
+    }
+    if (bearishContent && bearishContent.length > 3) {
+      scenarios.push({ label: '⚠️ بدبینانه', content: bearishContent });
+    }
+  }
+
+  // اگر باز هم چیزی پیدا نشد، کل متن را به عنوان یک مورد نمایش بده
+  if (scenarios.length === 0) {
+    // بررسی کنید آیا اصلاً سناریویی در متن هست
+    if (cleanText.includes('خوش') || cleanText.includes('محافظه') || cleanText.includes('بدبین') || cleanText.includes('بد بین')) {
+      // هنوز سناریو هست ولی پیدا نشده، با روش ساده‌تر
+      const simpleParts = cleanText.split(/\s*[-•*]\s*/);
+      let currentLabel = '';
+      let currentContent = '';
+
+      for (const part of simpleParts) {
+        const trimmed = part.trim();
+        if (!trimmed) continue;
+
+        if (trimmed.match(/(?:خوش‌بینانه|خوش بینانه)/i)) {
+          if (currentLabel && currentContent) {
+            scenarios.push({ label: currentLabel, content: currentContent });
+          }
+          currentLabel = '🚀 خوش‌بینانه';
+          currentContent = trimmed.replace(/(?:خوش‌بینانه|خوش بینانه)\s*[:]\s*/i, '').trim();
+        } else if (trimmed.match(/(?:محافظه‌کارانه|محافظه کارانه)/i)) {
+          if (currentLabel && currentContent) {
+            scenarios.push({ label: currentLabel, content: currentContent });
+          }
+          currentLabel = '⚖️ محافظه‌کارانه';
+          currentContent = trimmed.replace(/(?:محافظه‌کارانه|محافظه کارانه)\s*[:]\s*/i, '').trim();
+        } else if (trimmed.match(/(?:بدبینانه|بد بینانه)/i)) {
+          if (currentLabel && currentContent) {
+            scenarios.push({ label: currentLabel, content: currentContent });
+          }
+          currentLabel = '⚠️ بدبینانه';
+          currentContent = trimmed.replace(/(?:بدبینانه|بد بینانه)\s*[:]\s*/i, '').trim();
+        } else if (currentLabel) {
+          currentContent += ' ' + trimmed;
+        }
+      }
+
+      if (currentLabel && currentContent) {
+        scenarios.push({ label: currentLabel, content: currentContent });
+      }
+    }
+  }
+
+  // اگر هیچ سناریویی پیدا نشد، کل متن را نمایش بده
+  if (scenarios.length === 0) {
+    return (
+      <div className="analysis-box" style={{ borderRight: '4px solid #2E86C1', background: 'rgba(46, 134, 193, 0.06)' }}>
+        <div className="analysis-box-header">
+          <span className="analysis-box-icon">🎯</span>
+          <h4 className="analysis-box-title">تحلیل سناریو</h4>
+        </div>
+        <div className="analysis-box-content">
+          <p>{scenarioText}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="analysis-box" style={{ borderRight: '4px solid #2E86C1', background: 'rgba(46, 134, 193, 0.06)' }}>
+      <div className="analysis-box-header">
+        <span className="analysis-box-icon">🎯</span>
+        <h4 className="analysis-box-title">تحلیل سناریو</h4>
+      </div>
+      <div className="analysis-box-content">
+        {scenarios.map((item, idx) => {
+          let type = 'neutral';
+          if (item.label.includes('خوش')) {
+            type = 'bullish';
+          } else if (item.label.includes('محافظه')) {
+            type = 'conservative';
+          } else if (item.label.includes('بدبین') || item.label.includes('بد بین')) {
+            type = 'bearish';
+          }
+          return (
+            <div key={idx} className={`scenario-item ${type}`}>
+              <span className="scenario-label">{item.label}:</span>
+              <span>{item.content}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const AIConsultationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -72,6 +278,36 @@ const AIConsultationDetail = () => {
     return map[emotion] || emotion;
   };
 
+  // ===== استخراج تحلیل‌ها از پاسخ =====
+  const extractAnalysis = (psychologyText) => {
+    if (!psychologyText) return { psychology: null, technical: null, scenario: null };
+
+    let psychology = psychologyText;
+    let technical = null;
+    let scenario = null;
+
+    // استخراج تحلیل تکنیکال هوشمند
+    const techMatch = psychologyText.match(/تحلیل\s*تکنیکال\s*هوشمند\s*[:]\s*([\s\S]*?)(?=تحلیل\s*سناریو|$)/i);
+    if (techMatch) {
+      technical = techMatch[1].trim();
+      psychology = psychologyText.replace(/تحلیل\s*تکنیکال\s*هوشمند\s*[:]\s*[\s\S]*?(?=تحلیل\s*سناریو|$)/i, '').trim();
+    }
+
+    // استخراج تحلیل سناریو
+    const scenarioMatch = psychologyText.match(/تحلیل\s*سناریو\s*[:]\s*([\s\S]*?)$/i);
+    if (scenarioMatch) {
+      scenario = scenarioMatch[1].trim();
+      psychology = psychology.replace(/تحلیل\s*سناریو\s*[:]\s*[\s\S]*?$/i, '').trim();
+    }
+
+    psychology = psychology.replace(/^\s*[:]\s*/, '').trim();
+    if (!psychology || psychology.length < 5) {
+      psychology = psychologyText;
+    }
+
+    return { psychology, technical, scenario };
+  };
+
   // ===== بازخورد =====
   const handleOpenFeedback = () => {
     if (!consultation) return;
@@ -122,7 +358,7 @@ const AIConsultationDetail = () => {
     return (
       <div className="detail-error">
         <p>{error || 'مشاوره یافت نشد'}</p>
-        <button onClick={() => navigate('/ai-history')} className="btn-back">↩️ بازگشت به تاریخچه</button>
+        <button onClick={() => navigate('/ai-history')} className="btn-back">↩️ بازگشت</button>
       </div>
     );
   }
@@ -134,7 +370,13 @@ const AIConsultationDetail = () => {
   const strengths = response?.strengths || [];
   const warnings = response?.warnings || [];
 
-  // ===== قیمت لحظه‌ای (با تبدیل به عدد) =====
+  // ===== استخراج تحلیل‌ها از response.psychology =====
+  const extracted = extractAnalysis(response?.psychology || '');
+  const psychologyContent = extracted.psychology;
+  const technicalContent = extracted.technical;
+  const scenarioContent = extracted.scenario;
+
+  // ===== قیمت لحظه‌ای =====
   const livePrice = rest.live_price ? parseFloat(rest.live_price) : null;
   const entryPrice = parseFloat(rest.entry_price) || 0;
 
@@ -218,31 +460,12 @@ const AIConsultationDetail = () => {
     });
   };
 
-  const renderCard = (title, content, type = 'text') => {
-    if (!content) return null;
-    if (type === 'list') {
-      if (!Array.isArray(content) || content.length === 0) return null;
-      return (
-        <div className="detail-card">
-          <h4>{title}</h4>
-          <ul>{content.map((item, idx) => <li key={idx}>{formatBold(item)}</li>)}</ul>
-        </div>
-      );
-    }
-    return (
-      <div className="detail-card">
-        <h4>{title}</h4>
-        <p>{formatBold(content)}</p>
-      </div>
-    );
-  };
-
   return (
     <div className={`detail-container ${isDark ? 'dark' : 'light'}`} id="print-area">
       <div className="detail-header">
         <h2>🧠 جزئیات مشاوره هوشمند</h2>
         <div className="header-actions">
-          <button onClick={() => navigate('/ai-history')} className="btn-back">📋 بازگشت به تاریخچه</button>
+          <button onClick={() => navigate('/ai-history')} className="btn-back">↩️ بازگشت</button>
           <button onClick={() => navigate('/ai-consultation')} className="btn-new">🆕 مشاوره جدید</button>
           <button onClick={handlePrint} className="btn-print">🖨️ چاپ</button>
         </div>
@@ -335,27 +558,115 @@ const AIConsultationDetail = () => {
             </div>
           )}
 
-          {renderCard('✅ نقاط قوت', response?.strengths, 'list')}
-          {renderCard('⚠️ هشدارها', response?.warnings, 'list')}
-          {response?.suggestion && response.suggestion !== 'پیشنهادی موجود نیست.' && renderCard('💡 پیشنهاد عملی', response.suggestion, 'text')}
+          {/* ===== باکس‌های قدیمی با رنگ‌آمیزی ===== */}
 
+          {/* نقاط قوت - سبز */}
+          {strengths && strengths.length > 0 && (
+            <div className="result-card strengths-card">
+              <h4>✅ نقاط قوت</h4>
+              <ul>
+                {strengths.map((item, idx) => (
+                  <li key={idx}>{formatBold(item)}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* هشدارها - قرمز */}
+          {warnings && warnings.length > 0 && (
+            <div className="result-card warnings-card">
+              <h4>⚠️ هشدارها</h4>
+              <ul>
+                {warnings.map((item, idx) => (
+                  <li key={idx}>{formatBold(item)}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* پیشنهاد عملی - آبی */}
+          {response?.suggestion && response.suggestion !== 'پیشنهادی موجود نیست.' && (
+            <div className="result-card suggestion-card">
+              <h4>💡 پیشنهاد عملی</h4>
+              <p>{formatBold(response.suggestion)}</p>
+            </div>
+          )}
+
+          {/* جزئیات پیشنهادی - بنفش */}
           {(response?.suggested_sl || response?.suggested_tp || response?.suggested_position || response?.suggested_timing) && (
-            <div className="detail-card">
+            <div className="result-card details-card">
               <h4>📋 جزئیات پیشنهادی</h4>
               <div className="suggestion-details">
-                {response.suggested_sl && <div className="detail-row"><span className="label">حد ضرر پیشنهادی:</span><span className="value">{formatBold(response.suggested_sl)}</span></div>}
-                {response.suggested_tp && <div className="detail-row"><span className="label">حد سود پیشنهادی:</span><span className="value">{formatBold(response.suggested_tp)}</span></div>}
-                {response.suggested_position && <div className="detail-row"><span className="label">اندازه پوزیشن:</span><span className="value">{formatBold(response.suggested_position)}</span></div>}
-                {response.suggested_timing && <div className="detail-row"><span className="label">⏰ زمان‌بندی:</span><span className="value">{formatBold(response.suggested_timing)}</span></div>}
+                {response.suggested_sl && (
+                  <div className="detail-row">
+                    <span className="detail-label">حد ضرر پیشنهادی:</span>
+                    <span className="detail-value">{formatBold(response.suggested_sl)}</span>
+                  </div>
+                )}
+                {response.suggested_tp && (
+                  <div className="detail-row">
+                    <span className="detail-label">حد سود پیشنهادی:</span>
+                    <span className="detail-value">{formatBold(response.suggested_tp)}</span>
+                  </div>
+                )}
+                {response.suggested_position && (
+                  <div className="detail-row">
+                    <span className="detail-label">اندازه پوزیشن:</span>
+                    <span className="detail-value">{formatBold(response.suggested_position)}</span>
+                  </div>
+                )}
+                {response.suggested_timing && (
+                  <div className="detail-row">
+                    <span className="detail-label">⏰ زمان‌بندی:</span>
+                    <span className="detail-value">{formatBold(response.suggested_timing)}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {response?.psychology && response.psychology !== 'تحلیل روانشناختی موجود نیست.' && renderCard('🧠 تحلیل روانشناختی', response.psychology, 'text')}
-          {response?.tip && response.tip !== 'همیشه به مدیریت ریسک توجه کنید.' && renderCard('📖 نکته آموزشی', response.tip, 'text')}
+          {/* ===== باکس‌های جدید با آیکون و رنگ ===== */}
 
+          {/* تحلیل روانشناختی - بنفش */}
+          {psychologyContent && psychologyContent !== 'تحلیل روانشناختی موجود نیست.' && (
+            <AnalysisBox
+              icon="🧠"
+              title="تحلیل روانشناختی"
+              content={psychologyContent}
+              type="text"
+              color="#6C63FF"
+              bgColor="rgba(108, 99, 255, 0.06)"
+            />
+          )}
+
+          {/* تحلیل تکنیکال هوشمند - نارنجی */}
+          {technicalContent && (
+            <AnalysisBox
+              icon="📊"
+              title="تحلیل تکنیکال هوشمند"
+              content={technicalContent}
+              type="text"
+              color="#FF6B35"
+              bgColor="rgba(255, 107, 53, 0.06)"
+            />
+          )}
+
+          {/* تحلیل سناریو - آبی با سطرهای جداگانه */}
+          {scenarioContent && (
+            <ScenarioRenderer scenarioText={scenarioContent} />
+          )}
+
+          {/* نکته آموزشی - طلایی */}
+          {response?.tip && response.tip !== 'همیشه به مدیریت ریسک توجه کنید.' && (
+            <div className="result-card tip-card">
+              <h4>📖 نکته آموزشی</h4>
+              <p>{formatBold(response.tip)}</p>
+            </div>
+          )}
+
+          {/* تحلیل داخلی - فیروزه‌ای */}
           {analytics && Object.keys(analytics).length > 0 && (
-            <div className="detail-card internal-analysis">
+            <div className="result-card internal-analysis">
               <h4>📊 تحلیل داخلی از تاریخچه شما</h4>
               <div className="stats-grid">
                 <div className="stat-item"><span className="label">کل تریدها</span><span className="value">{analytics.total_trades || 0}</span></div>
@@ -369,7 +680,8 @@ const AIConsultationDetail = () => {
             </div>
           )}
 
-          <div className="detail-card feedback-section">
+          {/* بازخورد - ارغوانی */}
+          <div className="result-card feedback-section">
             <h4>📝 بازخورد</h4>
             {feedbackSubmitted && consultation.feedback_score ? (
               <div className="feedback-status">
@@ -397,6 +709,7 @@ const AIConsultationDetail = () => {
         </div>
       </div>
 
+      {/* مودال بازخورد */}
       {showFeedbackModal && (
         <div className="modal-overlay" onClick={() => setShowFeedbackModal(false)}>
           <div className="modal-content feedback-modal" onClick={(e) => e.stopPropagation()}>

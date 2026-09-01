@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import RealApiService from '../../services/realApiService';
 import './Messaging.css';
+import LoadingBar from './../common/LoadingBar';
 
 const MessageList = () => {
   const { user } = useAuth();
@@ -139,7 +140,7 @@ const MessageList = () => {
   if (loading) {
     return (
       <div className="messaging-container">
-        <div className="loading-spinner">⏳ در حال بارگذاری پیام‌ها...</div>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

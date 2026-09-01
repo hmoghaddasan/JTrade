@@ -638,15 +638,22 @@ class SystemMessagesView(APIView):
 # ============================================
 # نسخه‌های نرم‌افزار
 # ============================================
+# backend/apps/accounts/views.py
+
+# فقط بخش AppVersionsView را اصلاح می‌کنیم:
+
 class AppVersionsView(APIView):
-    """دریافت تاریخچه نسخه‌های نرم‌افزار"""
+    """دریافت تاریخچه نسخه‌های نرم‌افزار - بدون محدودیت"""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        versions = AppVersion.get_recent_versions(15)
+        # دریافت همه نسخه‌ها بدون محدودیت
+        versions = AppVersion.objects.all().order_by('-release_date')
         serializer = AppVersionSerializer(versions, many=True)
-        return Response(serializer.data)
-
+        return Response({
+            'results': serializer.data,
+            'count': versions.count()
+        })
 
 class CurrentAppVersionView(APIView):
     """دریافت نسخه فعلی نرم‌افزار"""

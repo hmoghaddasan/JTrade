@@ -16,7 +16,9 @@
   color: #e0e0e0;
 }
 
-/* ===== هدر ===== */
+/* ============================================
+   هدر
+   ============================================ */
 .analytics-header {
   display: flex;
   justify-content: space-between;
@@ -24,6 +26,13 @@
   padding-bottom: 15px;
   border-bottom: 2px solid rgba(26, 35, 126, 0.2);
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.analytics-header .header-left {
+  display: flex;
+  flex-direction: column;
 }
 
 .analytics-header h2 {
@@ -37,6 +46,12 @@
   color: #666;
   display: block;
   margin-top: 2px;
+}
+
+.analytics-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .dark .analytics-header h2 {
@@ -57,6 +72,7 @@
   font-size: 14px;
   transition: all 0.2s;
   font-family: inherit;
+  white-space: nowrap;
 }
 
 .btn-back:hover {
@@ -72,7 +88,9 @@
   background: #3d3d5c;
 }
 
-/* ===== تب‌ها ===== */
+/* ============================================
+   تب‌ها - استایل یکسان برای همه تب‌ها
+   ============================================ */
 .analytics-tabs {
   display: flex;
   gap: 4px;
@@ -81,6 +99,14 @@
   border-radius: 12px;
   padding: 4px;
   border: 1px solid rgba(0, 0, 0, 0.06);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.analytics-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .dark .analytics-tabs {
@@ -88,6 +114,7 @@
   border-color: rgba(255, 255, 255, 0.06);
 }
 
+/* ===== استایل پایه همه تب‌ها (یکسان) ===== */
 .tab-btn {
   padding: 10px 24px;
   border: none;
@@ -100,6 +127,8 @@
   transition: all 0.3s ease;
   font-family: inherit;
   flex: 0 0 auto;
+  white-space: nowrap;
+  position: relative;
 }
 
 .tab-btn:hover {
@@ -112,20 +141,21 @@
   color: #e0e0e0;
 }
 
+/* ===== استایل تب فعال (یکسان برای همه) ===== */
 .tab-btn.active {
-  background: #1a237e;
-  color: white;
+  background: #1a237e !important;
+  color: white !important;
   box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
+  border-color: #1a237e !important;
 }
 
 .dark .tab-btn.active {
-  background: #3949ab;
+  background: #3949ab !important;
   box-shadow: 0 2px 8px rgba(57, 73, 171, 0.3);
 }
 
-/* ===== تب احساسات ===== */
+/* ===== تب تحلیل مالی احساسات (در حالت عادی با رنگ ملایم) ===== */
 .tab-btn.emotional-tab {
-  position: relative;
   background: linear-gradient(135deg, rgba(106, 27, 154, 0.05), rgba(255, 193, 7, 0.05));
   border: 1px solid rgba(106, 27, 154, 0.1);
 }
@@ -135,18 +165,44 @@
   border-color: rgba(106, 27, 154, 0.15);
 }
 
+/* ✅ تب تحلیل مالی احساسات (در حالت فعال - یکسان با تب اصلی) */
 .tab-btn.emotional-tab.active {
-  background: linear-gradient(135deg, #6a1b9a, #4a148c);
-  color: white;
-  border-color: #6a1b9a;
-  box-shadow: 0 2px 12px rgba(106, 27, 154, 0.4);
+  background: #1a237e !important;
+  color: white !important;
+  border-color: #1a237e !important;
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3) !important;
 }
 
 .dark .tab-btn.emotional-tab.active {
-  background: linear-gradient(135deg, #7b1fa2, #4a148c);
-  box-shadow: 0 2px 12px rgba(106, 27, 154, 0.3);
+  background: #3949ab !important;
+  box-shadow: 0 2px 8px rgba(57, 73, 171, 0.3) !important;
 }
 
+/* ===== تب پایبندی به قوانین (در حالت عادی با رنگ ملایم) ===== */
+.tab-btn.rules-tab {
+  background: linear-gradient(135deg, rgba(26, 35, 126, 0.05), rgba(13, 71, 161, 0.05));
+  border: 1px solid rgba(26, 35, 126, 0.1);
+}
+
+.dark .tab-btn.rules-tab {
+  background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(13, 71, 161, 0.03));
+  border-color: rgba(26, 35, 126, 0.15);
+}
+
+/* ✅ تب پایبندی به قوانین (در حالت فعال - یکسان با تب اصلی) */
+.tab-btn.rules-tab.active {
+  background: #1a237e !important;
+  color: white !important;
+  border-color: #1a237e !important;
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3) !important;
+}
+
+.dark .tab-btn.rules-tab.active {
+  background: #3949ab !important;
+  box-shadow: 0 2px 8px rgba(57, 73, 171, 0.3) !important;
+}
+
+/* ===== نشان تب ===== */
 .tab-badge {
   display: inline-block;
   padding: 0 8px;
@@ -169,7 +225,9 @@
   color: #1a1a2e;
 }
 
-/* ===== لودینگ و خطا ===== */
+/* ============================================
+   لودینگ و خطا
+   ============================================ */
 .analytics-loading,
 .analytics-error {
   display: flex;
@@ -214,7 +272,9 @@
   background: #0d47a1;
 }
 
-/* ===== پیام بدون داده ===== */
+/* ============================================
+   پیام بدون داده
+   ============================================ */
 .no-data-message {
   text-align: center;
   padding: 60px 20px;
@@ -240,32 +300,98 @@
 .no-data-message p {
   color: #888;
 }
-/* frontend/src/components/analytics/AnalyticsDashboard.css */
-
-/* ... (بقیه استایل‌ها) ... */
 
 /* ============================================
-   تب قوانین
+   ✅ ریسپانسیو
    ============================================ */
-.tab-btn.rules-tab {
-  position: relative;
-  background: linear-gradient(135deg, rgba(26, 35, 126, 0.05), rgba(13, 71, 161, 0.05));
-  border: 1px solid rgba(26, 35, 126, 0.1);
+
+/* ===== تبلت و موبایل بزرگ ===== */
+@media (max-width: 992px) {
+  .analytics-dashboard {
+    padding: 16px 20px;
+  }
 }
 
-.dark .tab-btn.rules-tab {
-  background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(13, 71, 161, 0.03));
-  border-color: rgba(26, 35, 126, 0.15);
+/* ===== موبایل ===== */
+@media (max-width: 768px) {
+  .analytics-dashboard {
+    padding: 12px 16px;
+  }
+
+  /* ===== هدر ===== */
+  .analytics-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+
+  .analytics-header .header-left {
+    width: 100%;
+  }
+
+  .analytics-header h2 {
+    font-size: 20px;
+  }
+
+  .analytics-header .header-subtitle {
+    font-size: 12px;
+  }
+
+  .analytics-header .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .btn-back {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  /* ===== تب‌ها ===== */
+  .analytics-tabs {
+    gap: 2px;
+    padding: 3px;
+    border-radius: 8px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .tab-badge {
+    font-size: 8px;
+    padding: 0 6px;
+  }
 }
 
-.tab-btn.rules-tab.active {
-  background: linear-gradient(135deg, #1a237e, #0d47a1);
-  color: white;
-  border-color: #1a237e;
-  box-shadow: 0 2px 12px rgba(26, 35, 126, 0.4);
-}
+/* ===== موبایل کوچک ===== */
+@media (max-width: 480px) {
+  .analytics-dashboard {
+    padding: 8px 10px;
+  }
 
-.dark .tab-btn.rules-tab.active {
-  background: linear-gradient(135deg, #283593, #0d47a1);
-  box-shadow: 0 2px 12px rgba(26, 35, 126, 0.3);
+  .analytics-header h2 {
+    font-size: 18px;
+  }
+
+  .analytics-header .header-subtitle {
+    font-size: 11px;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .btn-back {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
 }

@@ -769,7 +769,7 @@
 }
 
 /* ============================================
-   Responsive
+   ✅ Responsive - اصلاحات برای موبایل
    ============================================ */
 @media (max-width: 992px) {
   .tradelist-container {
@@ -805,20 +805,35 @@
     font-size: 18px;
   }
 
+  /* ==========================================================
+     ✅ اصلاح: سه دکمه هدر - هر کدام 33% عرض صفحه
+     ========================================================== */
   .header-actions {
-    width: 100%;
-    justify-content: center;
-    gap: 4px;
-    flex-wrap: wrap;
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
   .header-actions .btn-secondary {
-    font-size: 12px;
-    padding: 4px 8px;
-    height: 30px;
-    min-width: 50px;
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 33.33% !important;
+    max-width: 33.33% !important;
+    min-width: 0 !important;
+    padding: 5px 4px !important;
+    font-size: 11px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    gap: 3px !important;
   }
 
   .stats-bar {
@@ -862,24 +877,48 @@
 
 @media (max-width: 480px) {
   .tradelist-container {
-    padding: 8px 12px;
+    padding: 8px 10px;
   }
 
+  /* ==========================================================
+     ✅ اصلاح نهایی برای موبایل کوچک - سه دکمه 33%
+     ========================================================== */
   .header-actions {
-    gap: 3px;
+    gap: 3px !important;
   }
 
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
   .header-actions .btn-secondary {
-    font-size: 11px;
-    padding: 3px 6px;
-    height: 28px;
-    min-width: 40px;
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 33.33% !important;
+    max-width: 33.33% !important;
+    min-width: 0 !important;
+    padding: 4px 3px !important;
+    font-size: 10px !important;
+    height: 28px !important;
+    border-radius: 4px !important;
+  }
+
+  .tradelist-header h2 {
+    font-size: 16px;
   }
 
   .stats-bar {
     grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  .stat-label {
+    font-size: 10px;
   }
 
   .tradelist-table {
@@ -909,16 +948,43 @@
     height: 24px;
     border-width: 1px !important;
   }
+
+  .pagination {
+    gap: 4px;
+  }
+
+  .pagination .btn-secondary {
+    padding: 4px 10px;
+    font-size: 11px;
+    height: 28px;
+  }
+
+  .page-info {
+    font-size: 12px;
+  }
+
+  .items-per-page {
+    font-size: 11px;
+    padding: 4px 6px;
+    height: 28px;
+  }
 }
 
 @media (max-width: 360px) {
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
   .header-actions .btn-secondary {
-    font-size: 10px;
-    padding: 2px 4px;
-    height: 24px;
-    min-width: 32px;
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 33.33% !important;
+    max-width: 33.33% !important;
+    min-width: 0 !important;
+    font-size: 9px !important;
+    padding: 3px 2px !important;
+    height: 24px !important;
+    border-radius: 3px !important;
   }
 
   .tradelist-container .btn-view,
@@ -928,5 +994,9 @@
     font-size: 10px;
     min-width: 20px;
     height: 20px;
+  }
+
+  .tradelist-header h2 {
+    font-size: 14px;
   }
 }

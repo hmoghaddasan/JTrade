@@ -2,12 +2,12 @@
 
 import axios from 'axios';
 
-// ✅ اصلاح: حذف اسلش انتهایی برای جلوگیری از double slash
-const API_BASE_URL = 'http://localhost:8000/api';  // ← اسلش انتهایی حذف شد
+// ✅ اصلاح: فقط از یک متغیر استفاده می‌شود (API_URL)
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 // ایجاد نمونه axios
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -57,7 +57,8 @@ apiClient.interceptors.response.use(
         }
 
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
+          // ✅ اصلاح: استفاده از API_URL به جای API_BASE_URL
+          const response = await axios.post(`${API_URL}/auth/refresh/`, {
             refresh: refreshToken,
           });
           const { access } = response.data;

@@ -1,10 +1,12 @@
 /* frontend/src/index.css */
 
 /* ============================================
-   فونت وزیر از طریق پکیج @fontsource/vazirmatn
-   (حذف @import و @font-face اضافی)
+   فونت IRANYekanXFaNum در index.html تعریف شده است
    ============================================ */
 
+/* ============================================
+   Reset & Base Styles
+   ============================================ */
 * {
   margin: 0;
   padding: 0;
@@ -13,9 +15,9 @@
 
 body {
   margin: 0;
-  font-family: 'Vazirmatn', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'IRANYekanXFaNum', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   direction: rtl;
@@ -82,6 +84,7 @@ code {
   width: 100%;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: 'IRANYekanXFaNum', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
 .toast-success {

@@ -11,7 +11,7 @@ import ComparisonSummaryCards from '../components/portfolio/ComparisonSummaryCar
 import ComparisonChart from '../components/portfolio/ComparisonChart';
 import ComparisonTable from '../components/portfolio/ComparisonTable';
 import './PortfolioComparisonPage.css';
-
+import LoadingBar from '../components/common/LoadingBar';
 // ============================================
 // داده‌های راهنمای شاخص‌ها
 // ============================================
@@ -168,8 +168,7 @@ const PortfolioComparisonPage = () => {
     if (loading) {
         return (
             <div className="comparison-page-loading">
-                <div className="loading-spinner">⏳</div>
-                <p>در حال بارگذاری داده‌های مقایسه...</p>
+                <LoadingBar text="در حال بارگذاری..." />
             </div>
         );
     }

@@ -40,7 +40,7 @@
 }
 
 /* ============================================
-   Header - نسخه نهایی با کلیدهای دسترسی سریع
+   Header - با سلکتور در کنار عنوان
    ============================================ */
 .dashboard-header {
   display: flex;
@@ -51,10 +51,18 @@
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 99999 !important;
   flex-wrap: wrap;
   gap: 8px;
   box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* ===== گروه عنوان + سلکتور ===== */
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -82,11 +90,54 @@
   border-radius: 12px;
 }
 
+/* ===== سلکتور پورتفولیو - در کنار عنوان ===== */
+.portfolio-selector-wrapper {
+  position: relative !important;
+  z-index: 999999 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.portfolio-selector-wrapper .portfolio-selector {
+  position: relative !important;
+  z-index: 999999 !important;
+}
+
+.portfolio-selector-wrapper select {
+  z-index: 999999 !important;
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  color: #fff !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  min-width: 100px !important;
+  cursor: pointer !important;
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+}
+
+.portfolio-selector-wrapper select option {
+  color: #333 !important;
+  background: #fff !important;
+}
+
+.dark-theme .portfolio-selector-wrapper select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+/* ===== header-right - فقط کلیدها ===== */
 .header-right {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  z-index: 9999 !important;
+  position: relative !important;
 }
 
 /* ============================================
@@ -364,20 +415,22 @@
   box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
 }
 
-.quick-actions .action-btn.warning {
-  background: linear-gradient(135deg, #f57f17, #e65100);
+/* ===== دکمه تحلیل عملکرد (رنگ سبز تیره - متمایز از مشاور AI) ===== */
+.quick-actions .action-btn.info {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20) !important;
 }
-.quick-actions .action-btn.warning:hover {
-  background: linear-gradient(135deg, #f57f17, #e65100);
-  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5);
+.quick-actions .action-btn.info:hover {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32) !important;
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.5);
 }
 
+/* ===== دکمه مشاور AI (رنگ صورتی/بنفش - متمایز از تحلیل عملکرد) ===== */
 .quick-actions .action-btn.ai {
-  background: linear-gradient(135deg, #6a1b9a, #4a148c);
+  background: linear-gradient(135deg, #c2185b, #7b1fa2) !important;
 }
 .quick-actions .action-btn.ai:hover {
-  background: linear-gradient(135deg, #6a1b9a, #4a148c);
-  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
+  background: linear-gradient(135deg, #7b1fa2, #c2185b) !important;
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.5);
 }
 .quick-actions .action-btn.ai:disabled {
   opacity: 0.5;
@@ -385,12 +438,13 @@
   transform: none !important;
 }
 
-.quick-actions .action-btn.info {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+/* ===== دکمه پنل کاربری (رنگ نارنجی-طلایی) ===== */
+.quick-actions .action-btn.warning {
+  background: linear-gradient(135deg, #e65100, #bf360c) !important;
 }
-.quick-actions .action-btn.info:hover {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.5);
+.quick-actions .action-btn.warning:hover {
+  background: linear-gradient(135deg, #bf360c, #e65100) !important;
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5);
 }
 
 /* ===== حالت تاریک ===== */
@@ -418,17 +472,19 @@
 }
 
 .dark-theme .quick-actions .action-btn.warning {
-  background: linear-gradient(135deg, #ffa726, #f57f17);
+  background: linear-gradient(135deg, #ff6d00, #e65100);
 }
 .dark-theme .quick-actions .action-btn.warning:hover {
-  background: linear-gradient(135deg, #ffa726, #f57f17);
+  background: linear-gradient(135deg, #e65100, #ff6d00);
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5);
 }
 
 .dark-theme .quick-actions .action-btn.ai {
-  background: linear-gradient(135deg, #ab47bc, #6a1b9a);
+  background: linear-gradient(135deg, #d81b60, #7b1fa2);
 }
 .dark-theme .quick-actions .action-btn.ai:hover {
-  background: linear-gradient(135deg, #ab47bc, #6a1b9a);
+  background: linear-gradient(135deg, #7b1fa2, #d81b60);
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.5);
 }
 
 .dark-theme .quick-actions .action-btn.info {
@@ -436,6 +492,7 @@
 }
 .dark-theme .quick-actions .action-btn.info:hover {
   background: linear-gradient(135deg, #43a047, #2e7d32);
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.5);
 }
 
 /* ============================================
@@ -447,11 +504,10 @@
   width: 100%;
   height: 100%;
   position: relative;
-  direction: ltr; /* برای کنترل دقیق ترتیب */
+  direction: ltr;
 }
 
 /* ===== فلش (سمت چپ) ===== */
-/* گوشه‌های راست ۹۰ درجه، گوشه‌های چپ گرد */
 .dropdown-toggle {
   flex: 0 0 30px !important;
   min-width: 30px !important;
@@ -459,7 +515,7 @@
   background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
   color: white !important;
   border: none !important;
-  border-radius: 10px 0 0 10px !important; /* چپ گرد، راست تیز */
+  border-radius: 10px 0 0 10px !important;
   padding: 0 4px !important;
   font-size: 18px !important;
   cursor: pointer;
@@ -473,10 +529,9 @@
   font-family: inherit;
   line-height: 1;
   margin-right: 0;
-  order: 1; /* فلش در سمت چپ */
+  order: 1;
 }
 
-/* بزرگتر شدن محتوای فلش */
 .dropdown-toggle .arrow-icon {
   display: inline-block;
   transform: scale(1.4);
@@ -498,10 +553,9 @@
 }
 
 /* ===== دکمه اصلی "ترید جدید" (سمت راست) ===== */
-/* گوشه‌های راست گرد، گوشه‌های چپ ۹۰ درجه */
 .action-btn-wrapper .action-btn.primary {
   flex: 1;
-  border-radius: 0 10px 10px 0 !important; /* راست گرد، چپ تیز */
+  border-radius: 0 10px 10px 0 !important;
   padding: 12px 8px 12px 10px;
   justify-content: center;
   min-width: 0;
@@ -509,7 +563,7 @@
   font-size: 14px;
   background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
   color: white !important;
-  order: 2; /* دکمه اصلی در سمت راست */
+  order: 2;
 }
 
 .action-btn-wrapper .action-btn.primary:hover {
@@ -535,7 +589,7 @@
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   min-width: 180px;
-  z-index: 1000;
+  z-index: 10000 !important;
   overflow: hidden;
   animation: dropdownFadeIn 0.2s ease;
 }
@@ -1204,7 +1258,7 @@
 .stats-cards .stat-value {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
 }
 
 .stats-cards .stat-value.active {
@@ -1223,20 +1277,31 @@
   color: #888;
 }
 
-.dark-theme .stats-cards .stat-value.active {
-  color: #4caf50;
+/* ============================================
+   ✅ اصلاح ۲: کارت‌های آمار در تم تاریک - آیکون‌های بدون زمینه سفید
+   ============================================ */
+.dark-theme .stats-cards .stat-icon,
+.dark .stats-cards .stat-icon {
+  background: transparent !important;
+  color: #4caf50 !important;
+  filter: none !important;
+}
+
+.dark-theme .stats-cards .stat-value.active,
+.dark .stats-cards .stat-value {
+  color: #4caf50 !important;
 }
 
 .dark-theme .stats-cards .stat-value.danger {
-  color: #ef5350;
+  color: #ef5350 !important;
 }
 
 .dark-theme .stats-cards .stat-value.trial {
-  color: #ab47bc;
+  color: #ab47bc !important;
 }
 
 .dark-theme .stats-cards .stat-value.inactive {
-  color: #999;
+  color: #999 !important;
 }
 
 /* ============================================
@@ -1252,7 +1317,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 99999 !important;
   animation: fadeIn 0.3s ease;
 }
 
@@ -1489,132 +1554,145 @@
   box-shadow: 0 2px 8px rgba(108, 99, 255, 0.2);
 }
 
-/* ===== ریسپانسیو ===== */
-@media (max-width: 768px) {
-  .show-more-btn {
-    font-size: 13px;
-    padding: 8px 12px;
-    width: calc(100% - 12px);
-    margin: 8px 6px 2px 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .show-more-btn {
-    font-size: 12px;
-    padding: 6px 10px;
-    width: calc(100% - 8px);
-    margin: 6px 4px 0px 4px;
-  }
-}
-
 /* ============================================
    Responsive
    ============================================ */
-@media (max-width: 1200px) {
+
+/* ===== اصلاح ۱: عرض صفحه 984 - افزایش عرض ستون دسته‌بندی ===== */
+@media (max-width: 990px) {
   .three-column-layout {
-    grid-template-columns: 180px 240px 1fr;
+    grid-template-columns: 260px 220px 1fr !important;
   }
 }
 
-@media (max-width: 992px) {
-  .three-column-layout {
-    grid-template-columns: 160px 1fr;
-    grid-template-rows: 1fr 1fr;
-    min-height: 500px;
-  }
+/* ==========================================================
+   ✅ همه تنظیمات ریسپانسیو هدر در یکجا
+   ========================================================== */
 
-  .three-column-layout .col-groups {
-    grid-row: 1 / 3;
-    border-left: none;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .three-column-layout .col-trades {
-    border-left: none;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .three-column-layout .col-details {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .stats-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .quick-actions {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
+/* ===== کمتر از 770 ===== */
+@media (max-width: 770px) {
   .dashboard-header {
-    padding: 8px 12px;
+    padding: 8px 12px !important;
+    z-index: 99999 !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+
+  /* ===== گروه عنوان + سلکتور در یک خط ===== */
+  .header-left-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
   }
 
   .header-left h1 {
-    font-size: 16px;
-  }
-
-  .header-right {
-    gap: 4px;
-  }
-
-  .header-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .header-btn .btn-text {
-    display: none;
-  }
-
-  .header-btn .btn-icon {
-    font-size: 20px;
-  }
-
-  .metrics-btn .btn-text {
-    display: none;
-  }
-
-  .theme-btn .btn-text {
-    display: none;
-  }
-
-  .logout-btn .btn-text {
-    display: none;
-  }
-
-  .comparison-btn .btn-text {
-    display: none;
-  }
-
-  .discipline-btn .btn-text {
-    display: none;
+    font-size: 16px !important;
+    white-space: nowrap !important;
   }
 
   .header-version {
-    font-size: 10px;
-    padding: 1px 6px;
+    font-size: 10px !important;
+    padding: 1px 6px !important;
   }
 
-  /* ===== ریسپانسیو: Quick Actions و Dropdown ===== */
+  .portfolio-selector-wrapper {
+    z-index: 999999 !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  .portfolio-selector-wrapper select {
+    z-index: 999999 !important;
+    position: relative !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    min-width: 80px !important;
+  }
+
+  /* ==========================================================
+     ✅ اصلاح ۱: افزایش ارتفاع ستون‌ها در موبایل (۱.۵ برابر)
+     ========================================================== */
+  .three-column-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    min-height: 0 !important;
+  }
+
+  .three-column-layout .col-groups {
+    grid-row: 1 !important;
+    border-left: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    max-height: 300px !important;
+  }
+
+  .three-column-layout .col-trades {
+    grid-row: 2 !important;
+    border-left: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    max-height: 525px !important;
+  }
+
+  .three-column-layout .col-details {
+    grid-row: 3 !important;
+    grid-column: 1 !important;
+    min-height: 400px !important;
+  }
+
+  /* ===== header-right با اسکرول افقی ===== */
+  .header-right {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 4px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 4px 0 !important;
+    z-index: 9999 !important;
+    position: relative !important;
+    flex: 1 1 100% !important;
+  }
+  .header-right::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .header-btn {
+    flex: 0 0 auto !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    min-width: auto !important;
+    z-index: 9999 !important;
+  }
+
+  .header-btn .btn-text {
+    display: inline-block !important;
+    font-size: 11px !important;
+  }
+
+  .header-btn .btn-icon {
+    font-size: 16px !important;
+  }
+
+  /* ===== Quick Actions ===== */
   .quick-actions {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 12px 16px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 12px 16px !important;
   }
 
   .quick-actions .action-btn {
-    padding: 10px 8px;
-    font-size: 13px;
-    border-radius: 8px;
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
   }
 
   .quick-actions .action-btn .action-icon {
-    font-size: 18px;
+    font-size: 18px !important;
   }
 
   .dropdown-toggle {
@@ -1632,209 +1710,106 @@
 
   .action-btn-wrapper .action-btn.primary {
     border-radius: 0 8px 8px 0 !important;
-    padding: 10px 6px 10px 6px;
-    font-size: 13px;
+    padding: 10px 6px 10px 6px !important;
+    font-size: 13px !important;
   }
 
   .dropdown-menu {
-    min-width: 150px;
-    right: -2px;
+    min-width: 150px !important;
+    right: -2px !important;
   }
 
   .dropdown-item {
-    font-size: 13px;
-    padding: 8px 12px;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
   }
 
-  .three-column-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    min-height: 0;
-  }
-
-  .three-column-layout .col-groups {
-    grid-row: 1;
-    border-left: none;
-    border-bottom: 1px solid var(--border-color);
-    max-height: 200px;
-  }
-
-  .three-column-layout .col-trades {
-    grid-row: 2;
-    border-left: none;
-    border-bottom: 1px solid var(--border-color);
-    max-height: 300px;
-  }
-
-  .three-column-layout .col-details {
-    grid-row: 3;
-    grid-column: 1;
-    min-height: 400px;
-  }
-
-  .stats-cards {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 12px 16px;
-    gap: 10px;
-  }
-
-  .stats-cards .stat-card {
-    padding: 10px 14px;
-  }
-
-  .stats-cards .stat-value {
-    font-size: 16px;
-  }
-
+  /* ===== استایل تب‌ها ===== */
   .three-column-layout .detail-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
   }
 
   .three-column-layout .tab-btn {
-    font-size: 11px;
-    padding: 8px 10px;
-    white-space: nowrap;
+    font-size: 11px !important;
+    padding: 8px 10px !important;
+    white-space: nowrap !important;
   }
 
   .three-column-layout .detail-actions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
   }
 
   .three-column-layout .detail-actions button {
-    font-size: 11px;
-    padding: 3px 8px;
+    font-size: 11px !important;
+    padding: 3px 8px !important;
   }
 
   .empty-trades {
-    padding: 30px 15px;
-    min-height: 150px;
+    padding: 30px 15px !important;
+    min-height: 150px !important;
   }
 
   .btn-add-trade {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 6px 8px;
-  }
-
-  .header-left h1 {
-    font-size: 14px;
-  }
-
-  .header-btn {
-    padding: 4px 8px;
-  }
-
-  .header-btn .btn-icon {
-    font-size: 18px;
-  }
-
-  /* ===== ریسپانسیو: Quick Actions و Dropdown موبایل کوچک ===== */
-  .quick-actions {
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    padding: 8px 10px;
-  }
-
-  .quick-actions .action-btn {
-    padding: 8px 6px;
-    font-size: 12px;
-    border-radius: 6px;
-  }
-
-  .quick-actions .action-btn .action-icon {
-    font-size: 16px;
-  }
-
-  .dropdown-toggle {
-    flex: 0 0 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
+    padding: 10px 20px !important;
     font-size: 14px !important;
-    border-radius: 6px 0 0 6px !important;
-    padding: 0 2px !important;
-  }
-
-  .dropdown-toggle .arrow-icon {
-    transform: scale(1.1);
-  }
-
-  .action-btn-wrapper .action-btn.primary {
-    border-radius: 0 6px 6px 0 !important;
-    padding: 8px 4px 8px 4px;
-    font-size: 12px;
-  }
-
-  .dropdown-menu {
-    min-width: 130px;
-    right: -6px;
-  }
-
-  .dropdown-item {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-
-  .dropdown-item .dropdown-icon {
-    font-size: 15px;
-    width: 18px;
-  }
-
-  .three-column-layout {
-    min-height: 600px;
-  }
-
-  .three-column-layout .col-groups {
-    max-height: 150px;
-  }
-
-  .three-column-layout .col-trades {
-    max-height: 200px;
-  }
-
-  .three-column-layout .col-details {
-    min-height: 300px;
   }
 
   .stats-cards {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 8px 10px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
   }
 
   .stats-cards .stat-card {
-    padding: 8px 12px;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  .stats-cards .stat-icon {
+    font-size: 20px !important;
   }
 
   .stats-cards .stat-value {
-    font-size: 15px;
+    font-size: 15px !important;
   }
 
-  .modal-content {
-    padding: 24px;
-    margin: 16px;
+  .stats-cards .stat-label {
+    font-size: 10px !important;
+  }
+}
+
+/* ===== کمتر از 580 ===== */
+@media (max-width: 580px) {
+  /* ===== کلیدهای هدر: فقط آیکون ===== */
+  .header-btn {
+    padding: 4px 6px !important;
+    font-size: 0 !important;
+    min-width: 32px !important;
+    max-width: 36px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    gap: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
-  .three-column-layout .detail-actions {
-    gap: 4px;
+  .header-btn .btn-text {
+    display: none !important;
   }
 
-  .three-column-layout .detail-actions button {
-    font-size: 10px;
-    padding: 2px 6px;
+  .header-btn .btn-icon {
+    font-size: 18px !important;
+    margin: 0 !important;
   }
 
-  .btn-add-trade {
-    padding: 8px 16px;
-    font-size: 13px;
-    width: 100%;
-    justify-content: center;
+  .portfolio-selector-wrapper select {
+    font-size: 10px !important;
+    padding: 3px 6px !important;
+    min-width: 70px !important;
   }
 }
 
@@ -1842,7 +1817,6 @@
    Print Styles - برای چاپ تک ترید
    ============================================ */
 @media print {
-  /* مخفی کردن المان‌های غیرضروری در چاپ */
   .dashboard-header,
   .quick-actions,
   .col-groups,
@@ -1927,30 +1901,6 @@
   }
 }
 
-/* ============================================
-   اصلاح فاصله کلیدهای سریع هدر در موبایل
-   ============================================ */
-@media (max-width: 768px) {
-  .header-right {
-    gap: 2px !important;
-  }
-
-  .header-btn {
-    padding: 4px 6px !important;
-    font-size: 12px !important;
-    min-width: 32px;
-    justify-content: center;
-  }
-
-  .header-btn .btn-icon {
-    font-size: 16px !important;
-  }
-
-  .header-btn .btn-text {
-    display: none !important;
-  }
-}
-
 .trade-broker {
   font-size: 10px;
   color: var(--text-muted);
@@ -1961,4 +1911,428 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ============================================
+   اصلاح استایل تب‌ها (Tabs)
+   ============================================ */
+.detail-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
+  padding-bottom: 2px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555 !important;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  position: relative;
+}
+
+.dark .tab-btn {
+  color: #aaa !important;
+}
+
+.tab-btn:hover {
+  background: rgba(26, 35, 126, 0.06);
+  color: #1a237e !important;
+}
+
+.dark .tab-btn:hover {
+  background: rgba(144, 202, 249, 0.08);
+  color: #90caf9 !important;
+}
+
+.tab-btn.active {
+  background: rgba(26, 35, 126, 0.08) !important;
+  color: #1a237e !important;
+  border-bottom: 3px solid #1a237e;
+  font-weight: 700;
+}
+
+.dark .tab-btn.active {
+  background: rgba(144, 202, 249, 0.12) !important;
+  color: #90caf9 !important;
+  border-bottom-color: #90caf9;
+}
+
+.detail-content {
+  background: var(--bg-card, #ffffff);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dark .detail-content {
+  background: var(--bg-card, #1e1e1e);
+  border-color: var(--border-color, #333333);
+}
+
+.tab-panel .detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  font-size: 14px;
+}
+
+.tab-panel .detail-row:last-child {
+  border-bottom: none;
+}
+
+.tab-panel .detail-label {
+  color: var(--text-muted, #666);
+  font-weight: 500;
+}
+
+.tab-panel .detail-value {
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  text-align: left;
+}
+
+.dark .tab-panel .detail-label {
+  color: #999;
+}
+
+.dark .tab-panel .detail-value {
+  color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ==========================================================
+   اصلاح کلید پنل کاربری با رنگ نارنجی متمایز از گزارشات
+   ========================================================== */
+.quick-actions .action-btn.warning {
+  background: linear-gradient(135deg, #e65100, #bf360c) !important;
+}
+.quick-actions .action-btn.warning:hover {
+  background: linear-gradient(135deg, #bf360c, #e65100) !important;
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+.dark-theme .quick-actions .action-btn.warning {
+  background: linear-gradient(135deg, #ff6d00, #e65100) !important;
+}
+.dark-theme .quick-actions .action-btn.warning:hover {
+  background: linear-gradient(135deg, #e65100, #ff6d00) !important;
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.5) !important;
+}
+
+/* ==========================================================
+   ✅ تنظیمات نهایی برای سایزهای کوچک (زیر 580)
+   ========================================================== */
+
+/* ===== زیر 580px ===== */
+@media (max-width: 580px) {
+  /* ===== کلیدهای هدر: فقط آیکون ===== */
+  .header-btn {
+    padding: 4px 6px !important;
+    font-size: 0 !important;
+    min-width: 32px !important;
+    max-width: 36px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    gap: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .header-btn .btn-text {
+    display: none !important;
+  }
+
+  .header-btn .btn-icon {
+    font-size: 18px !important;
+    margin: 0 !important;
+  }
+
+  .portfolio-selector-wrapper select {
+    font-size: 10px !important;
+    padding: 3px 6px !important;
+    min-width: 70px !important;
+  }
+
+  /* ===== Quick Actions: ۳ ستون ===== */
+  .quick-actions {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    padding: 10px 12px !important;
+  }
+
+  .quick-actions .action-btn {
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    gap: 4px !important;
+  }
+
+  .quick-actions .action-btn .action-icon {
+    font-size: 16px !important;
+  }
+
+  .dropdown-toggle {
+    flex: 0 0 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    font-size: 14px !important;
+    border-radius: 6px 0 0 6px !important;
+    padding: 0 2px !important;
+  }
+
+  .dropdown-toggle .arrow-icon {
+    transform: scale(1.2);
+  }
+
+  .action-btn-wrapper .action-btn.primary {
+    border-radius: 0 6px 6px 0 !important;
+    padding: 8px 4px 8px 4px !important;
+    font-size: 12px !important;
+  }
+
+  .dropdown-menu {
+    min-width: 150px !important;
+    right: -2px !important;
+    z-index: 10000 !important;
+  }
+
+  .dropdown-item {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+/* ==========================================================
+   ✅ زیر 480px - هدر با Grid 6 ستونی
+   ========================================================== */
+@media (max-width: 480px) {
+  /* ===== تغییر هدر به ستونی ===== */
+  .dashboard-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 4px 8px !important;
+    gap: 2px !important;
+  }
+
+  /* ===== خط اول: عنوان (وسط‌چین) ===== */
+  .header-left-group {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    padding: 2px 0 !important;
+    gap: 6px !important;
+  }
+
+  .header-left h1 {
+    font-size: 14px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+  }
+
+  .header-version {
+    font-size: 8px !important;
+    padding: 1px 4px !important;
+  }
+
+  .portfolio-selector-wrapper {
+    z-index: 999999 !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+  }
+  .portfolio-selector-wrapper select {
+    font-size: 9px !important;
+    padding: 2px 4px !important;
+    min-width: 60px !important;
+    height: 24px !important;
+  }
+
+  /* ==========================================================
+     ✅ اصلاح ۳: کلیدهای هدر در موبایل با لیبل
+     ========================================================== */
+  .header-right {
+    display: grid !important;
+    grid-template-columns: repeat(6, auto) !important;
+    gap: 2px !important;
+    width: 100% !important;
+    padding: 2px 0 !important;
+    flex: 0 0 auto !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+  }
+
+  .header-btn {
+    flex: none !important;
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+    min-width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    border-radius: 4px !important;
+    gap: 4px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    cursor: pointer;
+  }
+
+  .header-btn .btn-text {
+    display: inline-block !important;
+    font-size: 9px !important;
+  }
+
+  .header-btn .btn-icon {
+    font-size: 14px !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* ==========================================================
+     ✅ اصلاح ۱: افزایش ارتفاع ستون‌ها در 480 (۱.۵ برابر)
+     ========================================================== */
+  .three-column-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    min-height: 0 !important;
+  }
+
+  .three-column-layout .col-groups {
+    grid-row: 1 !important;
+    border-left: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    max-height: 225px !important; /* 150px × 1.5 = 225px */
+  }
+
+  .three-column-layout .col-trades {
+    grid-row: 2 !important;
+    border-left: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    max-height: 300px !important; /* 200px × 1.5 = 300px */
+  }
+
+  .three-column-layout .col-details {
+    grid-row: 3 !important;
+    grid-column: 1 !important;
+    min-height: 300px !important;
+  }
+
+  /* ===== Quick Actions: ۳ ستون ===== */
+  .quick-actions {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+    padding: 6px 6px !important;
+  }
+
+  .quick-actions .action-btn {
+    padding: 6px 3px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    gap: 3px !important;
+  }
+
+  .quick-actions .action-btn .action-icon {
+    font-size: 14px !important;
+  }
+
+  .dropdown-toggle {
+    flex: 0 0 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    font-size: 12px !important;
+    border-radius: 4px 0 0 4px !important;
+    padding: 0 2px !important;
+  }
+
+  .dropdown-toggle .arrow-icon {
+    transform: scale(1.1);
+  }
+
+  .action-btn-wrapper .action-btn.primary {
+    border-radius: 0 4px 4px 0 !important;
+    padding: 6px 3px 6px 3px !important;
+    font-size: 11px !important;
+  }
+
+  .dropdown-menu {
+    min-width: 130px !important;
+    right: -4px !important;
+    z-index: 10000 !important;
+  }
+
+  .dropdown-item {
+    font-size: 11px !important;
+    padding: 5px 8px !important;
+  }
+
+  /* ===== کارت‌های آمار ===== */
+  .stats-cards {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+    padding: 4px 6px !important;
+  }
+
+  .stats-cards .stat-card {
+    padding: 4px 6px !important;
+    gap: 4px !important;
+  }
+
+  .stats-cards .stat-icon {
+    font-size: 14px !important;
+  }
+
+  .stats-cards .stat-value {
+    font-size: 12px !important;
+  }
+
+  .stats-cards .stat-label {
+    font-size: 8px !important;
+  }
+
+  /* ===== مودال ===== */
+  .modal-content {
+    padding: 20px !important;
+    margin: 12px !important;
+  }
+
+  /* ===== جزئیات ===== */
+  .three-column-layout .detail-actions {
+    gap: 3px !important;
+  }
+
+  .three-column-layout .detail-actions button {
+    font-size: 9px !important;
+    padding: 2px 4px !important;
+  }
+
+  .btn-add-trade {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
 }

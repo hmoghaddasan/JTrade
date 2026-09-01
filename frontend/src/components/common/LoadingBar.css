@@ -1,0 +1,91 @@
+/* src/components/common/LoadingBar.css */
+
+.loading-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  width: 100%;
+  min-height: 80px;
+}
+
+.loading-bar-container.small {
+  min-height: 40px;
+  padding: 8px;
+}
+
+.loading-bar-container.small .loading-bar {
+  width: 80px;
+  height: 2px;
+}
+
+.loading-bar-container.medium .loading-bar {
+  width: 160px;
+  height: 3px;
+}
+
+.loading-bar-container.large .loading-bar {
+  width: 240px;
+  height: 4px;
+}
+
+.loading-bar {
+  width: 160px;
+  height: 3px;
+  background: rgba(26, 35, 126, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dark .loading-bar {
+  background: rgba(144, 202, 249, 0.1);
+}
+
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #1a237e, #0d47a1);
+  border-radius: 2px;
+  animation: loadingBarMove 1.2s ease-in-out infinite;
+}
+
+.dark .loading-bar::after {
+  background: linear-gradient(90deg, #90caf9, #42a5f5);
+}
+
+@keyframes loadingBarMove {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+.loading-bar-text {
+  font-size: 14px;
+  color: var(--text-muted, #666);
+  font-weight: 500;
+  margin: 0;
+  animation: pulseText 1.8s ease-in-out infinite;
+}
+
+.dark .loading-bar-text {
+  color: #aaa;
+}
+
+@keyframes pulseText {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}

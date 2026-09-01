@@ -11,7 +11,7 @@ import TradeGroupList from '../trading/TradeGroupList';
 import RulesComplianceWidget from './RulesComplianceWidget';
 import RealApiService from '../../services/realApiService';
 import './dashboard.css';
-
+import LoadingBar from '../../common/LoadingBar';
 const Dashboard = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -60,8 +60,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال بارگذاری داشبورد...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

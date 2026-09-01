@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import RuleService from '../../services/ruleService';
 import './RulesManager.css';
-
+import LoadingBar from '../common/LoadingBar';
 const RulesManager = () => {
   const { isDark } = useTheme();
   const { showToast } = useToast();
@@ -205,8 +205,7 @@ const RulesManager = () => {
   if (loading) {
     return (
       <div className="rules-manager-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال بارگذاری قوانین...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

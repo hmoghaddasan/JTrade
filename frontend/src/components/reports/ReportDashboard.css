@@ -447,17 +447,34 @@
     text-align: center;
   }
 
+  /* ==========================================================
+     ✅ اصلاح ۱: دو کلید هدر - هر کدام 50% عرض
+     ========================================================== */
   .header-actions {
-    width: 100%;
-    justify-content: center;
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   .header-actions .btn-print-report,
   .header-actions .btn-back {
-    font-size: 12px;
-    padding: 0 12px;
-    height: 34px;
-    min-width: 60px;
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    height: 34px !important;
+    border-radius: 6px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    gap: 4px !important;
   }
 
   .report-content {
@@ -478,19 +495,24 @@
     gap: 6px;
   }
 
+  /* ==========================================================
+     ✅ اصلاح ۲: ۱۲ گزارش در ۴ ستون (هر خط ۳ گزارش)
+     ========================================================== */
   .report-tabs {
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    padding: 8px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+    padding: 8px !important;
   }
 
   .report-tab {
-    font-size: 11px;
-    padding: 6px 10px;
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+    border-radius: 4px !important;
   }
 
   .report-tab-en {
-    font-size: 9px;
+    font-size: 8px !important;
+    opacity: 0.6;
   }
 }
 
@@ -499,19 +521,86 @@
     padding: 8px 12px;
   }
 
-  .report-tabs {
-    grid-template-columns: 1fr;
-  }
-
+  /* ==========================================================
+     ✅ اصلاح ۱ (موبایل کوچک): دو کلید هدر - 50% عرض
+     ========================================================== */
   .header-actions {
-    flex-direction: column;
-    width: 100%;
+    gap: 4px !important;
   }
 
   .header-actions .btn-print-report,
   .header-actions .btn-back {
-    width: 100%;
-    justify-content: center;
-    min-width: unset;
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    padding: 0 6px !important;
+    font-size: 11px !important;
+    height: 30px !important;
+    border-radius: 4px !important;
+  }
+
+  /* ==========================================================
+     ✅ اصلاح ۲ (موبایل کوچک): ۱۲ گزارش در ۳ ستون
+     ========================================================== */
+  .report-tabs {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 3px !important;
+    padding: 6px !important;
+  }
+
+  .report-tab {
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+    border-radius: 3px !important;
+  }
+
+  .report-tab-en {
+    font-size: 7px !important;
+    opacity: 0.5;
+  }
+
+  .report-content {
+    padding: 12px;
+  }
+
+  .report-table {
+    font-size: 10px;
+  }
+
+  .report-table th,
+  .report-table td {
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  /* ==========================================================
+     اصلاح نهایی برای موبایل بسیار کوچک
+     ========================================================== */
+  .header-actions .btn-print-report,
+  .header-actions .btn-back {
+    font-size: 10px !important;
+    height: 26px !important;
+    padding: 0 4px !important;
+  }
+
+  .report-tabs {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2px !important;
+    padding: 4px !important;
+  }
+
+  .report-tab {
+    font-size: 9px !important;
+    padding: 3px 4px !important;
+  }
+
+  .report-tab-en {
+    font-size: 6px !important;
+    display: none !important;
   }
 }

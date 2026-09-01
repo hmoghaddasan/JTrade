@@ -11,7 +11,7 @@ import MetricsFilter from './MetricsFilter';
 import MetricsTable from './MetricsTable';
 import MetricsChart from './MetricsChart';
 import './AdvancedMetricsReport.css';
-
+import LoadingBar from '../common/LoadingBar';
 const AdvancedMetricsReport = () => {
   const { user } = useAuth();
   const { currentPortfolioId, portfolios } = usePortfolio();
@@ -96,8 +96,7 @@ const AdvancedMetricsReport = () => {
   if (loading) {
     return (
       <div className="metrics-report-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال محاسبه شاخص‌ها...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

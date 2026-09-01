@@ -41,6 +41,50 @@ const HelpTooltip = ({ text }) => {
   );
 };
 
+// ============================================
+// کامپوننت باکس تحلیل جداگانه
+// ============================================
+const AnalysisBox = ({ icon, title, content, type = 'text', color = '#1a237e' }) => {
+  if (!content) return null;
+
+  const formatBold = (text) => {
+    if (!text) return text;
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const content = part.slice(2, -2);
+        return <strong key={index}>{content}</strong>;
+      }
+      return part;
+    });
+  };
+
+  const boxStyle = {
+    borderRight: `4px solid ${color}`,
+    background: `rgba(${parseInt(color.slice(1,3), 16)}, ${parseInt(color.slice(3,5), 16)}, ${parseInt(color.slice(5,7), 16)}, 0.06)`,
+  };
+
+  return (
+    <div className="analysis-box" style={boxStyle}>
+      <div className="analysis-box-header">
+        <span className="analysis-box-icon">{icon}</span>
+        <h4 className="analysis-box-title">{title}</h4>
+      </div>
+      <div className="analysis-box-content">
+        {type === 'list' ? (
+          <ul>
+            {Array.isArray(content) && content.map((item, idx) => (
+              <li key={idx}>{formatBold(item)}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>{formatBold(content)}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AIConsultation = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -115,13 +159,13 @@ const AIConsultation = () => {
   const [symbols, setSymbols] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
 
-  // ===== Stateهای مدیریت کش مدل‌ها =====
+  // ===== Stateهای مدیریت کش مدل‌ها (با localStorage) =====
   const [availableModels, setAvailableModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
   const [modelsLastFetched, setModelsLastFetched] = useState(null);
-  const [isModelsCacheValid, setIsModelsCacheValid] = useState(false);
   const [isRefreshingModels, setIsRefreshingModels] = useState(false);
-  const MODELS_CACHE_DURATION = 30 * 60 * 1000; // 30 دقیقه به میلی‌ثانیه
+  const MODELS_CACHE_KEY = 'jtrade_models_cache';
+  const MODELS_CACHE_DURATION = 30 * 60 * 1000; // 30 دقیقه
 
   const stages = [
     { id: 0, label: '📊 دریافت قیمت لحظه‌ای', threshold: 10 },
@@ -197,30 +241,22 @@ const AIConsultation = () => {
     const provider = String(model.provider || '');
     const displayName = String(model.display_name || '');
 
-    // اگر نام مدل قبلاً کوتاه است، همان را برگردان
     if (name.length < 15 && !name.includes(':')) {
       return name;
     }
 
-    // حذف پیشوندهای اضافی
     let shortName = name;
-
-    // حذف بخش‌های اضافی مانند :latest, :8b
     shortName = shortName.replace(/:[^:]*$/, '');
 
-    // اگر name خیلی بلند است و displayName دارد
     if (shortName.length > 20 && displayName) {
       return displayName;
     }
 
-    // اگر فقط نام provider است، نام مدل را از id بگیریم
     if (shortName === provider && name.length > 20) {
-      // از id استفاده کن
       const idParts = name.split('/');
       shortName = idParts[idParts.length - 1] || name;
     }
 
-    // حذف پیشوندهای اضافی
     const prefixes = ['openai/', 'anthropic/', 'google/', 'meta/', 'mistral/', 'deepseek/'];
     for (const prefix of prefixes) {
       if (shortName.startsWith(prefix)) {
@@ -229,7 +265,6 @@ const AIConsultation = () => {
       }
     }
 
-    // اگر هنوز طولانی است، 20 کاراکتر اول را بگیر
     if (shortName.length > 25) {
       shortName = shortName.substring(0, 22) + '...';
     }
@@ -238,19 +273,38 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // ✅ تابع دریافت لیست مدل‌ها با کش
+  // ✅ تابع دریافت لیست مدل‌ها با کش (ذخیره در localStorage)
   // ============================================
   const fetchModels = async (forceRefresh = false) => {
-    // اگر کش معتبر است و نیرو دریافت نشده، از کش استفاده کن
+    // بررسی کش در localStorage
+    const cachedData = localStorage.getItem(MODELS_CACHE_KEY);
     const now = Date.now();
-    if (!forceRefresh && isModelsCacheValid && modelsLastFetched) {
-      const timeSinceLastFetch = now - modelsLastFetched;
-      if (timeSinceLastFetch < MODELS_CACHE_DURATION) {
-        console.log(`📡 Using cached models (${Math.round(timeSinceLastFetch / 60000)} minutes old)`);
-        return;
+
+    if (!forceRefresh && cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        const { models, timestamp } = parsed;
+        const timeSinceLastFetch = now - timestamp;
+
+        if (timeSinceLastFetch < MODELS_CACHE_DURATION && Array.isArray(models) && models.length > 0) {
+          console.log(`📡 Using cached models (${Math.round(timeSinceLastFetch / 60000)} minutes old)`);
+          setAvailableModels(models);
+          setModelsLastFetched(timestamp);
+          setModelsLoading(false);
+
+          // انتخاب مدل پیش‌فرض
+          const defaultModel = models.find(m => m.is_default) || models[0];
+          if (defaultModel && !selectedModel) {
+            setSelectedModel(defaultModel.id);
+          }
+          return;
+        }
+      } catch (e) {
+        console.warn('⚠️ Cache parse error:', e);
       }
     }
 
+    // دریافت از سرور
     setModelsLoading(true);
     setIsRefreshingModels(true);
 
@@ -284,7 +338,6 @@ const AIConsultation = () => {
         category_label: String(model.category_label || ''),
         cooldown: Number(model.cooldown || 10),
         is_default: Boolean(model.is_default),
-        // ✅ اضافه کردن نام کوتاه برای نمایش
         short_name: getShortModelName({
           name: String(model.name || model.id || ''),
           provider: String(model.provider || ''),
@@ -296,13 +349,17 @@ const AIConsultation = () => {
 
       if (processedModels.length > 0) {
         setAvailableModels(processedModels);
+        // ذخیره در localStorage
+        localStorage.setItem(MODELS_CACHE_KEY, JSON.stringify({
+          models: processedModels,
+          timestamp: now
+        }));
+        setModelsLastFetched(now);
+
         const defaultModel = processedModels.find(m => m.is_default) || processedModels[0];
         if (defaultModel && !selectedModel) {
           setSelectedModel(defaultModel.id);
         }
-        // به‌روزرسانی کش
-        setModelsLastFetched(Date.now());
-        setIsModelsCacheValid(true);
       } else {
         // Fallback
         const fallback = [
@@ -310,11 +367,14 @@ const AIConsultation = () => {
           { id: 'o4-mini', name: 'o4-mini', provider: 'gapgpt', display_name: 'Gapgpt', online: true, free: true, category: 'free', category_label: '🟢 آنلاین', cooldown: 10, is_default: false, short_name: 'o4-mini' },
         ];
         setAvailableModels(fallback);
+        localStorage.setItem(MODELS_CACHE_KEY, JSON.stringify({
+          models: fallback,
+          timestamp: now
+        }));
+        setModelsLastFetched(now);
         if (!selectedModel) {
           setSelectedModel('llama3.1:8b');
         }
-        setModelsLastFetched(Date.now());
-        setIsModelsCacheValid(true);
       }
     } catch (error) {
       console.error('❌ Error loading models:', error);
@@ -342,10 +402,13 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // ✅ تابع رفرش دستی مدل‌ها (با دکمه)
+  // ✅ تابع رفرش دستی مدل‌ها (با دکمه) - با غیرفعال‌سازی
   // ============================================
   const handleRefreshModels = () => {
-    if (isRefreshingModels) return;
+    if (isRefreshingModels || modelsLoading) {
+      showToast('⏳ در حال بروزرسانی لیست مدل‌ها...', 'info');
+      return;
+    }
     showToast('🔄 در حال بروزرسانی لیست مدل‌ها...', 'info');
     fetchModels(true);
   };
@@ -435,6 +498,8 @@ const AIConsultation = () => {
         suggestion: 'پیشنهادی موجود نیست.',
         tip: 'همیشه به مدیریت ریسک توجه کنید.',
         psychology: 'تحلیل روانشناختی موجود نیست.',
+        technical_analysis: null,
+        scenario_analysis: null,
         suggested_sl: null,
         suggested_tp: null,
         suggested_timing: null,
@@ -490,6 +555,24 @@ const AIConsultation = () => {
     let tip = aiResponse.tip || 'همیشه به مدیریت ریسک توجه کنید.';
     tip = processText(tip) || tip;
 
+    // ===== استخراج تحلیل تکنیکال هوشمند از پاسخ =====
+    let technicalAnalysis = aiResponse.technical_analysis || null;
+    if (!technicalAnalysis && typeof aiResponse.psychology === 'string') {
+      const match = aiResponse.psychology.match(/تحلیل\s*تکنیکال\s*هوشمند\s*[:]\s*([\s\S]*?)(?=تحلیل\s*سناریو|$)/i);
+      if (match) {
+        technicalAnalysis = match[1].trim();
+      }
+    }
+
+    // ===== استخراج تحلیل سناریو از پاسخ =====
+    let scenarioAnalysis = aiResponse.scenario_analysis || null;
+    if (!scenarioAnalysis && typeof aiResponse.psychology === 'string') {
+      const match = aiResponse.psychology.match(/تحلیل\s*سناریو\s*[:]\s*([\s\S]*?)$/i);
+      if (match) {
+        scenarioAnalysis = match[1].trim();
+      }
+    }
+
     const suggested_sl = aiResponse.suggested_sl || null;
     const suggested_tp = aiResponse.suggested_tp || null;
     const suggested_timing = aiResponse.suggested_timing || null;
@@ -508,6 +591,8 @@ const AIConsultation = () => {
       suggestion,
       tip,
       psychology,
+      technical_analysis: technicalAnalysis,
+      scenario_analysis: scenarioAnalysis,
       suggested_sl,
       suggested_tp,
       suggested_timing,
@@ -550,6 +635,8 @@ const AIConsultation = () => {
       suggestion: 'پیشنهادی موجود نیست.',
       tip: 'همیشه به مدیریت ریسک توجه کنید.',
       psychology: 'تحلیل روانشناختی موجود نیست.',
+      technical_analysis: null,
+      scenario_analysis: null,
       suggested_sl: null,
       suggested_tp: null,
       suggested_timing: null,
@@ -594,7 +681,6 @@ const AIConsultation = () => {
     }
     if (strengthsMatch) {
       const strengthsText = strengthsMatch[1].trim();
-      console.log('🔍 متن نقاط قوت:', strengthsText.substring(0, 100) + '...');
       const items = strengthsText.match(/(?:[-•])\s*([^\n]*?)(?=(?:[-•])|$)/g);
       if (items) {
         for (const item of items) {
@@ -619,7 +705,6 @@ const AIConsultation = () => {
     }
     if (warningsMatch) {
       const warningsText = warningsMatch[1].trim();
-      console.log('🔍 متن هشدارها:', warningsText.substring(0, 100) + '...');
       const items = warningsText.match(/(?:[-•])\s*([^\n]*?)(?=(?:[-•])|$)/g);
       if (items) {
         for (const item of items) {
@@ -664,9 +749,9 @@ const AIConsultation = () => {
     }
 
     // ===== 6. استخراج تحلیل روانشناختی =====
-    let psychologyMatch = text.match(/\*\*تحلیل\s*روانشناختی\s*[:]\*\*\s*([\s\S]*?)(?=\*\*نکته\s*[:]\*\*|$)/i);
+    let psychologyMatch = text.match(/\*\*تحلیل\s*روانشناختی\s*[:]\*\*\s*([\s\S]*?)(?=\*\*تحلیل\s*تکنیکال\s*هوشمند\s*[:]\*\*|\*\*نکته\s*[:]\*\*|$)/i);
     if (!psychologyMatch) {
-      psychologyMatch = text.match(/تحلیل\s*روانشناختی\s*[:]\s*([\s\S]*?)(?=\s*نکته\s*[:]|$)/i);
+      psychologyMatch = text.match(/تحلیل\s*روانشناختی\s*[:]\s*([\s\S]*?)(?=\s*تحلیل\s*تکنیکال\s*هوشمند\s*[:]|\s*نکته\s*[:]|$)/i);
     }
     if (psychologyMatch) {
       const psychologyText = psychologyMatch[1].trim();
@@ -674,18 +759,35 @@ const AIConsultation = () => {
         result.psychology = translateEmotion(psychologyText);
         console.log('✅ استخراج تحلیل روانشناختی:', result.psychology.substring(0, 100) + '...');
       }
-    } else {
-      const lowerText = text.toLowerCase();
-      if (lowerText.includes('احساس') || lowerText.includes('روان') || lowerText.includes('استرس') || lowerText.includes('آرامش')) {
-        const emotionSentences = text.match(/[^.!?]*(احساس|روان|استرس|آرامش|ترس|طمع|هیجان)[^.!?]*[.!?]/gi);
-        if (emotionSentences) {
-          result.psychology = translateEmotion(emotionSentences.join(' '));
-          console.log('✅ استخراج تحلیل روانشناختی (از کلمات کلیدی):', result.psychology.substring(0, 100) + '...');
-        }
+    }
+
+    // ===== 7. استخراج تحلیل تکنیکال هوشمند =====
+    let techMatch = text.match(/\*\*تحلیل\s*تکنیکال\s*هوشمند\s*[:]\*\*\s*([\s\S]*?)(?=\*\*تحلیل\s*سناریو\s*[:]\*\*|$)/i);
+    if (!techMatch) {
+      techMatch = text.match(/تحلیل\s*تکنیکال\s*هوشمند\s*[:]\s*([\s\S]*?)(?=\s*تحلیل\s*سناریو\s*[:]|$)/i);
+    }
+    if (techMatch) {
+      const techText = techMatch[1].trim();
+      if (techText && techText.length > 5) {
+        result.technical_analysis = techText;
+        console.log('✅ استخراج تحلیل تکنیکال هوشمند:', result.technical_analysis.substring(0, 100) + '...');
       }
     }
 
-    // ===== 7. تولید هشدار قیمت استاندارد =====
+    // ===== 8. استخراج تحلیل سناریو =====
+    let scenarioMatch = text.match(/\*\*تحلیل\s*سناریو\s*[:]\*\*\s*([\s\S]*?)(?=\*\*نکته\s*[:]\*\*|$)/i);
+    if (!scenarioMatch) {
+      scenarioMatch = text.match(/تحلیل\s*سناریو\s*[:]\s*([\s\S]*?)(?=\s*نکته\s*[:]|$)/i);
+    }
+    if (scenarioMatch) {
+      const scenarioText = scenarioMatch[1].trim();
+      if (scenarioText && scenarioText.length > 5) {
+        result.scenario_analysis = scenarioText;
+        console.log('✅ استخراج تحلیل سناریو:', result.scenario_analysis.substring(0, 100) + '...');
+      }
+    }
+
+    // ===== 9. تولید هشدار قیمت استاندارد =====
     if (livePriceData && entryPrice) {
       result.price_warning = generateStandardPriceWarning(entryPrice, livePriceData);
     }
@@ -699,7 +801,9 @@ const AIConsultation = () => {
           warnings: ['هشدار خاصی وجود ندارد'],
           suggestion: result.suggestion || 'پیشنهادی موجود نیست.',
           tip: result.tip || 'همیشه به مدیریت ریسک توجه کنید.',
-          psychology: result.psychology || 'تحلیل روانشناختی موجود نیست.'
+          psychology: result.psychology || 'تحلیل روانشناختی موجود نیست.',
+          technical_analysis: result.technical_analysis,
+          scenario_analysis: result.scenario_analysis,
         },
         livePriceData,
         entryPrice
@@ -752,735 +856,6 @@ const AIConsultation = () => {
   };
 
   // ============================================
-  // رندر راهنمای فیلدها
-  // ============================================
-  const renderHelpTooltip = (helpKey) => {
-    const help = helpTexts[helpKey];
-    if (!help) return null;
-    return (
-      <HelpTooltip text={help.items.map((item, idx) => <div key={idx}>{item}</div>)} />
-    );
-  };
-
-  // ============================================
-  // بارگذاری نمادها
-  // ============================================
-  useEffect(() => {
-    const loadSymbols = async () => {
-      setSymbolsLoading(true);
-      try {
-        const response = await RealApiService.getAllSymbols();
-        let symbolList = [];
-        if (Array.isArray(response.data)) {
-          symbolList = response.data.filter(Boolean);
-        } else if (response.data && response.data.results) {
-          symbolList = response.data.results.filter(Boolean);
-        }
-        if (symbolList.length > 0) {
-          setSymbols(symbolList);
-        } else {
-          setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
-        }
-      } catch (error) {
-        console.error('❌ Error loading symbols:', error);
-        setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
-      } finally {
-        setSymbolsLoading(false);
-      }
-    };
-    loadSymbols();
-  }, []);
-
-  // ============================================
-  // بررسی وضعیت اشتراک
-  // ============================================
-  useEffect(() => {
-    const checkSubscription = async () => {
-      try {
-        const response = await RealApiService.getSubscriptionStatus();
-        const data = response.data;
-        setSubscriptionStatus(data);
-        const remaining = data.remaining_ai_consultations ?? 0;
-        if (remaining <= 0) {
-          setLimitReached(true);
-          showToast(
-            `⚠️ محدودیت مشاوره AI شما به پایان رسیده است. (${data.ai_consultations_limit || 0} مشاوره)`,
-            'warning'
-          );
-        } else {
-          setLimitReached(false);
-        }
-      } catch (error) {
-        console.error('Error checking subscription:', error);
-      }
-    };
-    checkSubscription();
-  }, []);
-
-  // ============================================
-  // تغییرات فرم
-  // ============================================
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'model') {
-      console.log('🔍 Model selected in handleChange:', value);
-      setSelectedModel(value);
-    }
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // ============================================
-  // شروع و توقف تایمرهای پیشرفت
-  // ============================================
-  const startProgressTimers = () => {
-    setIsTimeout(false);
-    setProgress(0);
-    setElapsedTime(0);
-    setCurrentStage(0);
-    startTimeRef.current = Date.now();
-
-    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-    progressIntervalRef.current = setInterval(() => {
-      setProgress(prev => {
-        const newProgress = Math.min(prev + 0.5, 95);
-        for (let i = stages.length - 1; i >= 0; i--) {
-          if (newProgress >= stages[i].threshold) {
-            setCurrentStage(i);
-            break;
-          }
-        }
-        return newProgress;
-      });
-    }, 100);
-
-    if (timeIntervalRef.current) clearInterval(timeIntervalRef.current);
-    timeIntervalRef.current = setInterval(() => {
-      setElapsedTime(prev => prev + 1);
-    }, 1000);
-  };
-
-  const stopProgressTimers = () => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
-    if (timeIntervalRef.current) {
-      clearInterval(timeIntervalRef.current);
-      timeIntervalRef.current = null;
-    }
-    setProgress(100);
-    setCurrentStage(5);
-  };
-
-  // ============================================
-  // تابع دریافت قیمت لحظه‌ای
-  // ============================================
-  const fetchLivePrice = async (symbol) => {
-    if (!symbol) return null;
-    setLivePriceLoading(true);
-    setLivePriceStatus('loading');
-    try {
-      const response = await RealApiService.getLivePrice(symbol);
-      if (response && response.price) {
-        setLivePriceStatus('success');
-        return response.price;
-      } else {
-        setLivePriceStatus('error');
-        return null;
-      }
-    } catch (error) {
-      console.error('❌ Error fetching live price:', error);
-      if (error.message?.includes('Network Error') || error.message?.includes('Failed to fetch')) {
-        setLivePriceStatus('network_error');
-      } else if (error.response?.status === 404) {
-        setLivePriceStatus('not_found');
-      } else if (error.response?.status === 401 || error.response?.status === 403) {
-        setLivePriceStatus('error');
-      } else if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
-        setLivePriceStatus('error');
-      } else {
-        setLivePriceStatus('error');
-      }
-      return null;
-    } finally {
-      setLivePriceLoading(false);
-    }
-  };
-
-  // ============================================
-  // ✅ دریافت مشاوره (نسخه ناهمگام جدید)
-  // ============================================
-  const handleConsult = async (e) => {
-    e.preventDefault();
-
-    console.log('🔍 formData.model before request:', formData.model);
-    console.log('🔍 selectedModel before request:', selectedModel);
-
-    if (!formData.symbol) {
-      setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً نماد معاملاتی را انتخاب کنید.' });
-      return;
-    }
-    if (!formData.direction) {
-      setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً جهت معامله را انتخاب کنید.' });
-      return;
-    }
-    if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) {
-      setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً قیمت ورود را به‌صورت عدد معتبر وارد کنید.' });
-      return;
-    }
-
-    if (limitReached) {
-      setErrorModal({
-        open: true,
-        title: 'محدودیت مشاوره',
-        message: 'محدودیت مشاوره AI شما به پایان رسیده است. لطفاً اشتراک خود را تمدید کنید.'
-      });
-      return;
-    }
-
-    setConsulting(true);
-    setResult(null);
-    setStreamingText('');
-    setConsultationId(null);
-    setComparisonStats(null);
-    setLivePrice(null);
-    setPriceWarning(null);
-    setLivePriceStatus('idle');
-    setIsTimeout(false);
-    setCurrentStage(0);
-    startProgressTimers();
-
-    // مرحله ۰: دریافت قیمت لحظه‌ای
-    setCurrentStage(0);
-    let fetchedLivePrice = null;
-    let fetchedPriceWarning = null;
-    try {
-      const livePriceData = await fetchLivePrice(formData.symbol);
-      if (livePriceData) {
-        fetchedLivePrice = livePriceData;
-        setLivePrice(livePriceData);
-        const standardWarning = generateStandardPriceWarning(formData.entry_price, livePriceData);
-        if (standardWarning) {
-          fetchedPriceWarning = standardWarning;
-          setPriceWarning(standardWarning);
-        }
-      } else {
-        if (livePriceStatus === 'network_error') {
-          setPriceWarning('⚠️ خطا در اتصال به اینترنت. لطفاً اتصال خود را بررسی کنید.');
-        } else if (livePriceStatus === 'not_found') {
-          setPriceWarning('⚠️ نماد مورد نظر در سرویس قیمت‌یابی موجود نیست. لطفاً قیمت را خودتان وارد کنید.');
-        } else {
-          setPriceWarning('⚠️ قیمت لحظه‌ای در دسترس نیست. لطفاً قیمت را خودتان بررسی کنید.');
-        }
-        fetchedPriceWarning = priceWarning;
-      }
-    } catch (error) {
-      console.error('Error fetching live price:', error);
-      setLivePriceStatus('error');
-      const warning = '⚠️ خطا در دریافت قیمت لحظه‌ای. لطفاً خودتان بررسی کنید.';
-      fetchedPriceWarning = warning;
-      setPriceWarning(warning);
-    }
-
-    try {
-      // ✅ استفاده از selectedModel به جای formData.model
-      const modelToSend = selectedModel || formData.model || null;
-      console.log('✅ Model being sent to server:', modelToSend);
-
-      const response = await AIService.startConsultation({
-        symbol: formData.symbol,
-        direction: formData.direction,
-        entry_price: parseFloat(formData.entry_price),
-        stop_loss: formData.stop_loss ? parseFloat(formData.stop_loss) : null,
-        take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
-        market_condition: formData.market_condition || null,
-        emotion: formData.emotion || null,
-        time_ny: formData.time_ny || null,
-        user_question: formData.user_question || null,
-        model: modelToSend,
-        session_type: formData.session_type || null,
-        strategy_type: formData.strategy_type || null,
-        timeframes: formData.timeframes || null,
-        risk_percent: formData.risk_percent ? parseFloat(formData.risk_percent) : null,
-        volume: formData.volume ? parseFloat(formData.volume) : null,
-      });
-
-      console.log('📥 Consultation started:', response);
-
-      const { consultation_id, status, message } = response;
-
-      if (consultation_id) {
-        console.log(`➕ [AIConsultation] Calling addConsultation with ${consultation_id}`);
-        addConsultation(consultation_id, formData.symbol);
-
-        showToast('🧠 مشاوره در حال پردازش است. می‌توانید به کارهای دیگر بپردازید.', 'info');
-
-        navigate('/dashboard');
-
-        try {
-          const subResponse = await RealApiService.getSubscriptionStatus();
-          setSubscriptionStatus(subResponse.data);
-          if (subResponse.data.remaining_ai_consultations <= 0) {
-            setLimitReached(true);
-          }
-        } catch (subError) {
-          console.error('Error updating subscription status:', subError);
-        }
-
-      } else {
-        showToast('⚠️ خطا در شروع مشاوره', 'error');
-      }
-
-    } catch (error) {
-      console.error('Error starting consultation:', error);
-      stopProgressTimers();
-
-      let errorMessage = '❌ خطا در شروع مشاوره';
-      let errorTitle = '❌ خطا';
-      let errorDetails = null;
-
-      console.error('❌ [AIConsultation] Full error details:');
-      console.error('   - Error object:', error);
-      console.error('   - Error name:', error.name);
-      console.error('   - Error message:', error.message);
-      console.error('   - Error stack:', error.stack);
-      if (error.response) {
-        console.error('   - Response data:', error.response.data);
-        console.error('   - Response status:', error.response.status);
-        console.error('   - Response headers:', error.response.headers);
-      }
-
-      if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
-        setIsTimeout(true);
-        errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
-        errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
-      } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
-        errorTitle = '🔌 خطای اتصال به AI';
-        errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
-      } else if (error.response?.data) {
-        const data = error.response.data;
-        if (data.message) errorMessage = data.message;
-        else if (data.error) errorMessage = data.error;
-        else if (data.detail) errorMessage = data.detail;
-        else if (typeof data === 'object') {
-          const fieldErrors = Object.entries(data)
-            .filter(([key, value]) => key !== 'error' && key !== 'message')
-            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
-            .join(' | ');
-          if (fieldErrors) {
-            errorMessage = `خطا در فیلدها: ${fieldErrors}`;
-            errorDetails = data;
-          }
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      setErrorModal({
-        open: true,
-        title: errorTitle,
-        message: errorMessage,
-        details: errorDetails
-      });
-    } finally {
-      setConsulting(false);
-    }
-  };
-
-  // ============================================
-  // بازنشانی فرم
-  // ============================================
-  const handleReset = () => {
-    setFormData({
-      symbol: '',
-      direction: 'Buy',
-      entry_price: '',
-      stop_loss: '',
-      take_profit: '',
-      market_condition: '',
-      emotion: '',
-      time_ny: '',
-      user_question: '',
-      model: '',
-      session_type: '',
-      strategy_type: '',
-      timeframes: '',
-      risk_percent: '',
-      volume: '',
-    });
-    setSelectedModel('');
-    setResult(null);
-    setStreamingText('');
-    setLivePrice(null);
-    setPriceWarning(null);
-    setLivePriceStatus('idle');
-    setConsultationDetail(null);
-    setExpandedChart(null);
-    setFeedbackSubmitted(false);
-    stopProgressTimers();
-    setProgress(0);
-    setElapsedTime(0);
-    setCurrentStage(0);
-    const el = document.getElementById('streaming-response');
-    if (el) el.remove();
-  };
-
-  // ============================================
-  // بزرگ‌نمایی نمودار
-  // ============================================
-  const toggleChartExpand = (chartId) => {
-    setExpandedChart(expandedChart === chartId ? null : chartId);
-  };
-
-  // ============================================
-  // چاپ گزارش کامل
-  // ============================================
-  const handlePrintReport = () => {
-    if (!result) return;
-    const { score, response } = result;
-    const printWindow = window.open('', '_blank', 'width=900,height=700');
-    if (!printWindow) {
-      showToast('لطفاً pop-up را فعال کنید', 'warning');
-      return;
-    }
-
-    const now = new Date().toLocaleString('fa-IR');
-    const livePriceDisplay = response?.live_price || livePrice;
-    const entry = parseFloat(formData.entry_price);
-    let diffPercent = 0;
-    if (livePriceDisplay && entry) {
-      diffPercent = ((entry - livePriceDisplay) / livePriceDisplay) * 100;
-    }
-    if (!isFinite(diffPercent) || isNaN(diffPercent)) diffPercent = 0;
-    const priceStatus = getPriceStatus(Math.abs(diffPercent));
-
-    const boldForPrint = (text) => {
-      if (!text) return text;
-      return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    };
-
-    const strengthsHtml = response?.strengths?.length > 0
-      ? response.strengths.map(s => `<li>${boldForPrint(s)}</li>`).join('')
-      : '<li>نقاط قوتی یافت نشد</li>';
-
-    const warningsHtml = response?.warnings?.length > 0
-      ? response.warnings.map(w => `<li>${boldForPrint(w)}</li>`).join('')
-      : '<li>هشدار خاصی وجود ندارد</li>';
-
-    const suggestionHtml = response?.suggestion && response.suggestion !== 'پیشنهادی موجود نیست.'
-      ? `<p>${boldForPrint(response.suggestion)}</p>`
-      : '';
-
-    const psychologyHtml = response?.psychology && response.psychology !== 'تحلیل روانشناختی موجود نیست.'
-      ? `<p>${boldForPrint(response.psychology)}</p>`
-      : '';
-
-    const tipHtml = response?.tip && response.tip !== 'همیشه به مدیریت ریسک توجه کنید.'
-      ? `<p style="background:#fff8e1;padding:12px;border-radius:6px;border-right:4px solid #f57c00;">${boldForPrint(response.tip)}</p>`
-      : '';
-
-    const suggestedTimingHtml = response?.suggested_timing
-      ? `<div class="detail-row"><span class="label-text">⏰ زمان‌بندی پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_timing)}</span></div>`
-      : '';
-
-    const suggestedSlHtml = response?.suggested_sl
-      ? `<div class="detail-row"><span class="label-text">حد ضرر پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_sl)}</span></div>`
-      : '';
-
-    const suggestedTpHtml = response?.suggested_tp
-      ? `<div class="detail-row"><span class="label-text">حد سود پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_tp)}</span></div>`
-      : '';
-
-    const suggestedPositionHtml = response?.suggested_position
-      ? `<div class="detail-row"><span class="label-text">اندازه پوزیشن پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_position)}</span></div>`
-      : '';
-
-    const internalAnalysisHtml = comparisonStats ? `
-      <div class="section">
-        <div class="section-title">📊 تحلیل داخلی از تاریخچه شما</div>
-        <div class="section-body">
-          <div class="grid-2">
-            <div class="detail-row"><span class="label-text">کل تریدها</span><span class="value-text">${comparisonStats.total_trades || 0}</span></div>
-            <div class="detail-row"><span class="label-text">نرخ برد کلی</span><span class="value-text ${(comparisonStats.win_rate || 0) >= 50 ? 'positive' : 'negative'}">${(comparisonStats.win_rate || 0).toFixed(1)}%</span></div>
-            <div class="detail-row"><span class="label-text">سود کل</span><span class="value-text">${comparisonStats.total_profit ? `$${comparisonStats.total_profit.toFixed(2)}` : '-'}</span></div>
-            <div class="detail-row"><span class="label-text">میانگین R:R</span><span class="value-text">${comparisonStats.avg_rr ? comparisonStats.avg_rr.toFixed(2) : '-'}</span></div>
-            ${comparisonStats.best_strategy ? `<div class="detail-row"><span class="label-text">بهترین استراتژی</span><span class="value-text" style="color:#2e7d32;">${comparisonStats.best_strategy}</span></div>` : ''}
-            ${comparisonStats.best_hour ? `<div class="detail-row"><span class="label-text">بهترین ساعت</span><span class="value-text" style="color:#2e7d32;">${comparisonStats.best_hour}:۰۰</span></div>` : ''}
-            ${comparisonStats.most_common_emotion ? `<div class="detail-row"><span class="label-text">احساس غالب</span><span class="value-text">${comparisonStats.most_common_emotion}</span></div>` : ''}
-          </div>
-        </div>
-      </div>
-    ` : '';
-
-    const htmlContent = `<!DOCTYPE html>
-      <html dir="rtl" lang="fa">
-      <head>
-        <meta charset="UTF-8">
-        <title>گزارش مشاوره هوشمند - ${formData.symbol}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Vazir', Tahoma, sans-serif; padding: 24px; background: #fff; color: #333; direction: rtl; }
-          .header { text-align: center; padding-bottom: 16px; border-bottom: 3px solid #1a237e; margin-bottom: 20px; }
-          .header h1 { font-size: 24px; color: #1a237e; }
-          .header p { color: #666; font-size: 14px; margin-top: 4px; }
-          .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-          .summary-card { background: #f5f7fa; padding: 14px; border-radius: 8px; text-align: center; border: 1px solid #e0e0e0; }
-          .summary-card .label { font-size: 12px; color: #888; }
-          .summary-card .value { font-size: 24px; font-weight: 700; }
-          .section { margin-bottom: 16px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
-          .section-title { background: #e8eaf6; padding: 10px 16px; font-weight: 700; color: #1a237e; font-size: 15px; }
-          .section-body { padding: 12px 16px; }
-          .score-section { background: ${score >= 70 ? '#e8f5e9' : score >= 40 ? '#fff3e0' : '#ffebee'}; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px; border: 2px solid ${score >= 70 ? '#2e7d32' : score >= 40 ? '#f57c00' : '#c62828'}; }
-          .score-section .score { font-size: 48px; font-weight: 700; }
-          .score-section .status { font-size: 16px; font-weight: 600; margin-top: 4px; }
-          .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
-          .detail-row:last-child { border-bottom: none; }
-          .label-text { color: #555; font-weight: 500; }
-          .value-text { font-weight: 600; }
-          .positive { color: #2e7d32; }
-          .negative { color: #c62828; }
-          ul { padding-right: 20px; margin: 4px 0; }
-          ul li { margin-bottom: 4px; font-size: 13px; line-height: 1.6; }
-          .footer { text-align: center; padding-top: 16px; border-top: 1px solid #e0e0e0; margin-top: 20px; color: #999; font-size: 11px; }
-          .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
-          .full-width { grid-column: 1 / -1; }
-          .live-price-display { background: #e3f2fd; padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; gap: 20px; flex-wrap: wrap; }
-          .live-price-item { display: flex; gap: 6px; font-size: 14px; }
-          .live-price-item .label { color: #555; }
-          .live-price-item .value { font-weight: 700; color: #0d47a1; }
-          .live-price-item .diff.warning { color: #f57c00; }
-          .live-price-item .diff.positive { color: #2e7d32; }
-          .status-badge { padding: 2px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-block; }
-          .status-badge.perfect { background: #e8f5e9; color: #2e7d32; }
-          .status-badge.good { background: #e8f5e9; color: #4caf50; }
-          .status-badge.warning { background: #fff3e0; color: #f57c00; }
-          .status-badge.danger { background: #ffe0b2; color: #e65100; }
-          .status-badge.critical { background: #ffebee; color: #c62828; }
-          .status-message { font-size: 13px; color: #555; }
-          strong { color: #1a237e; }
-          .live-price-error { background: #ffebee; border-color: #ef9a9a; }
-          .live-price-error .value { color: #c62828; }
-          .live-price-error .status-message { color: #c62828; }
-          @media print { body { padding: 12px; } }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>🧠 گزارش مشاوره هوشمند معاملاتی</h1>
-          <p>تاریخ: ${now} | نماد: ${formData.symbol} | جهت: ${formData.direction === 'Buy' ? 'خرید' : 'فروش'}</p>
-        </div>
-
-        ${livePriceDisplay ? `
-        <div class="live-price-display">
-          <div class="live-price-item">
-            <span class="label">📊 قیمت لحظه‌ای:</span>
-            <span class="value">${livePriceDisplay.toFixed(4)}</span>
-          </div>
-          ${formData.entry_price ? `
-          <div class="live-price-item">
-            <span class="label">📉 تفاوت با ورود:</span>
-            <span class="diff ${Math.abs(diffPercent) > 20 ? 'warning' : Math.abs(diffPercent) > 10 ? 'warning' : 'positive'}">
-              ${diffPercent.toFixed(2)}%
-            </span>
-          </div>
-          <div class="live-price-item">
-            <span class="label">📊 وضعیت:</span>
-            <span class="status-badge ${priceStatus.level}">${priceStatus.label}</span>
-          </div>
-          <div class="live-price-item full-width">
-            <span class="label">💡 توصیه:</span>
-            <span class="status-message">${priceStatus.message}</span>
-          </div>
-          ` : ''}
-          ${response?.price_warning || priceWarning ? `
-          <div class="live-price-item">
-            <span class="label">⚠️ هشدار:</span>
-            <span class="diff warning">${response?.price_warning || priceWarning}</span>
-          </div>
-          ` : ''}
-        </div>
-        ` : `
-        <div class="live-price-display live-price-error">
-          <div class="live-price-item">
-            <span class="label">⚠️ وضعیت قیمت لحظه‌ای:</span>
-            <span class="value">در دسترس نیست</span>
-          </div>
-          <div class="live-price-item full-width">
-            <span class="label">💡 توصیه:</span>
-            <span class="status-message">${priceWarning || 'لطفاً قیمت را خودتان بررسی کنید.'}</span>
-          </div>
-        </div>
-        `}
-
-        <div class="summary">
-          <div class="summary-card">
-            <div class="label">امتیاز اعتبار</div>
-            <div class="value" style="color: ${score >= 70 ? '#2e7d32' : score >= 40 ? '#f57c00' : '#c62828'}">${score}</div>
-            <div style="font-size:12px;color:#888;">وضعیت: ${score >= 70 ? 'مطلوب' : score >= 40 ? 'متوسط' : 'نامطلوب'}</div>
-          </div>
-          <div class="summary-card">
-            <div class="label">نقاط قوت</div>
-            <div class="value" style="color:#2e7d32;">${response?.strengths?.length || 0}</div>
-            <div style="font-size:12px;color:#888;">مورد</div>
-          </div>
-          <div class="summary-card">
-            <div class="label">هشدارها</div>
-            <div class="value" style="color:#c62828;">${response?.warnings?.length || 0}</div>
-            <div style="font-size:12px;color:#888;">مورد</div>
-          </div>
-        </div>
-
-        <div class="score-section">
-          <div class="score">${score}</div>
-          <div class="status">امتیاز اعتبار (از ۱۰۰) — ${score >= 70 ? '✅ شرایط مطلوب' : score >= 40 ? '⚖️ شرایط متوسط' : '⚠️ شرایط نامطلوب'}</div>
-        </div>
-
-        <div class="section">
-          <div class="section-title">📊 اطلاعات ورودی</div>
-          <div class="section-body">
-            <div class="grid-2">
-              <div class="detail-row"><span class="label-text">نماد</span><span class="value-text">${formData.symbol}</span></div>
-              <div class="detail-row"><span class="label-text">جهت</span><span class="value-text">${formData.direction === 'Buy' ? 'خرید' : 'فروش'}</span></div>
-              <div class="detail-row"><span class="label-text">قیمت ورود</span><span class="value-text">${formData.entry_price}</span></div>
-              ${formData.stop_loss ? `<div class="detail-row"><span class="label-text">حد ضرر</span><span class="value-text">${formData.stop_loss}</span></div>` : ''}
-              ${formData.take_profit ? `<div class="detail-row"><span class="label-text">حد سود</span><span class="value-text">${formData.take_profit}</span></div>` : ''}
-              ${formData.session_type ? `<div class="detail-row"><span class="label-text">نوع جلسه <span class="help-indicator">ⓘ</span></span><span class="value-text">${formData.session_type}</span></div>` : ''}
-              ${formData.strategy_type ? `<div class="detail-row"><span class="label-text">نوع استراتژی <span class="help-indicator">ⓘ</span></span><span class="value-text">${formData.strategy_type}</span></div>` : ''}
-              ${formData.timeframes ? `<div class="detail-row"><span class="label-text">تایم‌فریم‌ها</span><span class="value-text">${formData.timeframes}</span></div>` : ''}
-              ${formData.risk_percent ? `<div class="detail-row"><span class="label-text">درصد ریسک</span><span class="value-text">${formData.risk_percent}%</span></div>` : ''}
-              ${formData.volume ? `<div class="detail-row"><span class="label-text">حجم (لات)</span><span class="value-text">${formData.volume}</span></div>` : ''}
-              ${formData.market_condition ? `<div class="detail-row"><span class="label-text">وضعیت بازار <span class="help-indicator">ⓘ</span></span><span class="value-text">${formData.market_condition}</span></div>` : ''}
-              ${formData.emotion ? `<div class="detail-row"><span class="label-text">احساسات</span><span class="value-text">${formData.emotion}</span></div>` : ''}
-              ${formData.time_ny ? `<div class="detail-row"><span class="label-text">ساعت نیویورک</span><span class="value-text">${formData.time_ny}</span></div>` : ''}
-              ${formData.user_question ? `<div class="detail-row full-width"><span class="label-text">سوال کاربر</span><span class="value-text">${formData.user_question}</span></div>` : ''}
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="section-title">✅ نقاط قوت</div>
-          <div class="section-body"><ul>${strengthsHtml}</ul></div>
-        </div>
-
-        <div class="section">
-          <div class="section-title">⚠️ هشدارها</div>
-          <div class="section-body"><ul>${warningsHtml}</ul></div>
-        </div>
-
-        ${suggestionHtml ? `
-        <div class="section">
-          <div class="section-title">💡 پیشنهاد عملی</div>
-          <div class="section-body">${suggestionHtml}</div>
-        </div>
-        ` : ''}
-
-        ${suggestedSlHtml || suggestedTpHtml || suggestedPositionHtml || suggestedTimingHtml ? `
-        <div class="section">
-          <div class="section-title">📋 جزئیات پیشنهادی</div>
-          <div class="section-body">
-            ${suggestedSlHtml}
-            ${suggestedTpHtml}
-            ${suggestedPositionHtml}
-            ${suggestedTimingHtml}
-          </div>
-        </div>
-        ` : ''}
-
-        ${psychologyHtml ? `
-        <div class="section">
-          <div class="section-title">🧠 تحلیل روانشناختی</div>
-          <div class="section-body">${psychologyHtml}</div>
-        </div>
-        ` : ''}
-
-        ${tipHtml ? `
-        <div class="section">
-          <div class="section-title">📖 نکته آموزشی</div>
-          <div class="section-body">${tipHtml}</div>
-        </div>
-        ` : ''}
-
-        ${internalAnalysisHtml}
-
-        <div class="footer">
-          این گزارش توسط ژورنال حرفه‌ای ترید تولید شده است.<br>
-          تاریخ چاپ: ${now}
-        </div>
-
-        <script>
-          window.onload = function() {
-            setTimeout(function() { window.print(); }, 800);
-          };
-        </script>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-  };
-
-  // ============================================
-  // بستن مودال خطا
-  // ============================================
-  const closeErrorModal = () => {
-    setErrorModal({ open: false, title: '', message: '', details: null });
-  };
-
-  // ============================================
-  // توابع مربوط به بازخورد
-  // ============================================
-  const handleOpenFeedback = () => {
-    if (!consultationId) {
-      showToast('❌ شناسه مشاوره یافت نشد', 'error');
-      return;
-    }
-    setFeedbackForm({
-      is_followed: 'full',
-      trade_result: 'win',
-      feedback_score: 3,
-      feedback_helpfulness: 'somewhat_helpful',
-      feedback_comment: '',
-    });
-    setShowFeedbackModal(true);
-  };
-
-  const handleCloseFeedback = () => {
-    setShowFeedbackModal(false);
-  };
-
-  const handleFeedbackChange = (e) => {
-    const { name, value } = e.target;
-    setFeedbackForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmitFeedback = async () => {
-    if (!consultationId) {
-      showToast('❌ شناسه مشاوره یافت نشد', 'error');
-      return;
-    }
-
-    try {
-      await AIService.submitFeedback(consultationId, feedbackForm);
-      showToast('✅ بازخورد با موفقیت ثبت شد', 'success');
-      setShowFeedbackModal(false);
-      setFeedbackSubmitted(true);
-
-      if (consultationId) {
-        try {
-          const detailData = await AIService.getConsultationDetail(consultationId);
-          setConsultationDetail(detailData);
-        } catch (error) {
-          console.error('Error refreshing consultation detail:', error);
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      showToast('❌ خطا در ثبت بازخورد', 'error');
-    }
-  };
-
-  // ============================================
   // رندر راهنما
   // ============================================
   const renderGuide = () => (
@@ -1514,7 +889,7 @@ const AIConsultation = () => {
   );
 
   // ============================================
-  // رندر نتیجه نهایی (با بخش بازخورد)
+  // رندر نتیجه نهایی (با باکس‌های جداگانه)
   // ============================================
   const renderResult = () => {
     if (!result) return null;
@@ -1728,8 +1103,35 @@ const AIConsultation = () => {
           </div>
         )}
 
+        {/* ===== ✅ باکس‌های جداگانه برای تحلیل‌ها ===== */}
         {response?.psychology && response.psychology !== 'تحلیل روانشناختی موجود نیست.' && (
-          renderCard('🧠 تحلیل روانشناختی', response.psychology, 'text')
+          <AnalysisBox
+            icon="🧠"
+            title="تحلیل روانشناختی"
+            content={response.psychology}
+            type="text"
+            color="#6C63FF"
+          />
+        )}
+
+        {response?.technical_analysis && (
+          <AnalysisBox
+            icon="📊"
+            title="تحلیل تکنیکال هوشمند"
+            content={response.technical_analysis}
+            type="text"
+            color="#FF6B35"
+          />
+        )}
+
+        {response?.scenario_analysis && (
+          <AnalysisBox
+            icon="🎯"
+            title="تحلیل سناریو"
+            content={response.scenario_analysis}
+            type="text"
+            color="#2E86C1"
+          />
         )}
 
         {response?.tip && response.tip !== 'همیشه به مدیریت ریسک توجه کنید.' && (
@@ -1843,6 +1245,749 @@ const AIConsultation = () => {
   };
 
   // ============================================
+  // توابع مربوط به بازخورد
+  // ============================================
+  const handleOpenFeedback = () => {
+    if (!consultationId) {
+      showToast('❌ شناسه مشاوره یافت نشد', 'error');
+      return;
+    }
+    setFeedbackForm({
+      is_followed: 'full',
+      trade_result: 'win',
+      feedback_score: 3,
+      feedback_helpfulness: 'somewhat_helpful',
+      feedback_comment: '',
+    });
+    setShowFeedbackModal(true);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowFeedbackModal(false);
+  };
+
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedbackForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!consultationId) {
+      showToast('❌ شناسه مشاوره یافت نشد', 'error');
+      return;
+    }
+
+    try {
+      await AIService.submitFeedback(consultationId, feedbackForm);
+      showToast('✅ بازخورد با موفقیت ثبت شد', 'success');
+      setShowFeedbackModal(false);
+      setFeedbackSubmitted(true);
+
+      if (consultationId) {
+        try {
+          const detailData = await AIService.getConsultationDetail(consultationId);
+          setConsultationDetail(detailData);
+        } catch (error) {
+          console.error('Error refreshing consultation detail:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      showToast('❌ خطا در ثبت بازخورد', 'error');
+    }
+  };
+
+  // ============================================
+  // بارگذاری نمادها
+  // ============================================
+  useEffect(() => {
+    const loadSymbols = async () => {
+      setSymbolsLoading(true);
+      try {
+        const response = await RealApiService.getAllSymbols();
+        let symbolList = [];
+        if (Array.isArray(response.data)) {
+          symbolList = response.data.filter(Boolean);
+        } else if (response.data && response.data.results) {
+          symbolList = response.data.results.filter(Boolean);
+        }
+        if (symbolList.length > 0) {
+          setSymbols(symbolList);
+        } else {
+          setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
+        }
+      } catch (error) {
+        console.error('❌ Error loading symbols:', error);
+        setSymbols(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'BTCUSD', 'ETHUSD', 'XAUUSD', 'USOIL']);
+      } finally {
+        setSymbolsLoading(false);
+      }
+    };
+    loadSymbols();
+  }, []);
+
+  // ============================================
+  // بررسی وضعیت اشتراک
+  // ============================================
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const response = await RealApiService.getSubscriptionStatus();
+        const data = response.data;
+        setSubscriptionStatus(data);
+        const remaining = data.remaining_ai_consultations ?? 0;
+        if (remaining <= 0) {
+          setLimitReached(true);
+          showToast(
+            `⚠️ محدودیت مشاوره AI شما به پایان رسیده است. (${data.ai_consultations_limit || 0} مشاوره)`,
+            'warning'
+          );
+        } else {
+          setLimitReached(false);
+        }
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      }
+    };
+    checkSubscription();
+  }, []);
+
+  // ============================================
+  // تغییرات فرم
+  // ============================================
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'model') {
+      console.log('🔍 Model selected in handleChange:', value);
+      setSelectedModel(value);
+    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // ============================================
+  // شروع و توقف تایمرهای پیشرفت
+  // ============================================
+  const startProgressTimers = () => {
+    setIsTimeout(false);
+    setProgress(0);
+    setElapsedTime(0);
+    setCurrentStage(0);
+    startTimeRef.current = Date.now();
+
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = Math.min(prev + 0.5, 95);
+        for (let i = stages.length - 1; i >= 0; i--) {
+          if (newProgress >= stages[i].threshold) {
+            setCurrentStage(i);
+            break;
+          }
+        }
+        return newProgress;
+      });
+    }, 100);
+
+    if (timeIntervalRef.current) clearInterval(timeIntervalRef.current);
+    timeIntervalRef.current = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stopProgressTimers = () => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    if (timeIntervalRef.current) {
+      clearInterval(timeIntervalRef.current);
+      timeIntervalRef.current = null;
+    }
+    setProgress(100);
+    setCurrentStage(5);
+  };
+
+  // ============================================
+  // تابع دریافت قیمت لحظه‌ای
+  // ============================================
+  const fetchLivePrice = async (symbol) => {
+    if (!symbol) return null;
+    setLivePriceLoading(true);
+    setLivePriceStatus('loading');
+    try {
+      const response = await RealApiService.getLivePrice(symbol);
+      if (response && response.price) {
+        setLivePriceStatus('success');
+        return response.price;
+      } else {
+        setLivePriceStatus('error');
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching live price:', error);
+      if (error.message?.includes('Network Error') || error.message?.includes('Failed to fetch')) {
+        setLivePriceStatus('network_error');
+      } else if (error.response?.status === 404) {
+        setLivePriceStatus('not_found');
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        setLivePriceStatus('error');
+      } else if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
+        setLivePriceStatus('error');
+      } else {
+        setLivePriceStatus('error');
+      }
+      return null;
+    } finally {
+      setLivePriceLoading(false);
+    }
+  };
+
+  // ============================================
+  // بزرگ‌نمایی نمودار
+  // ============================================
+  const toggleChartExpand = (chartId) => {
+    setExpandedChart(expandedChart === chartId ? null : chartId);
+  };
+
+  // ============================================
+  // چاپ گزارش کامل
+  // ============================================
+  const handlePrintReport = () => {
+    if (!result) return;
+    const { score, response } = result;
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      showToast('لطفاً pop-up را فعال کنید', 'warning');
+      return;
+    }
+
+    const now = new Date().toLocaleString('fa-IR');
+    const livePriceDisplay = response?.live_price || livePrice;
+    const entry = parseFloat(formData.entry_price);
+    let diffPercent = 0;
+    if (livePriceDisplay && entry) {
+      diffPercent = ((entry - livePriceDisplay) / livePriceDisplay) * 100;
+    }
+    if (!isFinite(diffPercent) || isNaN(diffPercent)) diffPercent = 0;
+    const priceStatus = getPriceStatus(Math.abs(diffPercent));
+
+    const boldForPrint = (text) => {
+      if (!text) return text;
+      return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    };
+
+    const strengthsHtml = response?.strengths?.length > 0
+      ? response.strengths.map(s => `<li>${boldForPrint(s)}</li>`).join('')
+      : '<li>نقاط قوتی یافت نشد</li>';
+
+    const warningsHtml = response?.warnings?.length > 0
+      ? response.warnings.map(w => `<li>${boldForPrint(w)}</li>`).join('')
+      : '<li>هشدار خاصی وجود ندارد</li>';
+
+    const suggestionHtml = response?.suggestion && response.suggestion !== 'پیشنهادی موجود نیست.'
+      ? `<p>${boldForPrint(response.suggestion)}</p>`
+      : '';
+
+    const psychologyHtml = response?.psychology && response.psychology !== 'تحلیل روانشناختی موجود نیست.'
+      ? `<p>${boldForPrint(response.psychology)}</p>`
+      : '';
+
+    const technicalHtml = response?.technical_analysis
+      ? `<p>${boldForPrint(response.technical_analysis)}</p>`
+      : '';
+
+    const scenarioHtml = response?.scenario_analysis
+      ? `<p>${boldForPrint(response.scenario_analysis)}</p>`
+      : '';
+
+    const tipHtml = response?.tip && response.tip !== 'همیشه به مدیریت ریسک توجه کنید.'
+      ? `<p style="background:#fff8e1;padding:12px;border-radius:6px;border-right:4px solid #f57c00;">${boldForPrint(response.tip)}</p>`
+      : '';
+
+    const suggestedTimingHtml = response?.suggested_timing
+      ? `<div class="detail-row"><span class="label-text">⏰ زمان‌بندی پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_timing)}</span></div>`
+      : '';
+
+    const suggestedSlHtml = response?.suggested_sl
+      ? `<div class="detail-row"><span class="label-text">حد ضرر پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_sl)}</span></div>`
+      : '';
+
+    const suggestedTpHtml = response?.suggested_tp
+      ? `<div class="detail-row"><span class="label-text">حد سود پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_tp)}</span></div>`
+      : '';
+
+    const suggestedPositionHtml = response?.suggested_position
+      ? `<div class="detail-row"><span class="label-text">اندازه پوزیشن پیشنهادی</span><span class="value-text" style="color:#2e7d32;">${boldForPrint(response.suggested_position)}</span></div>`
+      : '';
+
+    const internalAnalysisHtml = comparisonStats ? `
+      <div class="section">
+        <div class="section-title">📊 تحلیل داخلی از تاریخچه شما</div>
+        <div class="section-body">
+          <div class="grid-2">
+            <div class="detail-row"><span class="label-text">کل تریدها</span><span class="value-text">${comparisonStats.total_trades || 0}</span></div>
+            <div class="detail-row"><span class="label-text">نرخ برد کلی</span><span class="value-text ${(comparisonStats.win_rate || 0) >= 50 ? 'positive' : 'negative'}">${(comparisonStats.win_rate || 0).toFixed(1)}%</span></div>
+            <div class="detail-row"><span class="label-text">سود کل</span><span class="value-text">${comparisonStats.total_profit ? `$${comparisonStats.total_profit.toFixed(2)}` : '-'}</span></div>
+            <div class="detail-row"><span class="label-text">میانگین R:R</span><span class="value-text">${comparisonStats.avg_rr ? comparisonStats.avg_rr.toFixed(2) : '-'}</span></div>
+            ${comparisonStats.best_strategy ? `<div class="detail-row"><span class="label-text">بهترین استراتژی</span><span class="value-text" style="color:#2e7d32;">${comparisonStats.best_strategy}</span></div>` : ''}
+            ${comparisonStats.best_hour ? `<div class="detail-row"><span class="label-text">بهترین ساعت</span><span class="value-text" style="color:#2e7d32;">${comparisonStats.best_hour}:۰۰</span></div>` : ''}
+            ${comparisonStats.most_common_emotion ? `<div class="detail-row"><span class="label-text">احساس غالب</span><span class="value-text">${comparisonStats.most_common_emotion}</span></div>` : ''}
+          </div>
+        </div>
+      </div>
+    ` : '';
+
+    const htmlContent = `<!DOCTYPE html>
+      <html dir="rtl" lang="fa">
+      <head>
+        <meta charset="UTF-8">
+        <title>گزارش مشاوره هوشمند - ${formData.symbol}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Vazir', Tahoma, sans-serif; padding: 24px; background: #fff; color: #333; direction: rtl; }
+          .header { text-align: center; padding-bottom: 16px; border-bottom: 3px solid #1a237e; margin-bottom: 20px; }
+          .header h1 { font-size: 24px; color: #1a237e; }
+          .header p { color: #666; font-size: 14px; margin-top: 4px; }
+          .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+          .summary-card { background: #f5f7fa; padding: 14px; border-radius: 8px; text-align: center; border: 1px solid #e0e0e0; }
+          .summary-card .label { font-size: 12px; color: #888; }
+          .summary-card .value { font-size: 24px; font-weight: 700; }
+          .section { margin-bottom: 16px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+          .section-title { background: #e8eaf6; padding: 10px 16px; font-weight: 700; color: #1a237e; font-size: 15px; }
+          .section-body { padding: 12px 16px; }
+          .score-section { background: ${score >= 70 ? '#e8f5e9' : score >= 40 ? '#fff3e0' : '#ffebee'}; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px; border: 2px solid ${score >= 70 ? '#2e7d32' : score >= 40 ? '#f57c00' : '#c62828'}; }
+          .score-section .score { font-size: 48px; font-weight: 700; }
+          .score-section .status { font-size: 16px; font-weight: 600; margin-top: 4px; }
+          .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+          .detail-row:last-child { border-bottom: none; }
+          .label-text { color: #555; font-weight: 500; }
+          .value-text { font-weight: 600; }
+          .positive { color: #2e7d32; }
+          .negative { color: #c62828; }
+          ul { padding-right: 20px; margin: 4px 0; }
+          ul li { margin-bottom: 4px; font-size: 13px; line-height: 1.6; }
+          .footer { text-align: center; padding-top: 16px; border-top: 1px solid #e0e0e0; margin-top: 20px; color: #999; font-size: 11px; }
+          .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+          .full-width { grid-column: 1 / -1; }
+          .live-price-display { background: #e3f2fd; padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; gap: 20px; flex-wrap: wrap; }
+          .live-price-item { display: flex; gap: 6px; font-size: 14px; }
+          .live-price-item .label { color: #555; }
+          .live-price-item .value { font-weight: 700; color: #0d47a1; }
+          .live-price-item .diff.warning { color: #f57c00; }
+          .live-price-item .diff.positive { color: #2e7d32; }
+          .status-badge { padding: 2px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-block; }
+          .status-badge.perfect { background: #e8f5e9; color: #2e7d32; }
+          .status-badge.good { background: #e8f5e9; color: #4caf50; }
+          .status-badge.warning { background: #fff3e0; color: #f57c00; }
+          .status-badge.danger { background: #ffe0b2; color: #e65100; }
+          .status-badge.critical { background: #ffebee; color: #c62828; }
+          .status-message { font-size: 13px; color: #555; }
+          strong { color: #1a237e; }
+          .live-price-error { background: #ffebee; border-color: #ef9a9a; }
+          .live-price-error .value { color: #c62828; }
+          .live-price-error .status-message { color: #c62828; }
+          .analysis-box { border-right: 4px solid #6C63FF; background: rgba(108,99,255,0.06); padding: 14px 16px; border-radius: 8px; margin-bottom: 12px; }
+          .analysis-box .box-title { font-size: 15px; font-weight: 700; color: #1a237e; margin-bottom: 6px; }
+          .analysis-box .box-content { font-size: 14px; line-height: 1.7; color: #333; }
+          .analysis-box .box-content strong { color: #1a237e; }
+          @media print { body { padding: 12px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🧠 گزارش مشاوره هوشمند معاملاتی</h1>
+          <p>تاریخ: ${now} | نماد: ${formData.symbol} | جهت: ${formData.direction === 'Buy' ? 'خرید' : 'فروش'}</p>
+        </div>
+
+        ${livePriceDisplay ? `
+        <div class="live-price-display">
+          <div class="live-price-item">
+            <span class="label">📊 قیمت لحظه‌ای:</span>
+            <span class="value">${livePriceDisplay.toFixed(4)}</span>
+          </div>
+          ${formData.entry_price ? `
+          <div class="live-price-item">
+            <span class="label">📉 تفاوت با ورود:</span>
+            <span class="diff ${Math.abs(diffPercent) > 20 ? 'warning' : Math.abs(diffPercent) > 10 ? 'warning' : 'positive'}">
+              ${diffPercent.toFixed(2)}%
+            </span>
+          </div>
+          <div class="live-price-item">
+            <span class="label">📊 وضعیت:</span>
+            <span class="status-badge ${priceStatus.level}">${priceStatus.label}</span>
+          </div>
+          <div class="live-price-item full-width">
+            <span class="label">💡 توصیه:</span>
+            <span class="status-message">${priceStatus.message}</span>
+          </div>
+          ` : ''}
+          ${response?.price_warning || priceWarning ? `
+          <div class="live-price-item">
+            <span class="label">⚠️ هشدار:</span>
+            <span class="diff warning">${response?.price_warning || priceWarning}</span>
+          </div>
+          ` : ''}
+        </div>
+        ` : `
+        <div class="live-price-display live-price-error">
+          <div class="live-price-item">
+            <span class="label">⚠️ وضعیت قیمت لحظه‌ای:</span>
+            <span class="value">در دسترس نیست</span>
+          </div>
+          <div class="live-price-item full-width">
+            <span class="label">💡 توصیه:</span>
+            <span class="status-message">${priceWarning || 'لطفاً قیمت را خودتان بررسی کنید.'}</span>
+          </div>
+        </div>
+        `}
+
+        <div class="summary">
+          <div class="summary-card">
+            <div class="label">امتیاز اعتبار</div>
+            <div class="value" style="color: ${score >= 70 ? '#2e7d32' : score >= 40 ? '#f57c00' : '#c62828'}">${score}</div>
+            <div style="font-size:12px;color:#888;">وضعیت: ${score >= 70 ? 'مطلوب' : score >= 40 ? 'متوسط' : 'نامطلوب'}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">نقاط قوت</div>
+            <div class="value" style="color:#2e7d32;">${response?.strengths?.length || 0}</div>
+            <div style="font-size:12px;color:#888;">مورد</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">هشدارها</div>
+            <div class="value" style="color:#c62828;">${response?.warnings?.length || 0}</div>
+            <div style="font-size:12px;color:#888;">مورد</div>
+          </div>
+        </div>
+
+        <div class="score-section">
+          <div class="score">${score}</div>
+          <div class="status">امتیاز اعتبار (از ۱۰۰) — ${score >= 70 ? '✅ شرایط مطلوب' : score >= 40 ? '⚖️ شرایط متوسط' : '⚠️ شرایط نامطلوب'}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📊 اطلاعات ورودی</div>
+          <div class="section-body">
+            <div class="grid-2">
+              <div class="detail-row"><span class="label-text">نماد</span><span class="value-text">${formData.symbol}</span></div>
+              <div class="detail-row"><span class="label-text">جهت</span><span class="value-text">${formData.direction === 'Buy' ? 'خرید' : 'فروش'}</span></div>
+              <div class="detail-row"><span class="label-text">قیمت ورود</span><span class="value-text">${formData.entry_price}</span></div>
+              ${formData.stop_loss ? `<div class="detail-row"><span class="label-text">حد ضرر</span><span class="value-text">${formData.stop_loss}</span></div>` : ''}
+              ${formData.take_profit ? `<div class="detail-row"><span class="label-text">حد سود</span><span class="value-text">${formData.take_profit}</span></div>` : ''}
+              ${formData.session_type ? `<div class="detail-row"><span class="label-text">نوع جلسه</span><span class="value-text">${formData.session_type}</span></div>` : ''}
+              ${formData.strategy_type ? `<div class="detail-row"><span class="label-text">نوع استراتژی</span><span class="value-text">${formData.strategy_type}</span></div>` : ''}
+              ${formData.timeframes ? `<div class="detail-row"><span class="label-text">تایم‌فریم‌ها</span><span class="value-text">${formData.timeframes}</span></div>` : ''}
+              ${formData.risk_percent ? `<div class="detail-row"><span class="label-text">درصد ریسک</span><span class="value-text">${formData.risk_percent}%</span></div>` : ''}
+              ${formData.volume ? `<div class="detail-row"><span class="label-text">حجم (لات)</span><span class="value-text">${formData.volume}</span></div>` : ''}
+              ${formData.market_condition ? `<div class="detail-row"><span class="label-text">وضعیت بازار</span><span class="value-text">${formData.market_condition}</span></div>` : ''}
+              ${formData.emotion ? `<div class="detail-row"><span class="label-text">احساسات</span><span class="value-text">${formData.emotion}</span></div>` : ''}
+              ${formData.time_ny ? `<div class="detail-row"><span class="label-text">ساعت نیویورک</span><span class="value-text">${formData.time_ny}</span></div>` : ''}
+              ${formData.user_question ? `<div class="detail-row full-width"><span class="label-text">سوال کاربر</span><span class="value-text">${formData.user_question}</span></div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">✅ نقاط قوت</div>
+          <div class="section-body"><ul>${strengthsHtml}</ul></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">⚠️ هشدارها</div>
+          <div class="section-body"><ul>${warningsHtml}</ul></div>
+        </div>
+
+        ${suggestionHtml ? `
+        <div class="section">
+          <div class="section-title">💡 پیشنهاد عملی</div>
+          <div class="section-body">${suggestionHtml}</div>
+        </div>
+        ` : ''}
+
+        ${suggestedSlHtml || suggestedTpHtml || suggestedPositionHtml || suggestedTimingHtml ? `
+        <div class="section">
+          <div class="section-title">📋 جزئیات پیشنهادی</div>
+          <div class="section-body">
+            ${suggestedSlHtml}
+            ${suggestedTpHtml}
+            ${suggestedPositionHtml}
+            ${suggestedTimingHtml}
+          </div>
+        </div>
+        ` : ''}
+
+        ${psychologyHtml ? `
+        <div class="analysis-box" style="border-right-color:#6C63FF; background:rgba(108,99,255,0.06);">
+          <div class="box-title">🧠 تحلیل روانشناختی</div>
+          <div class="box-content">${psychologyHtml}</div>
+        </div>
+        ` : ''}
+
+        ${technicalHtml ? `
+        <div class="analysis-box" style="border-right-color:#FF6B35; background:rgba(255,107,53,0.06);">
+          <div class="box-title">📊 تحلیل تکنیکال هوشمند</div>
+          <div class="box-content">${technicalHtml}</div>
+        </div>
+        ` : ''}
+
+        ${scenarioHtml ? `
+        <div class="analysis-box" style="border-right-color:#2E86C1; background:rgba(46,134,193,0.06);">
+          <div class="box-title">🎯 تحلیل سناریو</div>
+          <div class="box-content">${scenarioHtml}</div>
+        </div>
+        ` : ''}
+
+        ${tipHtml ? `
+        <div class="section">
+          <div class="section-title">📖 نکته آموزشی</div>
+          <div class="section-body">${tipHtml}</div>
+        </div>
+        ` : ''}
+
+        ${internalAnalysisHtml}
+
+        <div class="footer">
+          این گزارش توسط ژورنال حرفه‌ای ترید تولید شده است.<br>
+          تاریخ چاپ: ${now}
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 800);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
+  // ============================================
+  // بستن مودال خطا
+  // ============================================
+  const closeErrorModal = () => {
+    setErrorModal({ open: false, title: '', message: '', details: null });
+  };
+
+  // ============================================
+  // دریافت مشاوره
+  // ============================================
+  const handleConsult = async (e) => {
+    e.preventDefault();
+
+    console.log('🔍 formData.model before request:', formData.model);
+    console.log('🔍 selectedModel before request:', selectedModel);
+
+    if (!formData.symbol) {
+      setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً نماد معاملاتی را انتخاب کنید.' });
+      return;
+    }
+    if (!formData.direction) {
+      setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً جهت معامله را انتخاب کنید.' });
+      return;
+    }
+    if (!formData.entry_price || parseFloat(formData.entry_price) <= 0) {
+      setErrorModal({ open: true, title: 'خطا در فرم', message: 'لطفاً قیمت ورود را به‌صورت عدد معتبر وارد کنید.' });
+      return;
+    }
+
+    if (limitReached) {
+      setErrorModal({
+        open: true,
+        title: 'محدودیت مشاوره',
+        message: 'محدودیت مشاوره AI شما به پایان رسیده است. لطفاً اشتراک خود را تمدید کنید.'
+      });
+      return;
+    }
+
+    setConsulting(true);
+    setResult(null);
+    setStreamingText('');
+    setConsultationId(null);
+    setComparisonStats(null);
+    setLivePrice(null);
+    setPriceWarning(null);
+    setLivePriceStatus('idle');
+    setIsTimeout(false);
+    setCurrentStage(0);
+    startProgressTimers();
+
+    // مرحله ۰: دریافت قیمت لحظه‌ای
+    setCurrentStage(0);
+    let fetchedLivePrice = null;
+    let fetchedPriceWarning = null;
+    try {
+      const livePriceData = await fetchLivePrice(formData.symbol);
+      if (livePriceData) {
+        fetchedLivePrice = livePriceData;
+        setLivePrice(livePriceData);
+        const standardWarning = generateStandardPriceWarning(formData.entry_price, livePriceData);
+        if (standardWarning) {
+          fetchedPriceWarning = standardWarning;
+          setPriceWarning(standardWarning);
+        }
+      } else {
+        if (livePriceStatus === 'network_error') {
+          setPriceWarning('⚠️ خطا در اتصال به اینترنت. لطفاً اتصال خود را بررسی کنید.');
+        } else if (livePriceStatus === 'not_found') {
+          setPriceWarning('⚠️ نماد مورد نظر در سرویس قیمت‌یابی موجود نیست. لطفاً قیمت را خودتان وارد کنید.');
+        } else {
+          setPriceWarning('⚠️ قیمت لحظه‌ای در دسترس نیست. لطفاً قیمت را خودتان بررسی کنید.');
+        }
+        fetchedPriceWarning = priceWarning;
+      }
+    } catch (error) {
+      console.error('Error fetching live price:', error);
+      setLivePriceStatus('error');
+      const warning = '⚠️ خطا در دریافت قیمت لحظه‌ای. لطفاً خودتان بررسی کنید.';
+      fetchedPriceWarning = warning;
+      setPriceWarning(warning);
+    }
+
+    try {
+      const modelToSend = selectedModel || formData.model || null;
+      console.log('✅ Model being sent to server:', modelToSend);
+
+      const response = await AIService.startConsultation({
+        symbol: formData.symbol,
+        direction: formData.direction,
+        entry_price: parseFloat(formData.entry_price),
+        stop_loss: formData.stop_loss ? parseFloat(formData.stop_loss) : null,
+        take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
+        market_condition: formData.market_condition || null,
+        emotion: formData.emotion || null,
+        time_ny: formData.time_ny || null,
+        user_question: formData.user_question || null,
+        model: modelToSend,
+        session_type: formData.session_type || null,
+        strategy_type: formData.strategy_type || null,
+        timeframes: formData.timeframes || null,
+        risk_percent: formData.risk_percent ? parseFloat(formData.risk_percent) : null,
+        volume: formData.volume ? parseFloat(formData.volume) : null,
+      });
+
+      console.log('📥 Consultation started:', response);
+
+      const { consultation_id, status, message } = response;
+
+      if (consultation_id) {
+        console.log(`➕ [AIConsultation] Calling addConsultation with ${consultation_id}`);
+        addConsultation(consultation_id, formData.symbol);
+
+        showToast('🧠 مشاوره در حال پردازش است. می‌توانید به کارهای دیگر بپردازید.', 'info');
+
+        navigate('/dashboard');
+
+        try {
+          const subResponse = await RealApiService.getSubscriptionStatus();
+          setSubscriptionStatus(subResponse.data);
+          if (subResponse.data.remaining_ai_consultations <= 0) {
+            setLimitReached(true);
+          }
+        } catch (subError) {
+          console.error('Error updating subscription status:', subError);
+        }
+
+      } else {
+        showToast('⚠️ خطا در شروع مشاوره', 'error');
+      }
+
+    } catch (error) {
+      console.error('Error starting consultation:', error);
+      stopProgressTimers();
+
+      let errorMessage = '❌ خطا در شروع مشاوره';
+      let errorTitle = '❌ خطا';
+      let errorDetails = null;
+
+      console.error('❌ [AIConsultation] Full error details:');
+      console.error('   - Error object:', error);
+      console.error('   - Error name:', error.name);
+      console.error('   - Error message:', error.message);
+      console.error('   - Error stack:', error.stack);
+      if (error.response) {
+        console.error('   - Response data:', error.response.data);
+        console.error('   - Response status:', error.response.status);
+        console.error('   - Response headers:', error.response.headers);
+      }
+
+      if (error.name === 'TimeoutError' || error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        setIsTimeout(true);
+        errorTitle = '⏰ زمان پاسخگویی به پایان رسید';
+        errorMessage = '⏰ زمان پاسخگویی سرویس هوش مصنوعی به پایان رسید.\nلطفاً چند لحظه صبر کنید و دوباره تلاش کنید.';
+      } else if (error.message?.includes('Ollama') || error.message?.includes('اتصال') || error.message?.includes('404')) {
+        errorTitle = '🔌 خطای اتصال به AI';
+        errorMessage = `🔌 خطای اتصال به سرویس هوش مصنوعی\n${error.message}`;
+      } else if (error.response?.data) {
+        const data = error.response.data;
+        if (data.message) errorMessage = data.message;
+        else if (data.error) errorMessage = data.error;
+        else if (data.detail) errorMessage = data.detail;
+        else if (typeof data === 'object') {
+          const fieldErrors = Object.entries(data)
+            .filter(([key, value]) => key !== 'error' && key !== 'message')
+            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+            .join(' | ');
+          if (fieldErrors) {
+            errorMessage = `خطا در فیلدها: ${fieldErrors}`;
+            errorDetails = data;
+          }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrorModal({
+        open: true,
+        title: errorTitle,
+        message: errorMessage,
+        details: errorDetails
+      });
+    } finally {
+      setConsulting(false);
+    }
+  };
+
+  // ============================================
+  // بازنشانی فرم
+  // ============================================
+  const handleReset = () => {
+    setFormData({
+      symbol: '',
+      direction: 'Buy',
+      entry_price: '',
+      stop_loss: '',
+      take_profit: '',
+      market_condition: '',
+      emotion: '',
+      time_ny: '',
+      user_question: '',
+      model: '',
+      session_type: '',
+      strategy_type: '',
+      timeframes: '',
+      risk_percent: '',
+      volume: '',
+    });
+    setSelectedModel('');
+    setResult(null);
+    setStreamingText('');
+    setLivePrice(null);
+    setPriceWarning(null);
+    setLivePriceStatus('idle');
+    setConsultationDetail(null);
+    setExpandedChart(null);
+    setFeedbackSubmitted(false);
+    stopProgressTimers();
+    setProgress(0);
+    setElapsedTime(0);
+    setCurrentStage(0);
+    const el = document.getElementById('streaming-response');
+    if (el) el.remove();
+  };
+
+  // ============================================
   // رندر اصلی
   // ============================================
   return (
@@ -1892,7 +2037,7 @@ const AIConsultation = () => {
                   name="model"
                   value={selectedModel || formData.model || ''}
                   onChange={handleChange}
-                  disabled={limitReached || modelsLoading}
+                  disabled={limitReached || modelsLoading || isRefreshingModels}
                   className="model-select"
                 >
                   <option value="">انتخاب مدل...</option>
@@ -2102,7 +2247,9 @@ const AIConsultation = () => {
                   limitReached ||
                   hasActiveConsultation ||
                   (subscriptionStatus?.remaining_ai_consultations !== undefined &&
-                    subscriptionStatus.remaining_ai_consultations <= 0)
+                    subscriptionStatus.remaining_ai_consultations <= 0) ||
+                  isRefreshingModels ||
+                  modelsLoading
                 }
               >
                 {consulting ? (
@@ -2113,6 +2260,8 @@ const AIConsultation = () => {
                   (subscriptionStatus?.remaining_ai_consultations !== undefined &&
                     subscriptionStatus.remaining_ai_consultations <= 0)) ? (
                   '⛔ محدودیت مشاوره به پایان رسیده'
+                ) : (isRefreshingModels || modelsLoading) ? (
+                  '⏳ در حال بروزرسانی مدل‌ها...'
                 ) : (
                   '🔍 دریافت تحلیل'
                 )}

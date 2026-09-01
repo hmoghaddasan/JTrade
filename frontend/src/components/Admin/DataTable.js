@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import './DataTable.css';
+import LoadingBar from '../common/LoadingBar';
 
 const DataTable = ({
   columns,
@@ -67,7 +68,7 @@ const DataTable = ({
   if (loading) {
     return (
       <div className="data-table-container">
-        <div className="loading-spinner">در حال بارگذاری...</div>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

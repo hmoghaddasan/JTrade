@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
 import RulesManager from './rules/RulesManager';
 import './Profile.css';
+import LoadingBar from './common/LoadingBar';
 
 // ============================================
 // ✅ کامپوننت راهنمای جمع‌شونده قوانین معاملاتی
@@ -87,6 +88,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showVersions, setShowVersions] = useState(false);
+  const [showAllVersions, setShowAllVersions] = useState(false);
   const [trades, setTrades] = useState([]);
   const [appVersions, setAppVersions] = useState([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
@@ -210,11 +212,24 @@ const Profile = () => {
     setVersionsLoading(true);
     try {
       const response = await RealApiService.getAppVersions();
-      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        setAppVersions(response.data);
+      let versions = [];
+
+      // بررسی ساختار پاسخ
+      if (response.data && response.data.results && Array.isArray(response.data.results)) {
+        versions = response.data.results;
+      } else if (response.data && Array.isArray(response.data)) {
+        versions = response.data;
       } else {
-        setAppVersions(getFallbackVersions());
+        versions = getFallbackVersions();
       }
+
+      // مرتب‌سازی نزولی بر اساس تاریخ (جدیدترین اول)
+      const sortedVersions = versions.sort((a, b) =>
+        new Date(b.release_date) - new Date(a.release_date)
+      );
+
+      console.log(`📱 ${sortedVersions.length} نسخه دریافت شد`);
+      setAppVersions(sortedVersions);
     } catch (error) {
       console.error('❌ Error fetching app versions:', error);
       setAppVersions(getFallbackVersions());
@@ -223,25 +238,32 @@ const Profile = () => {
     }
   };
 
+  // ============================================
+  // ✅ Fallback برای زمانی که سرور پاسخ نمی‌دهد
+  // ============================================
   const getFallbackVersions = () => {
+    // این تابع فقط زمانی استفاده می‌شود که سرور در دسترس نباشد
+    // در حالت عادی، داده‌ها از سرور دریافت می‌شوند
     return [
-      { version_number: '1.4.1', release_date: '2024-10-01T00:00:00Z', release_notes: 'آخرین به‌روزرسانی و بهبودهای نهایی', is_current: true },
-      { version_number: '1.4.0', release_date: '2024-09-15T00:00:00Z', release_notes: 'به‌روزرسانی کامل پنل ادمین', is_current: false },
-      { version_number: '1.3.2', release_date: '2024-09-01T00:00:00Z', release_notes: 'افزودن قابلیت پاسخگویی به پیام‌های کاربران', is_current: false },
-      { version_number: '1.3.1', release_date: '2024-08-15T00:00:00Z', release_notes: 'بهبود سرعت بارگذاری و تجربه کاربری', is_current: false },
-      { version_number: '1.3.0', release_date: '2024-08-01T00:00:00Z', release_notes: 'افزودن سیستم تخفیف و کدهای تخفیف', is_current: false },
-      { version_number: '1.2.2', release_date: '2024-07-15T00:00:00Z', release_notes: 'بهبود گزارشات مالی و نمودارها', is_current: false },
-      { version_number: '1.2.1', release_date: '2024-07-01T00:00:00Z', release_notes: 'رفع مشکلات امنیتی و بهبود احراز هویت', is_current: false },
-      { version_number: '1.2.0', release_date: '2024-06-15T00:00:00Z', release_notes: 'افزودن سیستم پیام‌رسانی کاربران', is_current: false },
-      { version_number: '1.1.2', release_date: '2024-06-01T00:00:00Z', release_notes: 'افزودن قابلیت چاپ و خروجی PDF', is_current: false },
-      { version_number: '1.1.1', release_date: '2024-05-15T00:00:00Z', release_notes: 'بهبود عملکرد و بهینه‌سازی دیتابیس', is_current: false },
-      { version_number: '1.1.0', release_date: '2024-05-01T00:00:00Z', release_notes: 'افزودن گزارشات پیشرفته و نمودارها', is_current: false },
-      { version_number: '1.0.3', release_date: '2024-04-15T00:00:00Z', release_notes: 'بهبود رابط کاربری و افزودن تم شب', is_current: false },
-      { version_number: '1.0.2', release_date: '2024-04-01T00:00:00Z', release_notes: 'افزودن قابلیت دسته‌بندی تریدها', is_current: false },
-      { version_number: '1.0.1', release_date: '2024-03-20T00:00:00Z', release_notes: 'رفع باگ‌های اولیه و بهبود سرعت', is_current: false },
-      { version_number: '1.0.0', release_date: '2024-03-15T00:00:00Z', release_notes: 'نسخه اولیه نرم‌افزار ژورنال ترید', is_current: false },
+      { version_number: '1.11.2', release_date: '2026-08-27T00:00:00Z', release_notes: '🐛 رفع برخی خطاها و مشکلات جزیی', is_current: true },
+      { version_number: '1.11.1', release_date: '2026-08-27T00:00:00Z', release_notes: '📈 بهبود خروجی مشاوره هوش مصنوعی', is_current: false },
+      { version_number: '1.11.0', release_date: '2026-08-27T00:00:00Z', release_notes: '🧠 استفاده از مدل‌های جدید هوش مصنوعی', is_current: false },
+      { version_number: '1.10.4', release_date: '2026-08-27T00:00:00Z', release_notes: '🌐 اتصال به Gapgpt.app و رفع خطاهای AI', is_current: false },
+      { version_number: '1.10.3', release_date: '2026-08-27T00:00:00Z', release_notes: '🎯 بهبود نمایش سناریو به صورت سطرهای جداگانه', is_current: false },
+      { version_number: '1.10.2', release_date: '2026-08-27T00:00:00Z', release_notes: '📊 جداسازی تحلیل‌ها با باکس‌های مجزا و رنگ‌آمیزی', is_current: false },
+      { version_number: '1.10.1', release_date: '2026-08-27T00:00:00Z', release_notes: '🔄 دکمه رفرش و غیرفعال‌سازی در حالت بارگذاری', is_current: false },
+      { version_number: '1.10.0', release_date: '2026-08-27T00:00:00Z', release_notes: '🧠 کش هوشمند مدل‌های AI و کوتاه‌سازی نام‌ها', is_current: false },
+      { version_number: '1.9.7', release_date: '2026-08-23T00:00:00Z', release_notes: '🧠 تکمیل دریافت پویا لیست مدل‌های Ollama', is_current: false },
+      { version_number: '1.9.6', release_date: '2026-08-22T00:00:00Z', release_notes: '🗑️ اصلاح حذف گروه و نمایش نام پورتفولیو', is_current: false },
+      { version_number: '1.9.5', release_date: '2026-08-22T00:00:00Z', release_notes: '📱 بهبود نمایش موبایل آمار سریع پروفایل', is_current: false },
+      { version_number: '1.9.4', release_date: '2026-08-22T00:00:00Z', release_notes: '🧠 دریافت پویا لیست مدل‌های Ollama از سرور', is_current: false },
+      { version_number: '1.9.3', release_date: '2026-08-22T00:00:00Z', release_notes: '🔘 اصلاح چیدمان کلیدهای هدر و عملیات', is_current: false },
+      { version_number: '1.9.2', release_date: '2026-08-22T00:00:00Z', release_notes: '📐 تمام‌صفحه شدن صفحات پروفایل و گزارشات', is_current: false },
+      { version_number: '1.9.1', release_date: '2026-08-22T00:00:00Z', release_notes: '🎨 اصلاح استایل دکمه‌های نمایش بیشتر/کمتر', is_current: false },
+      { version_number: '1.9.0', release_date: '2026-08-22T00:00:00Z', release_notes: '✏️ بهبود فرم ثبت و ویرایش ترید', is_current: false },
     ];
   };
+
 
   // ============================================
   // تمدید اشتراک
@@ -348,6 +370,67 @@ const Profile = () => {
     if (value === '♾️' || value === Infinity || value === 999999) return '♾️';
     return value;
   };
+
+  // ============================================
+  // رندر لیست نسخه‌ها (با قابلیت نمایش بیشتر)
+  // ============================================
+  const renderVersions = () => {
+    const displayLimit = 15;
+    const hasMoreVersions = appVersions.length > displayLimit;
+    const displayedVersions = showAllVersions ? appVersions : appVersions.slice(0, displayLimit);
+
+    return (
+      <div className="versions-list">
+        {versionsLoading ? (
+          <LoadingBar text="در حال بارگذاری..." />
+        ) : appVersions.length > 0 ? (
+          <>
+            <div className="versions-header-info">
+              <span className="versions-count">
+                نمایش {displayedVersions.length} از {appVersions.length} نسخه
+              </span>
+              {hasMoreVersions && (
+                <button
+                  className="versions-toggle-btn"
+                  onClick={() => setShowAllVersions(!showAllVersions)}
+                  type="button"
+                >
+                  {showAllVersions ? '🔽 نمایش کمتر' : `🔼 نمایش ${appVersions.length - displayLimit} نسخه بیشتر`}
+                </button>
+              )}
+            </div>
+            <div className="versions-table-wrapper">
+              <table className="versions-table">
+                <thead>
+                  <tr>
+                    <th>نسخه</th>
+                    <th>تاریخ انتشار</th>
+                    <th>تغییرات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedVersions.map((item, index) => (
+                    <tr key={index} className={item.is_current ? 'current-version' : ''}>
+                      <td><strong>v{item.version_number}</strong></td>
+                      <td>
+                        {/* ✅ استفاده از release_date_persian اگر وجود دارد */}
+                        {item.release_date_persian ||
+                          (item.release_date ? new Date(item.release_date).toLocaleDateString('fa-IR') : '-')}
+                      </td>
+                      <td>{item.release_notes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <div className="empty-state">هیچ نسخه‌ای یافت نشد</div>
+        )}
+      </div>
+    );
+  };
+
 
   // ============================================
   // رندر اصلی
@@ -563,7 +646,7 @@ const Profile = () => {
               )}
             </div>
 
-            {/* نسخه نرم‌افزار و تغییرات */}
+            {/* نسخه نرم‌افزار و تغییرات - نمایش همه نسخه‌ها */}
             <div className="profile-card">
               <div className="card-header">
                 <h3>📱 درباره نرم‌افزار</h3>
@@ -573,7 +656,7 @@ const Profile = () => {
                 <div className="version-item">
                   <span className="version-label">نسخه فعلی</span>
                   <span className="version-value">
-                    {appVersions.find(v => v.is_current)?.version_number || '1.4.1'}
+                    {appVersions.find(v => v.is_current)?.version_number || '1.11.2'}
                   </span>
                 </div>
                 <div className="version-item">
@@ -584,34 +667,17 @@ const Profile = () => {
                       : '۱۴۰۳/۱۰/۰۱'}
                   </span>
                 </div>
+                <div className="version-item">
+                  <span className="version-label">تعداد نسخه‌ها</span>
+                  <span className="version-value">{appVersions.length}</span>
+                </div>
               </div>
 
               <button className="btn-versions" onClick={() => setShowVersions(!showVersions)}>
                 {showVersions ? '🔽 بستن تاریخچه تغییرات' : '📜 مشاهده تاریخچه تغییرات'}
               </button>
 
-              {showVersions && (
-                <div className="versions-list">
-                  {versionsLoading ? (
-                    <div className="loading-spinner">⏳ در حال بارگذاری...</div>
-                  ) : appVersions.length > 0 ? (
-                    <table className="versions-table">
-                      <thead><tr><th>نسخه</th><th>تاریخ</th><th>تغییرات</th></tr></thead>
-                      <tbody>
-                        {appVersions.map((item, index) => (
-                          <tr key={index} className={item.is_current ? 'current-version' : ''}>
-                            <td><strong>v{item.version_number}</strong></td>
-                            <td>{item.release_date_persian || new Date(item.release_date).toLocaleDateString('fa-IR')}</td>
-                            <td>{item.release_notes}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="empty-state">هیچ نسخه‌ای یافت نشد</div>
-                  )}
-                </div>
-              )}
+              {showVersions && renderVersions()}
             </div>
 
             {/* تماس با ما */}

@@ -87,6 +87,9 @@
   flex-wrap: wrap;
 }
 
+/* ============================================
+   ✅ کلیدهای هدر - بولد
+   ============================================ */
 .header-buttons button {
   background: rgba(255, 255, 255, 0.15);
   border: none;
@@ -95,10 +98,28 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
+  font-weight: 700 !important; /* ✅ بولد */
   transition: var(--transition);
+  font-family: inherit;
 }
 
 .header-buttons button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-buttons .btn-history {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.header-buttons .btn-history:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-buttons .btn-back {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.header-buttons .btn-back:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
@@ -1214,6 +1235,7 @@
   padding: 8px 18px;
   border-radius: var(--radius-sm);
   font-size: 14px;
+  font-weight: 700 !important; /* ✅ بولد */
   cursor: pointer;
   transition: var(--transition);
 }
@@ -1238,6 +1260,7 @@
   padding: 8px 18px;
   border-radius: var(--radius-sm);
   font-size: 14px;
+  font-weight: 700 !important; /* ✅ بولد */
   cursor: pointer;
   transition: var(--transition);
 }
@@ -1423,7 +1446,7 @@
   border: none;
   border-radius: var(--radius-sm);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700 !important; /* ✅ بولد */
   cursor: pointer;
   transition: var(--transition);
   display: inline-flex;
@@ -1646,7 +1669,7 @@
   padding: 10px 24px;
   border-radius: var(--radius-sm);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700 !important; /* ✅ بولد */
   cursor: pointer;
   transition: var(--transition);
 }
@@ -1663,7 +1686,7 @@
   padding: 10px 24px;
   border-radius: var(--radius-sm);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700 !important; /* ✅ بولد */
   cursor: pointer;
   transition: var(--transition);
 }

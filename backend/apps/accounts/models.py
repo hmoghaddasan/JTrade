@@ -331,6 +331,10 @@ class SystemMessage(models.Model):
         )
 
 
+# backend/apps/accounts/models.py
+
+# فقط بخش AppVersion را اصلاح می‌کنیم:
+
 class AppVersion(models.Model):
     version_number = models.CharField('شماره نسخه', max_length=20)
     release_date = models.DateTimeField('تاریخ انتشار')
@@ -353,9 +357,15 @@ class AppVersion(models.Model):
         return cls.objects.filter(is_current=True).first()
 
     @classmethod
-    def get_recent_versions(cls, limit=15):
-        return cls.objects.all().order_by('-release_date')[:limit]
-
+    def get_recent_versions(cls, limit=None):
+        """
+        دریافت نسخه‌های اخیر - اگر limit=None باشد همه نسخه‌ها برگردانده می‌شوند
+        """
+        queryset = cls.objects.all().order_by('-release_date')
+        if limit is not None:
+            return queryset[:limit]
+        return queryset
+    
 
 class UserLoginLog(models.Model):
     user = models.ForeignKey(

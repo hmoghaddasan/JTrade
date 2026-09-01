@@ -388,10 +388,26 @@ class RealApiService {
   }
 
   // ============================================
+  // ✅ پیام‌های فعال سیستم (برای SystemMessages)
+  // ============================================
+  async getActiveSystemMessages() {
+    try {
+      const response = await this.request('/messaging/system-messages/');
+      return response;
+    } catch (error) {
+      console.error('Error fetching active system messages:', error);
+      throw error;
+    }
+  }
+
+  // ============================================
   // نسخه‌ها و تنظیمات
   // ============================================
   async getAppVersions() {
-    return this.request('/system/versions/');
+    // ارسال پارامتر page_size بزرگ برای دریافت همه نسخه‌ها
+    return this.request('/system/versions/', {
+      params: { page_size: 1000 }
+    });
   }
 
   async getSystemSettings() {
@@ -399,12 +415,121 @@ class RealApiService {
   }
 
 
-// ============================================
-// ✅ بروکرها (کارگزاران) - با پشتیبانی از پارامتر
-// ============================================
-async getBrokers(params = {}) {
-  return this.request('/trading/brokers/', { params });
-}
+  async getSystemSettings() {
+    return this.request('/system/settings/');
+  }
+
+  // ============================================
+  // ✅ بروکرها (کارگزاران) - با پشتیبانی از پارامتر
+  // ============================================
+  async getBrokers(params = {}) {
+    return this.request('/trading/brokers/', { params });
+  }
+
+  // ============================================
+  // ✅ مدیریت پورتفولیوها
+  // ============================================
+  async getPortfolios(params = {}) {
+    return this.request('/trading/portfolios/', { params });
+  }
+
+  async createPortfolio(data) {
+    return this.request('/trading/portfolios/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async updatePortfolio(id, data) {
+    return this.request(`/trading/portfolios/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deletePortfolio(id) {
+    return this.request(`/trading/portfolios/${id}/`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ============================================
+  // ✅ قوانین معاملاتی
+  // ============================================
+  async getTradingRules(params = {}) {
+    return this.request('/trading/rules/', { params });
+  }
+
+  async createTradingRule(data) {
+    return this.request('/trading/rules/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async updateTradingRule(id, data) {
+    return this.request(`/trading/rules/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deleteTradingRule(id) {
+    return this.request(`/trading/rules/${id}/`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ============================================
+  // ✅ ابزارهای انضباطی (Discipline)
+  // ============================================
+  async getDisciplineStatus() {
+    return this.request('/trading/discipline/status/');
+  }
+
+  async getDisciplineSettings() {
+    return this.request('/trading/discipline/settings/');
+  }
+
+  async updateDisciplineSettings(data) {
+    return this.request('/trading/discipline/settings/', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async getDailyHabits(date) {
+    return this.request(`/trading/discipline/habits/?date=${date}`);
+  }
+
+  async updateDailyHabits(data) {
+    return this.request('/trading/discipline/habits/', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async getTiltmeterStatus() {
+    return this.request('/trading/discipline/tiltmeter/');
+  }
+
+  async resetTiltmeter() {
+    return this.request('/trading/discipline/tiltmeter/reset/', {
+      method: 'POST'
+    });
+  }
+
+  // ============================================
+  // ✅ شاخص‌های پیشرفته (Metrics)
+  // ============================================
+  async getAdvancedMetrics(params = {}) {
+    return this.request('/trading/metrics/advanced/', { params });
+  }
+
+  async getMetricsGuide() {
+    return this.request('/trading/metrics/guide/');
+  }
+
   // ============================================
   // WebSocket (غیرفعال)
   // ============================================

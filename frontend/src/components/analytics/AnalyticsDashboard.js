@@ -14,6 +14,7 @@ import AnalyticsFilters from './AnalyticsFilters';
 import EmotionalPnL from './EmotionalPnL';
 import RulesReport from '../reports/RulesReport';
 import './AnalyticsDashboard.css';
+import LoadingBar from '../common/LoadingBar';
 
 const AnalyticsDashboard = () => {
   const { user } = useAuth();
@@ -84,13 +85,13 @@ const AnalyticsDashboard = () => {
         className={`tab-btn emotional-tab ${activeTab === 'emotional' ? 'active' : ''}`}
         onClick={() => setActiveTab('emotional')}
       >
-        🧠 تحلیل مالی احساسات <span className="tab-badge">جدید</span>
+        🧠 تحلیل مالی احساسات
       </button>
       <button
         className={`tab-btn rules-tab ${activeTab === 'rules' ? 'active' : ''}`}
         onClick={() => setActiveTab('rules')}
       >
-        📋 پایبندی به قوانین <span className="tab-badge">جدید</span>
+        📋 پایبندی به قوانین
       </button>
     </div>
   );
@@ -112,8 +113,7 @@ const AnalyticsDashboard = () => {
         </div>
         {renderTabs()}
         <div className="analytics-loading">
-          <div className="loading-spinner">⏳</div>
-          <p>در حال بارگذاری داده‌های تحلیل...</p>
+          <LoadingBar text="در حال بارگذاری..." />
         </div>
       </div>
     );

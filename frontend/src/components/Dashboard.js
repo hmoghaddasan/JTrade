@@ -13,7 +13,7 @@ import { usePortfolio } from '../contexts/PortfolioContext';
 import PortfolioSelector from './PortfolioSelector';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import DisciplineWidget from './discipline/DisciplineWidget';
-
+import LoadingBar from './common/LoadingBar';  // یا './common/LoadingBar' بسته به مسیر
 // لیست ۵۰ آیکون برای دسته‌بندی‌ها
 const GROUP_ICONS = [
   '📁', '📊', '💱', '₿', '📈', '📉', '🏆', '⭐', '🔥', '💰',
@@ -658,8 +658,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال بارگذاری...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }
@@ -684,66 +683,53 @@ const Dashboard = () => {
     <div className={`dashboard-new ${isDark ? 'dark' : 'light'}`}>
       {/* ===== هدر ===== */}
       <header className="dashboard-header">
-        <div className="header-left">
-          <h1>📊 ژورنال حرفه‌ای ترید <span className="header-version">v{appVersion}</span></h1>
+        <div className="header-left-group">
+          <div className="header-left">
+            <h1>
+              📊 ژورنال حرفه‌ای ترید
+              <span className="header-version">v{appVersion}</span>
+            </h1>
+          </div>
+
+          {/* ===== سلکتور پورتفولیو - در کنار عنوان ===== */}
+          <div className="portfolio-selector-wrapper">
+            <PortfolioSelector />
+          </div>
         </div>
+
         <div className="header-right">
           {/* ===== کلید شاخص‌ها ===== */}
-          <button
-            className="header-btn metrics-btn"
-            onClick={handleGoToMetrics}
-            title="شاخص‌های پیشرفته"
-          >
+          <button className="header-btn metrics-btn" onClick={handleGoToMetrics} title="شاخص‌های پیشرفته">
             <span className="btn-icon">📈</span>
             <span className="btn-text">شاخص‌ها</span>
           </button>
 
-          {/* ===== کلید پورتفولیو ===== */}
-          <div className="portfolio-selector">
-            <PortfolioSelector />
-          </div>
-
           {/* ===== کلید مقایسه پورتفولیوها ===== */}
-          <button
-            className="header-btn comparison-btn"
-            onClick={handleGoToComparison}
-            title="مقایسه پورتفولیوها"
-          >
+          <button className="header-btn comparison-btn" onClick={handleGoToComparison} title="مقایسه پورتفولیوها">
             <span className="btn-icon">📊</span>
             <span className="btn-text">مقایسه</span>
           </button>
 
           {/* ===== کلید انضباط ===== */}
-          <button
-            className="header-btn discipline-btn"
-            onClick={() => navigate('/discipline')}
-            title="ابزارهای انضباطی"
-          >
+          <button className="header-btn discipline-btn" onClick={() => navigate('/discipline')} title="ابزارهای انضباطی">
             <span className="btn-icon">🛡️</span>
             <span className="btn-text">انضباط</span>
           </button>
 
           {/* ===== کلید شب/روز ===== */}
-          <button
-            className="header-btn theme-btn"
-            onClick={toggleTheme}
-            title={isDark ? 'حالت روشن' : 'حالت تاریک'}
-          >
+          <button className="header-btn theme-btn" onClick={toggleTheme} title={isDark ? 'حالت روشن' : 'حالت تاریک'}>
             <span className="btn-icon">{isDark ? '☀️' : '🌙'}</span>
             <span className="btn-text">{isDark ? 'روشن' : 'تاریک'}</span>
           </button>
 
           {/* ===== کلید خروج ===== */}
-          <button
-            className="header-btn"
-            onClick={handleLogout}
-            title="خروج از حساب کاربری"
-          >
+          <button className="header-btn logout-btn" onClick={handleLogout} title="خروج از حساب کاربری">
             <span className="btn-icon">🚪</span>
             <span className="btn-text">خروج</span>
           </button>
         </div>
       </header>
+
 
       {/* ===== دکمه‌های اقدام سریع ===== */}
       <div className="quick-actions">
@@ -752,8 +738,8 @@ const Dashboard = () => {
             className="action-btn primary"
             onClick={handleNewTrade}
           >
-            <span className="action-icon">➕</span>
             <span>ترید جدید</span>
+            <span className="action-icon">➕</span>
           </button>
           <button
             className="dropdown-toggle"
@@ -915,8 +901,7 @@ const Dashboard = () => {
         <div className="col-details">
           {loadingDetail ? (
             <div className="loading-detail">
-              <div className="loading-spinner">⏳</div>
-              <p>در حال دریافت جزئیات...</p>
+              <LoadingBar text="در حال بارگذاری..." />
             </div>
           ) : selectedTrade ? (
             <>

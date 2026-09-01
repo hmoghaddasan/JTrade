@@ -255,6 +255,185 @@
     display: none;
 }
 
+/* ============================================
+   ✅ اصلاح ۳: ریسپانسیو ویجت انضباط در موبایل
+   ============================================ */
+@media (max-width: 768px) {
+    .discipline-widget .widget-header {
+        padding: 6px 10px;
+        min-height: 36px;
+        flex-wrap: nowrap !important;
+        gap: 4px;
+    }
+
+    .discipline-widget .header-left {
+        flex: 1;
+        min-width: 0;
+        gap: 4px;
+        flex-wrap: nowrap !important;
+    }
+
+    .discipline-widget .widget-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .discipline-widget .widget-title {
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .discipline-widget .widget-date {
+        font-size: 10px;
+        padding: 0 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .discipline-widget .header-right {
+        flex-shrink: 0;
+        gap: 4px;
+        min-width: auto;
+    }
+
+    .discipline-widget .widget-status-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .discipline-widget .widget-status-text {
+        font-size: 10px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .discipline-widget .toggle-btn {
+        font-size: 14px;
+        padding: 2px 4px;
+        flex-shrink: 0;
+    }
+
+    .discipline-widget .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+
+    .discipline-widget .stat-item {
+        padding: 3px 8px;
+    }
+
+    .discipline-widget .stat-value {
+        font-size: 12px;
+    }
+
+    .discipline-widget .stat-label {
+        font-size: 9px;
+    }
+
+    .discipline-widget .widget-body {
+        padding: 6px 10px 10px 10px;
+    }
+
+    .discipline-widget .tiltmeter-label {
+        font-size: 11px;
+    }
+
+    .discipline-widget .cooldown-alert {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .discipline-widget .btn-details {
+        font-size: 11px;
+        padding: 2px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .discipline-widget .widget-header {
+        padding: 4px 8px;
+        min-height: 32px;
+        flex-wrap: nowrap !important;
+        gap: 2px;
+    }
+
+    .discipline-widget .header-left {
+        gap: 2px;
+        flex-wrap: nowrap !important;
+    }
+
+    .discipline-widget .widget-icon {
+        font-size: 14px;
+    }
+
+    .discipline-widget .widget-title {
+        font-size: 12px;
+    }
+
+    .discipline-widget .widget-date {
+        font-size: 9px;
+        padding: 0 4px;
+        display: inline-block !important;
+    }
+
+    .discipline-widget .header-right {
+        gap: 2px;
+    }
+
+    .discipline-widget .widget-status-icon {
+        font-size: 12px;
+    }
+
+    .discipline-widget .widget-status-text {
+        font-size: 9px;
+        display: inline-block !important;
+    }
+
+    .discipline-widget .toggle-btn {
+        font-size: 12px;
+        padding: 0 3px;
+    }
+
+    .discipline-widget .stats-grid {
+        gap: 3px;
+    }
+
+    .discipline-widget .stat-item {
+        padding: 2px 6px;
+    }
+
+    .discipline-widget .stat-value {
+        font-size: 11px;
+    }
+
+    .discipline-widget .stat-label {
+        font-size: 8px;
+    }
+
+    .discipline-widget .widget-body {
+        padding: 4px 8px 8px 8px;
+    }
+
+    .discipline-widget .tiltmeter-label {
+        font-size: 10px;
+    }
+
+    .discipline-widget .progress-bar {
+        height: 4px;
+    }
+
+    .discipline-widget .cooldown-alert {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .discipline-widget .btn-details {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+}
+
 /* ===== تم تاریک ===== */
 .dark .discipline-widget {
     background: #1e1e2f;

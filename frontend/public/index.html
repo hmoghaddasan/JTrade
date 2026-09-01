@@ -14,6 +14,145 @@
     <meta name="keywords" content="ترید, معامله, ژورنال, تحلیل, مالی, JTrade" />
     <meta name="author" content="JTrade Team" />
 
+    <!-- ===== Preload فونت‌ها ===== -->
+    <link rel="preload" href="%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+
+    <!-- ===== تعریف فونت از طریق Style ===== -->
+    <style>
+      /* ============================================
+         فونت IRANYekanXFaNum - با پشتیبانی کامل
+         ============================================ */
+
+      /* ===== woff2 (کروم، اج، سافاری جدید) ===== */
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Light.woff2') format('woff2');
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Black.woff2') format('woff2');
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-ExtraBlack.woff2') format('woff2');
+        font-weight: 950;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* ===== woff (فایرفاکس، سافاری قدیمی) ===== */
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Regular.woff') format('woff');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Light.woff') format('woff');
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Bold.woff') format('woff');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Black.woff') format('woff');
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-ExtraBlack.woff') format('woff');
+        font-weight: 950;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* ===== ttf (پشتیبان نهایی - فایرفاکس اندروید) ===== */
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Light.ttf') format('truetype');
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Bold.ttf') format('truetype');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Black.ttf') format('truetype');
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'IRANYekanXFaNum';
+        src: url('%PUBLIC_URL%/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-ExtraBlack.ttf') format('truetype');
+        font-weight: 950;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* ===== اعمال فونت به کل صفحه ===== */
+      * {
+        font-family: 'IRANYekanXFaNum', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      }
+    </style>
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
@@ -29,14 +168,12 @@
             .then((registration) => {
               console.log('✅ Service Worker registered successfully:', registration);
 
-              // بررسی به‌روزرسانی
               registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 if (newWorker) {
                   newWorker.addEventListener('statechange', () => {
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                       console.log('🔄 New version available!');
-                      // نمایش پیام به کاربر برای به‌روزرسانی
                       const event = new CustomEvent('newVersionAvailable', {
                         detail: { message: 'نسخه جدیدی موجود است. برای به‌روزرسانی صفحه را رفرش کنید.' }
                       });
@@ -59,9 +196,7 @@
     <noscript>برای استفاده از این برنامه نیاز به فعال کردن جاوااسکریپت دارید.</noscript>
     <div id="root"></div>
 
-    <!-- Fallback for offline status -->
     <script>
-      // نمایش پیام در صورت قطع اتصال
       window.addEventListener('offline', () => {
         const event = new CustomEvent('connectionChange', {
           detail: { status: 'offline', message: '⚠️ اتصال اینترنت قطع شد. برخی از امکانات ممکن است در دسترس نباشند.' }

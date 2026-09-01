@@ -9,8 +9,8 @@ import { usePortfolio } from '../contexts/PortfolioContext';
 import RealApiService from '../services/realApiService';
 import RuleService from '../services/ruleService';
 import SystemSettingsService from '../services/systemSettingsService';
-import ImageZoom from './ImageZoom';
 import './TradeForm.css';
+import LoadingBar from './common/LoadingBar';
 
 // ============================================
 // ✅ کامپوننت Tooltip راهنما
@@ -1076,7 +1076,7 @@ const TradeEditForm = () => {
       return (
         <div className="form-step">
           <h3>📋 قوانین معاملاتی</h3>
-          <div className="loading-spinner">⏳ در حال بارگذاری قوانین...</div>
+          <LoadingBar text="در حال بارگذاری..." />
         </div>
       );
     }
@@ -1276,7 +1276,7 @@ const TradeEditForm = () => {
   };
 
   if (loading) {
-    return <div className="loading-spinner">⏳ در حال بارگذاری...</div>;
+    return <LoadingBar text="در حال بارگذاری..." />;
   }
 
   if (!tradeData) {

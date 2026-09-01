@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import RealApiService from '../../services/realApiService';
 import './SubscriptionRenewal.css';
-
+import LoadingBar from './../common/LoadingBar';
 const SubscriptionRenewal = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -316,7 +316,7 @@ const SubscriptionRenewal = () => {
   if (loading) {
     return (
       <div className="subscription-renewal-container">
-        <div className="loading-spinner">⏳ در حال بارگذاری پلن‌ها...</div>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

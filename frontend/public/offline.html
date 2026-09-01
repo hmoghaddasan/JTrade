@@ -7,15 +7,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1a237e">
   <title>آفلاین - ژورنال حرفه‌ای ترید</title>
+
+  <!-- ===== Preload فونت‌ها ===== -->
+  <link rel="preload" href="/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+  <link rel="preload" href="/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+
   <style>
+    /* ============================================
+       تعریف فونت IRANYekanXFaNum
+       ============================================ */
+
+    /* ===== woff2 ===== */
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Light.woff2') format('woff2');
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-Black.woff2') format('woff2');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff2/IRANYekanXFaNum-ExtraBlack.woff2') format('woff2');
+      font-weight: 950;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ===== woff ===== */
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Regular.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Bold.woff') format('woff');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Light.woff') format('woff');
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-Black.woff') format('woff');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/woff/IRANYekanXFaNum-ExtraBlack.woff') format('woff');
+      font-weight: 950;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ===== ttf (فایرفاکس اندروید) ===== */
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Light.ttf') format('truetype');
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-Black.ttf') format('truetype');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'IRANYekanXFaNum';
+      src: url('/fonts/IRANYekanXFaNum/ttf/IRANYekanXFaNum-ExtraBlack.ttf') format('truetype');
+      font-weight: 950;
+      font-style: normal;
+      font-display: swap;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     body {
-      font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
       background: #f5f7fa;
       color: #1a1a2e;
       display: flex;
@@ -47,6 +180,7 @@
       font-weight: 700;
       color: #1a237e;
       margin-bottom: 8px;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     .offline-subtitle {
@@ -54,6 +188,7 @@
       color: #666;
       margin-bottom: 20px;
       line-height: 1.7;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     .offline-message {
@@ -66,6 +201,7 @@
       margin-bottom: 24px;
       text-align: right;
       line-height: 1.6;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     .offline-message .emoji {
@@ -82,7 +218,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      font-family: inherit;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
       width: 100%;
       display: flex;
       align-items: center;
@@ -103,12 +239,14 @@
       margin-top: 20px;
       font-size: 13px;
       color: #999;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     .offline-footer a {
       color: #1a237e;
       text-decoration: none;
       font-weight: 500;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     .offline-footer a:hover {
@@ -123,6 +261,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      font-family: 'IRANYekanXFaNum', 'Segoe UI', Tahoma, sans-serif !important;
     }
 
     .status-dot {
@@ -139,6 +278,10 @@
     .status-dot.checking {
       background: #f57c00;
       animation: pulse 1s infinite;
+    }
+
+    .status-dot.online {
+      background: #2e7d32;
     }
 
     @keyframes pulse {
@@ -171,7 +314,7 @@
     <div class="offline-message">
       <span class="emoji">🔄</span> لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید.
       <br>
-      <span style="font-size:13px;color:#888;display:block;margin-top:4px;">
+      <span style="font-size:13px;color:#888;display:block;margin-top:4px;font-family:'IRANYekanXFaNum','Segoe UI',Tahoma,sans-serif !important;">
         پس از برقراری اتصال، صفحه به‌طور خودکار بارگذاری می‌شود.
       </span>
     </div>
@@ -183,14 +326,11 @@
     </div>
     <div class="offline-status">
       <span class="status-dot offline"></span>
-      <span id="statusText">آفلاین</span>
+      <span id="statusText" style="font-family:'IRANYekanXFaNum','Segoe UI',Tahoma,sans-serif !important;">آفلاین</span>
     </div>
   </div>
 
   <script>
-    // ============================================
-    // تلاش خودکار برای اتصال مجدد
-    // ============================================
     let retryCount = 0;
     const maxRetries = 10;
     const statusText = document.getElementById('statusText');
@@ -221,12 +361,8 @@
       }
     }
 
-    // شروع بررسی اتصال پس از 3 ثانیه
     setTimeout(checkConnection, 3000);
 
-    // ============================================
-    // گوش دادن به تغییرات اتصال
-    // ============================================
     window.addEventListener('online', () => {
       updateStatus('✅ آنلاین - در حال بارگذاری...', 'online');
       setTimeout(() => {
@@ -238,9 +374,6 @@
       updateStatus('📡 آفلاین', 'offline');
     });
 
-    // ============================================
-    // نمایش وضعیت اتصال در کنسول
-    // ============================================
     console.log('📡 Offline page loaded. Connection status:', navigator.onLine ? 'Online' : 'Offline');
   </script>
 </body>

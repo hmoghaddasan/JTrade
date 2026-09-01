@@ -4,17 +4,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import AuthBackground from './AuthBackground';
 import './auth.css';
 
 const VerifyCode = ({ onVerifySuccess, onBack }) => {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(120);
   const { verifyCode, phoneNumber, sendCode } = useAuth();
   const { showToast } = useToast();
   const inputRefs = useRef([]);
   const navigate = useNavigate();
+  const isSubmitting = useRef(false);
 
   useEffect(() => {
     console.log('📱 VerifyCode mounted, phoneNumber:', phoneNumber);
@@ -31,39 +33,71 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
   }, [timeLeft]);
 
   // ============================================
-  // تغییر مقدار هر خانه
+  // ✅ اصلاح شده - حذف صفر اضافی ابتدای شماره
   // ============================================
+  const formatPhone = (phone) => {
+    if (!phone) return '';
+
+    // فقط اعداد را نگه دار
+    const cleaned = phone.replace(/[^0-9]/g, '');
+    if (cleaned.length === 0) return phone;
+
+    // اگر شماره ۱۱ رقمی است (با صفر ابتدا)، آن را فرمت کن
+    if (cleaned.length === 11) {
+      // ۰۹۱۵۵۵۱۱۳۹۳ → ۰۹۱۵ ۵۵۱ ۱۳ ۹۳
+      const firstFour = cleaned.slice(0, 4);   // "0915"
+      const secondThree = cleaned.slice(4, 7); // "551"
+      const thirdTwo = cleaned.slice(7, 9);    // "13"
+      const fourthTwo = cleaned.slice(9, 11);  // "93"
+      return `۰${firstFour.slice(1)} ${secondThree} ${thirdTwo} ${fourthTwo}`;
+      // خروجی: "۰۹۱۵ ۵۵۱ ۱۳ ۹۳"
+    }
+
+    // اگر شماره ۱۰ رقمی است (بدون صفر اول)
+    if (cleaned.length === 10) {
+      // ۹۱۵۵۵۱۱۳۹۳ → ۰۹۱۵ ۵۵۱ ۱۳ ۹۳
+      const firstFour = cleaned.slice(0, 4);   // "9155"
+      const secondThree = cleaned.slice(4, 7); // "511"
+      const thirdTwo = cleaned.slice(7, 9);    // "13"
+      const fourthTwo = cleaned.slice(9, 11);  // "93"
+      return `۰${firstFour} ${secondThree} ${thirdTwo} ${fourthTwo}`;
+      // خروجی: "۰۹۱۵۵ ۵۱۱ ۱۳ ۹۳"
+    }
+
+    // در غیر این صورت، شماره را با یک صفر در ابتدا نمایش بده
+    return `۰${cleaned}`;
+  };
+
   const handleChange = (index, value) => {
-    // فقط اعداد پذیرفته می‌شوند
     if (value && !/^[0-9]$/.test(value)) return;
 
     const newCode = [...code];
     newCode[index] = value || '';
     setCode(newCode);
 
-    // حرکت خودکار به خانه بعدی
     if (value && index < 5) {
       inputRefs.current[index + 1].focus();
     }
 
     if (error) setError('');
+
+    const fullCode = newCode.join('');
+    if (fullCode.length === 6 && !loading && !isSubmitting.current) {
+      isSubmitting.current = true;
+      setTimeout(() => {
+        handleSubmit(newCode);
+      }, 200);
+    }
   };
 
-  // ============================================
-  // مدیریت کلیدهای صفحه کلید
-  // ============================================
   const handleKeyDown = (index, e) => {
-    // Backspace - برگشت به خانه قبلی
     if (e.key === 'Backspace') {
       if (!code[index] && index > 0) {
-        // اگر خانه خالی است، به خانه قبلی برو
         inputRefs.current[index - 1].focus();
-        // خانه قبلی را خالی کن
         const newCode = [...code];
         newCode[index - 1] = '';
         setCode(newCode);
       } else if (code[index]) {
-        // اگر خانه پر است، آن را خالی کن
         const newCode = [...code];
         newCode[index] = '';
         setCode(newCode);
@@ -71,18 +105,15 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
       e.preventDefault();
     }
 
-    // کلید Enter - ارسال فرم
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (code.every(digit => digit !== '')) {
-        handleSubmit(e);
+      if (code.every(digit => digit !== '') && !loading && !isSubmitting.current) {
+        isSubmitting.current = true;
+        handleSubmit(code);
       }
     }
   };
 
-  // ============================================
-  // چسباندن کد از کلیپ بورد
-  // ============================================
   const handlePaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text/plain').trim();
@@ -97,31 +128,36 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
     });
     setCode(newCode);
 
-    // فوکوس روی اولین خانه خالی یا آخرین خانه
     const lastFilledIndex = Math.min(digits.length - 1, 5);
     if (lastFilledIndex < 5 && inputRefs.current[lastFilledIndex + 1]) {
       inputRefs.current[lastFilledIndex + 1].focus();
     } else {
       inputRefs.current[5].focus();
     }
+
+    if (digits.length >= 6 && !loading && !isSubmitting.current) {
+      isSubmitting.current = true;
+      setTimeout(() => {
+        handleSubmit(newCode);
+      }, 300);
+    }
   };
 
-  // ============================================
-  // ارسال فرم
-  // ============================================
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+  const handleSubmit = async (codeArray) => {
+    const currentCode = codeArray || code;
+    const fullCode = currentCode.join('');
+
+    if (fullCode.length < 6) {
+      setError('لطفاً کد ۶ رقمی را کامل وارد کنید.');
+      setLoading(false);
+      isSubmitting.current = false;
+      return;
+    }
+
     setError('');
     setLoading(true);
 
-    const fullCode = code.join('');
     console.log('📤 Submitting code:', fullCode);
-
-    if (fullCode.length < 6) {
-      setError('لطفاً کد ۶ رقمی را کامل وارد کنید');
-      setLoading(false);
-      return;
-    }
 
     try {
       const result = await verifyCode(fullCode);
@@ -139,8 +175,8 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
       } else {
         setError(result.error || 'کد تایید نامعتبر است');
         showToast('❌ ' + (result.error || 'کد تایید نامعتبر است'), 'error');
-        // پاک کردن کد و بازگشت به خانه اول
         setCode(['', '', '', '', '', '']);
+        isSubmitting.current = false;
         if (inputRefs.current[0]) {
           inputRefs.current[0].focus();
         }
@@ -151,12 +187,12 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
       showToast('❌ خطا در تایید کد', 'error');
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        isSubmitting.current = false;
+      }, 500);
     }
   };
 
-  // ============================================
-  // ارسال مجدد کد
-  // ============================================
   const handleResendCode = async () => {
     if (timeLeft > 0 || loading) return;
     setLoading(true);
@@ -164,9 +200,10 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
     try {
       const result = await sendCode(phoneNumber);
       if (result.success) {
-        setTimeLeft(60);
-        showToast('📨 کد تایید مجدداً ارسال شد', 'success');
+        setTimeLeft(120);
+        showToast('📨 کد تایید مجدداً ارسال شد.', 'success');
         setCode(['', '', '', '', '', '']);
+        isSubmitting.current = false;
         if (inputRefs.current[0]) {
           inputRefs.current[0].focus();
         }
@@ -183,15 +220,6 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
     }
   };
 
-  // ============================================
-  // فرمت شماره تلفن
-  // ============================================
-  const formatPhone = (phone) => {
-    if (!phone || phone.length !== 11) return phone;
-    return `۰۹۱۲ ${phone.slice(4, 7)} ${phone.slice(7, 9)} ${phone.slice(9, 11)}`;
-  };
-
-  // اگر شماره تلفن وجود نداشت، به صفحه ورود برگرد
   if (!phoneNumber) {
     console.warn('⚠️ No phone number, redirecting to login');
     if (onBack) {
@@ -203,21 +231,21 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
   }
 
   return (
-    <div className="auth-container">
+    <AuthBackground>
       <div className="auth-card">
         <div className="auth-header">
           <h1>📊 ژورنال حرفه‌ای ترید</h1>
           <h2>🔐 تایید کد</h2>
           <p className="phone-display">
             کد تایید به شماره
-            <strong className="phone-number-ltr">
+            <strong className="phone-number-ltr" style={{ direction: 'ltr', unicodeBidi: 'embed' }}>
               {formatPhone(phoneNumber)}
             </strong>
             ارسال شد
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={(e) => e.preventDefault()} className="auth-form">
           <div className="code-inputs-container">
             <div className="code-inputs">
               {code.map((digit, index) => (
@@ -245,6 +273,13 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
             type="submit"
             disabled={loading || code.some(d => d === '')}
             className="btn-primary"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!loading && !isSubmitting.current) {
+                isSubmitting.current = true;
+                handleSubmit(code);
+              }
+            }}
           >
             {loading ? '⏳ در حال بررسی...' : '✅ تایید کد'}
           </button>
@@ -264,7 +299,7 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
           </button>
         </form>
       </div>
-    </div>
+    </AuthBackground>
   );
 };
 

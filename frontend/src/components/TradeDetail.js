@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext';
 import RealApiService from '../services/realApiService';
 import ImageZoom from './ImageZoom';
 import './TradeDetail.css';
+import LoadingBar from './common/LoadingBar';
 
 const TradeDetail = () => {
   const { id } = useParams();
@@ -709,7 +710,7 @@ const TradeDetail = () => {
   if (loading) {
     return (
       <div className="trade-detail-container">
-        <div className="loading-spinner">⏳ در حال بارگذاری...</div>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

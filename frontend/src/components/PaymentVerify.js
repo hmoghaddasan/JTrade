@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import RealApiService from '../services/realApiService';
 import { useAuth } from '../contexts/AuthContext';
 import './PaymentVerify.css';
-
+import LoadingBar from './common/LoadingBar';
 const PaymentVerify = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -154,8 +154,7 @@ const PaymentVerify = () => {
   if (loading) {
     return (
       <div className="payment-verify-container">
-        <div className="loading-spinner">⏳</div>
-        <h2>در حال تایید پرداخت...</h2>
+        <LoadingBar text="در حال بارگذاری..." />
         <p>لطفاً صبر کنید</p>
       </div>
     );

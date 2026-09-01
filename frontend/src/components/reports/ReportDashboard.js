@@ -21,7 +21,7 @@ import ExecutionQualityReport from './reports/ExecutionQualityReport';
 import BiasReport from './reports/BiasReport';
 import TimeframeReport from './reports/TimeframeReport';
 import RiskManagementReport from './reports/RiskManagementReport';
-
+import LoadingBar from '../common/LoadingBar';
 const ReportDashboard = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -238,8 +238,7 @@ const ReportDashboard = () => {
   if (loading) {
     return (
       <div className="report-dashboard-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>در حال بارگذاری گزارشات...</p>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }

@@ -1,5 +1,5 @@
 // frontend/src/components/TradeList.js
-
+import LoadingBar from './common/LoadingBar';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
@@ -51,7 +51,6 @@ const TradeList = () => {
         const tradesData = tradesResponse.data.results || tradesResponse.data || [];
         console.log('📊 Trades loaded:', tradesData.length);
 
-        // ✅ محاسبه و تکمیل مقادیر缺失 برای هر ترید
         const enrichedTrades = tradesData.map(trade => {
           const entry = parseFloat(trade.entry_price) || 0;
           const close = parseFloat(trade.close_price) || 0;
@@ -60,7 +59,6 @@ const TradeList = () => {
           const tp2 = parseFloat(trade.take_profit_2) || 0;
           const tp3 = parseFloat(trade.take_profit_3) || 0;
 
-          // ===== ۱. محاسبه سود/زیان =====
           let profit = parseFloat(trade.profit);
           if (isNaN(profit) || profit === 0) {
             if (trade.trade_type === 'Buy' && entry > 0 && close > 0) {
@@ -72,12 +70,10 @@ const TradeList = () => {
             }
           }
 
-          // ===== ۲. محاسبه R:R =====
           let rr = parseFloat(trade.risk_reward_ratio);
           if (isNaN(rr) || rr === 0) {
             if (entry > 0 && sl > 0) {
               const risk = Math.abs(entry - sl);
-              // از بین سه حد سود، اولین حد سود معتبر را انتخاب کن
               let reward = 0;
               if (tp1 > 0) {
                 reward = Math.abs(tp1 - entry);
@@ -92,7 +88,6 @@ const TradeList = () => {
             }
           }
 
-          // ===== ۳. کیفیت اجرا =====
           let quality = parseInt(trade.execution_quality_score);
           if (isNaN(quality) || quality === 0) {
             quality = 5;
@@ -120,7 +115,6 @@ const TradeList = () => {
     loadData();
   }, [user, showToast]);
 
-  // ===== استخراج لیست پورتفولیوها از تریدها =====
   const portfolioOptions = useMemo(() => {
     const portfolios = new Map();
     trades.forEach(trade => {
@@ -560,24 +554,24 @@ const TradeList = () => {
   if (loading) {
     return (
       <div className="tradelist-container">
-        <div className="loading-spinner">⏳ در حال بارگذاری...</div>
+        <LoadingBar text="در حال بارگذاری..." />
       </div>
     );
   }
 
   return (
     <div className={`tradelist-container ${isDark ? 'dark' : 'light'}`}>
-      {/* ===== هدر با راه‌حل قطعی ===== */}
-      <div className="tradelist-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-        <h2 style={{ fontSize: '18px', margin: 0, flexShrink: 0 }}>📈 لیست تریدها</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap', flexShrink: 0 }}>
-          <button className="btn-print-list" onClick={handlePrintList} style={{ padding: '5px 10px', border: 'none', borderRadius: '6px', background: '#1a237e', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', height: '30px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+      {/* ===== هدر با کلاس‌های CSS (بدون استایل inline) ===== */}
+      <div className="tradelist-header">
+        <h2>📈 لیست تریدها</h2>
+        <div className="header-actions">
+          <button className="btn-print-list" onClick={handlePrintList}>
             🖨️ چاپ
           </button>
-          <button className="btn-excel-list" onClick={handleExportExcel} style={{ padding: '5px 10px', border: 'none', borderRadius: '6px', background: '#2e7d32', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', height: '30px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <button className="btn-excel-list" onClick={handleExportExcel}>
             📄 اکسل
           </button>
-          <button className="btn-secondary" onClick={() => navigate('/dashboard')} style={{ padding: '5px 10px', border: 'none', borderRadius: '6px', background: '#e0e0e0', color: '#333', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', height: '30px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
             ↩️ بازگشت
           </button>
         </div>
@@ -723,7 +717,7 @@ const TradeList = () => {
                   <th>نتیجه</th>
                   <th>R:R</th>
                   <th>کیفیت</th>
-                  <th style={{ minWidth: '140px', width: '140px', whiteSpace: 'nowrap' }}>عملیات</th>
+                  <th>عملیات</th>
                 </tr>
               </thead>
               <tbody>
@@ -757,34 +751,25 @@ const TradeList = () => {
                         </span>
                       </div>
                     </td>
-                    <td style={{ minWidth: '140px', width: '140px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '4px', justifyContent: 'center', alignItems: 'center' }}>
+                    <td>
+                      <div className="action-buttons">
                         <button
-                          style={{ border: '1.5px solid #444', background: 'transparent', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontSize: '14px', minWidth: '32px', height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewDetails(trade.id);
-                          }}
+                          className="btn-view"
+                          onClick={() => handleViewDetails(trade.id)}
                           title="مشاهده جزئیات"
                         >
                           👁️
                         </button>
                         <button
-                          style={{ border: '1.5px solid #444', background: 'transparent', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontSize: '14px', minWidth: '32px', height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditTrade(trade.id);
-                          }}
+                          className="btn-edit"
+                          onClick={() => handleEditTrade(trade.id)}
                           title="ویرایش"
                         >
                           ✏️
                         </button>
                         <button
-                          style={{ border: '1.5px solid #444', background: 'transparent', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontSize: '14px', minWidth: '32px', height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(trade.id);
-                          }}
+                          className="btn-delete"
+                          onClick={() => handleDelete(trade.id)}
                           title="حذف"
                         >
                           🗑️
