@@ -124,8 +124,8 @@ const Dashboard = () => {
               style={{ background: 'linear-gradient(135deg, #0d47a1, #01579b)' }}
               onClick={() => navigate('/trades')}
             >
-              <span className="action-icon">📈</span>
-              <span className="action-label">لیست تریدها</span>
+              <span className="action-icon">📋</span>
+              <span className="action-label">تریدها</span>
             </button>
             <button
               className="quick-action-btn"

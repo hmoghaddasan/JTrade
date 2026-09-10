@@ -42,7 +42,6 @@ const MessageForm = () => {
         message: message.trim(),
       };
 
-      // ✅ اصلاح مسیر - استفاده از /messages/create/
       const response = await RealApiService.sendMessage(data);
       console.log('📤 Message sent:', response.data);
 
@@ -73,7 +72,8 @@ const MessageForm = () => {
     <div className="messaging-container">
       <div className="messaging-header">
         <h2>✉️ ارسال پیام جدید</h2>
-        <button className="btn-secondary" onClick={handleCancel}>
+        {/* ✅ دکمه بازگشت به چپ و با سایز استاندارد */}
+        <button className="btn-back" onClick={handleCancel}>
           ↩️ بازگشت
         </button>
       </div>

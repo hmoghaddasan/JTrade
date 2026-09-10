@@ -78,13 +78,13 @@ urlpatterns = [
     path('portfolios/<int:pk>/', views.AdminPortfolioDetailView.as_view(), name='admin_portfolio_detail'),
 
     # ============================================
-    # ✅ تنظیمات سیستم - مسیرهای قدیمی (برای سازگاری)
+    # ✅ تنظیمات سیستم - مسیرهای اصلی (در بالای router قرار دهید)
     # ============================================
-    path('settings/', views.AdminSettingsListView.as_view(), name='admin_settings'),
-    path('settings/update/', views.AdminSettingsUpdateView.as_view(), name='admin_settings_update'),
+    path('settings-list/', views.AdminSettingsListView.as_view(), name='admin_settings_list'),
+    path('settings-update/', views.AdminSettingsUpdateView.as_view(), name='admin_settings_update'),
 
     # ============================================
-    # ✅ مسیرهای جدید با Router (برای ViewSet)
+    # ✅ مسیرهای Router (برای ViewSet)
     # ============================================
     path('', include(router.urls)),
 ]

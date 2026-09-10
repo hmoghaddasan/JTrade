@@ -101,6 +101,9 @@ const adminService = {
     replyMessage: (id, data) => api.post(`${BASE_URL}/messages/${id}/reply/`, data),
     deleteMessage: (id) => api.delete(`${BASE_URL}/messages/${id}/delete/`),
 
+    // ✅ اضافه کردن متد getSystemMessages برای پیام‌های سیستمی
+    getSystemMessages: (params) => api.get(`${BASE_URL}/messages/`, { params }),
+
     // ============================================
     // ===== نسخه‌ها =====
     // ============================================
@@ -122,8 +125,66 @@ const adminService = {
     // ============================================
     // ===== تنظیمات سیستم =====
     // ============================================
-    getSettings: () => api.get(`${BASE_URL}/settings/`),
-    updateSettings: (data) => api.post(`${BASE_URL}/settings/update/`, data),
+    // ✅ اصلاح: استفاده از مسیرهای صحیح با fallback
+    getSettings: async () => {
+        try {
+            // ابتدا مسیر جدید را امتحان کن
+            const response = await api.get(`${BASE_URL}/settings/`);
+            return response;
+        } catch (error) {
+            if (error.response?.status === 404) {
+                // اگر مسیر جدید کار نکرد، مسیر settings-list را امتحان کن
+                try {
+                    const response = await api.get(`${BASE_URL}/settings-list/`);
+                    return response;
+                } catch (fallbackError) {
+                    console.error('Fallback failed:', fallbackError);
+                    throw error;
+                }
+            }
+            throw error;
+        }
+    },
+
+    updateSettings: async (data) => {
+        try {
+            // ابتدا مسیر جدید را امتحان کن
+            const response = await api.post(`${BASE_URL}/settings-update/`, data);
+            return response;
+        } catch (error) {
+            if (error.response?.status === 404) {
+                // اگر مسیر جدید کار نکرد، مسیر settings/update را امتحان کن
+                try {
+                    const response = await api.post(`${BASE_URL}/settings/update/`, data);
+                    return response;
+                } catch (fallbackError) {
+                    console.error('Fallback failed:', fallbackError);
+                    throw error;
+                }
+            }
+            throw error;
+        }
+    },
+
+    // ✅ اضافه کردن متد getSystemSettings (برای سازگاری با نسخه‌های قبلی)
+    getSystemSettings: async () => {
+        return adminService.getSettings();
+    },
+
+    // ✅ اضافه کردن متد updateSystemSettings (برای سازگاری با نسخه‌های قبلی)
+    updateSystemSettings: async (data) => {
+        return adminService.updateSettings(data);
+    },
+
+    // ============================================
+    // ===== ارسال پیامک گروهی با SMS.IR =====
+    // ============================================
+    sendBulkSms: (data) => api.post(`${BASE_URL}/send-bulk-sms/`, data),
+
+    // ============================================
+    // ===== ارسال پیامک زمانبندی شده =====
+    // ============================================
+    sendScheduledSms: (data) => api.post(`${BASE_URL}/send-scheduled-sms/`, data),
 };
 
 // ============================================

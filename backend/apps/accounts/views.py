@@ -32,9 +32,21 @@ from .serializers import (
 )
 from .permissions import IsAdminUser, IsVerifiedUser
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription
-from apps.subscriptions.sms import send_verification_sms
 
 logger = logging.getLogger(__name__)
+
+# ============================================
+# ✅ Import SMS Manager
+# ============================================
+try:
+    from apps.subscriptions.sms import sms_manager
+
+    SMS_MANAGER_AVAILABLE = True
+    logger.info("✅ SMS Manager imported successfully")
+except ImportError as e:
+    logger.error(f"❌ Failed to import SMS manager: {str(e)}")
+    SMS_MANAGER_AVAILABLE = False
+    sms_manager = None
 
 
 # ============================================
@@ -52,6 +64,35 @@ class SendVerificationCodeView(APIView):
                 {'error': 'شماره تلفن الزامی است'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        # ============================================
+        # ✅ بررسی bypass برای ادمین
+        # ============================================
+        admin_bypass_otp = SystemSetting.get_setting('admin_bypass_otp', False)
+        if admin_bypass_otp in (True, 'true', 'True', 1, '1'):
+            try:
+                user = User.objects.get(phone_number=phone_number)
+                if user.is_admin:
+                    # ادمین - ورود مستقیم بدون کد
+                    refresh = RefreshToken.for_user(user)
+                    return Response({
+                        'access': str(refresh.access_token),
+                        'refresh': str(refresh),
+                        'user': {
+                            'id': user.id,
+                            'phone_number': user.phone_number,
+                            'first_name': user.first_name,
+                            'last_name': user.last_name,
+                            'email': user.email,
+                            'is_verified': user.is_verified,
+                            'is_admin': user.is_admin,
+                        },
+                        'is_new_user': False,
+                        'message': 'ورود ادمین با موفقیت انجام شد',
+                        'admin_bypass': True
+                    })
+            except User.DoesNotExist:
+                pass
 
         # تولید کد ۶ رقمی
         verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
@@ -73,31 +114,57 @@ class SendVerificationCodeView(APIView):
             user.is_verified = False
             user.save()
 
-        # ارسال پیامک از طریق قاصدک
-        sms_enabled = getattr(settings, 'SMS_ENABLED', False) and getattr(settings, 'SMS_API_KEY', '')
-        sms_result = None
+        # ============================================
+        # ✅ ارسال پیامک با SMS Manager
+        # ============================================
+        sms_sent = False
+        sms_error = None
 
-        if sms_enabled:
+        if SMS_MANAGER_AVAILABLE and sms_manager:
             try:
-                sms_result = send_verification_sms(phone_number, verification_code)
-                logger.info(f"SMS sent to {phone_number}: {sms_result}")
+                # ✅ استفاده از sms_manager برای ارسال کد تایید
+                result = sms_manager.send_verification_code(phone_number, verification_code)
+                logger.info(f"SMS send result: {result}")
 
-                if sms_result and sms_result.get('status') == 'success':
+                if result and result.get('success'):
+                    sms_sent = True
                     print("✅ پیامک با موفقیت ارسال شد")
                 else:
-                    print(f"⚠️ خطا در ارسال پیامک: {sms_result}")
+                    error_msg = result.get('error', 'Unknown error') if result else 'No result'
+                    sms_error = error_msg
+                    logger.error(f"Failed to send SMS: {error_msg}")
+                    print(f"⚠️ خطا در ارسال پیامک: {error_msg}")
+
             except Exception as e:
                 logger.error(f"Error sending SMS: {str(e)}")
+                sms_error = str(e)
                 print(f"❌ خطا در ارسال پیامک: {str(e)}")
+        else:
+            # ✅ اگر SMS Manager در دسترس نیست، از روش قدیمی استفاده کن
+            try:
+                from apps.subscriptions.sms import send_verification_sms
+                result = send_verification_sms(phone_number, verification_code)
+                if result and result.get('status') == 'success':
+                    sms_sent = True
+                    print("✅ پیامک با موفقیت ارسال شد (legacy)")
+                else:
+                    sms_error = result.get('error', 'Unknown error') if result else 'No result'
+            except Exception as e:
+                logger.error(f"Legacy SMS error: {str(e)}")
+                sms_error = str(e)
 
-        # نمایش کد در کنسول برای دیباگ
+        # ============================================
+        # ✅ نمایش کد در کنسول
+        # ============================================
         print("=" * 60)
         print(f"📱 کد تایید برای شماره {phone_number}:")
         print(f"🔑 {verification_code}")
         print(f"⏱️ این کد تا ۲ دقیقه اعتبار دارد")
+        print(f"📨 وضعیت ارسال پیامک: {'✅ ارسال شد' if sms_sent else '❌ ارسال نشد'}")
+        if sms_error:
+            print(f"⚠️ خطا: {sms_error}")
         print("=" * 60)
 
-        # همیشه پیام موفقیت برگردان (حتی اگر پیامک ارسال نشد)
         return Response({
             'message': 'کد تایید به شماره شما ارسال شد',
             'phone_number': phone_number,
@@ -206,30 +273,25 @@ class RegisterUserView(APIView):
                 user.email = email
             user.save()
 
-            # ============================================
-            # ✅ ایجاد اشتراک آزمایشی
-            # ============================================
+            # ایجاد اشتراک آزمایشی
             trial_days = SystemSetting.get_setting('trial_days', 7)
             try:
                 trial_days = int(trial_days)
             except (ValueError, TypeError):
                 trial_days = 7
 
-            # ابتدا پلن حرفه‌ای با مدت زمان مشخص را بررسی کن
             trial_plan = SubscriptionPlan.objects.filter(
                 plan_type='professional',
                 duration_days=trial_days,
                 is_active=True
             ).first()
 
-            # اگر پلن حرفه‌ای با مدت مشخص وجود نداشت، از پلن پایه استفاده کن
             if not trial_plan:
                 trial_plan = SubscriptionPlan.objects.filter(
                     plan_type='basic',
                     is_active=True
                 ).first()
 
-            # اگر هیچ پلنی وجود نداشت، اولین پلن فعال را بگیر
             if not trial_plan:
                 trial_plan = SubscriptionPlan.objects.filter(is_active=True).first()
 
@@ -249,14 +311,13 @@ class RegisterUserView(APIView):
                         is_active=True,
                         trades_used=0,
                         trades_limit=trial_plan.monthly_trades_limit,
-                        ai_consultations_limit=trial_plan.monthly_ai_consultations_limit,  # ✅ اضافه شد
+                        ai_consultations_limit=trial_plan.monthly_ai_consultations_limit,
                         is_trial=True,
                         payment_status='paid',
                         amount_paid=0
                     )
-                    logger.info(f"✅ Trial subscription created for user {user.phone_number} in RegisterUserView")
+                    logger.info(f"✅ Trial subscription created for user {user.phone_number}")
 
-            # تولید توکن
             refresh = RefreshToken.for_user(user)
 
             return Response({
@@ -367,7 +428,7 @@ class TokenRefreshView(TokenRefreshView):
 
 
 # ============================================
-# پروفایل کاربر – با PUT و PATCH
+# پروفایل کاربر
 # ============================================
 class ProfileView(APIView):
     """مشاهده و ویرایش پروفایل کاربر"""
@@ -378,11 +439,9 @@ class ProfileView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        """به‌روزرسانی کامل پروفایل"""
         return self._update_profile(request, partial=False)
 
     def patch(self, request):
-        """به‌روزرسانی جزئی پروفایل"""
         return self._update_profile(request, partial=True)
 
     def _update_profile(self, request, partial=False):
@@ -452,10 +511,14 @@ class ForgotPasswordView(APIView):
                 user.verification_expiry = expiry
                 user.save()
 
-                sms_enabled = SystemSetting.get_setting('enable_sms', True)
-                if sms_enabled:
+                # ✅ استفاده از sms_manager
+                if SMS_MANAGER_AVAILABLE and sms_manager:
                     try:
-                        send_verification_sms(phone_number, verification_code)
+                        result = sms_manager.send_verification_code(phone_number, verification_code)
+                        if result and result.get('success'):
+                            print("✅ پیامک بازیابی ارسال شد")
+                        else:
+                            print(f"⚠️ خطا در ارسال پیامک بازیابی: {result}")
                     except Exception as e:
                         logger.error(f"Error sending SMS: {str(e)}")
                         if SystemSetting.get_setting('debug_mode', False):
@@ -464,10 +527,15 @@ class ForgotPasswordView(APIView):
                                 'test_code': verification_code
                             }, status=status.HTTP_200_OK)
                 else:
-                    return Response({
-                        'message': 'کد بازیابی ایجاد شد (ارسال پیامک غیرفعال)',
-                        'test_code': verification_code
-                    }, status=status.HTTP_200_OK)
+                    try:
+                        from apps.subscriptions.sms import send_verification_sms
+                        send_verification_sms(phone_number, verification_code)
+                    except:
+                        if SystemSetting.get_setting('debug_mode', False):
+                            return Response({
+                                'message': 'کد بازیابی ایجاد شد (حالت تست)',
+                                'test_code': verification_code
+                            }, status=status.HTTP_200_OK)
 
                 return Response({
                     'message': 'کد بازیابی به شماره شما ارسال شد'
@@ -533,7 +601,6 @@ class SubscriptionStatusView(APIView):
     def get(self, request):
         user = request.user
 
-        # اگر کاربر ادمین است
         if user.is_admin:
             return Response({
                 'has_subscription': True,
@@ -638,22 +705,18 @@ class SystemMessagesView(APIView):
 # ============================================
 # نسخه‌های نرم‌افزار
 # ============================================
-# backend/apps/accounts/views.py
-
-# فقط بخش AppVersionsView را اصلاح می‌کنیم:
-
 class AppVersionsView(APIView):
-    """دریافت تاریخچه نسخه‌های نرم‌افزار - بدون محدودیت"""
+    """دریافت تاریخچه نسخه‌های نرم‌افزار"""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # دریافت همه نسخه‌ها بدون محدودیت
         versions = AppVersion.objects.all().order_by('-release_date')
         serializer = AppVersionSerializer(versions, many=True)
         return Response({
             'results': serializer.data,
             'count': versions.count()
         })
+
 
 class CurrentAppVersionView(APIView):
     """دریافت نسخه فعلی نرم‌افزار"""

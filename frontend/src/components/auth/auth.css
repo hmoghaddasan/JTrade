@@ -1,18 +1,29 @@
 /* frontend/src/components/auth/auth.css */
 
-.auth-container {
+/* ============================================
+   ✅ wrapper جدید برای کل صفحه احراز هویت
+   ============================================ */
+.auth-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.auth-content {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0d47a1, #1a237e);
   padding: 20px;
   position: relative;
+  z-index: 1;
   overflow: hidden;
 }
 
 /* ============================================
-   ✅ بک‌گراند تصویر - بدون محو شدگی
+   ✅ بک‌گراند تصویر
    ============================================ */
 .auth-background {
   position: fixed;
@@ -22,32 +33,514 @@
   bottom: 0;
   z-index: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, #0d47a1, #1a237e); /* Fallback */
+  background: linear-gradient(135deg, #0d47a1, #1a237e);
 }
 
 .auth-background img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 1; /* ← کاملاً مشخص */
-  filter: none; /* ← بدون محو شدگی */
+  opacity: 1;
+  filter: none;
   transition: opacity 0.8s ease;
 }
 
 /* ============================================
-   کارت لاگین
+   کارت لاگین - حالت عادی
    ============================================ */
 .auth-card {
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 16px;
-  padding: 40px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-radius: 16px !important;
+  padding: 28px 32px !important;
+  max-width: 420px !important;
+  width: 100% !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  position: relative !important;
+  z-index: 1 !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+/* ============================================
+   ✅ تم تاریک (Dark Mode) - با !important قوی‌تر
+   ============================================ */
+
+/* ===== کل صفحه ===== */
+.dark.auth-page-wrapper,
+.auth-page-wrapper.dark {
+  background: #0a0a1a !important;
+}
+
+.dark .auth-background,
+.auth-page-wrapper.dark .auth-background {
+  background: linear-gradient(135deg, #0a0a1a, #0d1a3a) !important;
+}
+
+.dark .auth-background img,
+.auth-page-wrapper.dark .auth-background img {
+  opacity: 0.2 !important;
+}
+
+/* ===== کارت لاگین - اصلاح اصلی (رفع مشکل پس‌زمینه سفید) ===== */
+.dark .auth-card,
+.auth-page-wrapper.dark .auth-card {
+  background: rgba(18, 18, 38, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* ===== هدر ===== */
+.dark .auth-header h1,
+.auth-page-wrapper.dark .auth-header h1 {
+  color: #f0f0f0 !important;
+}
+
+.dark .auth-header h2,
+.auth-page-wrapper.dark .auth-header h2 {
+  color: #b0b0b0 !important;
+}
+
+.dark .register-subtitle,
+.auth-page-wrapper.dark .register-subtitle {
+  color: #888 !important;
+}
+
+/* ===== برچسب‌ها ===== */
+.dark .form-group label,
+.auth-page-wrapper.dark .form-group label {
+  color: #ccc !important;
+}
+
+.dark .form-group p,
+.auth-page-wrapper.dark .form-group p {
+  color: #aaa !important;
+}
+
+/* ===== ورودی شماره تلفن ===== */
+.dark .auth-input,
+.auth-page-wrapper.dark .auth-input {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #e8e8e8 !important;
+  caret-color: #7c8bff !important;
+}
+
+.dark .auth-input:focus,
+.auth-page-wrapper.dark .auth-input:focus {
+  border-color: #6c63ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12) !important;
+}
+
+.dark .auth-input::placeholder,
+.auth-page-wrapper.dark .auth-input::placeholder {
+  color: #666 !important;
+}
+
+.dark .auth-input.filled,
+.auth-page-wrapper.dark .auth-input.filled {
+  border-color: #6c63ff !important;
+  background: rgba(108, 99, 255, 0.08) !important;
+}
+
+.dark .auth-input:disabled,
+.auth-page-wrapper.dark .auth-input:disabled {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #555 !important;
+}
+
+/* ===== ورودی کد ۶ رقمی ===== */
+.dark .code-input,
+.auth-page-wrapper.dark .code-input {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #e8e8e8 !important;
+}
+
+.dark .code-input:focus,
+.auth-page-wrapper.dark .code-input:focus {
+  border-color: #6c63ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12) !important;
+}
+
+.dark .code-input.filled,
+.auth-page-wrapper.dark .code-input.filled {
+  border-color: #6c63ff !important;
+  background: rgba(108, 99, 255, 0.12) !important;
+}
+
+.dark .code-input.has-error,
+.auth-page-wrapper.dark .code-input.has-error {
+  border-color: #ef5350 !important;
+  background: rgba(239, 83, 80, 0.12) !important;
+}
+
+/* ===== دکمه اصلی (ارسال کد تایید) ===== */
+.dark .btn-primary,
+.auth-page-wrapper.dark .btn-primary {
+  background: linear-gradient(135deg, #3f51b5, #5c6bc0) !important;
+  color: #ffffff !important;
+}
+
+.dark .btn-primary:hover:not(:disabled),
+.auth-page-wrapper.dark .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 20px rgba(63, 81, 181, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.dark .btn-primary:disabled,
+.auth-page-wrapper.dark .btn-primary:disabled {
+  opacity: 0.5 !important;
+}
+
+/* ===== دکمه ثانویه ===== */
+.dark .btn-secondary,
+.auth-page-wrapper.dark .btn-secondary {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ccc !important;
+}
+
+.dark .btn-secondary:hover:not(:disabled),
+.auth-page-wrapper.dark .btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ===== لینک‌ها ===== */
+.dark .btn-link,
+.auth-page-wrapper.dark .btn-link {
+  color: #7c8bff !important;
+}
+
+.dark .btn-link:hover:not(:disabled),
+.auth-page-wrapper.dark .btn-link:hover:not(:disabled) {
+  color: #9fa8ff !important;
+}
+
+/* ===== فوتر فرم ===== */
+.dark .auth-footer,
+.auth-page-wrapper.dark .auth-footer {
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .auth-footer p,
+.auth-page-wrapper.dark .auth-footer p {
+  color: #888 !important;
+}
+
+.dark .auth-link,
+.auth-page-wrapper.dark .auth-link {
+  color: #7c8bff !important;
+}
+
+.dark .auth-link:hover,
+.auth-page-wrapper.dark .auth-link:hover {
+  color: #9fa8ff !important;
+}
+
+/* ===== نمایش شماره تلفن ===== */
+.dark .phone-display,
+.auth-page-wrapper.dark .phone-display {
+  color: #aaa !important;
+}
+
+.dark .phone-number-ltr,
+.auth-page-wrapper.dark .phone-number-ltr {
+  color: #7c8bff !important;
+}
+
+/* ===== خطاها ===== */
+.dark .error-message,
+.auth-page-wrapper.dark .error-message {
+  background: rgba(239, 83, 80, 0.12) !important;
+  color: #ef9a9a !important;
+  border-right-color: #ef5350 !important;
+}
+
+/* ===== هشدار موبایل ===== */
+.dark .auth-mobile-warning,
+.auth-page-wrapper.dark .auth-mobile-warning {
+  background: rgba(255, 193, 7, 0.08) !important;
+  border-right-color: #f9a825 !important;
+}
+
+.dark .auth-mobile-warning .mobile-warning-text,
+.auth-page-wrapper.dark .auth-mobile-warning .mobile-warning-text {
+  color: #ccc !important;
+}
+
+.dark .auth-mobile-warning .mobile-warning-text strong,
+.auth-page-wrapper.dark .auth-mobile-warning .mobile-warning-text strong {
+  color: #ffd54f !important;
+}
+
+/* ===== هشدار مرورگر داخل کارت ===== */
+.dark .browser-warning-bar,
+.auth-page-wrapper.dark .browser-warning-bar {
+  background: rgba(230, 81, 0, 0.12) !important;
+  border-right-color: #ff6d00 !important;
+}
+
+.dark .browser-warning-text,
+.auth-page-wrapper.dark .browser-warning-text {
+  color: #ccc !important;
+}
+
+.dark .browser-warning-text strong,
+.auth-page-wrapper.dark .browser-warning-text strong {
+  color: #ffab40 !important;
+}
+
+.dark .browser-warning-text span,
+.auth-page-wrapper.dark .browser-warning-text span {
+  color: #aaa !important;
+}
+
+.dark .browser-warning-text span strong,
+.auth-page-wrapper.dark .browser-warning-text span strong {
+  color: #ff6d00 !important;
+}
+
+.dark .browser-warning-close,
+.auth-page-wrapper.dark .browser-warning-close {
+  color: #888 !important;
+}
+
+.dark .browser-warning-close:hover,
+.auth-page-wrapper.dark .browser-warning-close:hover {
+  color: #ccc !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ===== هشدار مرورگر بالای صفحه ===== */
+.dark .browser-warning-bar-top,
+.auth-page-wrapper.dark .browser-warning-bar-top {
+  background: rgba(230, 81, 0, 0.15) !important;
+  border-bottom-color: #ff6d00 !important;
+}
+
+.dark .browser-warning-text-top,
+.auth-page-wrapper.dark .browser-warning-text-top {
+  color: #ccc !important;
+}
+
+.dark .browser-warning-text-top strong,
+.auth-page-wrapper.dark .browser-warning-text-top strong {
+  color: #ffab40 !important;
+}
+
+.dark .browser-warning-text-top span,
+.auth-page-wrapper.dark .browser-warning-text-top span {
+  color: #aaa !important;
+}
+
+.dark .browser-warning-detail-top,
+.auth-page-wrapper.dark .browser-warning-detail-top {
+  background: rgba(230, 81, 0, 0.15) !important;
+  color: #ffab40 !important;
+}
+
+.dark .browser-warning-close-top,
+.auth-page-wrapper.dark .browser-warning-close-top {
+  color: #888 !important;
+}
+
+.dark .browser-warning-close-top:hover,
+.auth-page-wrapper.dark .browser-warning-close-top:hover {
+  color: #ccc !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ===== لوگو ===== */
+.dark .auth-logo-wrapper,
+.auth-page-wrapper.dark .auth-logo-wrapper {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .auth-logo-wrapper:hover,
+.auth-page-wrapper.dark .auth-logo-wrapper:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ============================================
+   ✅ هشدار مرورگر غیرمجاز (حالت عادی)
+   ============================================ */
+.browser-warning-bar {
+  background: #fff3e0;
+  border-radius: 10px;
+  border-right: 4px solid #e65100;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   position: relative;
-  z-index: 1;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.browser-warning-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #888;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-family: inherit;
+}
+
+.browser-warning-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.browser-warning-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+}
+
+.browser-warning-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.browser-warning-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.browser-warning-text strong {
+  color: #1a237e;
+  font-size: 14px;
+}
+
+.browser-warning-text span {
+  color: #666;
+  font-size: 12px;
+}
+
+.browser-warning-text span strong {
+  color: #e65100;
+  font-size: 12px;
+}
+
+/* ============================================
+   ✅ هشدار مرورگر در بالای صفحه
+   ============================================ */
+.browser-warning-bar-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: #fff3e0;
+  border-bottom: 3px solid #e65100;
+  padding: 10px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  animation: slideDownTop 0.4s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes slideDownTop {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.browser-warning-close-top {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #888;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.browser-warning-close-top:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #333;
+}
+
+.browser-warning-content-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.browser-warning-icon-top {
+  font-size: 26px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.browser-warning-text-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.browser-warning-text-top strong {
+  color: #1a237e;
+  font-size: 15px;
+}
+
+.browser-warning-text-top span {
+  color: #666;
+  font-size: 13px;
+}
+
+.browser-warning-detail-top {
+  font-size: 12px !important;
+  color: #e65100 !important;
+  margin-top: 3px;
+  display: block;
+  background: rgba(230, 81, 0, 0.08);
+  padding: 4px 10px;
+  border-radius: 4px;
 }
 
 /* ============================================
@@ -85,23 +578,29 @@
 }
 
 /* ============================================
-   سایر استایل‌ها (بدون تغییر)
+   سایر استایل‌ها (حالت عادی)
    ============================================ */
 .auth-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 16px;
 }
 
 .auth-header h1 {
-  font-size: 24px;
+  font-size: 22px;
   color: #1a237e;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .auth-header h2 {
-  font-size: 20px;
+  font-size: 18px;
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.register-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-top: 2px;
 }
 
 .phone-display {
@@ -124,6 +623,38 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* ============================================
+   ✅ فرم با فاصله عمودی کمتر (برای ثبت‌نام)
+   ============================================ */
+.auth-form.auth-form-compact {
+  gap: 8px !important;
+}
+
+.auth-form.auth-form-compact .form-group {
+  gap: 2px !important;
+  margin-bottom: 0 !important;
+}
+
+.auth-form.auth-form-compact .form-group label {
+  font-size: 13px !important;
+  margin-bottom: 0 !important;
+}
+
+.auth-form.auth-form-compact .auth-input {
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+}
+
+.auth-form.auth-form-compact .btn-primary {
+  margin-top: 4px !important;
+  padding: 10px !important;
+}
+
+.auth-form.auth-form-compact .field-hint {
+  margin-top: 0 !important;
+  font-size: 11px !important;
 }
 
 /* ============================================
@@ -181,6 +712,84 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* ============================================
+   ورودی‌های فرم
+   ============================================ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.auth-input {
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  color: #1a237e;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  border-color: #1a237e;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.1);
+  background: #ffffff;
+}
+
+.auth-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-input.filled {
+  border-color: #1a237e;
+  background: #f0f2ff;
+}
+
+.auth-input.code-input-single {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  height: 60px;
+}
+
+.auth-input.code-input-single.filled {
+  border-color: #1a237e;
+  background: #e8eaf6;
+}
+
+.phone-input-ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.phone-input-ltr::placeholder {
+  direction: ltr;
+  text-align: left;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.field-hint strong {
+  color: #1a237e;
 }
 
 /* ============================================
@@ -256,6 +865,22 @@
 }
 
 /* ============================================
+   دکمه‌ها در یک ردیف (برای ثبت‌نام)
+   ============================================ */
+.auth-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.auth-actions-row .btn-primary {
+  flex: 2;
+}
+
+.auth-actions-row .btn-secondary {
+  flex: 1;
+}
+
+/* ============================================
    ارسال مجدد
    ============================================ */
 .resend-section {
@@ -279,17 +904,157 @@
 }
 
 /* ============================================
-   واکنش‌گرا
+   ✅ استایل‌های لوگو در صفحات احراز هویت
+   ============================================ */
+.auth-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px auto;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  padding: 12px;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.auth-logo-wrapper:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+.auth-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ============================================
+   ✅ فوتر فرم
+   ============================================ */
+.auth-footer {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e8ecf1;
+}
+
+.auth-footer p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.auth-link {
+  color: #1a237e;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-link:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا
    ============================================ */
 @media (max-width: 768px) {
   .auth-card {
-    padding: 28px 20px;
+    padding: 20px 20px !important;
+  }
+
+  .auth-logo-wrapper {
+    width: 64px;
+    height: 64px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .browser-warning-bar {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .browser-warning-text {
+    font-size: 12px;
+  }
+
+  .browser-warning-text strong {
+    font-size: 13px;
+  }
+
+  .browser-warning-text span {
+    font-size: 11px;
+  }
+
+  .browser-warning-icon {
+    font-size: 20px;
+  }
+
+  .browser-warning-close {
+    font-size: 16px;
+  }
+
+  /* اصلاحات ثبت‌نام در موبایل */
+  .auth-actions-row {
+    flex-direction: column;
+  }
+
+  .auth-actions-row .btn-primary,
+  .auth-actions-row .btn-secondary {
+    flex: none;
+    width: 100%;
+  }
+
+  .auth-input.code-input-single {
+    height: 50px !important;
+    font-size: 20px !important;
+    letter-spacing: 6px !important;
+  }
+
+  .auth-form.auth-form-compact {
+    gap: 6px !important;
+  }
+
+  .auth-form.auth-form-compact .auth-input {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+
+  .auth-header h1 {
+    font-size: 20px !important;
+  }
+
+  .auth-header h2 {
+    font-size: 16px !important;
+  }
+
+  .register-subtitle {
+    font-size: 12px !important;
+  }
+
+  .auth-actions-row .btn-primary,
+  .auth-actions-row .btn-secondary {
+    padding: 8px !important;
+    font-size: 13px !important;
+  }
+
+  .dark .auth-card,
+  .auth-page-wrapper.dark .auth-card {
+    background: rgba(14, 14, 30, 0.95) !important;
   }
 }
 
 @media (max-width: 480px) {
   .auth-card {
-    padding: 20px 16px;
+    padding: 16px 16px !important;
   }
 
   .code-input {
@@ -331,6 +1096,89 @@
   .mobile-warning-text strong {
     font-size: 13px;
   }
+
+  .auth-logo-wrapper {
+    width: 56px;
+    height: 56px;
+    padding: 8px;
+    margin-bottom: 6px;
+  }
+
+  .browser-warning-bar {
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .browser-warning-content {
+    gap: 8px;
+  }
+
+  .browser-warning-text {
+    font-size: 11px;
+  }
+
+  .browser-warning-text strong {
+    font-size: 12px;
+  }
+
+  .browser-warning-text span {
+    font-size: 10px;
+  }
+
+  .browser-warning-icon {
+    font-size: 18px;
+  }
+
+  .browser-warning-close {
+    font-size: 14px;
+    padding: 0 4px;
+  }
+
+  /* اصلاحات ثبت‌نام در موبایل کوچک */
+  .auth-card {
+    padding: 16px 16px !important;
+  }
+
+  .auth-form.auth-form-compact {
+    gap: 4px !important;
+  }
+
+  .auth-form.auth-form-compact .auth-input {
+    padding: 5px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .auth-header h1 {
+    font-size: 18px !important;
+  }
+
+  .auth-header h2 {
+    font-size: 15px !important;
+  }
+
+  .register-subtitle {
+    font-size: 11px !important;
+  }
+
+  .auth-footer p {
+    font-size: 13px !important;
+  }
+
+  .auth-link {
+    font-size: 13px !important;
+  }
+
+  .auth-input.code-input-single {
+    height: 44px !important;
+    font-size: 18px !important;
+    letter-spacing: 4px !important;
+  }
+
+  .dark .auth-card,
+  .auth-page-wrapper.dark .auth-card {
+    background: rgba(10, 10, 24, 0.96) !important;
+  }
 }
 
 @media (max-width: 380px) {
@@ -346,6 +1194,26 @@
   }
 
   .auth-card {
-    padding: 16px 12px;
+    padding: 12px 12px;
+  }
+
+  .browser-warning-bar {
+    padding: 6px 10px;
+  }
+
+  .browser-warning-text {
+    font-size: 10px;
+  }
+
+  .browser-warning-text strong {
+    font-size: 11px;
+  }
+
+  .browser-warning-text span {
+    font-size: 10px;
+  }
+
+  .browser-warning-icon {
+    font-size: 16px;
   }
 }

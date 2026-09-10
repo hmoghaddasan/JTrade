@@ -301,9 +301,9 @@
   color: #888;
 }
 
-/* ============================================
-   ✅ ریسپانسیو
-   ============================================ */
+/* ==========================================================
+   ✅ ریسپانسیو - اصلاح کامل هدر و دکمه بازگشت در موبایل
+   ========================================================== */
 
 /* ===== تبلت و موبایل بزرگ ===== */
 @media (max-width: 992px) {
@@ -312,40 +312,64 @@
   }
 }
 
-/* ===== موبایل ===== */
+/* ===== موبایل (تا 768px) ===== */
 @media (max-width: 768px) {
   .analytics-dashboard {
     padding: 12px 16px;
   }
 
-  /* ===== هدر ===== */
+  /* ===== هدر - ستونی ===== */
   .analytics-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding-bottom: 12px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding-bottom: 12px !important;
   }
 
   .analytics-header .header-left {
-    width: 100%;
+    width: 100% !important;
   }
 
   .analytics-header h2 {
-    font-size: 20px;
+    font-size: 20px !important;
   }
 
   .analytics-header .header-subtitle {
-    font-size: 12px;
+    font-size: 12px !important;
   }
 
+  /* ===== کانتینر دکمه‌ها - عرض کامل و ستونی ===== */
   .analytics-header .header-actions {
-    width: 100%;
-    justify-content: flex-start;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    flex-wrap: nowrap !important;
   }
 
+  /* ===== دکمه بازگشت - عرض کامل با متن یک خط ===== */
+  .analytics-header .header-actions .btn-back,
+  .analytics-header .btn-back,
   .btn-back {
-    padding: 6px 14px;
-    font-size: 13px;
+    width: 100% !important;
+    display: block !important;
+    text-align: center !important;
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    flex: none !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    line-height: 1.4 !important;
+    height: auto !important;
+    min-height: 40px !important;
   }
 
   /* ===== تب‌ها ===== */
@@ -371,27 +395,418 @@
   }
 }
 
-/* ===== موبایل کوچک ===== */
+/* ===== موبایل کوچک (تا 480px) ===== */
 @media (max-width: 480px) {
   .analytics-dashboard {
-    padding: 8px 10px;
+    padding: 8px 10px !important;
   }
 
   .analytics-header h2 {
-    font-size: 18px;
+    font-size: 18px !important;
   }
 
   .analytics-header .header-subtitle {
-    font-size: 11px;
+    font-size: 11px !important;
   }
 
   .tab-btn {
-    padding: 6px 10px;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* ===== دکمه بازگشت در موبایل کوچک ===== */
+  .analytics-header .header-actions .btn-back,
+  .analytics-header .btn-back,
+  .btn-back {
+    padding: 10px 10px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    min-height: 38px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* ===== موبایل خیلی کوچک (تا 380px) ===== */
+@media (max-width: 380px) {
+  .analytics-dashboard {
+    padding: 6px 6px !important;
+  }
+
+  .analytics-header h2 {
+    font-size: 16px !important;
+  }
+
+  .analytics-header .header-subtitle {
+    font-size: 10px !important;
+  }
+
+  .tab-btn {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+  }
+
+  /* ===== دکمه بازگشت در موبایل خیلی کوچک ===== */
+  .analytics-header .header-actions .btn-back,
+  .analytics-header .btn-back,
+  .btn-back {
+    padding: 8px 8px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    min-height: 34px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+/* frontend/src/components/analytics/AnalyticsDashboard.css - اضافه کردن به انتهای فایل */
+
+/* ============================================
+   ✅ استایل‌های راهنمای بازشو (Guide)
+   ============================================ */
+
+.analytics-guide-section {
+  background: rgba(26, 35, 126, 0.04);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(26, 35, 126, 0.08);
+}
+
+.dark .analytics-guide-section {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.analytics-guide-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+  transition: background 0.2s ease;
+}
+
+.analytics-guide-header:hover {
+  background: rgba(26, 35, 126, 0.04);
+}
+
+.dark .analytics-guide-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.analytics-guide-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.analytics-guide-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.analytics-guide-toggle {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: transform 0.3s ease;
+}
+
+.analytics-guide-section.open .analytics-guide-toggle {
+  transform: rotate(180deg);
+}
+
+.analytics-guide-content {
+  padding: 0 18px 18px 18px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== استایل‌های محتوای راهنما ===== */
+.analytics-guide-content .guide-intro {
+  background: rgba(26, 35, 126, 0.06);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(26, 35, 126, 0.1);
+}
+
+.dark .analytics-guide-content .guide-intro {
+  background: rgba(144, 202, 249, 0.06);
+  border-color: rgba(144, 202, 249, 0.08);
+}
+
+.analytics-guide-content .guide-intro p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.analytics-guide-content .guide-intro strong {
+  color: var(--primary);
+}
+
+.dark .analytics-guide-content .guide-intro strong {
+  color: #90caf9;
+}
+
+.analytics-guide-content .guide-step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.analytics-guide-content .guide-step:last-child {
+  margin-bottom: 0;
+}
+
+.analytics-guide-content .step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dark .analytics-guide-content .step-number {
+  background: #3949ab;
+}
+
+.analytics-guide-content .guide-step h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.analytics-guide-content .guide-step p {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.analytics-guide-content .guide-step ul {
+  margin: 4px 0 0 0;
+  padding-right: 20px;
+}
+
+.analytics-guide-content .guide-step ul li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+
+.analytics-guide-content .guide-step ul li strong {
+  color: var(--primary);
+}
+
+.dark .analytics-guide-content .guide-step ul li strong {
+  color: #90caf9;
+}
+
+.analytics-guide-content .guide-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  padding: 6px 12px;
+  background: rgba(26, 35, 126, 0.04);
+  border-radius: 6px;
+  border-right: 3px solid var(--primary);
+}
+
+.dark .analytics-guide-content .guide-note {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #90caf9;
+}
+
+/* ===== تیپ‌های مختلف راهنما ===== */
+.analytics-guide-content .guide-tip {
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.analytics-guide-content .guide-tip .tip-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.analytics-guide-content .guide-tip div {
+  flex: 1;
+}
+
+.analytics-guide-content .guide-tip strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.analytics-guide-content .guide-tip ul {
+  margin: 4px 0 0 0;
+  padding-right: 20px;
+}
+
+.analytics-guide-content .guide-tip ul li {
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+
+.analytics-guide-content .guide-tip-important {
+  background: #fff3e0;
+  border-right: 4px solid #e65100;
+}
+
+.dark .analytics-guide-content .guide-tip-important {
+  background: #2e1a0a;
+  border-color: #ff6d00;
+}
+
+.analytics-guide-content .guide-tip-important strong {
+  color: #e65100;
+}
+
+.dark .analytics-guide-content .guide-tip-important strong {
+  color: #ff8a65;
+}
+
+.analytics-guide-content .guide-tip-success {
+  background: #e8f5e9;
+  border-right: 4px solid #2e7d32;
+}
+
+.dark .analytics-guide-content .guide-tip-success {
+  background: #1a2e1a;
+  border-color: #4caf50;
+}
+
+.analytics-guide-content .guide-tip-success strong {
+  color: #2e7d32;
+}
+
+.dark .analytics-guide-content .guide-tip-success strong {
+  color: #81c784;
+}
+
+/* ============================================
+   واکنش‌گرا برای راهنما
+   ============================================ */
+@media (max-width: 768px) {
+  .analytics-guide-header {
+    padding: 10px 14px;
+  }
+
+  .analytics-guide-title {
+    font-size: 14px;
+  }
+
+  .analytics-guide-content {
+    padding: 0 14px 14px 14px;
+  }
+
+  .analytics-guide-content .guide-step {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .analytics-guide-content .guide-step h4 {
+    font-size: 14px;
+  }
+
+  .analytics-guide-content .guide-step p {
+    font-size: 13px;
+  }
+
+  .analytics-guide-content .guide-step ul li {
+    font-size: 12px;
+  }
+
+  .analytics-guide-content .guide-intro {
+    padding: 10px 14px;
+  }
+
+  .analytics-guide-content .guide-intro p {
+    font-size: 13px;
+  }
+
+  .analytics-guide-content .guide-tip {
+    padding: 10px 14px;
+    flex-direction: column;
+  }
+
+  .analytics-guide-content .guide-tip ul li {
+    font-size: 12px;
+  }
+
+  .analytics-guide-content .guide-note {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-guide-header {
+    padding: 8px 12px;
+  }
+
+  .analytics-guide-title {
+    font-size: 13px;
+  }
+
+  .analytics-guide-icon {
+    font-size: 18px;
+  }
+
+  .analytics-guide-toggle {
+    font-size: 16px;
+  }
+
+  .analytics-guide-content {
+    padding: 0 12px 12px 12px;
+  }
+
+  .analytics-guide-content .guide-step h4 {
+    font-size: 13px;
+  }
+
+  .analytics-guide-content .guide-step p {
+    font-size: 12px;
+  }
+
+  .analytics-guide-content .guide-step ul li {
     font-size: 11px;
   }
 
-  .btn-back {
-    padding: 4px 10px;
+  .analytics-guide-content .guide-intro p {
     font-size: 12px;
+  }
+
+  .analytics-guide-content .guide-tip ul li {
+    font-size: 11px;
   }
 }

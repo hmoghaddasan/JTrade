@@ -1,20 +1,17 @@
 # backend/apps/admin_panel/serializers.py
 
-# backend/apps/admin_panel/serializers.py
-
 from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from apps.accounts.models import SystemSetting, AppVersion
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription, DiscountCode, Transaction, DiscountCodeUsage
-from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, Portfolio  # ✅ Portfolio اضافه شد
+from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, Portfolio, Broker
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from .models import AdminActionLog
-from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, Portfolio, Broker
-
 
 User = get_user_model()
+
 
 # ================================
 # ۱. مدیریت کاربران
@@ -130,6 +127,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 class AdminUserUpdateSerializer(serializers.ModelSerializer):
     """سریالایزر ویرایش کاربر توسط ادمین"""
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'is_active', 'is_admin', 'is_verified']
@@ -477,7 +475,7 @@ class AdminAppVersionSerializer(serializers.ModelSerializer):
 
 
 # ================================
-# ۸. مدیریت تنظیمات سیستم
+# ۸. مدیریت تنظیمات سیستم (نسخه نهایی)
 # ================================
 class AdminSystemSettingSerializer(serializers.ModelSerializer):
     """سریالایزر تنظیمات سیستم برای ادمین"""
@@ -496,57 +494,90 @@ class AdminSystemSettingSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):
         categories = {
+            # عمومی
             'app_name': 'عمومی',
             'app_version': 'عمومی',
             'default_font': 'عمومی',
             'primary_color': 'عمومی',
             'secondary_color': 'عمومی',
+
+            # سایت
             'site_email': 'سایت',
             'site_phone': 'سایت',
             'site_address': 'سایت',
             'footer_text': 'سایت',
+
+            # ظاهر
             'logo_path': 'ظاهر',
             'favicon_path': 'ظاهر',
             'bg_image_path': 'ظاهر',
+
+            # ترید
             'max_trades_per_day': 'ترید',
             'min_trade_interval': 'ترید',
             'trial_days': 'ترید',
             'trial_trades_limit': 'ترید',
             'trial_ai_consultations_limit': 'ترید',
+
+            # هوش مصنوعی
             'ai_model': 'هوش مصنوعی',
             'ai_temperature': 'هوش مصنوعی',
             'ai_timeout': 'هوش مصنوعی',
             'ollama_url': 'هوش مصنوعی',
+            'ollama_model': 'هوش مصنوعی',
             'ollama_available_models': 'هوش مصنوعی',
+            'ollama_timeout': 'هوش مصنوعی',
+            'ai_provider_mode': 'هوش مصنوعی',
+            'gapgpt_api_key': 'هوش مصنوعی',
+            'gapgpt_base_url': 'هوش مصنوعی',
+            'gapgpt_default_model': 'هوش مصنوعی',
+            'gapgpt_available_models': 'هوش مصنوعی',
+            'save_ai_prompt': 'هوش مصنوعی',
+
+            # تصاویر
             'max_image_width': 'تصاویر',
             'max_image_height': 'تصاویر',
             'image_quality': 'تصاویر',
             'max_image_size_mb': 'تصاویر',
             'show_screenshot_upload': 'تصاویر',
-            'sms_enabled': 'پیامک',
-            'sms_api_key': 'پیامک',
-            'sms_sender_number': 'پیامک',
-            'sms_otp_template': 'پیامک',
-            'zarinpal_merchant_id': 'پرداخت',
-            'zarinpal_sandbox': 'پرداخت',
-            'zarinpal_callback_url': 'پرداخت',
-            'enable_payment': 'پرداخت',
+
+            # ارائه‌دهنده پیامک (فقط SMS.IR)
+            'sms_provider': 'ارائه‌دهنده پیامک',
+            'smsir_api_key': 'ارائه‌دهنده پیامک',
+            'smsir_line_number': 'ارائه‌دهنده پیامک',
+
+            # پرداخت
+            'zarinpal_merchant_id': 'پرداخت (زرین‌پال)',
+            'zarinpal_sandbox': 'پرداخت (زرین‌پال)',
+            'zarinpal_callback_url': 'پرداخت (زرین‌پال)',
+            'enable_payment': 'پرداخت (زرین‌پال)',
+
+            # قیمت لحظه‌ای
             'live_price_provider': 'قیمت لحظه‌ای',
             'twelvedata_api_key': 'قیمت لحظه‌ای',
             'twelvedata_base_url': 'قیمت لحظه‌ای',
             'finnhub_api_key': 'قیمت لحظه‌ای',
             'finnhub_base_url': 'قیمت لحظه‌ای',
             'alphavantage_api_key': 'قیمت لحظه‌ای',
+
+            # امنیت
             'secret_key': 'امنیت',
             'debug': 'امنیت',
             'allowed_hosts': 'امنیت',
+
+            # دیتابیس
             'db_name': 'دیتابیس',
             'db_user': 'دیتابیس',
             'db_password': 'دیتابیس',
             'db_host': 'دیتابیس',
             'db_port': 'دیتابیس',
+
+            # CORS
             'cors_allowed_origins': 'CORS',
+
+            # ادمین
             'admin_phone_number': 'ادمین',
+            'admin_bypass_otp': 'ادمین',
         }
         return categories.get(obj.setting_key, 'متفرقه')
 
@@ -563,9 +594,9 @@ class AdminSystemSettingSerializer(serializers.ModelSerializer):
 
     def get_is_sensitive(self, obj):
         sensitive_keys = [
-            'secret_key', 'db_password', 'sms_api_key',
+            'secret_key', 'db_password',
             'twelvedata_api_key', 'finnhub_api_key', 'alphavantage_api_key',
-            'zarinpal_merchant_id'
+            'zarinpal_merchant_id', 'gapgpt_api_key', 'smsir_api_key'
         ]
         return obj.setting_key in sensitive_keys
 
@@ -705,16 +736,7 @@ class AdminActionLogSerializer(serializers.ModelSerializer):
 
 
 # ================================
-# ۱۲. مدیریت پلن‌های اشتراک - جدید
-# ================================
-# ================================
-# ۱۲. مدیریت پلن‌های اشتراک - جدید
-# ================================
-# ================================
-# ۱۲. مدیریت پلن‌های اشتراک - جدید
-# ================================
-# ================================
-# ۱۲. مدیریت پلن‌های اشتراک - جدید
+# ۱۲. مدیریت پلن‌های اشتراک
 # ================================
 class AdminSubscriptionPlanSerializer(serializers.ModelSerializer):
     """سریالایزر پلن اشتراک برای ادمین"""
@@ -754,7 +776,6 @@ class AdminSubscriptionPlanSerializer(serializers.ModelSerializer):
         return obj.updated_at.strftime('%Y/%m/%d %H:%M') if obj.updated_at else None
 
     def get_total_subscribers(self, obj):
-        # ✅ استفاده از related_name صحیح: subscriptions
         return obj.subscriptions.count()
 
     def get_active_subscribers(self, obj):
@@ -769,8 +790,9 @@ class AdminSubscriptionPlanSerializer(serializers.ModelSerializer):
         ).aggregate(Sum('amount_paid'))
         return float(result['amount_paid__sum'] or 0)
 
+
 # ================================
-# مدیریت پورتفولیوها (ادمین)
+# ۱۳. مدیریت پورتفولیوها (ادمین)
 # ================================
 class AdminPortfolioSerializer(serializers.ModelSerializer):
     user_phone = serializers.CharField(source='user.phone_number', read_only=True)
@@ -802,8 +824,9 @@ class AdminPortfolioSerializer(serializers.ModelSerializer):
     def get_created_at_fa(self, obj):
         return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
 
+
 # ================================
-# مدیریت بروکرها (کارگزاران) - جدید
+# ۱۴. مدیریت بروکرها (کارگزاران)
 # ================================
 class AdminBrokerSerializer(serializers.ModelSerializer):
     """سریالایزر بروکر برای ادمین"""
@@ -833,4 +856,3 @@ class AdminBrokerSerializer(serializers.ModelSerializer):
 
     def get_updated_at_fa(self, obj):
         return obj.updated_at.strftime('%Y/%m/%d %H:%M') if obj.updated_at else None
-

@@ -10,13 +10,10 @@
   position: relative;
   transition: all 0.3s ease;
 }
-/* frontend/src/components/dashboard/PnLCalendar.css */
 
 /* ============================================
-   ✅ استایل‌های جدید برای هدر جمع‌شونده
+   ✅ استایل‌های هدر جمع‌شونده
    ============================================ */
-
-/* هدر تقویم (قابل کلیک) */
 .pnl-calendar-container .calendar-header {
   display: flex;
   justify-content: space-between;
@@ -117,7 +114,7 @@
 }
 
 .pnl-calendar-container .calendar-body.expanded {
-  max-height: 800px; /* به اندازه کافی بزرگ برای محتوا */
+  max-height: 800px;
   opacity: 1;
   padding: 4px 0 0 0;
 }
@@ -129,92 +126,7 @@
 }
 
 /* ============================================
-   ✅ تنظیمات responsive برای هدر
-   ============================================ */
-@media (max-width: 768px) {
-  .calendar-header-left {
-    gap: 6px;
-  }
-
-  .calendar-title-text {
-    font-size: 13px;
-  }
-
-  .calendar-badge {
-    font-size: 10px;
-    padding: 1px 8px;
-  }
-
-  .calendar-month-badge {
-    font-size: 11px;
-  }
-
-  .calendar-icon {
-    font-size: 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .calendar-header-left {
-    gap: 4px;
-  }
-
-  .calendar-title-text {
-    font-size: 12px;
-  }
-
-  .calendar-badge {
-    font-size: 9px;
-    padding: 0 6px;
-  }
-
-  .calendar-month-badge {
-    font-size: 10px;
-  }
-
-  .calendar-icon {
-    font-size: 14px;
-  }
-
-  .calendar-toggle {
-    font-size: 12px;
-  }
-}
-
-/* ============================================
-   ✅ تنظیمات قبلی بدون تغییر باقی می‌مانند
-   ============================================ */
-/* ... بقیه استایل‌های قبلی (pnl-calendar-container، calendar-grid، calendar-day-cell، legend، tooltip و ...) ... */
-
-/* توجه: استایل‌های قبلی در فایل اصلی وجود دارند و نیازی به تکرار نیست */
-/* ============================================
-   حالت فشرده (Compact)
-   ============================================ */
-.pnl-calendar-container.compact {
-  padding: 8px 12px;
-}
-
-.pnl-calendar-container.compact .calendar-title h3 {
-  font-size: 14px;
-}
-
-.pnl-calendar-container.compact .calendar-month-year {
-  font-size: 12px;
-  padding: 1px 10px;
-}
-
-.pnl-calendar-container.compact .nav-btn {
-  padding: 2px 10px;
-  font-size: 12px;
-}
-
-.pnl-calendar-container.compact .nav-btn.today-btn {
-  font-size: 11px;
-  padding: 2px 12px;
-}
-
-/* ============================================
-   هدر تقویم
+   ✅ هدر تقویم
    ============================================ */
 .pnl-calendar-header {
   display: flex;
@@ -282,7 +194,7 @@
 }
 
 /* ============================================
-   آمار ماه
+   ✅ آمار ماه
    ============================================ */
 .calendar-stats {
   display: flex;
@@ -323,12 +235,6 @@
   color: #c62828;
 }
 
-.stat-change {
-  font-size: 10px;
-  font-weight: 400;
-  color: var(--text-muted, #888);
-}
-
 .win-count {
   color: #2e7d32;
 }
@@ -343,7 +249,7 @@
 }
 
 /* ============================================
-   گرید تقویم
+   ✅ گرید تقویم - افزایش عرض کارت‌ها
    ============================================ */
 .calendar-grid {
   width: 100%;
@@ -352,8 +258,8 @@
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  margin-bottom: 3px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .weekday-cell {
@@ -361,35 +267,42 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary, #666);
-  padding: 3px 0;
+  padding: 4px 0;
 }
 
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 6px;
 }
 
 /* ============================================
-   سلول‌های روز
+   ✅ سلول‌های روز - افزایش عرض حداقل ۱.۵ برابر
    ============================================ */
 .calendar-day-cell {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: all 0.2s ease;
   position: relative;
-  font-size: 13px;
+  font-size: 15px;
   border: 2px solid transparent;
-  min-height: 38px;
+  min-height: 52px;
+  min-width: 50px;
+  padding: 6px 4px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
 }
 
 .calendar-day-cell.compact-cell {
-  border-radius: 4px;
-  font-size: 11px;
-  min-height: 28px;
+  border-radius: 6px;
+  font-size: 13px;
+  min-height: 48px;
+  min-width: 46px;
+  padding: 4px 2px;
+  aspect-ratio: 1 / 1;
 }
 
 .calendar-day-cell.has-date {
@@ -416,7 +329,7 @@
 }
 
 /* ============================================
-   روزهای خارج از ماه (خاکستری بسیار کم رنگ)
+   ✅ روزهای خارج از ماه
    ============================================ */
 .calendar-day-cell.empty {
   background-color: #fafafa !important;
@@ -435,7 +348,7 @@
 }
 
 /* ============================================
-   روزهای بدون ترید (سفید با حاشیه نارنجی)
+   ✅ روزهای بدون ترید
    ============================================ */
 .calendar-day-cell.no-data {
   background-color: #ffffff !important;
@@ -455,7 +368,7 @@
 }
 
 /* ============================================
-   روزهای دارای ترید
+   ✅ روزهای دارای ترید
    ============================================ */
 .calendar-day-cell.positive {
   border-color: #a5d6a7 !important;
@@ -472,21 +385,21 @@
 .day-number {
   font-weight: 500;
   color: var(--text-primary, #333);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .compact-cell .day-number {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .calendar-day-cell .day-profit-indicator {
-  font-size: 7px;
-  margin-top: 1px;
-  opacity: 0.7;
+  font-size: 8px;
+  margin-top: 2px;
+  opacity: 0.8;
 }
 
 .compact-cell .day-profit-indicator {
-  font-size: 6px;
+  font-size: 7px;
 }
 
 .day-profit-indicator.up {
@@ -502,7 +415,7 @@
 }
 
 /* ============================================
-   Legend - راهنمای رنگ (دایره)
+   ✅ Legend - راهنمای رنگ
    ============================================ */
 .calendar-legend {
   display: flex;
@@ -530,7 +443,6 @@
   font-size: 12px;
 }
 
-/* دایره‌های راهنما */
 .legend-dot {
   width: 14px;
   height: 14px;
@@ -568,7 +480,7 @@
 }
 
 /* ============================================
-   Tooltip
+   ✅ Tooltip
    ============================================ */
 .calendar-tooltip {
   position: fixed;
@@ -647,7 +559,7 @@
 }
 
 /* ============================================
-   تاریک (Dark Mode)
+   ✅ تاریک (Dark Mode)
    ============================================ */
 [data-theme='dark'] .pnl-calendar-container {
   background: var(--dark-card-bg, #1e1e1e);
@@ -721,15 +633,18 @@
 }
 
 /* ============================================
-   واکنش‌گرا (Responsive)
+   ✅ واکنش‌گرا (Responsive)
    ============================================ */
 @media (max-width: 1200px) {
-  .pnl-calendar-container.compact .calendar-day-cell {
-    min-height: 32px;
+  .calendar-day-cell {
+    min-height: 48px;
+    min-width: 46px;
+    font-size: 14px;
   }
-
-  .pnl-calendar-container.compact .day-number {
-    font-size: 11px;
+  .calendar-day-cell.compact-cell {
+    min-height: 44px;
+    min-width: 42px;
+    font-size: 12px;
   }
 }
 
@@ -739,16 +654,15 @@
     margin: 2px 2px 2px 2px;
   }
 
-  .pnl-calendar-container.compact .calendar-day-cell {
-    min-height: 36px;
-  }
-
-  .pnl-calendar-container.compact .day-number {
-    font-size: 12px;
-  }
-
   .calendar-day-cell {
-    min-height: 36px;
+    min-height: 46px;
+    min-width: 44px;
+    font-size: 13px;
+  }
+
+  .calendar-day-cell.compact-cell {
+    min-height: 42px;
+    min-width: 40px;
     font-size: 12px;
   }
 
@@ -789,13 +703,24 @@
   }
 
   .calendar-day-cell {
-    min-height: 32px;
+    min-height: 44px;
+    min-width: 40px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .calendar-day-cell.compact-cell {
+    min-height: 40px;
+    min-width: 36px;
     font-size: 11px;
-    border-radius: 4px;
   }
 
   .day-number {
-    font-size: 11px;
+    font-size: 12px;
+  }
+
+  .compact-cell .day-number {
+    font-size: 10px;
   }
 
   .calendar-stats {
@@ -844,21 +769,32 @@
     margin: 2px 2px 2px 2px;
   }
 
-  .pnl-calendar-container.compact .calendar-day-cell {
-    min-height: 28px;
+  .calendar-day-cell {
+    min-height: 40px;
+    min-width: 36px;
+    font-size: 11px;
+    border-radius: 4px;
   }
 
-  .calendar-day-cell {
-    min-height: 28px;
+  .calendar-day-cell.compact-cell {
+    min-height: 36px;
+    min-width: 32px;
     font-size: 10px;
-    border-radius: 3px;
   }
 
   .day-number {
-    font-size: 10px;
+    font-size: 11px;
+  }
+
+  .compact-cell .day-number {
+    font-size: 9px;
   }
 
   .calendar-day-cell .day-profit-indicator {
+    font-size: 6px;
+  }
+
+  .compact-cell .day-profit-indicator {
     font-size: 5px;
   }
 
@@ -914,4 +850,186 @@
   .legend-label {
     font-size: 10px;
   }
+
+  .calendar-header-left {
+    gap: 4px;
+  }
+
+  .calendar-title-text {
+    font-size: 12px;
+  }
+
+  .calendar-badge {
+    font-size: 9px;
+    padding: 0 6px;
+  }
+
+  .calendar-month-badge {
+    font-size: 10px;
+  }
+
+  .calendar-icon {
+    font-size: 14px;
+  }
+
+  .calendar-toggle {
+    font-size: 12px;
+  }
 }
+
+@media (max-width: 380px) {
+  .calendar-day-cell {
+    min-height: 36px;
+    min-width: 32px;
+    font-size: 10px;
+    padding: 2px 1px;
+  }
+
+  .calendar-day-cell.compact-cell {
+    min-height: 32px;
+    min-width: 28px;
+    font-size: 9px;
+  }
+
+  .day-number {
+    font-size: 10px;
+  }
+
+  .compact-cell .day-number {
+    font-size: 8px;
+  }
+
+  .calendar-days {
+    gap: 3px;
+  }
+
+  .calendar-weekdays {
+    gap: 3px;
+  }
+}
+/* frontend/src/components/dashboard/PnLCalendar.css */
+
+/* ============================================
+   ✅ فقط این بخش اصلاح می‌شود - عرض کارت‌های آمار دو برابر
+   ============================================ */
+
+.calendar-stats {
+  display: flex;
+  gap: 30px; /* افزایش فاصله بین کارت‌ها */
+  padding: 6px 0 10px 0;
+  border-bottom: 1px solid var(--border-color, #eee);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.calendar-stats.compact-stats {
+  gap: 20px; /* افزایش فاصله در حالت فشرده */
+  padding: 4px 0 6px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column; /* تغییر به ستونی برای نمایش بهتر */
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px; /* افزایش padding داخلی */
+  min-width: 100px; /* افزایش عرض حداقل */
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e8ecf1);
+}
+
+[data-theme='dark'] .stat-item {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 16px; /* افزایش سایز فونت */
+  font-weight: 700;
+  color: var(--text-primary, #333);
+}
+
+.stat-value.positive {
+  color: #2e7d32;
+}
+
+.stat-value.negative {
+  color: #c62828;
+}
+
+.win-count {
+  color: #2e7d32;
+}
+
+.loss-count {
+  color: #c62828;
+}
+
+.separator {
+  color: var(--text-muted, #888);
+  margin: 0 4px;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا برای کارت‌های آمار
+   ============================================ */
+@media (max-width: 992px) {
+  .stat-item {
+    padding: 6px 12px;
+    min-width: 80px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  .calendar-stats {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-item {
+    padding: 4px 10px;
+    min-width: 70px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+  }
+
+  .calendar-stats {
+    gap: 12px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-item {
+    padding: 3px 8px;
+    min-width: 60px;
+  }
+
+  .stat-value {
+    font-size: 12px;
+  }
+
+  .calendar-stats {
+    gap: 8px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+}
+
+/* ============================================
+   ✅ بقیه استایل‌ها کاملاً بدون تغییر باقی می‌مانند
+   ============================================ */

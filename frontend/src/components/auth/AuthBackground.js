@@ -1,12 +1,15 @@
 // frontend/src/components/auth/AuthBackground.js
 
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
+import AppFooter from '../common/AppFooter';
+import './auth.css';
 
 const AuthBackground = ({ children }) => {
+  const { isDark } = useTheme();
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [totalImages, setTotalImages] = useState(5); // تعداد پیش‌فرض
 
   useEffect(() => {
     const checkMobile = () => {
@@ -17,48 +20,12 @@ const AuthBackground = ({ children }) => {
 
     const updateBackground = async (mobile) => {
       const folder = mobile ? 'vertical' : 'horizontal';
-
-      // ✅ شمارش تعداد عکس‌های موجود
-      const count = await getImageCount(folder);
-      setTotalImages(count);
-
-      // انتخاب تصویر تصادفی از بین عکس‌های موجود
+      const count = 5;
       const imageNumber = Math.floor(Math.random() * count) + 1;
       const imagePath = `/images/login/${folder}/login-${imageNumber}.jpg`;
-      console.log(`🖼️ Loading background image (${imageNumber}/${count}):`, imagePath);
+      console.log(`🖼️ Loading background image:`, imagePath);
       setBackgroundImage(imagePath);
       setImageLoaded(false);
-    };
-
-    // ✅ تابع شمارش فایل‌ها
-    const getImageCount = async (folder) => {
-      try {
-        // تلاش برای دریافت لیست فایل‌ها از سرور
-        const response = await fetch(`/images/login/${folder}/`);
-        if (response.ok) {
-          const text = await response.text();
-          // استخراج تعداد فایل‌های jpg از محتوای HTML
-          const matches = text.match(/login-\d+\.jpg/g);
-          if (matches) {
-            const uniqueNumbers = new Set();
-            matches.forEach(m => {
-              const num = parseInt(m.match(/\d+/)[0]);
-              uniqueNumbers.add(num);
-            });
-            const count = uniqueNumbers.size;
-            console.log(`📁 Found ${count} images in ${folder} folder`);
-            return count > 0 ? count : 5;
-          }
-        }
-      } catch (error) {
-        console.warn('⚠️ Could not count images, using default:', error);
-      }
-
-      // اگر نتوانستیم شمارش کنیم، از تعداد پیش‌فرض استفاده کن
-      // می‌توانی این عدد را به تعداد واقعی عکس‌هایت تغییر دهی
-      const defaultCount = folder === 'vertical' ? 5 : 5;
-      console.log(`📁 Using default count: ${defaultCount} for ${folder}`);
-      return defaultCount;
     };
 
     checkMobile();
@@ -67,7 +34,7 @@ const AuthBackground = ({ children }) => {
   }, []);
 
   return (
-    <div className="auth-container">
+    <div className={`auth-page-wrapper ${isDark ? 'dark' : ''}`}>
       {/* بک‌گراند تصویر */}
       {backgroundImage && (
         <div className="auth-background">
@@ -80,7 +47,6 @@ const AuthBackground = ({ children }) => {
             }}
             onError={() => {
               console.error('❌ Failed to load background image:', backgroundImage);
-              // در صورت خطا، یک تصویر جایگزین با عدد ۱ امتحان کن
               const fallbackPath = backgroundImage.replace(/login-\d+\.jpg/, 'login-1.jpg');
               if (backgroundImage !== fallbackPath) {
                 console.log('🔄 Trying fallback image:', fallbackPath);
@@ -90,7 +56,14 @@ const AuthBackground = ({ children }) => {
           />
         </div>
       )}
-      {children}
+
+      {/* محتوای اصلی */}
+      <div className={`auth-content ${isDark ? 'dark' : ''}`}>
+        {children}
+      </div>
+
+      {/* ===== فوتر در پایین صفحه ===== */}
+      <AppFooter isAuthPage={true} />
     </div>
   );
 };

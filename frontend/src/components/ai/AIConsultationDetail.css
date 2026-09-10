@@ -54,7 +54,7 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 700 !important; /* ✅ بولد */
+  font-weight: 700 !important;
   transition: background 0.2s;
   font-family: inherit;
 }
@@ -109,21 +109,6 @@
 
 .dark .btn-print:hover {
   background: #1b5e20;
-}
-
-@media (max-width: 600px) {
-  .detail-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  .header-actions {
-    width: 100%;
-  }
-  .header-actions button {
-    flex: 1;
-    text-align: center;
-  }
 }
 
 .detail-grid {
@@ -935,7 +920,7 @@
   border: none;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 700 !important; /* ✅ بولد */
+  font-weight: 700 !important;
   cursor: pointer;
   transition: all 0.2s;
   display: inline-flex;
@@ -1087,7 +1072,7 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: 700 !important; /* ✅ بولد */
+  font-weight: 700 !important;
   transition: all 0.2s;
   font-family: inherit;
 }
@@ -1209,7 +1194,7 @@
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 700 !important; /* ✅ بولد */
+  font-weight: 700 !important;
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
@@ -1235,7 +1220,7 @@
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 700 !important; /* ✅ بولد */
+  font-weight: 700 !important;
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
@@ -1409,6 +1394,48 @@
     padding: 12px;
   }
 
+  /* ===== هدر - وسط‌چین در موبایل ===== */
+  .detail-header {
+    flex-direction: column;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+
+  .detail-header h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  /* ===== دکمه‌های هدر - هم‌اندازه در موبایل ===== */
+  .header-actions {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .header-actions button {
+    flex: 1 1 0 !important;
+    min-width: 80px !important;
+    max-width: 200px !important;
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    border-radius: 8px !important;
+  }
+
   .analysis-box {
     padding: 12px 14px;
   }
@@ -1450,5 +1477,68 @@
 
   .detail-header h2 {
     font-size: 18px;
+  }
+}
+
+/* ===== موبایل کوچک (تا 480px) ===== */
+@media (max-width: 480px) {
+  .detail-container {
+    padding: 8px 10px;
+  }
+
+  .detail-header h2 {
+    font-size: 16px;
+  }
+
+  .header-actions {
+    gap: 6px !important;
+  }
+
+  .header-actions button {
+    flex: 1 1 0 !important;
+    min-width: 60px !important;
+    max-width: 160px !important;
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+  }
+
+  .detail-inputs, .detail-outputs {
+    padding: 10px 12px;
+  }
+
+  .detail-inputs h3, .detail-outputs h3 {
+    font-size: 16px;
+  }
+}
+
+/* ===== موبایل خیلی کوچک (تا 360px) ===== */
+@media (max-width: 360px) {
+  .detail-header h2 {
+    font-size: 14px;
+  }
+
+  .header-actions button {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+    min-width: 50px !important;
+    max-width: 120px !important;
+  }
+
+  .score-number {
+    font-size: 28px;
+  }
+
+  .result-card {
+    padding: 8px 10px;
+  }
+
+  .result-card h4 {
+    font-size: 13px;
+  }
+
+  .result-card ul li,
+  .result-card p {
+    font-size: 12px;
   }
 }

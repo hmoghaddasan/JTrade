@@ -188,6 +188,14 @@
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
+/* ============================================
+   ✅ تم تاریک برای محتوای تب‌ها
+   ============================================ */
+.dark .discipline-content {
+    background: #1a1a2e !important;
+    border: 1px solid #333 !important;
+}
+
 /* ===== تب خلاصه ===== */
 .tab-summary .summary-cards {
     display: grid;
@@ -205,6 +213,11 @@
     gap: 12px;
 }
 
+.dark .summary-card {
+    background: #24243a !important;
+    border: 1px solid #333 !important;
+}
+
 .summary-card .card-icon {
     font-size: 28px;
 }
@@ -219,10 +232,18 @@
     color: var(--text-secondary, #888);
 }
 
+.dark .summary-card .card-label {
+    color: #999 !important;
+}
+
 .summary-card .card-value {
     font-size: 20px;
     font-weight: 700;
     color: var(--text-primary, #1a237e);
+}
+
+.dark .summary-card .card-value {
+    color: #e0e0e0 !important;
 }
 
 .summary-card .mini-progress {
@@ -232,6 +253,10 @@
     border-radius: 2px;
     margin-top: 4px;
     overflow: hidden;
+}
+
+.dark .summary-card .mini-progress {
+    background: #333 !important;
 }
 
 .summary-card .mini-fill {
@@ -255,9 +280,19 @@
     font-size: 14px;
 }
 
+.dark .summary-details .detail-row {
+    background: #24243a !important;
+    color: #ccc !important;
+    border: 1px solid #333 !important;
+}
+
 .summary-details .detail-row .danger {
     color: #c62828;
     font-weight: 600;
+}
+
+.dark .summary-details .detail-row .danger {
+    color: #ef5350 !important;
 }
 
 .summary-details .detail-row .success {
@@ -265,8 +300,16 @@
     font-weight: 600;
 }
 
+.dark .summary-details .detail-row .success {
+    color: #66bb6a !important;
+}
+
 .habits-section {
     grid-column: 1 / -1;
+}
+
+.dark .habits-section {
+    color: #ccc !important;
 }
 
 .habits-list {
@@ -283,9 +326,19 @@
     background: #e0e0e0;
 }
 
+.dark .habit-badge {
+    background: #333 !important;
+    color: #ccc !important;
+}
+
 .habit-badge.done {
     background: #c8e6c9;
     color: #2e7d32;
+}
+
+.dark .habit-badge.done {
+    background: #1b3a1b !important;
+    color: #66bb6a !important;
 }
 
 /* ===== تب تنظیمات ===== */
@@ -301,10 +354,19 @@
     border-radius: 12px;
 }
 
+.dark .tab-settings .settings-group {
+    background: #1e1e2f !important;
+    border: 1px solid #333 !important;
+}
+
 .tab-settings .settings-group h4 {
     margin: 0 0 12px 0;
     font-size: 16px;
     color: var(--text-primary, #1a237e);
+}
+
+.dark .tab-settings .settings-group h4 {
+    color: #e0e0e0 !important;
 }
 
 .setting-row {
@@ -319,9 +381,17 @@
     border-bottom: none;
 }
 
+.dark .setting-row {
+    border-bottom-color: #333 !important;
+}
+
 .setting-row label {
     font-size: 14px;
     color: var(--text-secondary, #555);
+}
+
+.dark .setting-row label {
+    color: #ccc !important;
 }
 
 .setting-row input[type="number"] {
@@ -332,10 +402,26 @@
     text-align: center;
 }
 
+.dark .setting-row input[type="number"] {
+    background: #2a2a3d !important;
+    border: 1px solid #444 !important;
+    color: #e0e0e0 !important;
+}
+
+.dark .setting-row input[type="number"]:focus {
+    border-color: #6c63ff !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15) !important;
+}
+
 .setting-row input[type="checkbox"] {
     width: 18px;
     height: 18px;
     cursor: pointer;
+}
+
+.dark .setting-row input[type="checkbox"] {
+    accent-color: #6c63ff !important;
 }
 
 .setting-row.textarea {
@@ -356,6 +442,22 @@
     resize: vertical;
 }
 
+.dark .setting-row.textarea textarea {
+    background: #2a2a3d !important;
+    border: 1px solid #444 !important;
+    color: #e0e0e0 !important;
+}
+
+.dark .setting-row.textarea textarea:focus {
+    border-color: #6c63ff !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15) !important;
+}
+
+.dark .setting-row.textarea textarea::placeholder {
+    color: #666 !important;
+}
+
 .tab-settings .btn-save {
     grid-column: 1 / -1;
     padding: 12px;
@@ -369,13 +471,24 @@
     transition: background 0.2s;
 }
 
-.tab-settings .btn-save:hover {
-    background: #0d47a1;
+.dark .tab-settings .btn-save {
+    background: #3949ab !important;
+    color: #ffffff !important;
+}
+
+.dark .tab-settings .btn-save:hover {
+    background: #5c6bc0 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(57, 73, 171, 0.4);
 }
 
 .tab-settings .btn-save:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.dark .tab-settings .btn-save:disabled {
+    opacity: 0.5 !important;
 }
 
 /* ===== تب گزارش نشت ===== */
@@ -393,10 +506,19 @@
     text-align: center;
 }
 
+.dark .report-card {
+    background: #24243a !important;
+    border: 1px solid #333 !important;
+}
+
 .report-card .report-label {
     font-size: 12px;
     color: var(--text-secondary, #888);
     display: block;
+}
+
+.dark .report-card .report-label {
+    color: #999 !important;
 }
 
 .report-card .report-value {
@@ -405,12 +527,24 @@
     color: var(--text-primary, #1a237e);
 }
 
+.dark .report-card .report-value {
+    color: #e0e0e0 !important;
+}
+
 .report-card .report-value.positive {
     color: #2e7d32;
 }
 
+.dark .report-card .report-value.positive {
+    color: #66bb6a !important;
+}
+
 .report-card .report-value.negative {
     color: #c62828;
+}
+
+.dark .report-card .report-value.negative {
+    color: #ef5350 !important;
 }
 
 .violations-table table {
@@ -426,9 +560,28 @@
     text-align: right;
 }
 
+.dark .violations-table td {
+    border-bottom-color: #333 !important;
+    color: #ccc !important;
+}
+
 .violations-table th {
     background: var(--table-header, #e8eaf6);
     font-weight: 600;
+}
+
+.dark .violations-table th {
+    background: #2a2a3d !important;
+    color: #e0e0e0 !important;
+    border-bottom: 2px solid #444 !important;
+}
+
+.dark .violations-table td {
+    color: #ccc !important;
+}
+
+.violations-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.03) !important;
 }
 
 .recommendations {
@@ -436,6 +589,19 @@
     padding: 16px;
     background: #fff8e1;
     border-radius: 12px;
+}
+
+.dark .recommendations {
+    background: #2a1a0a !important;
+    border: 1px solid #4a3a1a !important;
+}
+
+.dark .recommendations h4 {
+    color: #e0e0e0 !important;
+}
+
+.dark .recommendations ul li {
+    color: #ccc !important;
 }
 
 .recommendations ul {
@@ -481,6 +647,10 @@
     color: rgba(0,0,0,0.6);
 }
 
+.dark .heat-cell .heat-date {
+    color: rgba(255,255,255,0.5) !important;
+}
+
 .heat-cell .heat-value {
     font-size: 14px;
     font-weight: 600;
@@ -491,9 +661,19 @@
     color: #1b5e20;
 }
 
+.dark .heat-green {
+    background: #1b5e20 !important;
+    color: #a5d6a7 !important;
+}
+
 .heat-yellow {
     background: #ffe082;
     color: #e65100;
+}
+
+.dark .heat-yellow {
+    background: #4a3a00 !important;
+    color: #ffe082 !important;
 }
 
 .heat-red {
@@ -501,9 +681,19 @@
     color: #b71c1c;
 }
 
+.dark .heat-red {
+    background: #4a1a1a !important;
+    color: #ef9a9a !important;
+}
+
 .heat-empty {
     background: #e0e0e0;
     color: #999;
+}
+
+.dark .heat-empty {
+    background: #2a2a2a !important;
+    color: #555 !important;
 }
 
 .heatmap-legend {
@@ -511,6 +701,10 @@
     gap: 20px;
     justify-content: center;
     font-size: 14px;
+}
+
+.dark .heatmap-legend {
+    color: #ccc !important;
 }
 
 /* ===== حالت لودینگ و خالی ===== */
@@ -522,7 +716,260 @@
     font-size: 16px;
 }
 
-/* ===== واکنش‌گرایی ===== */
+.dark .tab-loading,
+.dark .tab-empty {
+    color: #999 !important;
+}
+
+/* ============================================
+   ✅ تم تاریک برای راهنما
+   ============================================ */
+.dark .discipline-guide {
+    background: #1a1a2e !important;
+    border-color: #333 !important;
+}
+
+.dark .discipline-guide .guide-toggle {
+    color: #e0e0e0 !important;
+}
+
+.dark .discipline-guide .guide-toggle:hover {
+    background: #24243a !important;
+}
+
+.dark .discipline-guide .guide-content {
+    border-top-color: #333 !important;
+}
+
+.dark .discipline-guide .guide-section {
+    border-bottom-color: #333 !important;
+}
+
+.dark .discipline-guide .guide-section h4 {
+    color: #90caf9 !important;
+}
+
+.dark .discipline-guide .guide-section p {
+    color: #aaa !important;
+}
+
+.dark .discipline-guide .formula-box,
+.dark .discipline-guide .info-box {
+    background: #24243a !important;
+}
+
+.dark .discipline-guide .formula-label,
+.dark .discipline-guide .info-label {
+    color: #e0e0e0 !important;
+}
+
+.dark .discipline-guide .formula-code {
+    background: #0d1b4a !important;
+    color: #e0e0e0 !important;
+}
+
+.dark .discipline-guide .interpretation li {
+    color: #aaa !important;
+}
+
+.dark .discipline-guide .guide-arrow {
+    color: #aaa !important;
+}
+
+/* ============================================
+   ✅ تم تاریک برای تب‌ها
+   ============================================ */
+.dark .discipline-tabs {
+    background: #1a1a2e !important;
+    border: 1px solid #333 !important;
+}
+
+.dark .discipline-tabs .tab-btn {
+    color: #999 !important;
+}
+
+.dark .discipline-tabs .tab-btn.active {
+    background: #24243a !important;
+    color: #e0e0e0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+.dark .discipline-tabs .tab-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.05) !important;
+}
+
+/* ============================================
+   ✅ توضیحات تکمیلی راهنما
+   ============================================ */
+.guide-intro {
+    background: rgba(26, 35, 126, 0.06);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    border: 1px solid rgba(26, 35, 126, 0.1);
+}
+
+.dark .guide-intro {
+    background: rgba(144, 202, 249, 0.06) !important;
+    border-color: rgba(144, 202, 249, 0.08) !important;
+}
+
+.guide-intro p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.dark .guide-intro p {
+    color: #aaa !important;
+}
+
+.guide-intro strong {
+    color: var(--primary, #1a237e);
+}
+
+.dark .guide-intro strong {
+    color: #90caf9 !important;
+}
+
+.guide-extra-info {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px solid var(--border-color, #eee);
+}
+
+.dark .guide-extra-info {
+    border-top-color: #333 !important;
+}
+
+.guide-extra-info .guide-tip {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.guide-extra-info .guide-tip:first-child {
+    margin-top: 0;
+}
+
+.guide-extra-info .guide-tip .tip-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.guide-extra-info .guide-tip div {
+    flex: 1;
+}
+
+.guide-extra-info .guide-tip strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.guide-extra-info .guide-tip ul {
+    margin: 4px 0 0 0;
+    padding-right: 20px;
+}
+
+.guide-extra-info .guide-tip ul li {
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.dark .guide-extra-info .guide-tip ul li {
+    color: #aaa !important;
+}
+
+.guide-extra-info .guide-tip ul li strong {
+    display: inline;
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+/* ===== تیپ‌های مختلف ===== */
+.guide-tip-important {
+    background: #fff3e0;
+    border-right: 4px solid #e65100;
+}
+
+.dark .guide-tip-important {
+    background: #2e1a0a !important;
+    border-color: #ff6d00 !important;
+}
+
+.guide-tip-important strong {
+    color: #e65100;
+}
+
+.dark .guide-tip-important strong {
+    color: #ff8a65 !important;
+}
+
+.guide-tip-success {
+    background: #e8f5e9;
+    border-right: 4px solid #2e7d32;
+}
+
+.dark .guide-tip-success {
+    background: #1a2e1a !important;
+    border-color: #4caf50 !important;
+}
+
+.guide-tip-success strong {
+    color: #2e7d32;
+}
+
+.dark .guide-tip-success strong {
+    color: #81c784 !important;
+}
+
+.guide-tip-warning {
+    background: #ffebee;
+    border-right: 4px solid #c62828;
+}
+
+.dark .guide-tip-warning {
+    background: #2d1a1a !important;
+    border-color: #ef5350 !important;
+}
+
+.guide-tip-warning strong {
+    color: #c62828;
+}
+
+.dark .guide-tip-warning strong {
+    color: #ef9a9a !important;
+}
+
+.guide-tip-info {
+    background: #e3f2fd;
+    border-right: 4px solid #0d47a1;
+}
+
+.dark .guide-tip-info {
+    background: #0d1a3a !important;
+    border-color: #42a5f5 !important;
+}
+
+.guide-tip-info strong {
+    color: #0d47a1;
+}
+
+.dark .guide-tip-info strong {
+    color: #64b5f6 !important;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا
+   ============================================ */
 @media (max-width: 768px) {
     .discipline-header .btn-back {
         font-size: 13px !important;
@@ -556,6 +1003,28 @@
         padding: 2px 8px;
         word-break: break-all;
     }
+
+    .guide-intro p {
+        font-size: 13px;
+    }
+
+    .guide-extra-info .guide-tip {
+        padding: 10px 14px;
+        flex-direction: column;
+    }
+
+    .guide-extra-info .guide-tip ul li {
+        font-size: 12px;
+    }
+
+    .guide-extra-info .guide-tip strong {
+        font-size: 14px;
+    }
+
+    .guide-extra-info {
+        margin-top: 14px;
+        padding-top: 12px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -567,122 +1036,24 @@
     }
 }
 
-/* ===== تم تاریک ===== */
-.dark .discipline-content {
-    background: #1e1e2f;
-}
+@media (max-width: 480px) {
+    .guide-intro p {
+        font-size: 12px;
+    }
 
-.dark .summary-card,
-.dark .settings-group,
-.dark .report-card {
-    background: #2a2a3d;
-}
+    .guide-intro {
+        padding: 10px 12px;
+    }
 
-.dark .summary-card .card-value,
-.dark .settings-group h4,
-.dark .report-card .report-value {
-    color: #e0e0e0;
-}
+    .guide-extra-info .guide-tip {
+        padding: 8px 10px;
+    }
 
-.dark .summary-details .detail-row {
-    background: #2a2a3d;
-}
+    .guide-extra-info .guide-tip ul li {
+        font-size: 11px;
+    }
 
-.dark .discipline-tabs {
-    background: #2a2a3d;
-}
-
-.dark .discipline-tabs .tab-btn.active {
-    background: #3a3a5d;
-    color: #fff;
-}
-
-.dark .heat-green {
-    background: #1b5e20;
-    color: #a5d6a7;
-}
-
-.dark .heat-yellow {
-    background: #4a3a00;
-    color: #ffe082;
-}
-
-.dark .heat-red {
-    background: #4a1a1a;
-    color: #ef9a9a;
-}
-
-.dark .discipline-guide {
-    background: #1e1e2f;
-    border-color: #333;
-}
-
-.dark .discipline-guide .guide-toggle {
-    color: #e0e0e0;
-}
-
-.dark .discipline-guide .guide-toggle:hover {
-    background: #2a2a3d;
-}
-
-.dark .discipline-guide .guide-content {
-    border-top-color: #333;
-}
-
-.dark .discipline-guide .guide-section {
-    border-bottom-color: #333;
-}
-
-.dark .discipline-guide .guide-section h4 {
-    color: #e0e0e0;
-}
-
-.dark .discipline-guide .guide-section p {
-    color: #aaa;
-}
-
-.dark .discipline-guide .formula-box,
-.dark .discipline-guide .info-box {
-    background: #2a2a3d;
-}
-
-.dark .discipline-guide .formula-label,
-.dark .discipline-guide .info-label {
-    color: #e0e0e0;
-}
-
-.dark .discipline-guide .formula-code {
-    background: #0d1b4a;
-    color: #e0e0e0;
-}
-
-.dark .discipline-guide .interpretation li {
-    color: #aaa;
-}
-
-.dark .discipline-guide .guide-arrow {
-    color: #aaa;
-}
-
-.dark .recommendations {
-    background: #2a1a0a;
-}
-
-.dark .tab-loading,
-.dark .tab-empty {
-    color: #aaa;
-}
-
-.dark .violations-table th {
-    background: #2a2a3d;
-    color: #e0e0e0;
-}
-
-.dark .violations-table td {
-    border-bottom-color: #333;
-    color: #ccc;
-}
-
-.dark .discipline-header {
-    border-bottom-color: #333 !important;
+    .guide-extra-info .guide-tip strong {
+        font-size: 13px;
+    }
 }

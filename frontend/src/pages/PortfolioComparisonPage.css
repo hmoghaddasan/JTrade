@@ -1,7 +1,7 @@
 /* frontend/src/pages/PortfolioComparisonPage.css */
 
 /* ============================================
-   Comparison Page - تمام صفحه (اصلاح شده)
+   Comparison Page - تمام صفحه
    ============================================ */
 .comparison-page {
     width: 100%;
@@ -12,13 +12,16 @@
     direction: rtl;
     font-family: inherit;
     box-sizing: border-box;
+    overflow-x: hidden !important;
 }
 
 .comparison-page * {
     box-sizing: border-box;
 }
 
-/* ===== هدر ===== */
+/* ==========================================================
+   ✅ هدر - اصلاح کامل
+   ========================================================== */
 .comparison-page-header {
     display: flex;
     justify-content: space-between;
@@ -30,6 +33,7 @@
     margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 12px;
+    width: 100%;
 }
 
 .header-left {
@@ -45,9 +49,9 @@
     color: var(--text-primary);
 }
 
-/* ============================================
-   هدر راست - دکمه‌ها در یک ردیف
-   ============================================ */
+/* ==========================================================
+   ✅ هدر راست - دکمه‌ها با رنگ مشخص
+   ========================================================== */
 .header-right {
     display: flex;
     align-items: center;
@@ -55,10 +59,35 @@
     flex-shrink: 0;
 }
 
-/* ============================================
-   دکمه‌های هدر - استایل یکسان
-   ============================================ */
-.btn-back,
+/* ===== دکمه بازگشت ===== */
+.btn-back {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    min-width: 80px;
+    white-space: nowrap;
+    background: #e8eaf6 !important;
+    color: #1a237e !important;
+    border: 1px solid #c5cae9 !important;
+}
+
+.btn-back:hover {
+    background: #c5cae9 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 35, 126, 0.2);
+}
+
+/* ===== دکمه چاپ ===== */
 .btn-print {
     padding: 8px 16px;
     border: none;
@@ -75,32 +104,41 @@
     height: 38px;
     min-width: 80px;
     white-space: nowrap;
-}
-
-.btn-back {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-}
-
-.btn-back:hover {
-    background: var(--bg-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.btn-print {
-    background: #2e7d32;
-    color: #fff;
+    background: #2e7d32 !important;
+    color: #ffffff !important;
+    border: 1px solid #1b5e20 !important;
 }
 
 .btn-print:hover {
-    background: #1b5e20;
+    background: #1b5e20 !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
 }
 
-/* ===== انتخاب نوع نمودار ===== */
+/* ===== تم تاریک ===== */
+.dark .btn-back {
+    background: #2d2d44 !important;
+    color: #90caf9 !important;
+    border-color: #444 !important;
+}
+
+.dark .btn-back:hover {
+    background: #3d3d5c !important;
+}
+
+.dark .btn-print {
+    background: #1b5e20 !important;
+    color: #ffffff !important;
+    border-color: #2e7d32 !important;
+}
+
+.dark .btn-print:hover {
+    background: #2e7d32 !important;
+}
+
+/* ==========================================================
+   ✅ کلیدهای انتخاب نوع نمودار
+   ========================================================== */
 .chart-type-selector {
     display: flex;
     gap: 8px;
@@ -110,10 +148,10 @@
 
 .chart-type-btn {
     padding: 8px 20px;
-    border: 1px solid var(--border-color);
+    border: 2px solid #c5cae9 !important;
     border-radius: 8px;
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
+    background: #f5f5f5 !important;
+    color: #555 !important;
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
@@ -122,38 +160,112 @@
 }
 
 .chart-type-btn:hover {
-    background: var(--bg-hover);
+    background: #e8eaf6 !important;
+    border-color: #9fa8da !important;
+    color: #1a237e !important;
 }
 
 .chart-type-btn.active {
-    background: var(--primary-color);
-    color: #fff;
-    border-color: var(--primary-color);
+    background: #1a237e !important;
+    color: #ffffff !important;
+    border-color: #1a237e !important;
+    box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
+}
+
+/* ===== تم تاریک ===== */
+.dark .chart-type-btn {
+    background: #2d2d44 !important;
+    border-color: #555 !important;
+    color: #aaa !important;
+}
+
+.dark .chart-type-btn:hover {
+    background: #3d3d5c !important;
+    border-color: #7986cb !important;
+    color: #e0e0e0 !important;
 }
 
 .dark .chart-type-btn.active {
-    background: #303f9f;
-    border-color: #303f9f;
+    background: #3949ab !important;
+    color: #ffffff !important;
+    border-color: #3949ab !important;
+    box-shadow: 0 2px 8px rgba(57, 73, 171, 0.4);
+}
+
+/* ==========================================================
+   ✅ دکمه راهنما
+   ========================================================== */
+.guide-toggle-wrapper {
+    text-align: right;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.btn-guide-toggle {
+    padding: 8px 18px;
+    border: 2px solid #c5cae9 !important;
+    border-radius: 8px;
+    background: #f5f5f5 !important;
+    color: #555 !important;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-guide-toggle:hover {
+    background: #e8eaf6 !important;
+    border-color: #9fa8da !important;
+    color: #1a237e !important;
+}
+
+.btn-guide-toggle.active {
+    background: #1a237e !important;
+    color: #ffffff !important;
+    border-color: #1a237e !important;
+    box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
+}
+
+/* ===== تم تاریک ===== */
+.dark .btn-guide-toggle {
+    background: #2d2d44 !important;
+    border-color: #555 !important;
+    color: #aaa !important;
+}
+
+.dark .btn-guide-toggle:hover {
+    background: #3d3d5c !important;
+    border-color: #7986cb !important;
+    color: #e0e0e0 !important;
+}
+
+.dark .btn-guide-toggle.active {
+    background: #3949ab !important;
+    color: #ffffff !important;
+    border-color: #3949ab !important;
+    box-shadow: 0 2px 8px rgba(57, 73, 171, 0.4);
 }
 
 /* ===== اطلاعات ترکیبی ===== */
 .combined-info {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
     margin: 16px 0;
-    padding: 16px;
+    padding: 14px;
     background: var(--bg-secondary);
     border-radius: 12px;
     border: 1px solid var(--border-color);
+    width: 100%;
 }
 
 .combined-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 8px;
+    gap: 3px;
+    padding: 6px;
 }
 
 .combined-label {
@@ -163,7 +275,7 @@
 }
 
 .combined-value {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -178,6 +290,7 @@
     color: var(--text-muted);
     gap: 12px;
     text-align: center;
+    width: 100%;
 }
 
 .no-data-message .empty-icon {
@@ -216,42 +329,6 @@
     to { transform: rotate(360deg); }
 }
 
-/* ============================================
-   دکمه راهنما
-   ============================================ */
-.guide-toggle-wrapper {
-    text-align: right;
-    margin-bottom: 12px;
-}
-
-.btn-guide-toggle {
-    padding: 8px 18px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
-    font-family: inherit;
-}
-
-.btn-guide-toggle:hover {
-    background: var(--bg-hover);
-}
-
-.btn-guide-toggle.active {
-    background: var(--primary-color);
-    color: #fff;
-    border-color: var(--primary-color);
-}
-
-.dark .btn-guide-toggle.active {
-    background: #303f9f;
-    border-color: #303f9f;
-}
-
 /* ===== بخش راهنما ===== */
 .guide-container {
     background: var(--bg-secondary);
@@ -260,6 +337,7 @@
     padding: 20px;
     margin-bottom: 20px;
     animation: fadeIn 0.3s ease;
+    width: 100%;
 }
 
 .guide-container h3 {
@@ -274,6 +352,7 @@
 
 .guide-table-wrapper {
     overflow-x: auto;
+    width: 100%;
 }
 
 .guide-table {
@@ -281,6 +360,7 @@
     border-collapse: collapse;
     font-size: 13px;
     direction: rtl;
+    min-width: 600px;
 }
 
 .guide-table thead {
@@ -344,117 +424,342 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================
-   واکنش‌گرایی
-   ============================================ */
+/* ==========================================================
+   ✅ جدول مقایسه کامل - فقط جدول اسکرول می‌خورد
+   ========================================================== */
+.comparison-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden !important;
+}
+
+.comparison-table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.comparison-table-container table {
+    min-width: 700px !important;
+    width: 100% !important;
+}
+
+.comparison-table-container th,
+.comparison-table-container td {
+    white-space: nowrap !important;
+}
+
+/* ==========================================================
+   ✅ اسکرول بار سفارشی برای جدول
+   ========================================================== */
+.comparison-table-container::-webkit-scrollbar {
+    height: 8px !important;
+}
+
+.comparison-table-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary) !important;
+    border-radius: 4px !important;
+}
+
+.dark .comparison-table-container::-webkit-scrollbar-track {
+    background: #1a1a2e !important;
+}
+
+.comparison-table-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #1a237e) !important;
+    border-radius: 4px !important;
+}
+
+.dark .comparison-table-container::-webkit-scrollbar-thumb {
+    background: #0d47a1 !important;
+}
+
+.comparison-table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark, #0d1b5e) !important;
+}
+
+.dark .comparison-table-container::-webkit-scrollbar-thumb:hover {
+    background: #1565c0 !important;
+}
+
+/* ==========================================================
+   ✅ موبایل (تا 768px)
+   ========================================================== */
 @media (max-width: 768px) {
     .comparison-page {
-        padding: 12px 16px;
+        padding: 12px 16px !important;
+        overflow-x: hidden !important;
     }
 
     .comparison-page-header {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px 16px;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 12px 16px !important;
+        gap: 12px !important;
+        width: 100% !important;
     }
 
     .header-left {
-        flex-wrap: wrap;
-        justify-content: center;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .header-left h1 {
-        font-size: 18px;
+        font-size: 18px !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin: 0 !important;
     }
 
     .header-right {
-        width: 100%;
-        justify-content: center;
-        gap: 6px;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     .btn-back,
     .btn-print {
-        font-size: 13px;
-        padding: 6px 12px;
-        height: 34px;
-        min-width: 60px;
-        flex: 0 1 auto;
+        flex: 1 1 0 !important;
+        flex-grow: 1 !important;
+        flex-shrink: 1 !important;
+        flex-basis: 0 !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;
+        padding: 10px 6px !important;
+        font-size: 13px !important;
+        height: 40px !important;
+        border-radius: 8px !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        gap: 4px !important;
+        display: flex !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
     }
 
     .combined-info {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        padding: 10px !important;
+    }
+
+    .combined-value {
+        font-size: 14px !important;
+    }
+
+    .combined-label {
+        font-size: 10px !important;
+    }
+
+    .btn-guide-toggle {
+        font-size: 13px !important;
+        padding: 6px 14px !important;
+        width: 100% !important;
+        text-align: center !important;
     }
 
     .guide-container {
-        padding: 14px;
+        padding: 14px !important;
     }
 
     .guide-table {
-        font-size: 12px;
-        min-width: 500px;
+        font-size: 12px !important;
+        min-width: 500px !important;
     }
 
     .guide-table th,
     .guide-table td {
-        padding: 6px 10px;
+        padding: 6px 10px !important;
     }
 
     .guide-fa,
     .guide-en {
-        white-space: normal;
+        white-space: normal !important;
     }
 
-    .btn-guide-toggle {
-        font-size: 13px;
-        padding: 6px 14px;
-        width: 100%;
-        text-align: center;
+    .comparison-table-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .comparison-table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .comparison-table-container table {
+        min-width: 650px !important;
+        width: 100% !important;
     }
 }
 
+/* ==========================================================
+   ✅ موبایل کوچک (تا 480px)
+   ========================================================== */
 @media (max-width: 480px) {
     .comparison-page {
-        padding: 8px 12px;
+        padding: 8px 10px !important;
+        overflow-x: hidden !important;
     }
 
-    .header-right {
-        flex-direction: column;
-        width: 100%;
+    .header-left h1 {
+        font-size: 16px !important;
     }
 
     .btn-back,
     .btn-print {
-        width: 100%;
-        justify-content: center;
-        min-width: unset;
+        flex: 1 1 0 !important;
+        flex-grow: 1 !important;
+        flex-shrink: 1 !important;
+        flex-basis: 0 !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;
+        padding: 8px 4px !important;
+        font-size: 12px !important;
+        height: 36px !important;
+        border-radius: 6px !important;
+        gap: 3px !important;
     }
 
     .combined-info {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 5px !important;
+        padding: 8px !important;
     }
 
     .combined-value {
-        font-size: 16px;
+        font-size: 13px !important;
+    }
+
+    .combined-label {
+        font-size: 9px !important;
     }
 
     .chart-type-selector {
-        gap: 4px;
+        gap: 4px !important;
     }
 
     .chart-type-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-        flex: 1;
-        text-align: center;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+        flex: 1 !important;
+        text-align: center !important;
     }
 
     .guide-table {
-        min-width: 400px;
+        min-width: 380px !important;
+    }
+
+    .guide-table th,
+    .guide-table td {
+        padding: 4px 6px !important;
+        font-size: 10px !important;
+    }
+
+    .comparison-table-container table {
+        min-width: 550px !important;
     }
 }
 
-/* ===== چاپ ===== */
+/* ==========================================================
+   ✅ موبایل خیلی کوچک (تا 360px)
+   ========================================================== */
+@media (max-width: 360px) {
+    .comparison-page {
+        padding: 6px 6px !important;
+        overflow-x: hidden !important;
+    }
+
+    .header-left h1 {
+        font-size: 14px !important;
+    }
+
+    .btn-back,
+    .btn-print {
+        flex: 1 1 0 !important;
+        flex-grow: 1 !important;
+        flex-shrink: 1 !important;
+        flex-basis: 0 !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;
+        font-size: 10px !important;
+        padding: 6px 3px !important;
+        height: 30px !important;
+        border-radius: 4px !important;
+        gap: 2px !important;
+    }
+
+    .btn-back span,
+    .btn-print span {
+        display: none !important;
+    }
+
+    .btn-back::after {
+        content: "↩️" !important;
+        font-size: 13px !important;
+    }
+
+    .btn-print::after {
+        content: "🖨️" !important;
+        font-size: 13px !important;
+    }
+
+    .combined-info {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 4px !important;
+        padding: 6px !important;
+    }
+
+    .combined-value {
+        font-size: 12px !important;
+    }
+
+    .combined-label {
+        font-size: 8px !important;
+    }
+
+    .chart-type-btn {
+        font-size: 9px !important;
+        padding: 4px 5px !important;
+    }
+
+    .guide-table {
+        min-width: 300px !important;
+    }
+
+    .guide-table th,
+    .guide-table td {
+        padding: 3px 4px !important;
+        font-size: 9px !important;
+    }
+
+    .comparison-table-container table {
+        min-width: 450px !important;
+    }
+}
+
+/* ==========================================================
+   ✅ چاپ
+   ========================================================== */
 @media print {
     .btn-back,
     .btn-print,
@@ -467,6 +772,7 @@
     .comparison-page {
         padding: 0 !important;
         background: #fff !important;
+        overflow: visible !important;
     }
 
     .comparison-page-header {
@@ -477,6 +783,8 @@
 
     .comparison-summary-cards {
         break-inside: avoid;
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
     }
 
     .comparison-chart {
@@ -486,9 +794,389 @@
 
     .comparison-table-container {
         border: 1px solid #ddd !important;
+        overflow: visible !important;
     }
 
     .combined-info {
         border: 1px solid #ddd !important;
+    }
+}
+/* frontend/src/pages/PortfolioComparisonPage.css - اضافه کردن به انتهای فایل */
+
+/* ============================================
+   ✅ دکمه راهنما - تمام عرض
+   ============================================ */
+
+.guide-toggle-wrapper.full-width {
+    width: 100% !important;
+    margin-bottom: 16px !important;
+}
+
+.guide-toggle-wrapper.full-width .btn-guide-toggle {
+    width: 100% !important;
+    padding: 12px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(13, 71, 161, 0.05)) !important;
+    border: 2px solid rgba(26, 35, 126, 0.15) !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.dark .guide-toggle-wrapper.full-width .btn-guide-toggle {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.08), rgba(144, 202, 249, 0.05)) !important;
+    border-color: rgba(144, 202, 249, 0.15) !important;
+}
+
+.guide-toggle-wrapper.full-width .btn-guide-toggle:hover {
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.15), rgba(13, 71, 161, 0.1)) !important;
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 35, 126, 0.15);
+}
+
+.dark .guide-toggle-wrapper.full-width .btn-guide-toggle:hover {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.15), rgba(144, 202, 249, 0.1)) !important;
+    border-color: #64b5f6 !important;
+    box-shadow: 0 4px 16px rgba(144, 202, 249, 0.1);
+}
+
+.guide-toggle-wrapper.full-width .btn-guide-toggle.active {
+    background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
+    color: #ffffff !important;
+    border-color: #1a237e !important;
+    box-shadow: 0 4px 16px rgba(26, 35, 126, 0.3);
+}
+
+.dark .guide-toggle-wrapper.full-width .btn-guide-toggle.active {
+    background: linear-gradient(135deg, #3949ab, #1a237e) !important;
+    border-color: #3949ab !important;
+    box-shadow: 0 4px 16px rgba(57, 73, 171, 0.3);
+}
+
+/* ============================================
+   ✅ توضیحات تکمیلی راهنما
+   ============================================ */
+
+.guide-extra-info {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px solid var(--border-color);
+}
+
+.guide-extra-info .guide-tip {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.guide-extra-info .guide-tip:first-child {
+    margin-top: 0;
+}
+
+.guide-extra-info .guide-tip .tip-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.guide-extra-info .guide-tip div {
+    flex: 1;
+}
+
+.guide-extra-info .guide-tip strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.guide-extra-info .guide-tip ul {
+    margin: 4px 0 0 0;
+    padding-right: 20px;
+}
+
+.guide-extra-info .guide-tip ul li {
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.guide-extra-info .guide-tip ul li strong {
+    display: inline;
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+.guide-extra-info .guide-tip-important {
+    background: #fff3e0;
+    border-right: 4px solid #e65100;
+}
+
+.dark .guide-extra-info .guide-tip-important {
+    background: #2e1a0a;
+    border-color: #ff6d00;
+}
+
+.guide-extra-info .guide-tip-important strong {
+    color: #e65100;
+}
+
+.dark .guide-extra-info .guide-tip-important strong {
+    color: #ff8a65;
+}
+
+.guide-extra-info .guide-tip-success {
+    background: #e8f5e9;
+    border-right: 4px solid #2e7d32;
+}
+
+.dark .guide-extra-info .guide-tip-success {
+    background: #1a2e1a;
+    border-color: #4caf50;
+}
+
+.guide-extra-info .guide-tip-success strong {
+    color: #2e7d32;
+}
+
+.dark .guide-extra-info .guide-tip-success strong {
+    color: #81c784;
+}
+
+.guide-extra-info .guide-tip-warning {
+    background: #ffebee;
+    border-right: 4px solid #c62828;
+}
+
+.dark .guide-extra-info .guide-tip-warning {
+    background: #2d1a1a;
+    border-color: #ef5350;
+}
+
+.guide-extra-info .guide-tip-warning strong {
+    color: #c62828;
+}
+
+.dark .guide-extra-info .guide-tip-warning strong {
+    color: #ef9a9a;
+}
+
+/* ============================================
+   ✅ استایل‌های ستون تفسیر در جدول
+   ============================================ */
+
+.guide-interpretation {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    min-width: 150px;
+}
+
+/* ============================================
+   ✅ معرفی اولیه راهنما
+   ============================================ */
+
+.guide-intro {
+    background: rgba(26, 35, 126, 0.05);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    border: 1px solid rgba(26, 35, 126, 0.08);
+}
+
+.dark .guide-intro {
+    background: rgba(144, 202, 249, 0.05);
+    border-color: rgba(144, 202, 249, 0.08);
+}
+
+.guide-intro p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.guide-intro strong {
+    color: var(--primary);
+}
+
+.dark .guide-intro strong {
+    color: #90caf9;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا
+   ============================================ */
+
+@media (max-width: 768px) {
+    .guide-toggle-wrapper.full-width .btn-guide-toggle {
+        font-size: 14px !important;
+        padding: 10px 14px !important;
+    }
+
+    .guide-interpretation {
+        font-size: 12px;
+        min-width: 100px;
+    }
+
+    .guide-extra-info .guide-tip {
+        padding: 10px 14px;
+        flex-direction: column;
+    }
+
+    .guide-extra-info .guide-tip ul li {
+        font-size: 12px;
+    }
+
+    .guide-extra-info .guide-tip strong {
+        font-size: 14px;
+    }
+
+    .guide-intro p {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .guide-toggle-wrapper.full-width .btn-guide-toggle {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+    }
+
+    .guide-interpretation {
+        font-size: 11px;
+        min-width: 80px;
+    }
+
+    .guide-extra-info .guide-tip {
+        padding: 8px 10px;
+    }
+
+    .guide-extra-info .guide-tip ul li {
+        font-size: 11px;
+    }
+
+    .guide-extra-info .guide-tip strong {
+        font-size: 13px;
+    }
+
+    .guide-intro p {
+        font-size: 12px;
+    }
+
+    .guide-intro {
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .guide-toggle-wrapper.full-width .btn-guide-toggle {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+    }
+
+    .guide-interpretation {
+        font-size: 10px;
+        min-width: 60px;
+    }
+}
+/* frontend/src/pages/PortfolioComparisonPage.css - اصلاح بخش دکمه راهنما */
+
+/* ============================================
+   ✅ دکمه راهنما - تمام عرض و راست‌چین
+   ============================================ */
+
+.guide-toggle-wrapper.full-width {
+    width: 100% !important;
+    margin-bottom: 16px !important;
+}
+
+.guide-toggle-wrapper.full-width .btn-guide-toggle {
+    width: 100% !important;
+    padding: 12px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+    justify-content: flex-start !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(13, 71, 161, 0.05)) !important;
+    border: 2px solid rgba(26, 35, 126, 0.15) !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    direction: rtl !important;
+}
+
+.dark .guide-toggle-wrapper.full-width .btn-guide-toggle {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.08), rgba(144, 202, 249, 0.05)) !important;
+    border-color: rgba(144, 202, 249, 0.15) !important;
+}
+
+.guide-toggle-wrapper.full-width .btn-guide-toggle:hover {
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.15), rgba(13, 71, 161, 0.1)) !important;
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 35, 126, 0.15);
+}
+
+.dark .guide-toggle-wrapper.full-width .btn-guide-toggle:hover {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.15), rgba(144, 202, 249, 0.1)) !important;
+    border-color: #64b5f6 !important;
+    box-shadow: 0 4px 16px rgba(144, 202, 249, 0.1);
+}
+
+.guide-toggle-wrapper.full-width .btn-guide-toggle.active {
+    background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
+    color: #ffffff !important;
+    border-color: #1a237e !important;
+    box-shadow: 0 4px 16px rgba(26, 35, 126, 0.3);
+}
+
+.dark .guide-toggle-wrapper.full-width .btn-guide-toggle.active {
+    background: linear-gradient(135deg, #3949ab, #1a237e) !important;
+    border-color: #3949ab !important;
+    box-shadow: 0 4px 16px rgba(57, 73, 171, 0.3);
+}
+
+/* ============================================
+   ✅ واکنش‌گرا
+   ============================================ */
+
+@media (max-width: 768px) {
+    .guide-toggle-wrapper.full-width .btn-guide-toggle {
+        font-size: 14px !important;
+        padding: 10px 14px !important;
+        text-align: right !important;
+        justify-content: flex-start !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .guide-toggle-wrapper.full-width .btn-guide-toggle {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+        text-align: right !important;
+        justify-content: flex-start !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .guide-toggle-wrapper.full-width .btn-guide-toggle {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+        text-align: right !important;
+        justify-content: flex-start !important;
     }
 }

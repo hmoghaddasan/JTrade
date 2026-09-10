@@ -39,6 +39,21 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // ============================================
+  // ✅ تشخیص اسکرول برای مخفی کردن tooltip
+  // ============================================
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tooltipData) {
+        setTooltipData(null);
+        setHoveredDay(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [tooltipData]);
+
   // محاسبه داده‌های تقویم
   const calendarDays = useMemo(() => {
     return getCalendarData(currentYear, currentMonth, trades);
@@ -57,6 +72,29 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
     return getMonthStats(trades, currentYear, currentMonth);
   }, [trades, currentYear, currentMonth]);
 
+  // ============================================
+  // ✅ نام ماه‌های میلادی به فارسی
+  // ============================================
+  const getGregorianMonthName = (monthIndex) => {
+    const monthNames = [
+      'ژانویه', 'فوریه', 'مارس', 'آوریل', 'مه', 'ژوئن',
+      'ژوئیه', 'اوت', 'سپتامبر', 'اکتبر', 'نوامبر', 'دسامبر'
+    ];
+    return monthNames[monthIndex] || monthNames[0];
+  };
+
+  // ============================================
+  // ✅ تبدیل تاریخ میلادی به فرمت فارسی با اعداد انگلیسی
+  // ============================================
+  const formatGregorianDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}/${month}/${day}`;
+  };
+
   // تعیین تعداد ردیف‌ها بر اساس عرض صفحه
   const getRowCount = () => {
     if (compact) {
@@ -71,15 +109,17 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
   // تعیین اندازه خانه بر اساس عرض صفحه
   const getCellSize = () => {
     if (compact) {
-      if (windowWidth > 1200) return '28px';
-      if (windowWidth > 992) return '32px';
-      if (windowWidth > 768) return '36px';
-      return '40px';
+      if (windowWidth > 1200) return '34px';
+      if (windowWidth > 992) return '38px';
+      if (windowWidth > 768) return '42px';
+      return '46px';
     }
-    return '40px';
+    return '46px';
   };
 
-  // تغییر ماه
+  // ============================================
+  // ✅ تغییر ماه (جای کلیدها عوض شد)
+  // ============================================
   const goToPrevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -104,7 +144,9 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
     setCurrentMonth(today.getMonth());
   };
 
-  // نمایش تولتیپ
+  // ============================================
+  // ✅ نمایش تولتیپ با تاریخ میلادی
+  // ============================================
   const showTooltip = (e, dayData) => {
     if (!dayData.date) return;
 
@@ -127,11 +169,8 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
     }
   };
 
-  // روزهای هفته (مخفف برای حالت فشرده)
-  const weekDaysFull = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
-  const weekDaysShort = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-
-  const weekDays = compact && windowWidth > 992 ? weekDaysShort : weekDaysFull;
+  // روزهای هفته
+  const weekDays = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 
   // بررسی اینکه روز امروز است
   const isToday = (dateStr) => {
@@ -165,7 +204,7 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
             {trades.length} ترید
           </span>
           <span className="calendar-month-badge">
-            {getPersianMonthName(currentMonth)} {currentYear}
+            {getGregorianMonthName(currentMonth)} {currentYear}
           </span>
         </div>
         <div className="calendar-header-right">
@@ -181,18 +220,20 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
         <div className="pnl-calendar-header">
           <div className="calendar-title">
             <span className="calendar-month-year">
-              {getPersianMonthName(currentMonth)} {currentYear}
+              {getGregorianMonthName(currentMonth)} {currentYear}
             </span>
           </div>
           <div className="calendar-nav">
-            <button className="nav-btn" onClick={goToPrevMonth} title="ماه قبل">
-              ◀
+            {/* ✅ کلید بعدی (▶) در سمت چپ */}
+            <button className="nav-btn" onClick={goToNextMonth} title="ماه بعد">
+              ▶
             </button>
             <button className="nav-btn today-btn" onClick={goToToday}>
               امروز
             </button>
-            <button className="nav-btn" onClick={goToNextMonth} title="ماه بعد">
-              ▶
+            {/* ✅ کلید قبلی (◀) در سمت راست */}
+            <button className="nav-btn" onClick={goToPrevMonth} title="ماه قبل">
+              ◀
             </button>
           </div>
         </div>
@@ -307,7 +348,7 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
         </div>
       </div>
 
-      {/* ===== Tooltip ===== */}
+      {/* ===== Tooltip با تاریخ میلادی ===== */}
       {tooltipData && (
         <div
           className="calendar-tooltip"
@@ -318,7 +359,7 @@ const PnLCalendar = ({ trades, onDayClick, selectedDate, compact = true }) => {
           }}
         >
           <div className="tooltip-date">
-            {tooltipData.date ? new Date(tooltipData.date).toLocaleDateString('fa-IR') : ''}
+            {tooltipData.date ? formatGregorianDate(tooltipData.date) : ''}
           </div>
           <div className="tooltip-profit">
             سود روز:

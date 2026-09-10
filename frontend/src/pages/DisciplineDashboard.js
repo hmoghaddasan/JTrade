@@ -335,7 +335,9 @@ const TabHeatmap = ({ heatmap, loading }) => {
     );
 };
 
-// ===== کامپوننت راهنمای بازشونده =====
+// ============================================
+// ✅ کامپوننت راهنمای ابزارهای انضباطی (تکمیل‌شده)
+// ============================================
 const DisciplineGuide = () => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -343,11 +345,19 @@ const DisciplineGuide = () => {
         <div className="discipline-guide">
             <button className="guide-toggle" onClick={() => setIsOpen(!isOpen)}>
                 <span className="guide-icon">📖</span>
-                <span className="guide-title">راهنمای اصطلاحات و فرمول‌ها</span>
+                <span className="guide-title">راهنمای ابزارهای انضباطی</span>
                 <span className="guide-arrow">{isOpen ? '▲' : '▼'}</span>
             </button>
             {isOpen && (
                 <div className="guide-content">
+                    <div className="guide-intro">
+                        <p>
+                            <strong>ابزارهای انضباطی JTrade</strong> شامل ۱۰ شاخص اصلی برای
+                            مدیریت و بهبود انضباط معاملاتی شماست. این ابزارها به شما کمک می‌کنند
+                            تا از تصمیمات احساسی دوری کرده، ریسک خود را کنترل کنید و عملکرد پایدارتری داشته باشید.
+                        </p>
+                    </div>
+
                     <div className="guide-section">
                         <h4>📊 Tiltmeter</h4>
                         <p>
@@ -381,6 +391,14 @@ const DisciplineGuide = () => {
                                 (تعداد تریدهای دارای قانون / کل تریدها) × ۱۰۰
                             </code>
                         </div>
+                        <div className="interpretation">
+                            <span className="interpret-label">تفسیر:</span>
+                            <ul>
+                                <li>🟢 بالای ۸۰%: انضباط عالی</li>
+                                <li>🟡 ۶۰-۸۰%: قابل قبول</li>
+                                <li>🔴 زیر ۶۰%: نیاز به بهبود جدی</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="guide-section">
@@ -392,6 +410,14 @@ const DisciplineGuide = () => {
                             <span className="info-label">مثال:</span>
                             <span>پس از ۲ ضرر متوالی، به‌مدت ۱۵ دقیقه معاملات قفل می‌شوند.</span>
                         </div>
+                        <div className="interpretation">
+                            <span className="interpret-label">کاربرد:</span>
+                            <ul>
+                                <li>🛑 جلوگیری از تصمیمات احساسی</li>
+                                <li>🧠 فرصت برای بازنگری استراتژی</li>
+                                <li>📉 کاهش ضررهای متوالی</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="guide-section">
@@ -399,6 +425,14 @@ const DisciplineGuide = () => {
                         <p>
                             حداکثر ضرر مجاز در یک روز معاملاتی. در صورت رسیدن به این سقف، معاملات تا پایان روز قفل می‌شوند.
                         </p>
+                        <div className="interpretation">
+                            <span className="interpret-label">مزایا:</span>
+                            <ul>
+                                <li>🛡️ محافظت از سرمایه در روزهای بد</li>
+                                <li>🧠 جلوگیری از تصمیمات احساسی</li>
+                                <li>📈 حفظ انضباط بلندمدت</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="guide-section">
@@ -409,6 +443,14 @@ const DisciplineGuide = () => {
                         <div className="info-box">
                             <span className="info-label">نرخ تکمیل چک‌لیست:</span>
                             <span>(چک‌لیست‌های تکمیل‌شده / کل چک‌لیست‌ها) × ۱۰۰</span>
+                        </div>
+                        <div className="interpretation">
+                            <span className="interpret-label">تأثیر:</span>
+                            <ul>
+                                <li>✅ کاهش تصمیمات عجولانه</li>
+                                <li>🎯 افزایش کیفیت معاملات</li>
+                                <li>📊 بهبود نرخ برد</li>
+                            </ul>
                         </div>
                     </div>
 
@@ -423,6 +465,14 @@ const DisciplineGuide = () => {
                                 سود تریدهای باانضباط – سود تریدهای بی‌انضباط
                             </code>
                         </div>
+                        <div className="interpretation">
+                            <span className="interpret-label">کاربرد:</span>
+                            <ul>
+                                <li>💰 محاسبه هزینه واقعی بی‌انضباطی</li>
+                                <li>🎯 شناسایی نقاط ضعف</li>
+                                <li>📈 انگیزه برای بهبود</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="guide-section">
@@ -430,6 +480,14 @@ const DisciplineGuide = () => {
                         <p>
                             نمایش رنگ‌بندی نرخ پایبندی روزانه در تقویم. هر روز با یکی از رنگ‌های 🟢 (عالی)، 🟡 (متوسط) یا 🔴 (ضعیف) مشخص می‌شود.
                         </p>
+                        <div className="interpretation">
+                            <span className="interpret-label">کاربرد:</span>
+                            <ul>
+                                <li>📊 شناسایی الگوهای روزانه</li>
+                                <li>🎯 تشخیص روزهای ضعیف</li>
+                                <li>📈 بهبود مستمر</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="guide-section">
@@ -437,6 +495,119 @@ const DisciplineGuide = () => {
                         <p>
                             عادت‌هایی که کاربر برای بهبود انضباط خود تعریف می‌کند و هر روز تکمیل آن‌ها را ثبت می‌کند.
                         </p>
+                        <div className="interpretation">
+                            <span className="interpret-label">مزایا:</span>
+                            <ul>
+                                <li>🧠 تقویت ذهنیت معاملاتی</li>
+                                <li>📈 بهبود عملکرد روزانه</li>
+                                <li>🔄 ایجاد عادات مثبت پایدار</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* ============================================
+                        ✅ توضیحات تکمیلی
+                        ============================================ */}
+                    <div className="guide-extra-info">
+                        <div className="guide-tip guide-tip-important">
+                            <span className="tip-icon">💡</span>
+                            <div>
+                                <strong>نکات کلیدی برای استفاده از ابزارهای انضباطی:</strong>
+                                <ul>
+                                    <li>
+                                        <strong>ثبات در اجرا:</strong> ابزارهای انضباطی زمانی مؤثر هستند که
+                                        به‌صورت <strong>روزانه و منظم</strong> استفاده شوند.
+                                    </li>
+                                    <li>
+                                        <strong>تنظیمات شخصی‌سازی‌شده:</strong> محدودیت‌ها را بر اساس
+                                        <strong>سبک معاملاتی</strong> و <strong>تحمل ریسک</strong> خود تنظیم کنید.
+                                    </li>
+                                    <li>
+                                        <strong>تغییر تدریجی:</strong> اگر عادت به بی‌انضباطی دارید،
+                                        تغییرات را <strong>گام‌به‌گام</strong> اعمال کنید.
+                                    </li>
+                                    <li>
+                                        <strong>بازخورد مستمر:</strong> گزارش‌ها را به‌صورت <strong>هفتگی</strong>
+                                        بررسی کنید و نقاط ضعف را شناسایی کنید.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-tip guide-tip-success">
+                            <span className="tip-icon">🎯</span>
+                            <div>
+                                <strong>چگونه از ابزارهای انضباطی بهترین استفاده را ببریم؟</strong>
+                                <ul>
+                                    <li>
+                                        <strong>شروع با قوانین ساده:</strong> با <strong>۳-۵ قانون</strong> اساسی شروع کنید
+                                        و به‌تدریج قوانین بیشتری اضافه کنید.
+                                    </li>
+                                    <li>
+                                        <strong>پیگیری روزانه:</strong> هر روز <strong>۵ دقیقه</strong> به بررسی وضعیت انضباط خود اختصاص دهید.
+                                    </li>
+                                    <li>
+                                        <strong>تحلیل هفتگی:</strong> هر هفته <strong>گزارش نشت</strong> را بررسی کنید
+                                        و هزینه بی‌انضباطی خود را محاسبه کنید.
+                                    </li>
+                                    <li>
+                                        <strong>پاداش برای پایبندی:</strong> برای روزهایی که انضباط عالی دارید،
+                                        یک <strong>پاداش کوچک</strong> در نظر بگیرید.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-tip guide-tip-warning">
+                            <span className="tip-icon">⚠️</span>
+                            <div>
+                                <strong>هشدارهای مهم:</strong>
+                                <ul>
+                                    <li>
+                                        <strong>عدم پایبندی:</strong> نقض مکرر قوانین نشان‌دهنده
+                                        <strong>نیاز به بازنگری</strong> در قوانین یا سبک معاملاتی است.
+                                    </li>
+                                    <li>
+                                        <strong>تنظیمات غیرواقعی:</strong> محدودیت‌های بسیار سخت‌گیرانه ممکن است
+                                        باعث <strong>فرسودگی</strong> و کاهش انگیزه شوند.
+                                    </li>
+                                    <li>
+                                        <strong>نادیده گرفتن هشدارها:</strong> نادیده گرفتن هشدارهای Tiltmeter
+                                        معمولاً با <strong>ضررهای بزرگ</strong> همراه است.
+                                    </li>
+                                    <li>
+                                        <strong>عدم بازنگری:</strong> اگر قوانین خود را به‌روز نکنید،
+                                        ممکن است با <strong>شرایط بازار</strong> هماهنگ نباشند.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-tip guide-tip-info">
+                            <span className="tip-icon">📊</span>
+                            <div>
+                                <strong>شاخص‌های ترکیبی و پیشرفته:</strong>
+                                <ul>
+                                    <li>
+                                        <strong>امتیاز انضباط روزانه:</strong> ترکیب
+                                        <strong>Tiltmeter</strong> و <strong>نرخ پایبندی</strong>
+                                        برای ارزیابی روزانه.
+                                    </li>
+                                    <li>
+                                        <strong>هزینه بی‌انضباطی تجمعی:</strong> جمع هزینه بی‌انضباطی در
+                                        <strong>۳۰ روز گذشته</strong>.
+                                    </li>
+                                    <li>
+                                        <strong>روند پایبندی:</strong> تغییرات <strong>نرخ پایبندی</strong>
+                                        در طول زمان برای شناسایی الگوها.
+                                    </li>
+                                    <li>
+                                        <strong>شاخص بازگشت به مسیر:</strong> مدت زمان مورد نیاز برای
+                                        بازگشت به <strong>انضباط عالی</strong> پس از یک دوره بی‌انضباطی.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -499,7 +670,7 @@ const DisciplineDashboard = () => {
 
     return (
         <div className={`discipline-dashboard ${isDark ? 'dark' : 'light'}`}>
-            {/* ===== هدر با دستور قطعی برای چپ‌چین کردن دکمه بازگشت ===== */}
+            {/* ===== هدر ===== */}
             <header style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -510,9 +681,6 @@ const DisciplineDashboard = () => {
                 borderBottom: '1px solid #e0e0e0',
                 marginBottom: '16px'
             }}>
-
-
-                {/* دکمه Refresh - در راست */}
                 <div style={{ order: 2, flex: '0 0 auto', textAlign: 'right' }}>
                     <button
                         onClick={loadAllData}
@@ -538,12 +706,10 @@ const DisciplineDashboard = () => {
                     </button>
                 </div>
 
-                {/* عنوان - در مرکز */}
                 <div style={{ order: 1, flex: '1', textAlign: 'center' }}>
                     <h1 style={{ fontSize: '22px', fontWeight: 700, color: isDark ? '#e0e0e0' : '#1a237e', margin: 0 }}>🛡️ ابزارهای انضباطی</h1>
                 </div>
 
-                {/* دکمه بازگشت - با order: 0 و text-align: left */}
                 <div style={{ order: 0, flex: '0 0 auto', textAlign: 'left' }}>
                     <button
                         onClick={() => navigate('/dashboard')}
@@ -571,7 +737,6 @@ const DisciplineDashboard = () => {
                         ↩️ بازگشت
                     </button>
                 </div>
-
             </header>
 
             {/* ===== راهنمای بازشونده ===== */}

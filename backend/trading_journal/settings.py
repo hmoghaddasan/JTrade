@@ -60,7 +60,96 @@ SECRET_KEY = get_db_setting('secret_key', os.environ.get('SECRET_KEY', 'django-i
 
 DEBUG = get_db_bool('debug', os.environ.get('DEBUG', 'True') == 'True')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,213.108.241.154,c648c6e04a1a').split(',')
+# ==========================================================
+# ✅ ALLOWED_HOSTS - اجازه همه دامنه‌ها (برای تست و رفع خطا)
+# ==========================================================
+ALLOWED_HOSTS = ['*']
+
+# ==========================================================
+# ✅ CSRF_TRUSTED_ORIGINS - برای درخواست‌های POST امن
+# ==========================================================
+CSRF_TRUSTED_ORIGINS = [
+    'https://jotr.ir',
+    'https://www.jotr.ir',
+    'http://jotr.ir',
+    'http://www.jotr.ir',
+    'http://jotr.ir:3000',
+    'http://jotr.ir:8000',
+    'http://www.jotr.ir:3000',
+    'http://www.jotr.ir:8000',
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:8000',
+    'http://213.108.241.154:3000',
+    'http://213.108.241.154:8000',
+]
+
+# ==========================================================
+# ✅ CORS_ALLOWED_ORIGINS - برای درخواست‌های Cross-Origin
+# ==========================================================
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://213.108.241.154:3000',
+    'http://213.108.241.154:8000',
+    'http://213.108.241.154',
+    'http://jotr.ir',
+    'http://www.jotr.ir',
+    'http://jotr.ir:3000',
+    'http://jotr.ir:8000',
+    'http://www.jotr.ir:3000',
+    'http://www.jotr.ir:8000',
+    'https://jotr.ir',
+    'https://www.jotr.ir',
+    'https://jotr.ir:3000',
+    'https://jotr.ir:8000',
+    'https://www.jotr.ir:3000',
+    'https://www.jotr.ir:8000',
+]
+
+# ==========================================================
+# ✅ CORS - تنظیمات کامل (اجازه همه برای تست)
+# ==========================================================
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-consultation-id',
+    'x-total-time',
+    'cache-control',
+]
+
+CORS_EXPOSE_HEADERS = [
+    'x-consultation-id',
+    'x-total-time',
+]
+
+CORS_PREFLIGHT_MAX_AGE = 86400
+
 # ============================================
 # تنظیمات دوره آزمایشی (از دیتابیس با fallback)
 # ============================================
@@ -117,11 +206,23 @@ DB_PASSWORD = get_db_setting('db_password', os.environ.get('DB_PASSWORD', 'po879
 DB_HOST = get_db_setting('db_host', os.environ.get('DB_HOST', 'localhost'))
 DB_PORT = get_db_setting('db_port', os.environ.get('DB_PORT', '3306'))
 
-# -- پیامک (SMS) --
+# ============================================
+# ✅ SMS Providers Settings
+# ============================================
+
+# SMS Provider (ghasedak / smsir / both)
+SMS_PROVIDER = get_db_setting('sms_provider', os.environ.get('SMS_PROVIDER', 'both'))
+
+# Ghasedak SMS Settings
 SMS_ENABLED = get_db_bool('sms_enabled', os.environ.get('SMS_ENABLED', 'False'))
 SMS_API_KEY = get_db_setting('sms_api_key', os.environ.get('SMS_API_KEY', ''))
 SMS_SENDER_NUMBER = get_db_setting('sms_sender_number', os.environ.get('SMS_SENDER_NUMBER', '3000****'))
 SMS_OTP_TEMPLATE = get_db_setting('sms_otp_template', os.environ.get('SMS_OTP_TEMPLATE', 'verifycode'))
+
+# SMS.IR Settings
+SMSIR_API_KEY = get_db_setting('smsir_api_key', os.environ.get('SMSIR_API_KEY', ''))
+SMSIR_LINE_NUMBER = get_db_setting('smsir_line_number', os.environ.get('SMSIR_LINE_NUMBER', ''))
+SMSIR_VERIFY_TEMPLATE_ID = get_db_int('smsir_verify_template_id', int(os.environ.get('SMSIR_VERIFY_TEMPLATE_ID', 123456)))
 
 # -- پرداخت (زرین‌پال) --
 ZARINPAL_MERCHANT_ID = get_db_setting('zarinpal_merchant_id', os.environ.get('ZARINPAL_MERCHANT_ID', 'c9f6ca76-02cf-11e9-a61e-005056a205be'))
@@ -137,67 +238,12 @@ FINNHUB_API_KEY = get_db_setting('finnhub_api_key', os.environ.get('FINNHUB_API_
 FINNHUB_BASE_URL = get_db_setting('finnhub_base_url', os.environ.get('FINNHUB_BASE_URL', 'https://finnhub.io/api/v1'))
 ALPHA_VANTAGE_API_KEY = get_db_setting('alphavantage_api_key', os.environ.get('ALPHA_VANTAGE_API_KEY', ''))
 
-# -- CORS --
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5173,http://127.0.0.1:5173,http://213.108.241.154:3000,http://213.108.241.154:8000,http://213.108.241.154').split(',')
 # -- ادمین --
 ADMIN_PHONE_NUMBER = get_db_setting('admin_phone_number', os.environ.get('ADMIN_PHONE_NUMBER', '09155511393'))
 
 
 # ============================================
-# ✅ تنظیمات CORS (کامل و صحیح - اصلاح شده)
-# ============================================
-# ✅ فعال‌سازی CORS برای همه دامنه‌ها (برای تست)
-CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'x-consultation-id',
-    'x-total-time',
-    'cache-control',
-]
-
-CORS_EXPOSE_HEADERS = [
-    'x-consultation-id',
-    'x-total-time',
-]
-
-CORS_PREFLIGHT_MAX_AGE = 86400
-
-# ✅ برای اطمینان بیشتر، لیست دامنه‌های مجاز
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://213.108.241.154:3000',  # ← اضافه شد
-    'http://213.108.241.154:8000',  # ← اضافه شد
-    'http://213.108.241.154',       # ← اضافه شد
-]
-
-
-# ============================================
-# ✅ تنظیمات لاگ (بهینه‌شده - کاهش نویز)
+# ✅ تنظیمات لاگ (بهینه‌شده - با نمایش لاگ‌های OTP)
 # ============================================
 LOGGING = {
     'version': 1,
@@ -237,32 +283,29 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console', 'file'],
-        'level': 'WARNING',
+        'level': 'INFO',
     },
     'loggers': {
-        # ======== لاگ‌های اصلی Django ========
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
         'django.request': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': False,
         },
         'django.server': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': False,
         },
         'django.security': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': False,
         },
-
-        # ======== لاگ‌های اپلیکیشن‌ها ========
         'apps.trading': {
             'handlers': ['console', 'ai_file', 'file'],
             'level': 'INFO',
@@ -270,26 +313,29 @@ LOGGING = {
         },
         'apps.subscriptions': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
         'apps.accounts': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
         'apps.admin_panel': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
         'apps.messaging': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
-
-        # ======== کتابخانه‌های جانبی ========
+        'apps.import': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'requests': {
             'handlers': ['console', 'file'],
             'level': 'ERROR',
@@ -302,7 +348,7 @@ LOGGING = {
         },
         'celery': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
     },
@@ -454,8 +500,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100,  # ✅ افزایش تعداد آیتم‌ها در هر صفحه
-    'MAX_PAGE_SIZE': 1000,  # ✅ حداکثر تعداد آیتم‌ها در هر صفحه
+    'PAGE_SIZE': 100,
+    'MAX_PAGE_SIZE': 1000,
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
@@ -469,7 +515,6 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
-
 
 
 # ============================================
@@ -501,7 +546,7 @@ ZARINPAL_CALLBACK_URL = os.environ.get('ZARINPAL_CALLBACK_URL', 'http://localhos
 
 
 # ============================================
-# تنظیمات پیامک (SMS)
+# تنظیمات SMS (سازگاری با کدهای قبلی)
 # ============================================
 SMS_API_KEY = os.environ.get('SMS_API_KEY', '')
 SMS_SENDER_NUMBER = os.environ.get('SMS_SENDER_NUMBER', '3000****')

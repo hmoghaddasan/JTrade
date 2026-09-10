@@ -32,39 +32,28 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
     }
   }, [timeLeft]);
 
-  // ============================================
-  // ✅ اصلاح شده - حذف صفر اضافی ابتدای شماره
-  // ============================================
   const formatPhone = (phone) => {
     if (!phone) return '';
 
-    // فقط اعداد را نگه دار
     const cleaned = phone.replace(/[^0-9]/g, '');
     if (cleaned.length === 0) return phone;
 
-    // اگر شماره ۱۱ رقمی است (با صفر ابتدا)، آن را فرمت کن
     if (cleaned.length === 11) {
-      // ۰۹۱۵۵۵۱۱۳۹۳ → ۰۹۱۵ ۵۵۱ ۱۳ ۹۳
-      const firstFour = cleaned.slice(0, 4);   // "0915"
-      const secondThree = cleaned.slice(4, 7); // "551"
-      const thirdTwo = cleaned.slice(7, 9);    // "13"
-      const fourthTwo = cleaned.slice(9, 11);  // "93"
+      const firstFour = cleaned.slice(0, 4);
+      const secondThree = cleaned.slice(4, 7);
+      const thirdTwo = cleaned.slice(7, 9);
+      const fourthTwo = cleaned.slice(9, 11);
       return `۰${firstFour.slice(1)} ${secondThree} ${thirdTwo} ${fourthTwo}`;
-      // خروجی: "۰۹۱۵ ۵۵۱ ۱۳ ۹۳"
     }
 
-    // اگر شماره ۱۰ رقمی است (بدون صفر اول)
     if (cleaned.length === 10) {
-      // ۹۱۵۵۵۱۱۳۹۳ → ۰۹۱۵ ۵۵۱ ۱۳ ۹۳
-      const firstFour = cleaned.slice(0, 4);   // "9155"
-      const secondThree = cleaned.slice(4, 7); // "511"
-      const thirdTwo = cleaned.slice(7, 9);    // "13"
-      const fourthTwo = cleaned.slice(9, 11);  // "93"
+      const firstFour = cleaned.slice(0, 4);
+      const secondThree = cleaned.slice(4, 7);
+      const thirdTwo = cleaned.slice(7, 9);
+      const fourthTwo = cleaned.slice(9, 11);
       return `۰${firstFour} ${secondThree} ${thirdTwo} ${fourthTwo}`;
-      // خروجی: "۰۹۱۵۵ ۵۱۱ ۱۳ ۹۳"
     }
 
-    // در غیر این صورت، شماره را با یک صفر در ابتدا نمایش بده
     return `۰${cleaned}`;
   };
 
@@ -234,7 +223,15 @@ const VerifyCode = ({ onVerifySuccess, onBack }) => {
     <AuthBackground>
       <div className="auth-card">
         <div className="auth-header">
-          <h1>📊 ژورنال حرفه‌ای ترید</h1>
+          {/* ===== ✅ لوگو SVG جایگزین آیکون ===== */}
+          <div className="auth-logo-wrapper">
+            <img
+              src="/logo.svg"
+              alt="JTrade Logo"
+              className="auth-logo"
+            />
+          </div>
+          <h1>ژورنال حرفه‌ای ترید</h1>
           <h2>🔐 تایید کد</h2>
           <p className="phone-display">
             کد تایید به شماره

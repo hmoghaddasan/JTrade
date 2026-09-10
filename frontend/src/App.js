@@ -14,6 +14,14 @@ import RealApiService from './services/realApiService';
 import PortfolioComparisonPage from './pages/PortfolioComparisonPage';
 import DisciplineDashboard from './pages/DisciplineDashboard';
 
+// ===== کامپوننت Layout =====
+import AppLayout from './components/common/AppLayout';
+
+// ===== صفحات جدید =====
+import AboutPage from './pages/AboutPage';
+import TermsPage from './pages/TermsPage';
+import ContactPage from './pages/ContactPage';
+
 // Auth Components
 import LoginStep1 from './components/auth/LoginStep1';
 import VerifyCode from './components/auth/VerifyCode';
@@ -179,13 +187,14 @@ function AppRoutes() {
     }
 
     const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+    const isPublicPage = location.pathname === '/about' || location.pathname === '/terms' || location.pathname === '/contact';
     const isPaymentPage = location.pathname === '/payment/verify/';
     const isRenewPage = location.pathname === '/subscription/renew';
     const isProfilePage = location.pathname === '/profile';
     const isAdminPage = location.pathname.startsWith('/admin');
 
-    if (isPaymentPage || isRenewPage || isAdminPage) {
-      console.log('⏭️ Skipping redirect on payment/renew/admin page');
+    if (isPaymentPage || isRenewPage || isAdminPage || isPublicPage) {
+      console.log('⏭️ Skipping redirect on public/payment/renew/admin page');
       return;
     }
 
@@ -224,7 +233,6 @@ function AppRoutes() {
   if (loading) {
     return (
       <div className="loading-screen">
-        {/* ✅ اسپینر جدید - خطی مینیمال */}
         <div className="loading-bar"></div>
         <p>در حال اتصال به سرور...</p>
       </div>
@@ -242,10 +250,6 @@ function AppRoutes() {
   const handleVerifySuccess = () => {
     console.log('✅ Verification successful');
 
-    // ============================================
-    // ✅ پاک کردن localStorage در لاگین جدید
-    // برای نمایش پیام‌های سیستمی فقط در لاگین جدید
-    // ============================================
     localStorage.removeItem('jtrade_system_messages_data');
     console.log('🗑️ localStorage پیام‌های سیستمی پاک شد');
 
@@ -267,30 +271,125 @@ function AppRoutes() {
   if (isAuthenticated) {
     return (
       <Routes>
-        {/* ===== مسیرهای اصلی کاربر ===== */}
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/subscription/renew" element={<SubscriptionRenewal />} />
-        <Route path="/payment/verify/" element={<PaymentVerify />} />
-        <Route path="/trades" element={<TradeList />} />
-        <Route path="/trades/new" element={<TradeForm />} />
-        <Route path="/trades/edit/:id" element={<TradeEditForm />} />
-        <Route path="/trades/:id" element={<TradeDetail />} />
-        <Route path="/reports" element={<ReportDashboard />} />
-        <Route path="/import" element={<ImportPage />} />
-        <Route path="/discipline" element={<DisciplineDashboard />} />
-        <Route path="/advanced-metrics" element={<AdvancedMetricsReport />} />
-        <Route path="/portfolio-comparison" element={<PortfolioComparisonPage />} />
-        <Route path="/analytics" element={<AnalyticsDashboard />} />
-        <Route path="/messages" element={<MessageList />} />
-        <Route path="/messages/new" element={<MessageForm />} />
-        <Route path="/ai-consultation" element={<AIConsultation />} />
-        <Route path="/ai-history" element={<AIConsultationHistory />} />
-        <Route path="/ai-consultation/:id" element={<AIConsultationDetail />} />
+        {/* ===== مسیرهای اصلی کاربر با Layout ===== */}
+        <Route path="/" element={
+          <AppLayout>
+            <Dashboard />
+          </AppLayout>
+        } />
+        <Route path="/dashboard" element={
+          <AppLayout>
+            <Dashboard />
+          </AppLayout>
+        } />
+        <Route path="/profile" element={
+          <AppLayout>
+            <Profile />
+          </AppLayout>
+        } />
+        <Route path="/about" element={
+          <AppLayout>
+            <AboutPage />
+          </AppLayout>
+        } />
+        <Route path="/contact" element={
+          <AppLayout>
+            <ContactPage />
+          </AppLayout>
+        } />
+        <Route path="/terms" element={
+          <AppLayout>
+            <TermsPage />
+          </AppLayout>
+        } />
+        <Route path="/subscription/renew" element={
+          <AppLayout>
+            <SubscriptionRenewal />
+          </AppLayout>
+        } />
+        <Route path="/payment/verify/" element={
+          <AppLayout>
+            <PaymentVerify />
+          </AppLayout>
+        } />
+        <Route path="/trades" element={
+          <AppLayout>
+            <TradeList />
+          </AppLayout>
+        } />
+        <Route path="/trades/new" element={
+          <AppLayout>
+            <TradeForm />
+          </AppLayout>
+        } />
+        <Route path="/trades/edit/:id" element={
+          <AppLayout>
+            <TradeEditForm />
+          </AppLayout>
+        } />
+        <Route path="/trades/:id" element={
+          <AppLayout>
+            <TradeDetail />
+          </AppLayout>
+        } />
+        <Route path="/reports" element={
+          <AppLayout>
+            <ReportDashboard />
+          </AppLayout>
+        } />
+        <Route path="/import" element={
+          <AppLayout>
+            <ImportPage />
+          </AppLayout>
+        } />
+        <Route path="/discipline" element={
+          <AppLayout>
+            <DisciplineDashboard />
+          </AppLayout>
+        } />
+        <Route path="/advanced-metrics" element={
+          <AppLayout>
+            <AdvancedMetricsReport />
+          </AppLayout>
+        } />
+        <Route path="/portfolio-comparison" element={
+          <AppLayout>
+            <PortfolioComparisonPage />
+          </AppLayout>
+        } />
+        <Route path="/analytics" element={
+          <AppLayout>
+            <AnalyticsDashboard />
+          </AppLayout>
+        } />
+        <Route path="/messages" element={
+          <AppLayout>
+            <MessageList />
+          </AppLayout>
+        } />
+        <Route path="/messages/new" element={
+          <AppLayout>
+            <MessageForm />
+          </AppLayout>
+        } />
+        <Route path="/ai-consultation" element={
+          <AppLayout>
+            <AIConsultation />
+          </AppLayout>
+        } />
+        <Route path="/ai-history" element={
+          <AppLayout>
+            <AIConsultationHistory />
+          </AppLayout>
+        } />
+        <Route path="/ai-consultation/:id" element={
+          <AppLayout>
+            <AIConsultationDetail />
+          </AppLayout>
+        } />
 
         {/* ========================================== */}
-        {/* مسیرهای پنل ادمین */}
+        {/* مسیرهای پنل ادمین - بدون Layout جداگانه */}
         {/* ========================================== */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -326,10 +425,28 @@ function AppRoutes() {
   }
 
   // ============================================
-  // کاربر احراز هویت نشده - نمایش صفحات لاگین
+  // کاربر احراز هویت نشده - نمایش صفحات عمومی + لاگین
   // ============================================
   return (
     <Routes>
+      {/* ===== مسیرهای عمومی (بدون نیاز به لاگین) ===== */}
+      <Route path="/about" element={
+        <AppLayout>
+          <AboutPage />
+        </AppLayout>
+      } />
+      <Route path="/terms" element={
+        <AppLayout>
+          <TermsPage />
+        </AppLayout>
+      } />
+      <Route path="/contact" element={
+        <AppLayout>
+          <ContactPage />
+        </AppLayout>
+      } />
+
+      {/* ===== مسیرهای احراز هویت ===== */}
       <Route
         path="/login"
         element={

@@ -536,6 +536,24 @@ class RealApiService {
   connectWebSocket() {
     return null;
   }
-}
+  // ============================================
+  // ✅ ارسال پیامک گروهی با SMS.IR
+  // ============================================
+  async sendBulkSms(data) {
+    return this.request('/admin/send-bulk-sms/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
 
+  // ============================================
+  // ✅ ارسال پیامک زمانبندی شده
+  // ============================================
+  async sendScheduledSms(data) {
+    return this.request('/admin/send-scheduled-sms/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+}
 export default new RealApiService();

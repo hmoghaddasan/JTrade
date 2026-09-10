@@ -1,0 +1,269 @@
+/* frontend/src/components/common/AppFooter.css */
+
+.app-footer {
+  background: linear-gradient(135deg, #0d47a1, #1a237e);
+  padding: 16px 24px;
+  margin-top: auto;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+/* ============================================
+   ✅ حالت شفاف برای صفحات احراز هویت
+   ============================================ */
+.app-footer.auth-footer {
+  background: rgba(13, 71, 161, 0.25) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px 24px 0 0 !important;
+}
+
+.app-footer.auth-footer .footer-copyright {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.app-footer.auth-footer .footer-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.app-footer.auth-footer .footer-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.app-footer.auth-footer .footer-divider {
+  color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ============================================
+   ✅ حالت تاریک برای فوتر شفاف
+   ============================================ */
+.app-footer.auth-footer.dark {
+  background: rgba(10, 26, 58, 0.3) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.app-footer.auth-footer.dark .footer-copyright {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.app-footer.auth-footer.dark .footer-link {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.app-footer.auth-footer.dark .footer-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ============================================
+   بخش‌های اصلی فوتر
+   ============================================ */
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.footer-copyright {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-icon {
+  font-size: 14px;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.footer-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.footer-divider {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+}
+
+/* ===== بخش راست - اینماد ===== */
+.footer-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.footer-right a {
+  display: inline-block;
+  line-height: 0;
+}
+
+.footer-right img {
+  display: block;
+  height: 60px;
+  width: auto;
+}
+
+/* ============================================
+   ✅ حالت تاریک (سایر صفحات)
+   ============================================ */
+.app-footer.dark {
+  background: linear-gradient(135deg, #0a1a3a, #0d2137);
+}
+
+.app-footer.dark .footer-copyright {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.app-footer.dark .footer-link {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.app-footer.dark .footer-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   ✅ واکنش‌گرا (Responsive)
+   ============================================ */
+@media (max-width: 768px) {
+  .app-footer {
+    padding: 12px 16px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .app-footer.auth-footer {
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-left {
+    align-items: center;
+  }
+
+  .footer-copyright {
+    font-size: 12px;
+  }
+
+  .footer-links {
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .footer-link {
+    font-size: 13px;
+    padding: 4px 6px;
+  }
+
+  .footer-divider {
+    font-size: 12px;
+  }
+
+  .footer-right {
+    justify-content: center;
+  }
+
+  .footer-right img {
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-footer {
+    padding: 10px 12px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .app-footer.auth-footer {
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  .footer-copyright {
+    font-size: 11px;
+  }
+
+  .footer-link {
+    font-size: 12px;
+    padding: 3px 5px;
+  }
+
+  .footer-divider {
+    font-size: 11px;
+  }
+
+  .footer-right img {
+    height: 45px;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-footer {
+    padding: 8px 10px;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .app-footer.auth-footer {
+    border-radius: 10px 10px 0 0 !important;
+  }
+
+  .footer-copyright {
+    font-size: 10px;
+  }
+
+  .footer-link {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  .footer-divider {
+    font-size: 10px;
+  }
+
+  .footer-right img {
+    height: 40px;
+  }
+}

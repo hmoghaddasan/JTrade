@@ -156,6 +156,13 @@ const AIConsultation = () => {
     volume: '',
   });
 
+  // ===== Stateهای مربوط به جستجوی نماد (AutoComplete) =====
+  const [symbolSearch, setSymbolSearch] = useState('');
+  const [showSymbolList, setShowSymbolList] = useState(false);
+  const [filteredSymbols, setFilteredSymbols] = useState([]);
+  const symbolInputRef = useRef(null);
+  const symbolListRef = useRef(null);
+
   const [symbols, setSymbols] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
 
@@ -276,7 +283,6 @@ const AIConsultation = () => {
   // ✅ تابع دریافت لیست مدل‌ها با کش (ذخیره در localStorage)
   // ============================================
   const fetchModels = async (forceRefresh = false) => {
-    // بررسی کش در localStorage
     const cachedData = localStorage.getItem(MODELS_CACHE_KEY);
     const now = Date.now();
 
@@ -292,7 +298,6 @@ const AIConsultation = () => {
           setModelsLastFetched(timestamp);
           setModelsLoading(false);
 
-          // انتخاب مدل پیش‌فرض
           const defaultModel = models.find(m => m.is_default) || models[0];
           if (defaultModel && !selectedModel) {
             setSelectedModel(defaultModel.id);
@@ -304,7 +309,6 @@ const AIConsultation = () => {
       }
     }
 
-    // دریافت از سرور
     setModelsLoading(true);
     setIsRefreshingModels(true);
 
@@ -349,7 +353,6 @@ const AIConsultation = () => {
 
       if (processedModels.length > 0) {
         setAvailableModels(processedModels);
-        // ذخیره در localStorage
         localStorage.setItem(MODELS_CACHE_KEY, JSON.stringify({
           models: processedModels,
           timestamp: now
@@ -361,7 +364,6 @@ const AIConsultation = () => {
           setSelectedModel(defaultModel.id);
         }
       } else {
-        // Fallback
         const fallback = [
           { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true, short_name: 'Ollama' },
           { id: 'o4-mini', name: 'o4-mini', provider: 'gapgpt', display_name: 'Gapgpt', online: true, free: true, category: 'free', category_label: '🟢 آنلاین', cooldown: 10, is_default: false, short_name: 'o4-mini' },
@@ -378,7 +380,6 @@ const AIConsultation = () => {
       }
     } catch (error) {
       console.error('❌ Error loading models:', error);
-      // Fallback
       const fallback = [
         { id: 'llama3.1:8b', name: 'Llama 3.1 8B', provider: 'ollama', display_name: 'Ollama', online: false, free: true, category: 'local', category_label: '🟣 محلی', cooldown: 5, is_default: true, short_name: 'Ollama' },
         { id: 'o4-mini', name: 'o4-mini', provider: 'gapgpt', display_name: 'Gapgpt', online: true, free: true, category: 'free', category_label: '🟢 آنلاین', cooldown: 10, is_default: false, short_name: 'o4-mini' },
@@ -402,7 +403,7 @@ const AIConsultation = () => {
   }, []);
 
   // ============================================
-  // ✅ تابع رفرش دستی مدل‌ها (با دکمه) - با غیرفعال‌سازی
+  // ✅ تابع رفرش دستی مدل‌ها (با دکمه)
   // ============================================
   const handleRefreshModels = () => {
     if (isRefreshingModels || modelsLoading) {
@@ -411,6 +412,101 @@ const AIConsultation = () => {
     }
     showToast('🔄 در حال بروزرسانی لیست مدل‌ها...', 'info');
     fetchModels(true);
+  };
+
+  // ============================================
+  // ✅ فیلتر کردن نمادها بر اساس جستجو (AutoComplete)
+  // ============================================
+  useEffect(() => {
+    if (symbolSearch.trim().length > 0) {
+      const filtered = symbols.filter(s =>
+        s.toLowerCase().includes(symbolSearch.toLowerCase())
+      );
+      setFilteredSymbols(filtered.slice(0, 20));
+    } else {
+      setFilteredSymbols(symbols.slice(0, 20));
+    }
+  }, [symbolSearch, symbols]);
+
+  // ============================================
+  // ✅ بستن لیست نمادها با کلیک خارج
+  // ============================================
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (symbolListRef.current && !symbolListRef.current.contains(event.target) &&
+          symbolInputRef.current && !symbolInputRef.current.contains(event.target)) {
+        setShowSymbolList(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ============================================
+  // ✅ بستن لیست نمادها با کلید ESC
+  // ============================================
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowSymbolList(false);
+        symbolInputRef.current?.blur();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // ============================================
+  // ✅ توابع مربوط به جستجوی نماد (AutoComplete)
+  // ============================================
+  const handleSymbolSelect = (symbol) => {
+    const upperSymbol = symbol.toUpperCase();
+    setFormData(prev => ({ ...prev, symbol: upperSymbol }));
+    setSymbolSearch(upperSymbol);
+    setShowSymbolList(false);
+  };
+
+  const handleSymbolSearch = (e) => {
+    const value = e.target.value.toUpperCase();
+    setSymbolSearch(value);
+    setFormData(prev => ({ ...prev, symbol: value }));
+    setShowSymbolList(true);
+  };
+
+  const handleSymbolFocus = () => {
+    setShowSymbolList(true);
+    if (symbolSearch.length === 0) {
+      setFilteredSymbols(symbols.slice(0, 20));
+    }
+  };
+
+  // ============================================
+  // رندر لیست نمادها (AutoComplete)
+  // ============================================
+  const renderSymbolList = () => {
+    if (!showSymbolList) return null;
+
+    const listItems = filteredSymbols.length > 0 ? filteredSymbols : symbols.slice(0, 20);
+
+    return (
+      <div className="symbol-list-dropdown" ref={symbolListRef}>
+        {listItems.length === 0 ? (
+          <div className="symbol-list-empty">🔍 نمادی یافت نشد</div>
+        ) : (
+          listItems.map((symbol, index) => (
+            <div
+              key={index}
+              className="symbol-list-item"
+              onClick={() => handleSymbolSelect(symbol)}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              <span className="symbol-item-icon">📊</span>
+              <span className="symbol-item-name">{symbol.toUpperCase()}</span>
+            </div>
+          ))
+        )}
+      </div>
+    );
   };
 
   // ============================================
@@ -555,7 +651,6 @@ const AIConsultation = () => {
     let tip = aiResponse.tip || 'همیشه به مدیریت ریسک توجه کنید.';
     tip = processText(tip) || tip;
 
-    // ===== استخراج تحلیل تکنیکال هوشمند از پاسخ =====
     let technicalAnalysis = aiResponse.technical_analysis || null;
     if (!technicalAnalysis && typeof aiResponse.psychology === 'string') {
       const match = aiResponse.psychology.match(/تحلیل\s*تکنیکال\s*هوشمند\s*[:]\s*([\s\S]*?)(?=تحلیل\s*سناریو|$)/i);
@@ -564,7 +659,6 @@ const AIConsultation = () => {
       }
     }
 
-    // ===== استخراج تحلیل سناریو از پاسخ =====
     let scenarioAnalysis = aiResponse.scenario_analysis || null;
     if (!scenarioAnalysis && typeof aiResponse.psychology === 'string') {
       const match = aiResponse.psychology.match(/تحلیل\s*سناریو\s*[:]\s*([\s\S]*?)$/i);
@@ -858,38 +952,174 @@ const AIConsultation = () => {
   // ============================================
   // رندر راهنما
   // ============================================
+// frontend/src/components/ai/AIConsultation.js
+
+// ============================================
+// ✅ بخش رندر راهنما (Guide Section) - اصلاح شده
+// ============================================
+
   const renderGuide = () => (
     <div className={`guide-section ${showGuide ? 'open' : ''}`}>
       <div className="guide-header" onClick={() => setShowGuide(!showGuide)}>
         <span className="guide-icon">❓</span>
-        <span className="guide-title">راهنمای فرایند مشاوره هوشمند</span>
+        <span className="guide-title">راهنمای جامع مشاوره هوشمند</span>
         <span className="guide-toggle">{showGuide ? '▲' : '▼'}</span>
       </div>
       {showGuide && (
         <div className="guide-content">
+          <div className="guide-intro">
+            <p>
+              <strong>🧠 مشاور هوشمند JTrade</strong> با ترکیب هوش مصنوعی پیشرفته و تحلیل داده‌های معاملاتی شما،
+              یک تحلیل جامع و شخصی‌سازی‌شده برای هر معامله ارائه می‌دهد.
+            </p>
+          </div>
+
           <div className="guide-step">
             <span className="step-number">۱</span>
-            <div><h4>وارد کردن شرایط فعلی</h4><p>نماد، جهت، قیمت، حد ضرر، حد سود و سایر اطلاعات را وارد کنید.</p></div>
+            <div>
+              <h4>📝 وارد کردن شرایط فعلی معامله</h4>
+              <p>
+                اطلاعات معامله‌ای که قصد ورود به آن را دارید را وارد کنید:
+              </p>
+              <ul>
+                <li><strong>نماد معاملاتی:</strong> نماد مورد نظر مانند EURUSD، BTCUSD، XAUUSD و ...</li>
+                <li><strong>جهت معامله:</strong> خرید (Buy) یا فروش (Sell)</li>
+                <li><strong>قیمت ورود، حد ضرر و حد سود:</strong> برای تحلیل دقیق‌تر ریسک و ریوارد</li>
+                <li><strong>وضعیت بازار:</strong> رونددار، رنج، خنثی یا پرنوسان</li>
+                <li><strong>احساسات فعلی:</strong> آرام، هیجان، ترس، طمع، صبر، استرس، بااعتمادبه‌نفس یا مردد</li>
+                <li><strong>نوع جلسه و استراتژی:</strong> حرفه‌ای (High Pro) یا مبتدی (Low Pro) و LTP/ITP/STP</li>
+              </ul>
+            </div>
           </div>
+
           <div className="guide-step">
             <span className="step-number">۲</span>
-            <div><h4>بررسی تاریخچه شما</h4><p>سیستم به‌طور خودکار عملکرد شما را در شرایط مشابه تحلیل می‌کند.</p></div>
+            <div>
+              <h4>📊 تحلیل تاریخچه معاملاتی شما</h4>
+              <p>
+                سیستم به‌طور خودکار <strong>همه تریدهای ثبت‌شده شما</strong> را تحلیل می‌کند و موارد زیر را استخراج می‌نماید:
+              </p>
+              <ul>
+                <li><strong>✅ عملکرد کلی:</strong> نرخ برد، سود کل، میانگین R:R و تعداد تریدها</li>
+                <li><strong>🎯 بهترین استراتژی‌ها:</strong> شناسایی استراتژی‌هایی که بیشترین سود را داشته‌اند</li>
+                <li><strong>⏰ بهترین ساعت معاملاتی:</strong> ساعتی که بیشترین بازدهی را داشته‌اید</li>
+                <li><strong>🧠 احساسات غالب:</strong> شناسایی الگوهای احساسی در معاملات شما</li>
+                <li>
+                  <strong>⚠️ هرچه تعداد تریدهای شما بیشتر باشد</strong>، تحلیل دقیق‌تر و قاطع‌تر خواهد بود.
+                  توصیه می‌کنیم حداقل <strong>۲۰ ترید</strong> ثبت‌شده داشته باشید تا خروجی‌ها قابل اعتماد باشند.
+                </li>
+              </ul>
+            </div>
           </div>
+
           <div className="guide-step">
             <span className="step-number">۳</span>
-            <div><h4>دریافت تحلیل هوشمند</h4><p>AI با ترکیب داده‌های شما و شرایط فعلی، تحلیل جامعی ارائه می‌دهد.</p></div>
+            <div>
+              <h4>🧠 پردازش هوش مصنوعی</h4>
+              <p>
+                هوش مصنوعی با استفاده از مدل‌های پیشرفته (Ollama و Gapgpt.app) ترکیبی از داده‌های شما و شرایط فعلی بازار را تحلیل می‌کند:
+              </p>
+              <ul>
+                <li><strong>🔄 تطبیق شرایط:</strong> بررسی تریدهای گذشته با شرایط مشابه (نماد، جهت، وضعیت بازار)</li>
+                <li><strong>📈 تحلیل تکنیکال هوشمند:</strong> شناسایی سطوح کلیدی، روندها و الگوهای قیمتی</li>
+                <li><strong>🧠 تحلیل روانشناختی:</strong> ارزیابی احساسات و تأثیر آن بر تصمیم‌گیری</li>
+                <li><strong>🎯 سناریوسازی:</strong> شبیه‌سازی سناریوهای مختلف و تحلیل احتمالات</li>
+                <li><strong>⚖️ تطبیق با قوانین انضباطی:</strong> بررسی پایبندی به قوانین شخصی شما</li>
+              </ul>
+            </div>
           </div>
+
           <div className="guide-step">
             <span className="step-number">۴</span>
-            <div><h4>ثبت بازخورد (اختیاری)</h4><p>پس از بسته شدن معامله، نتیجه را ثبت کنید تا سیستم دقیق‌تر شود.</p></div>
+            <div>
+              <h4>📋 خروجی‌های گزارش تحلیل</h4>
+              <p>پس از تکمیل تحلیل، گزارش جامعی شامل موارد زیر دریافت می‌کنید:</p>
+              <ul>
+                <li><strong>🎯 امتیاز اعتبار (۰-۱۰۰):</strong> نشان‌دهنده اعتبار و کیفیت معامله بر اساس داده‌های شما و شرایط بازار</li>
+                <li><strong>✅ نقاط قوت:</strong> عواملی که به نفع معامله شما هستند</li>
+                <li><strong>⚠️ هشدارها:</strong> عواملی که نیاز به توجه و بررسی مجدد دارند</li>
+                <li><strong>💡 پیشنهاد عملی:</strong> توصیه‌های مشخص برای انجام یا عدم انجام معامله</li>
+                <li><strong>📊 تحلیل تکنیکال هوشمند:</strong> تحلیل سطوح حمایت/مقاومت، روندها و نقاط کلیدی</li>
+                <li><strong>🧠 تحلیل روانشناختی:</strong> ارزیابی وضعیت روانی و تأثیر آن بر تصمیم‌گیری</li>
+                <li><strong>🎯 تحلیل سناریو:</strong> سناریوهای محتمل و نحوه واکنش به هر کدام</li>
+                <li><strong>📋 جزئیات پیشنهادی:</strong> حد ضرر، حد سود، اندازه پوزیشن و زمان‌بندی مناسب</li>
+                <li><strong>📖 نکته آموزشی:</strong> یک نکته ارزشمند برای بهبود عملکرد معاملاتی</li>
+                <li><strong>📊 نمودارهای تحلیلی:</strong> نمودار راداری، میله‌ای و دایره‌ای برای درک بهتر تحلیل</li>
+                <li><strong>📝 بازخورد:</strong> امکان ثبت بازخورد پس از بسته شدن معامله برای بهبود مستمر سیستم</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="guide-step">
+            <span className="step-number">۵</span>
+            <div>
+              <h4>🔄 ثبت بازخورد و بهبود مستمر</h4>
+              <p>
+                پس از بسته شدن معامله، با ثبت بازخورد خود به بهبود سیستم کمک می‌کنید:
+              </p>
+              <ul>
+                <li><strong>📊 آیا از پیشنهاد AI پیروی کردید؟</strong> (کاملاً، تا حدی، خیر)</li>
+                <li><strong>💰 نتیجه معامله:</strong> سود، زیان یا مساوی</li>
+                <li><strong>⭐ امتیاز شما به مشاوره:</strong> از ۱ تا ۵ ستاره</li>
+                <li><strong>📝 نظر شما:</strong> هر نکته‌ای که می‌تواند به بهبود سیستم کمک کند</li>
+              </ul>
+              <p className="guide-tip-highlight">
+                💡 <strong>هرچه بازخورد بیشتری ثبت کنید</strong>، سیستم دقیق‌تر و شخصی‌سازی‌شده‌تر خواهد شد.
+                داده‌های شما کاملاً محرمانه و فقط برای بهبود تحلیل‌های شخصی شما استفاده می‌شود.
+              </p>
+            </div>
+          </div>
+
+          <div className="guide-tip guide-tip-important">
+            <span className="tip-icon">⚠️</span>
+            <div>
+              <strong>نکته مهم:</strong>
+              <ul>
+                <li>
+                  <strong>حداقل تریدهای ثبت‌شده:</strong> برای دریافت تحلیل دقیق، حداقل <strong>۲۰ ترید</strong> ثبت‌شده داشته باشید.
+                  هرچه تعداد تریدها بیشتر باشد، خروجی‌ها <strong>قاطع‌تر و قابل‌اعتمادتر</strong> خواهند بود.
+                </li>
+                <li>
+                  <strong>کیفیت داده‌ها:</strong> دقت در وارد کردن اطلاعات تریدها (قیمت، احساسات، وضعیت بازار و ...)
+                  تأثیر مستقیم بر کیفیت تحلیل هوش مصنوعی دارد.
+                </li>
+                <li>
+                  <strong>قوانین انضباطی:</strong> سیستم قوانین شخصی شما را بررسی کرده و در تحلیل لحاظ می‌کند.
+                </li>
+                <li>
+                  <strong>مدیریت ریسک:</strong> همیشه قبل از ورود به معامله، مدیریت ریسک را در نظر داشته باشید
+                  و بیش از <strong>۱-۲٪</strong> از سرمایه خود را ریسک نکنید.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="guide-tip guide-tip-success">
+            <span className="tip-icon">🚀</span>
+            <div>
+              <strong>چرا از مشاور هوشمند استفاده کنیم؟</strong>
+              <ul>
+                <li>
+                  <strong>📊 تحلیل مبتنی بر داده:</strong> برخلاف تصمیمات احساسی، تحلیل‌های AI بر اساس داده‌های واقعی و الگوهای آماری است.
+                </li>
+                <li>
+                  <strong>🧠 یادگیری مستمر:</strong> سیستم با هر بازخوردی که ثبت می‌کنید، بهتر و دقیق‌تر می‌شود.
+                </li>
+                <li>
+                  <strong>⚖️ کنترل احساسات:</strong> به شما کمک می‌کند تا از تصمیمات احساسی دوری کرده و بر اساس داده‌ها عمل کنید.
+                </li>
+                <li>
+                  <strong>🎯 افزایش شانس موفقیت:</strong> با ترکیب تحلیل تکنیکال، روانشناسی و داده‌های شخصی، شانس موفقیت را افزایش می‌دهد.
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
-
   // ============================================
-  // رندر نتیجه نهایی (با باکس‌های جداگانه)
+  // رندر نتیجه نهایی
   // ============================================
   const renderResult = () => {
     if (!result) return null;
@@ -1103,7 +1333,6 @@ const AIConsultation = () => {
           </div>
         )}
 
-        {/* ===== ✅ باکس‌های جداگانه برای تحلیل‌ها ===== */}
         {response?.psychology && response.psychology !== 'تحلیل روانشناختی موجود نیست.' && (
           <AnalysisBox
             icon="🧠"
@@ -1182,7 +1411,6 @@ const AIConsultation = () => {
           </div>
         )}
 
-        {/* ===== ✅ بخش بازخورد ===== */}
         <div className="feedback-section">
           <h4>📝 بازخورد</h4>
           {consultationDetail?.feedback_score ? (
@@ -1970,6 +2198,7 @@ const AIConsultation = () => {
       risk_percent: '',
       volume: '',
     });
+    setSymbolSearch('');
     setSelectedModel('');
     setResult(null);
     setStreamingText('');
@@ -1979,6 +2208,7 @@ const AIConsultation = () => {
     setConsultationDetail(null);
     setExpandedChart(null);
     setFeedbackSubmitted(false);
+    setShowSymbolList(false);
     stopProgressTimers();
     setProgress(0);
     setElapsedTime(0);
@@ -2017,7 +2247,7 @@ const AIConsultation = () => {
         <div className="form-section">
           <h3>📝 شرایط فعلی خود را وارد کنید</h3>
           <form onSubmit={handleConsult}>
-            {/* ===== انتخاب مدل با نام کوتاه و دکمه رفرش ===== */}
+            {/* ===== انتخاب مدل ===== */}
             <div className="form-row model-first-row">
               <div className="form-group model-selector">
                 <label>
@@ -2086,14 +2316,36 @@ const AIConsultation = () => {
               </div>
             </div>
 
-            {/* ===== سایر فیلدها ===== */}
+            {/* ===== فیلد نماد با AutoComplete ===== */}
             <div className="form-row">
-              <div className="form-group">
-                <label>نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span></label>
-                <input type="text" name="symbol" list="symbol-list" value={formData.symbol} onChange={handleChange} placeholder={symbolsLoading ? "در حال بارگذاری نمادها..." : "جستجو و انتخاب نماد..."} required disabled={limitReached || symbolsLoading} className="symbol-input" autoComplete="off" />
-                <datalist id="symbol-list">{symbols.map((s) => <option key={s} value={s} />)}</datalist>
+              <div className="form-group symbol-group">
+                <label>
+                  نماد معاملاتی <span style={{ color: 'red' }}>(اجباری)</span>
+                </label>
+                <div className="symbol-input-wrapper">
+                  <input
+                    type="text"
+                    name="symbol"
+                    value={symbolSearch || formData.symbol}
+                    onChange={handleSymbolSearch}
+                    onFocus={handleSymbolFocus}
+                    placeholder={symbolsLoading ? "در حال بارگذاری نمادها..." : "جستجو و انتخاب نماد..."}
+                    required
+                    disabled={limitReached || symbolsLoading}
+                    className="symbol-input"
+                    autoComplete="off"
+                    ref={symbolInputRef}
+                    style={{ direction: 'ltr', textAlign: 'left', textTransform: 'uppercase' }}
+                  />
+                  <span className="symbol-search-icon">🔍</span>
+                </div>
+                {renderSymbolList()}
                 {symbolsLoading && <span className="field-hint">⏳ در حال بارگذاری لیست نمادها...</span>}
-                {!symbolsLoading && symbols.length > 0 && <span className="field-hint">🔍 {symbols.length} نماد موجود است. با تایپ کردن جستجو کنید.</span>}
+                {!symbolsLoading && symbols.length > 0 && (
+                  <span className="field-hint">
+                    🔍 {symbols.length} نماد موجود است. با تایپ کردن جستجو کنید.
+                  </span>
+                )}
               </div>
               <div className="form-group">
                 <label>جهت معامله <span style={{ color: 'red' }}>(اجباری)</span></label>

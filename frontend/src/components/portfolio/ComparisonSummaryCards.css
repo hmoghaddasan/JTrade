@@ -2,18 +2,20 @@
 
 .comparison-summary-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
     margin-bottom: 24px;
+    width: 100%;
 }
 
 .summary-card {
     background: var(--bg-secondary);
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    padding: 16px 18px;
+    padding: 14px 16px;
     transition: all 0.3s ease;
     border-left-width: 4px;
+    min-width: 0;
 }
 
 .summary-card:hover {
@@ -24,16 +26,17 @@
 .card-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 8px;
 }
 
 .card-icon {
-    font-size: 20px;
+    font-size: 18px;
+    flex-shrink: 0;
 }
 
 .card-label {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-secondary);
 }
@@ -41,20 +44,21 @@
 .card-content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .card-name {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 15px;
+    gap: 4px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .name-icon {
-    font-size: 18px;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
 .name-text {
@@ -66,26 +70,34 @@
 .card-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 4px;
 }
 
 .stat-item {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
 }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .stat-value {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     color: var(--text-primary);
+}
+
+.stat-value.positive {
+    color: #2e7d32;
+}
+
+.stat-value.negative {
+    color: #c62828;
 }
 
 .card-empty {
@@ -95,22 +107,172 @@
     padding: 16px 0;
 }
 
+/* ==========================================================
+   ✅ ریسپانسیو - همیشه دو ستونه
+   ========================================================== */
+
+/* ===== تبلت ===== */
 @media (max-width: 1024px) {
     .comparison-summary-cards {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+
+    .stat-value {
+        font-size: 12px !important;
     }
 }
 
-@media (max-width: 480px) {
+/* ===== موبایل (تا 768px) ===== */
+@media (max-width: 768px) {
     .comparison-summary-cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
     }
 
     .summary-card {
-        padding: 12px 14px;
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
+    }
+
+    .card-header {
+        margin-bottom: 4px !important;
+        gap: 4px !important;
+    }
+
+    .card-icon {
+        font-size: 14px !important;
+    }
+
+    .card-label {
+        font-size: 10px !important;
+    }
+
+    .card-name {
+        font-size: 12px !important;
+    }
+
+    .name-icon {
+        font-size: 12px !important;
     }
 
     .card-stats {
-        grid-template-columns: repeat(3, 1fr);
+        gap: 3px !important;
+    }
+
+    .stat-label {
+        font-size: 7px !important;
+        letter-spacing: 0 !important;
+    }
+
+    .stat-value {
+        font-size: 11px !important;
+    }
+}
+
+/* ===== موبایل کوچک (تا 480px) ===== */
+@media (max-width: 480px) {
+    .comparison-summary-cards {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .summary-card {
+        padding: 8px 8px !important;
+        border-radius: 8px !important;
+    }
+
+    .card-header {
+        margin-bottom: 3px !important;
+        gap: 3px !important;
+    }
+
+    .card-icon {
+        font-size: 12px !important;
+    }
+
+    .card-label {
+        font-size: 9px !important;
+    }
+
+    .card-name {
+        font-size: 11px !important;
+        gap: 3px !important;
+    }
+
+    .name-icon {
+        font-size: 10px !important;
+    }
+
+    .card-stats {
+        gap: 2px !important;
+    }
+
+    .stat-label {
+        font-size: 6px !important;
+        letter-spacing: 0 !important;
+    }
+
+    .stat-value {
+        font-size: 10px !important;
+    }
+
+    .name-text {
+        max-width: 70px !important;
+    }
+}
+
+/* ===== موبایل خیلی کوچک (تا 360px) ===== */
+@media (max-width: 360px) {
+    .comparison-summary-cards {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .summary-card {
+        padding: 6px 6px !important;
+        border-radius: 6px !important;
+    }
+
+    .card-header {
+        margin-bottom: 2px !important;
+        gap: 2px !important;
+    }
+
+    .card-icon {
+        font-size: 10px !important;
+    }
+
+    .card-label {
+        font-size: 8px !important;
+    }
+
+    .card-name {
+        font-size: 10px !important;
+        gap: 2px !important;
+    }
+
+    .name-icon {
+        font-size: 9px !important;
+    }
+
+    .card-stats {
+        gap: 2px !important;
+    }
+
+    .stat-label {
+        font-size: 5px !important;
+        letter-spacing: 0 !important;
+    }
+
+    .stat-value {
+        font-size: 9px !important;
+    }
+
+    .name-text {
+        max-width: 50px !important;
     }
 }

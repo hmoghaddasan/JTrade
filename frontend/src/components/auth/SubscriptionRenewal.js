@@ -4,12 +4,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useToast } from '../../contexts/ToastContext';
 import RealApiService from '../../services/realApiService';
 import './SubscriptionRenewal.css';
 import LoadingBar from './../common/LoadingBar';
+
 const SubscriptionRenewal = () => {
   const { user } = useAuth();
   const { isDark } = useTheme();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -20,23 +23,20 @@ const SubscriptionRenewal = () => {
   const [discountApplied, setDiscountApplied] = useState(false);
   const [discountMessage, setDiscountMessage] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
-  const [paymentData, setPaymentData] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const [bankPaymentEnabled, setBankPaymentEnabled] = useState(true);
+  const [cardPaymentEnabled, setCardPaymentEnabled] = useState(true);
 
   const VAT_PERCENT = 10;
 
-  // بارگذاری پلن‌ها از دیتابیس
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
         const plansResponse = await RealApiService.getPlans();
-        console.log('📊 Plans response:', plansResponse.data);
-
         let plansData = plansResponse.data;
         if (!Array.isArray(plansData)) {
-          console.warn('⚠️ Plans data is not an array, converting...');
           if (plansData && plansData.results && Array.isArray(plansData.results)) {
             plansData = plansData.results;
           } else if (plansData && typeof plansData === 'object') {
@@ -47,11 +47,9 @@ const SubscriptionRenewal = () => {
         }
 
         setPlans(plansData);
-        console.log('✅ Plans set:', plansData.length);
 
         try {
           const subResponse = await RealApiService.getUserSubscription();
-          console.log('📊 Subscription response:', subResponse.data);
           setCurrentSubscription(subResponse.data);
         } catch (error) {
           console.log('No active subscription found');
@@ -61,6 +59,8 @@ const SubscriptionRenewal = () => {
         if (plansData.length > 0) {
           setSelectedPlan(plansData[0]);
         }
+
+        await loadPaymentSettings();
 
       } catch (error) {
         console.error('Error loading subscription data:', error);
@@ -74,9 +74,23 @@ const SubscriptionRenewal = () => {
     loadData();
   }, []);
 
-  // ============================================
-  // گروه‌بندی پلن‌ها بر اساس نوع
-  // ============================================
+  const loadPaymentSettings = async () => {
+    try {
+      const settingsResponse = await RealApiService.getSystemSettings();
+      const settings = settingsResponse.data || [];
+
+      const bankPayment = settings.find(s => s.key === 'bank_payment_enabled');
+      const cardPayment = settings.find(s => s.key === 'card_payment_enabled');
+
+      setBankPaymentEnabled(bankPayment?.value !== 'false');
+      setCardPaymentEnabled(cardPayment?.value !== 'false');
+    } catch (error) {
+      console.error('Error loading payment settings:', error);
+      setBankPaymentEnabled(true);
+      setCardPaymentEnabled(true);
+    }
+  };
+
   const groupedPlans = useMemo(() => {
     if (!Array.isArray(plans) || plans.length === 0) {
       return {};
@@ -92,24 +106,16 @@ const SubscriptionRenewal = () => {
     }, {});
   }, [plans]);
 
-  // ============================================
-  // انتخاب پلن
-  // ============================================
   const handlePlanSelect = (plan) => {
     setSelectedPlan(plan);
     setDiscountApplied(false);
     setDiscountMessage('');
     setDiscountCode('');
     setDiscountPercent(0);
-    setPaymentData(null);
     setMessage({ type: '', text: '' });
   };
 
-  // ============================================
-  // اعمال کد تخفیف (اصلاح نهایی)
-  // ============================================
   const handleApplyDiscount = async () => {
-    // ✅ اگر کد خالی باشد، پیام خطا نشان بده
     if (!discountCode.trim()) {
       const errorMsg = 'لطفاً کد تخفیف را وارد کنید';
       setDiscountMessage(`❌ ${errorMsg}`);
@@ -128,8 +134,6 @@ const SubscriptionRenewal = () => {
         selectedPlan?.id
       );
 
-      console.log('📊 Discount validation response:', response.data);
-
       if (response.data.success) {
         const discountPercentValue = response.data.discount_percent;
         const successMessage = `✅ کد تخفیف ${discountPercentValue}% با موفقیت اعمال شد`;
@@ -139,7 +143,6 @@ const SubscriptionRenewal = () => {
         setDiscountMessage(successMessage);
         setMessage({ type: 'success', text: successMessage });
       } else {
-        // خطای برگشتی از بک‌اند
         const errorMsg = response.data.error || 'کد تخفیف نامعتبر است';
         setDiscountMessage(`❌ ${errorMsg}`);
         setMessage({ type: 'error', text: errorMsg });
@@ -148,7 +151,6 @@ const SubscriptionRenewal = () => {
       }
     } catch (error) {
       console.error('Error validating discount:', error);
-
       let errorMsg = 'خطا در اعتبارسنجی کد تخفیف.';
       if (error.response?.data?.error) {
         errorMsg = error.response.data.error;
@@ -165,9 +167,6 @@ const SubscriptionRenewal = () => {
     }
   };
 
-  // ============================================
-  // محاسبه قیمت با تخفیف
-  // ============================================
   const getPriceWithDiscount = (price) => {
     const basePrice = typeof price === 'string' ? parseFloat(price) : price;
     if (discountApplied && discountPercent > 0) {
@@ -176,22 +175,11 @@ const SubscriptionRenewal = () => {
     return basePrice;
   };
 
-  // ============================================
-  // محاسبه مالیات و مبلغ نهایی
-  // ============================================
   const calculateTotal = (price) => {
     const basePrice = typeof price === 'string' ? parseFloat(price) : price;
     const discountedPrice = getPriceWithDiscount(basePrice);
     const vat = discountedPrice * (VAT_PERCENT / 100);
     const total = discountedPrice + vat;
-
-    console.log('💰 Price calculation:', {
-      originalPrice: basePrice,
-      discountedPrice: discountedPrice,
-      vatPercent: VAT_PERCENT,
-      vat: vat,
-      total: total
-    });
 
     return {
       discountedPrice,
@@ -200,10 +188,32 @@ const SubscriptionRenewal = () => {
     };
   };
 
-  // ============================================
-  // پرداخت و تمدید
-  // ============================================
-  const handlePayment = async () => {
+  const getPriceWithoutVat = (price) => {
+    const basePrice = typeof price === 'string' ? parseFloat(price) : price;
+    return getPriceWithDiscount(basePrice);
+  };
+
+  const getPlanTypeLabel = (planType) => {
+    switch (planType) {
+      case 'professional': return 'حرفه‌ای';
+      case 'vip': return 'ویژه (VIP)';
+      case 'admin': return 'مدیریت';
+      case 'basic':
+      default: return 'پایه';
+    }
+  };
+
+  const getPlanBadge = (planType) => {
+    switch (planType) {
+      case 'professional': return 'premium';
+      case 'vip': return 'vip';
+      case 'admin': return 'admin';
+      case 'basic':
+      default: return 'basic';
+    }
+  };
+
+  const handleBankPayment = async () => {
     if (!selectedPlan) {
       setMessage({ type: 'error', text: 'لطفاً یک پلن را انتخاب کنید.' });
       return;
@@ -217,8 +227,6 @@ const SubscriptionRenewal = () => {
         selectedPlan.id,
         discountApplied ? discountCode : ''
       );
-
-      console.log('💰 Purchase response:', response.data);
 
       if (response.data.success) {
         const paymentUrl = response.data.payment_url;
@@ -242,77 +250,91 @@ const SubscriptionRenewal = () => {
     }
   };
 
-  // ============================================
-  // تایید پرداخت (برای نمایش پیام موفقیت)
-  // ============================================
-  const confirmPayment = () => {
-    setShowPaymentModal(false);
+  const handleCardPayment = () => {
+    if (!selectedPlan) {
+      setMessage({ type: 'error', text: 'لطفاً یک پلن را انتخاب کنید.' });
+      return;
+    }
 
-    const { total } = calculateTotal(selectedPlan?.price || 0);
+    const priceWithoutVat = getPriceWithoutVat(selectedPlan?.price || 0);
 
-    setMessage({
-      type: 'success',
-      text: `✅ پرداخت با موفقیت انجام شد! اشتراک ${selectedPlan?.plan_name} فعال شد. مبلغ پرداختی: ${Math.round(total).toLocaleString()} تومان`
-    });
+    const now = new Date();
+    const persianDate = now.toLocaleDateString('fa-IR');
+    const persianTime = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
 
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + (selectedPlan?.duration_days || 30));
+    const userFullName = user?.full_name || user?.first_name + ' ' + user?.last_name || 'کاربر';
+    const userPhone = user?.phone_number || 'نامشخص';
+    const userEmail = user?.email || 'ثبت نشده';
 
-    const subscriptionData = {
-      plan: selectedPlan?.plan_name || 'حرفه‌ای',
-      remainingDays: selectedPlan?.duration_days || 30,
-      remainingTrades: selectedPlan?.monthly_trades_limit || 50,
-      remainingAiConsultations: selectedPlan?.monthly_ai_consultations_limit || 0,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      isActive: true,
-      isExpired: false,
-      price: total,
-      discount: discountPercent || 0
-    };
+    const planName = selectedPlan?.plan_name || 'نامشخص';
+    const planType = selectedPlan?.plan_type || 'basic';
+    const planTypeLabel = getPlanTypeLabel(planType);
+    const durationDays = selectedPlan?.duration_days || 0;
+    const tradesLimit = selectedPlan?.monthly_trades_limit || 0;
+    const aiLimit = selectedPlan?.monthly_ai_consultations_limit || 0;
 
-    localStorage.setItem('subscription', JSON.stringify(subscriptionData));
+    const aiDisplay = aiLimit >= 999 ? '♾️ نامحدود' : `${aiLimit} عدد`;
 
-    setTimeout(() => {
-      navigate('/profile');
-    }, 2000);
-  };
+    const originalPrice = parseFloat(selectedPlan?.price || 0);
+    const priceWithoutVatRounded = Math.round(priceWithoutVat);
+    const discountedPrice = getPriceWithDiscount(originalPrice);
+    const discountedPriceRounded = Math.round(discountedPrice);
 
-  // ============================================
-  // توابع کمکی
-  // ============================================
-  const getPlanTypeLabel = (planType) => {
-    switch (planType) {
-      case 'professional':
-        return 'حرفه‌ای';
-      case 'vip':
-        return 'ویژه (VIP)';
-      case 'admin':
-        return 'مدیریت';
-      case 'basic':
-      default:
-        return 'پایه';
+    const messageText =
+`📋 درخواست پرداخت کارت به کارت
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 **اطلاعات کاربر:**
+• نام و نام خانوادگی: ${userFullName}
+• شماره تلفن: ${userPhone}
+• ایمیل: ${userEmail}
+• شناسه کاربری: #${user?.id || 'نامشخص'}
+
+📌 **اطلاعات پلن انتخابی:**
+• نام پلن: ${planName} (${planTypeLabel})
+• مدت زمان: ${durationDays} روز
+• تعداد ترید: ${tradesLimit} ترید در ماه
+• مشاوره AI: ${aiDisplay}
+• شناسه پلن: #${selectedPlan?.id || 'نامشخص'}
+
+💰 **جزئیات مالی:`
+    + (discountApplied && discountPercent > 0 ? `
+• قیمت اصلی: ${originalPrice.toLocaleString()} تومان
+• تخفیف (${discountPercent}%): -${Math.round(originalPrice * discountPercent / 100).toLocaleString()} تومان
+• قیمت پس از تخفیف: ${discountedPriceRounded.toLocaleString()} تومان` : `
+• قیمت: ${originalPrice.toLocaleString()} تومان`)
+    + `
+• مالیات (۱۰٪): ${Math.round(originalPrice * 0.1).toLocaleString()} تومان (معاف برای کارت به کارت)
+• مبلغ قابل پرداخت: ${priceWithoutVatRounded.toLocaleString()} تومان
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 تاریخ درخواست: ${persianDate} - ${persianTime}
+
+🔹 لطفاً شماره کارت را برای واریز مبلغ ${priceWithoutVatRounded.toLocaleString()} تومان ارسال فرمایید.
+
+با تشکر
+${userFullName}`;
+
+    try {
+      RealApiService.sendMessage({
+        subject: `درخواست پرداخت کارت به کارت - ${userFullName}`,
+        message: messageText
+      }).then((response) => {
+        console.log('📨 Message sent successfully:', response.data);
+        showToast('✅ درخواست شما با موفقیت به پشتیبانی ارسال شد.', 'success');
+        setMessage({ type: 'success', text: '✅ درخواست شما به پشتیبانی ارسال شد.' });
+      }).catch((error) => {
+        console.error('❌ Error sending message:', error);
+        showToast('❌ خطا در ارسال درخواست.', 'error');
+        setMessage({ type: 'error', text: '❌ خطا در ارسال درخواست.' });
+      });
+    } catch (error) {
+      console.error('❌ Error:', error);
+      showToast('❌ خطا در ارسال درخواست.', 'error');
+      setMessage({ type: 'error', text: '❌ خطا در ارسال درخواست.' });
     }
   };
 
-  const getPlanBadge = (planType) => {
-    switch (planType) {
-      case 'professional':
-        return 'premium';
-      case 'vip':
-        return 'vip';
-      case 'admin':
-        return 'admin';
-      case 'basic':
-      default:
-        return 'basic';
-    }
-  };
-
-  // ============================================
-  // لودینگ
-  // ============================================
   if (loading) {
     return (
       <div className="subscription-renewal-container">
@@ -337,9 +359,6 @@ const SubscriptionRenewal = () => {
     );
   }
 
-  // ============================================
-  // رندر اصلی
-  // ============================================
   return (
     <div className={`subscription-renewal-container ${isDark ? 'dark' : 'light'}`}>
       <div className="subscription-header">
@@ -355,10 +374,9 @@ const SubscriptionRenewal = () => {
         </div>
       )}
 
-      {/* وضعیت اشتراک فعلی */}
       {currentSubscription && (
         <div className="current-subscription-card">
-          <h3>📊 اشتراک فعلی</h3>
+          <h3>✔️ اشتراک فعلی</h3>
           <div className="sub-info-grid">
             <div className="sub-info-item">
               <span className="sub-label">پلن</span>
@@ -393,9 +411,8 @@ const SubscriptionRenewal = () => {
       )}
 
       <div className="subscription-content">
-        {/* انتخاب پلن */}
         <div className="plans-section">
-          <h3>📊 انتخاب پلن اشتراک</h3>
+          <h3>📌 انتخاب پلن اشتراک</h3>
 
           {Object.entries(groupedPlans).map(([planType, planItems]) => (
             <div key={planType} className="plan-group">
@@ -460,7 +477,6 @@ const SubscriptionRenewal = () => {
           ))}
         </div>
 
-        {/* کد تخفیف */}
         <div className="discount-section">
           <h3>🎁 کد تخفیف</h3>
           <div className="discount-input-group">
@@ -470,7 +486,6 @@ const SubscriptionRenewal = () => {
               value={discountCode}
               onChange={(e) => {
                 setDiscountCode(e.target.value);
-                // فقط اگر پیامی وجود دارد، آن را پاک کن (تا پیام خالی پاک نشود)
                 if (message.text) {
                   setMessage({ type: '', text: '' });
                   setDiscountMessage('');
@@ -494,67 +509,114 @@ const SubscriptionRenewal = () => {
           )}
         </div>
 
-        {/* خلاصه و پرداخت */}
-        <div className="summary-section">
-          <div className="summary-card">
-            <h3>📋 خلاصه سفارش</h3>
-            {selectedPlan ? (
-              <>
-                <div className="summary-row">
-                  <span>پلن</span>
-                  <span>{selectedPlan.plan_name} - {selectedPlan.duration_days} روز</span>
-                </div>
-                <div className="summary-row">
-                  <span>📈 تعداد ترید</span>
-                  <span>{selectedPlan.monthly_trades_limit} عدد</span>
-                </div>
-                <div className="summary-row">
-                  <span>🧠 تعداد مشاوره AI</span>
-                  <span>
-                    {selectedPlan.monthly_ai_consultations_limit >= 999
-                      ? '♾️ نامحدود'
-                      : `${selectedPlan.monthly_ai_consultations_limit} عدد`}
+        {/* ============================================
+            ✅ باکس اصلی خلاصه سفارش
+            ============================================ */}
+        <div className="summary-main-box">
+          <h3>📋 خلاصه سفارش و روش پرداخت</h3>
+
+          {selectedPlan ? (
+            <>
+              {/* باکس خلاصه سفارش - کل عرض - کامل‌تر */}
+              <div className="summary-order-box">
+                <div className="order-info">
+                  <span className="order-item">
+                    📌 <strong>{selectedPlan.plan_name}</strong>
+                    <span className="separator">|</span>
+                    🏷️ {getPlanTypeLabel(selectedPlan.plan_type)}
+                    <span className="separator">|</span>
+                    ⏳ {selectedPlan.duration_days} روز
+                    <span className="separator">|</span>
+                    📈 {selectedPlan.monthly_trades_limit} ترید
+                    <span className="separator">|</span>
+                    🧠 {selectedPlan.monthly_ai_consultations_limit >= 999 ? '♾️' : selectedPlan.monthly_ai_consultations_limit}
                   </span>
                 </div>
-                <div className="summary-row">
-                  <span>💰 قیمت پایه</span>
-                  <span>{parseFloat(selectedPlan.price).toLocaleString()} تومان</span>
-                </div>
-                {discountApplied && discountPercent > 0 && (
-                  <div className="summary-row discount">
-                    <span>تخفیف ({discountPercent}%)</span>
-                    <span>-{Math.round(parseFloat(selectedPlan.price) * discountPercent / 100).toLocaleString()} تومان</span>
-                  </div>
-                )}
-                <div className="summary-row">
-                  <span>قیمت پس از تخفیف</span>
-                  <span>{Math.round(getPriceWithDiscount(selectedPlan.price)).toLocaleString()} تومان</span>
-                </div>
-                <div className="summary-row">
-                  <span>🧾 مالیات بر ارزش افزوده (۱۰٪)</span>
-                  <span>{Math.round(calculateTotal(selectedPlan.price).vat).toLocaleString()} تومان</span>
-                </div>
-                <div className="summary-row total">
-                  <span>💳 مبلغ قابل پرداخت</span>
-                  <span>
+                <div className="order-price-detail">
+                  {discountApplied && discountPercent > 0 && (
+                    <span className="price-original-small">
+                      {parseFloat(selectedPlan.price).toLocaleString()} تومان
+                    </span>
+                  )}
+                  <span className="order-price">
                     {Math.round(calculateTotal(selectedPlan.price).total).toLocaleString()} تومان
                   </span>
+                  {discountApplied && discountPercent > 0 && (
+                    <span className="discount-badge-small">-{discountPercent}%</span>
+                  )}
+                  <span className="price-label">(مبلغ نهایی)</span>
                 </div>
-                <button
-                  className="btn-payment"
-                  onClick={handlePayment}
-                  disabled={processing}
-                >
-                  {processing ? '⏳ در حال آماده‌سازی پرداخت...' : '💰 پرداخت و تمدید'}
-                </button>
-                <p className="payment-note">
-                  با کلیک روی دکمه پرداخت، به درگاه امن زرین‌پال هدایت می‌شوید.
-                </p>
-              </>
-            ) : (
-              <p>لطفاً یک پلن را انتخاب کنید</p>
-            )}
-          </div>
+              </div>
+
+              {/* باکس دو روش پرداخت */}
+              <div className="payment-methods-box">
+                {/* روش ۱: پرداخت از درگاه بانکی */}
+                <div className={`payment-method-item bank-method ${!bankPaymentEnabled ? 'disabled' : ''}`}>
+                  <div className="payment-method-header">
+                    <span className="method-icon">🏦</span>
+                    <span className="method-title">
+                      {!bankPaymentEnabled && <span className="disabled-badge">غیرفعال</span>}
+                      پرداخت از درگاه بانکی
+                    </span>
+                  </div>
+                  <div className="payment-method-price">
+                    <span>💰 مبلغ قابل پرداخت:</span>
+                    <strong>{Math.round(calculateTotal(selectedPlan.price).total).toLocaleString()} تومان</strong>
+                    <span className="vat-badge">شامل ۱۰٪ مالیات</span>
+                  </div>
+                  {!bankPaymentEnabled && (
+                    <p className="payment-method-note" style={{ borderRightColor: '#dc3545' }}>
+                      <strong>⛔ غیرفعال:</strong> این روش پرداخت در حال حاضر توسط ادمین غیرفعال شده است.
+                    </p>
+                  )}
+                  <button
+                    className="btn-payment btn-bank"
+                    onClick={handleBankPayment}
+                    disabled={processing || !bankPaymentEnabled}
+                  >
+                    {!bankPaymentEnabled ? '⛔ غیرفعال' : processing ? '⏳ در حال آماده‌سازی...' : '💳 پرداخت از درگاه'}
+                  </button>
+                </div>
+
+                {/* روش ۲: پرداخت کارت به کارت - بدون مالیات */}
+                <div className={`payment-method-item card-method ${!cardPaymentEnabled ? 'disabled' : ''}`}>
+                  <div className="payment-method-header">
+                    <span className="method-icon">💳</span>
+                    <span className="method-title">
+                      {!cardPaymentEnabled && <span className="disabled-badge">غیرفعال</span>}
+                      پرداخت کارت به کارت
+                    </span>
+                  </div>
+                  <div className="payment-method-price">
+                    <span>💰 مبلغ قابل پرداخت:</span>
+                    <strong>{Math.round(getPriceWithoutVat(selectedPlan.price)).toLocaleString()} تومان</strong>
+                    <span className="vat-free-badge">بدون مالیات</span>
+                  </div>
+                  <p className="payment-method-note">
+                    <strong>⚠️ توجه:</strong> پرداخت کارت به کارت <strong>فاقد مالیات بر ارزش افزوده (۱۰٪)</strong> می‌باشد.
+                    {!cardPaymentEnabled && (
+                      <span style={{ display: 'block', marginTop: '4px', color: '#dc3545' }}>
+                        <strong>⛔ غیرفعال:</strong> این روش پرداخت در حال حاضر توسط ادمین غیرفعال شده است.
+                      </span>
+                    )}
+                  </p>
+                  <button
+                    className="btn-payment btn-card"
+                    onClick={handleCardPayment}
+                    disabled={processing || !cardPaymentEnabled}
+                  >
+                    {!cardPaymentEnabled ? '⛔ غیرفعال' : '📨 درخواست شماره کارت از پشتیبانی'}
+                  </button>
+                </div>
+              </div>
+
+              <p className="payment-footer-note">
+                🔒 کلیه اطلاعات پرداخت شما به صورت امن منتقل می‌شود.
+              </p>
+            </>
+          ) : (
+            <p>لطفاً یک پلن را انتخاب کنید</p>
+          )}
         </div>
       </div>
     </div>

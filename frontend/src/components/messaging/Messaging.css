@@ -19,6 +19,61 @@
 .messaging-header h2 {
   margin: 0;
   color: var(--text-primary, #1a237e);
+  font-size: 22px;
+}
+
+/* ===== دکمه پیام جدید - استایل گرادیان آبی ===== */
+.btn-new-message {
+  background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 20px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  font-family: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3) !important;
+}
+
+.btn-new-message:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(26, 35, 126, 0.4) !important;
+  background: linear-gradient(135deg, #0d47a1, #1565c0) !important;
+}
+
+.btn-new-message:active {
+  transform: translateY(0) !important;
+}
+
+/* ===== دکمه بازگشت - برای صفحات دیگر ===== */
+.btn-back {
+  background: transparent;
+  color: #1a237e;
+  border: 1px solid #1a237e;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-back:hover {
+  background: #1a237e;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
 }
 
 /* ============================================
@@ -478,6 +533,25 @@
     text-align: center;
   }
 
+  .messaging-header h2 {
+    font-size: 18px;
+  }
+
+  /* ===== دکمه پیام جدید در موبایل - تمام عرض ===== */
+  .btn-new-message {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 10px 20px !important;
+    font-size: 15px !important;
+  }
+
+  .btn-back {
+    padding: 5px 12px;
+    font-size: 12px;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
   .message-form-container {
     padding: 20px;
   }
@@ -510,5 +584,19 @@
   .detail-meta {
     flex-direction: column;
     gap: 4px;
+  }
+
+  .messaging-header h2 {
+    font-size: 16px;
+  }
+
+  .btn-new-message {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+
+  .btn-back {
+    padding: 4px 10px;
+    font-size: 11px;
   }
 }

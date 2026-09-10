@@ -76,7 +76,7 @@ const ConsultationList = () => {
       <div className="page-header">
         <h1>مدیریت مشاوره‌های AI</h1>
         <button onClick={() => navigate('/admin/consultations/analytics')} className="btn-analytics">
-          📊 تحلیل عملکرد
+          🏆 تحلیل عملکرد
         </button>
       </div>
 

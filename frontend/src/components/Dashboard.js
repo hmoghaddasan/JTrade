@@ -10,10 +10,10 @@ import PnLCalendar from './dashboard/PnLCalendar';
 import './Dashboard.css';
 import { useConsultation } from '../contexts/ConsultationContext';
 import { usePortfolio } from '../contexts/PortfolioContext';
-import PortfolioSelector from './PortfolioSelector';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import DisciplineWidget from './discipline/DisciplineWidget';
-import LoadingBar from './common/LoadingBar';  // یا './common/LoadingBar' بسته به مسیر
+import LoadingBar from './common/LoadingBar';
+
 // لیست ۵۰ آیکون برای دسته‌بندی‌ها
 const GROUP_ICONS = [
   '📁', '📊', '💱', '₿', '📈', '📉', '🏆', '⭐', '🔥', '💰',
@@ -24,8 +24,8 @@ const GROUP_ICONS = [
 ];
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
+  const { isDark } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -60,36 +60,6 @@ const Dashboard = () => {
   const [showAllTrades, setShowAllTrades] = useState(false);
   const [showAllGroups, setShowAllGroups] = useState(false);
   const DISPLAY_LIMIT = 15;
-
-  // State جدید برای Dropdown
-  const [showTradeDropdown, setShowTradeDropdown] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // ============================================
-  // بستن Dropdown با کلیک خارج از آن
-  // ============================================
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowTradeDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // ============================================
-  // توابع مربوط به Dropdown
-  // ============================================
-  const handleNewTrade = () => {
-    setShowTradeDropdown(false);
-    navigate('/trades/new');
-  };
-
-  const handleImportCSV = () => {
-    setShowTradeDropdown(false);
-    navigate('/import');
-  };
 
   // ============================================
   // دریافت نسخه جاری از سرور
@@ -477,35 +447,26 @@ const Dashboard = () => {
   // ============================================
   // ✅ حذف دسته‌بندی (نسخه نهایی با بررسی همه پورتفولیوها)
   // ============================================
-  // ============================================
-  // ✅ حذف دسته‌بندی (نسخه نهایی با بررسی همه پورتفولیوها)
-  // ============================================
   const handleDeleteCategory = async () => {
     if (!categoryToDelete) return;
 
     // ✅ بررسی وجود ترید در این دسته‌بندی در تمام پورتفولیوها
     const categoryTrades = trades.filter(t => {
-      // بررسی چند حالت مختلف برای اطمینان
       const tradeGroupId = t.group || t.group_id || t.group?.id;
       return Number(tradeGroupId) === Number(categoryToDelete.id);
     });
 
     // ✅ اگر ترید وجود دارد، پیام دقیق نمایش داده شود
     if (categoryTrades.length > 0) {
-      // ✅ دریافت لیست پورتفولیوهای دارای ترید
       const portfoliosWithTrades = new Set();
       categoryTrades.forEach(t => {
-        // ✅ استخراج نام پورتفولیو از هر سه حالت ممکن
         let portfolioName = 'بدون پورتفولیو';
 
         if (t.portfolio && typeof t.portfolio === 'object') {
-          // حالت اول: portfolio آبجکت کامل است
           portfolioName = t.portfolio.name || t.portfolio.portfolio_name || 'بدون پورتفولیو';
         } else if (t.portfolio_name) {
-          // حالت دوم: portfolio_name مستقیماً وجود دارد
           portfolioName = t.portfolio_name;
         } else if (t.portfolio_id) {
-          // حالت سوم: فقط portfolio_id وجود دارد، باید از لیست پورتفولیوها نام را پیدا کنیم
           const foundPortfolio = portfolios.find(p => Number(p.id) === Number(t.portfolio_id));
           portfolioName = foundPortfolio?.name || 'بدون پورتفولیو';
         }
@@ -544,6 +505,7 @@ const Dashboard = () => {
       showToast('❌ خطا در حذف دسته‌بندی', 'error');
     }
   };
+
   // ============================================
   // چاپ و اکسل
   // ============================================
@@ -619,14 +581,6 @@ const Dashboard = () => {
   };
 
   // ============================================
-  // خروج از سیستم
-  // ============================================
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  // ============================================
   // رفتن به صفحه شاخص‌های پیشرفته
   // ============================================
   const handleGoToMetrics = () => {
@@ -641,16 +595,273 @@ const Dashboard = () => {
   };
 
   // ============================================
-  // تب‌ها
+  // تب‌ها - با اضافه شدن قوانین و چارت
   // ============================================
   const tabs = [
-    { id: 'general', label: '📋 عمومی' },
-    { id: 'execution', label: '💰 اجرا' },
+    { id: 'general', label: '🌐 عمومی' },
+    { id: 'execution', label: '⚡ اجرا' },
     { id: 'psychology', label: '🧠 روانشناسی' },
     { id: 'checklist', label: '✅ چک‌لیست' },
     { id: 'review', label: '🔄 بازبینی' },
-    { id: 'ict', label: '📊 ICT' },
+    { id: 'ict', label: '📦 ICT' },
+    { id: 'rules', label: '📋 قوانین' },
+    { id: 'screenshot', label: '🖼️ چارت' },
   ];
+
+  // ============================================
+  // توابع رندر تب‌ها در داشبورد
+  // ============================================
+
+  // ===== عمومی =====
+  const renderGeneralForDashboard = () => {
+    if (!selectedTrade) return null;
+    const trade = selectedTrade;
+    const categoryName = categories.find(c => c.id === (trade.group || trade.group_id))?.name || 'بدون دسته‌بندی';
+    const portfolioData = trade.portfolio_info || (trade.portfolio && typeof trade.portfolio === 'object' ? trade.portfolio : null);
+
+    return (
+      <div className="tab-panel">
+        <div className="detail-row"><span className="detail-label">نماد</span><span className="detail-value">{trade.symbol}</span></div>
+        <div className="detail-row"><span className="detail-label">تاریخ</span><span className="detail-value">{trade.trade_date || new Date(trade.created_at).toLocaleDateString('fa-IR')}</span></div>
+        <div className="detail-row"><span className="detail-label">نوع</span><span className={`detail-value ${trade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>{trade.trade_type === 'Buy' ? 'خرید' : 'فروش'}</span></div>
+        <div className="detail-row"><span className="detail-label">دسته‌بندی</span><span className="detail-value">{categoryName}</span></div>
+        <div className="detail-row"><span className="detail-label">پورتفولیو</span><span className="detail-value">{portfolioData ? `${portfolioData.icon || '📊'} ${portfolioData.name}` : 'بدون پورتفولیو'}</span></div>
+        <div className="detail-row"><span className="detail-label">بروکر / کارگزار</span><span className="detail-value">{trade.broker_name || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">سود/زیان</span><span className={`detail-value ${parseFloat(trade.profit) >= 0 ? 'profit' : 'loss'}`}>{parseFloat(trade.profit) >= 0 ? '+' : ''}{parseFloat(trade.profit) || 0}$</span></div>
+        <div className="detail-row"><span className="detail-label">کیفیت اجرا</span><span className={`detail-value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>{trade.execution_quality_score || '-'}/10</span></div>
+        <div className="detail-row"><span className="detail-label">نوع جلسه</span><span className="detail-value">{trade.session_type || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">ساعت (نیویورک)</span><span className="detail-value">{trade.time_ny || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">روز هفته</span><span className="detail-value">{trade.day_of_week || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">یادداشت هفتگی</span><span className="detail-value">{trade.weekly_profile_note || '-'}</span></div>
+      </div>
+    );
+  };
+
+  // ===== اجرا =====
+  const renderExecutionForDashboard = () => {
+    if (!selectedTrade) return null;
+    const trade = selectedTrade;
+    return (
+      <div className="tab-panel">
+        <div className="detail-row"><span className="detail-label">قیمت ورود</span><span className="detail-value">{trade.entry_price || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">قیمت خروج</span><span className="detail-value">{trade.close_price || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">حد ضرر (SL)</span><span className="detail-value">{trade.stop_loss || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">حد سود اول (TP1)</span><span className="detail-value">{trade.take_profit_1 || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">حد سود دوم (TP2)</span><span className="detail-value">{trade.take_profit_2 || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">حد سود سوم (TP3)</span><span className="detail-value">{trade.take_profit_3 || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">حد خورده شده</span><span className="detail-value">{trade.tp_sl_hit || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">نسبت R:R</span><span className="detail-value">{trade.risk_reward_ratio || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">ریسک (دلار)</span><span className="detail-value">${trade.risk_usd || '0'}</span></div>
+        <div className="detail-row"><span className="detail-label">درصد ریسک</span><span className="detail-value">{trade.risk_percent || '0'}%</span></div>
+        <div className="detail-row"><span className="detail-label">کیفیت اجرا</span><span className={`detail-value quality-${trade.execution_quality_score >= 7 ? 'high' : trade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>{trade.execution_quality_score || '-'}/10</span></div>
+      </div>
+    );
+  };
+
+  // ===== روانشناسی =====
+  const renderPsychologyForDashboard = () => {
+    if (!selectedTrade) return null;
+    const trade = selectedTrade;
+    const emotionLabels = {
+      focus: 'تمرکز', calm: 'آرامش', excited: 'هیجان', fear: 'ترس',
+      greed: 'طمع', relaxed: 'ریلکس', happy: 'خوشحال', sad: 'غمگین',
+      energetic: 'پرانرژی', tired: 'خسته', fomo: 'FOMO', patience: 'صبر',
+      contentment: 'قناعت'
+    };
+    const emotions = Object.keys(emotionLabels)
+      .filter(key => trade[key])
+      .map(key => emotionLabels[key]);
+
+    return (
+      <div className="tab-panel">
+        <div className="detail-row"><span className="detail-label">کیفیت خواب</span><span className={`detail-value sleep-${trade.sleep_quality}`}>{trade.sleep_quality || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">تغذیه مناسب</span><span className={`detail-value ${trade.food_status ? 'checked' : 'unchecked'}`}>{trade.food_status ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">احساس غالب</span><span className="detail-value">{trade.dominant_feeling || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">استرس قبل معامله</span><span className="detail-value">{trade.pre_trade_stress || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">کنترل هیجان هنگام ورود</span><span className="detail-value">{trade.entry_emotion_control || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">واکنش به سود</span><span className="detail-value">{trade.reaction_to_profit || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">مدیریت انتظار</span><span className="detail-value">{trade.expectation_management || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">کنترل احساسات پس از ضرر</span><span className="detail-value">{trade.emotion_after_losses || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">احساسات</span><span className="detail-value">
+          {emotions.length > 0 ? emotions.map((em, i) => <span key={i} className="emotion-badge">{em}</span>) : '-'}
+        </span></div>
+      </div>
+    );
+  };
+
+  // ===== چک‌لیست =====
+  const renderChecklistForDashboard = () => {
+    if (!selectedTrade) return null;
+    const trade = selectedTrade;
+    return (
+      <div className="tab-panel">
+        <div className="detail-row"><span className="detail-label">SMT تایید شد</span><span className={`detail-value ${trade.smt_confirmed ? 'checked' : 'unchecked'}`}>{trade.smt_confirmed ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">سطوح کلیدی بررسی شد</span><span className={`detail-value ${trade.key_levels_reviewed ? 'checked' : 'unchecked'}`}>{trade.key_levels_reviewed ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">حمایت BOND/DXY</span><span className={`detail-value ${trade.bond_dxy_support ? 'checked' : 'unchecked'}`}>{trade.bond_dxy_support ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">اخبار هفتگی چاپ شد</span><span className={`detail-value ${trade.weekly_news_printed ? 'checked' : 'unchecked'}`}>{trade.weekly_news_printed ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">ساعت صفر مشخص شد</span><span className={`detail-value ${trade.zero_hour_identified ? 'checked' : 'unchecked'}`}>{trade.zero_hour_identified ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">رنج آسیا مشخص شد</span><span className={`detail-value ${trade.asian_range_identified ? 'checked' : 'unchecked'}`}>{trade.asian_range_identified ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">رنج لندن مشخص شد</span><span className={`detail-value ${trade.london_range_identified ? 'checked' : 'unchecked'}`}>{trade.london_range_identified ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">Judas LO مشخص شد</span><span className={`detail-value ${trade.judas_lo_identified ? 'checked' : 'unchecked'}`}>{trade.judas_lo_identified ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">توضیحات تکمیلی</span><span className="detail-value">{trade.checklist_extra || '-'}</span></div>
+      </div>
+    );
+  };
+
+  // ===== بازبینی =====
+  const renderReviewForDashboard = () => {
+    if (!selectedTrade) return null;
+    const trade = selectedTrade;
+    return (
+      <div className="tab-panel">
+        <div className="detail-row"><span className="detail-label">کد اشتباه</span><span className="detail-value">{trade.mistake_code || 'بدون اشتباه'}</span></div>
+        <div className="detail-row"><span className="detail-label">وزن اشتباه</span><span className="detail-value">{trade.mistake_weight || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">پایبندی به حد ضرر</span><span className={`detail-value ${trade.stop_loss_adherence ? 'checked' : 'unchecked'}`}>{trade.stop_loss_adherence ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">پایبندی به استراتژی</span><span className={`detail-value ${trade.strategy_adherence ? 'checked' : 'unchecked'}`}>{trade.strategy_adherence ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">پایبندی به مدیریت سرمایه</span><span className={`detail-value ${trade.capital_management_adherence ? 'checked' : 'unchecked'}`}>{trade.capital_management_adherence ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">اورترید</span><span className={`detail-value ${trade.over_trade ? 'checked' : 'unchecked'}`}>{trade.over_trade ? '⚠️ بله' : '✅ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">اسکن پس از معامله</span><span className={`detail-value ${trade.post_trade_scan ? 'checked' : 'unchecked'}`}>{trade.post_trade_scan ? '✅ انجام شد' : '❌ انجام نشد'}</span></div>
+        <div className="detail-row"><span className="detail-label">دلیل ورود یادداشت شد</span><span className={`detail-value ${trade.entry_reason_written ? 'checked' : 'unchecked'}`}>{trade.entry_reason_written ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">دلیل خروج یادداشت شد</span><span className={`detail-value ${trade.exit_reason_written ? 'checked' : 'unchecked'}`}>{trade.exit_reason_written ? '✅ بله' : '❌ خیر'}</span></div>
+        <div className="detail-row"><span className="detail-label">اشتباهات ثبت شد</span><span className={`detail-value ${trade.mistakes_recorded ? 'checked' : 'unchecked'}`}>{trade.mistakes_recorded ? '✅ بله' : '❌ خیر'}</span></div>
+      </div>
+    );
+  };
+
+  // ===== ICT =====
+  const renderICTForDashboard = () => {
+    if (!selectedTrade) return null;
+    const trade = selectedTrade;
+    return (
+      <div className="tab-panel">
+        <div className="detail-row"><span className="detail-label">FVG</span><span className="detail-value">{trade.fvg || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">Order Block</span><span className="detail-value">{trade.order_block || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">BOS</span><span className="detail-value">{trade.bos || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">CHOCH</span><span className="detail-value">{trade.choch || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">MSS</span><span className="detail-value">{trade.mss || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">Liquidity Sweep</span><span className="detail-value">{trade.liquidity_sweep || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">POI</span><span className="detail-value">{trade.poi || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">Demand Zone</span><span className="detail-value">{trade.demand_zone || '-'}</span></div>
+        <div className="detail-row"><span className="detail-label">Supply Zone</span><span className="detail-value">{trade.supply_zone || '-'}</span></div>
+      </div>
+    );
+  };
+
+  // ===== قوانین =====
+  const renderRulesForDashboard = () => {
+    if (!selectedTrade) return null;
+
+    const ruleChecks = selectedTrade.rule_checks_detail;
+    if (!ruleChecks || ruleChecks.length === 0) {
+      return (
+        <div className="tab-panel">
+          <p className="no-data-message">هیچ قانونی برای این ترید ثبت نشده است.</p>
+        </div>
+      );
+    }
+
+    const checkedCount = ruleChecks.filter(r => r.is_checked).length;
+    const totalCount = ruleChecks.length;
+    const percentage = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
+
+    const grouped = ruleChecks.reduce((acc, item) => {
+      const cat = item.rule_category || 'متفرقه';
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(item);
+      return acc;
+    }, {});
+
+    const categoryIcons = {
+      'قوانین ورود': '📈',
+      'قوانین خروج': '🚪',
+      'مدیریت ریسک': '🛡️',
+      'روانشناختی': '🧠',
+      'قوانین زمانی': '⏰',
+      'متفرقه': '📋',
+    };
+
+    return (
+      <div className="tab-panel">
+        <div className="rules-compliance-header">
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>📋 قوانین معاملاتی</span>
+          <div className="compliance-badge" style={{ minWidth: '70px', padding: '6px 16px', background: 'var(--gradient-start)', borderRadius: '12px', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <span style={{ fontSize: '20px', fontWeight: 700 }}>{percentage}%</span>
+            <span style={{ fontSize: '10px', opacity: 0.8 }}>پایبندی</span>
+          </div>
+        </div>
+
+        <div className="rules-summary-bar" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 0', marginBottom: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+          <span>{checkedCount} از {totalCount} قانون رعایت شده</span>
+          <div className="compliance-bar" style={{ flex: 1, height: '6px', background: 'var(--bg-secondary)', borderRadius: '4px', overflow: 'hidden' }}>
+            <div className="compliance-fill" style={{ height: '100%', background: 'linear-gradient(90deg, var(--gradient-start), var(--gradient-end))', borderRadius: '4px', transition: 'width 0.6s ease', width: `${percentage}%` }} />
+          </div>
+        </div>
+
+        {Object.entries(grouped).map(([category, items]) => (
+          <div key={category} className="rules-category-detail" style={{ marginBottom: '12px', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+            <div className="category-header" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 14px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+              <span className="category-icon">{categoryIcons[category] || '📋'}</span>
+              <span className="category-name" style={{ fontWeight: 600, flex: 1, fontSize: '14px', color: 'var(--text-primary)' }}>{category}</span>
+              <span className="category-count" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{items.filter(r => r.is_checked).length}/{items.length}</span>
+            </div>
+            <div className="rules-list-detail" style={{ padding: '4px 0' }}>
+              {items.map((item, index) => (
+                <div key={index} className={`rule-detail-item ${item.is_checked ? 'checked' : 'unchecked'}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 14px', fontSize: '13px', borderBottom: '1px solid var(--border-color)', transition: 'all 0.2s ease', background: item.is_checked ? 'rgba(46, 125, 50, 0.04)' : 'rgba(198, 40, 40, 0.04)' }}>
+                  <span className="rule-status" style={{ fontSize: '16px', flexShrink: 0 }}>{item.is_checked ? '✅' : '❌'}</span>
+                  <span className="rule-text" style={{ flex: 1, color: item.is_checked ? 'var(--text-primary)' : 'var(--text-muted)' }}>{item.rule_text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // ===== چارت =====
+  const renderScreenshotForDashboard = () => {
+    if (!selectedTrade) return null;
+
+    if (!selectedTrade.screenshot) {
+      return (
+        <div className="tab-panel">
+          <p className="no-data-message">هیچ تصویری برای این ترید آپلود نشده است.</p>
+        </div>
+      );
+    }
+
+    const imageUrl = selectedTrade.screenshot;
+
+    return (
+      <div className="tab-panel">
+        <div className="screenshot-container" style={{ marginTop: '8px', borderRadius: '8px', overflow: 'hidden', background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
+          <img
+            src={imageUrl}
+            alt={`چارت ${selectedTrade.symbol}`}
+            style={{ width: '100%', height: 'auto', display: 'block', cursor: 'pointer' }}
+            onClick={() => window.open(imageUrl, '_blank')}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // رندر محتوای تب‌ها
+  // ============================================
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'general': return renderGeneralForDashboard();
+      case 'execution': return renderExecutionForDashboard();
+      case 'psychology': return renderPsychologyForDashboard();
+      case 'checklist': return renderChecklistForDashboard();
+      case 'review': return renderReviewForDashboard();
+      case 'ict': return renderICTForDashboard();
+      case 'rules': return renderRulesForDashboard();
+      case 'screenshot': return renderScreenshotForDashboard();
+      default: return null;
+    }
+  };
 
   // ============================================
   // لودینگ و خطا
@@ -677,113 +888,10 @@ const Dashboard = () => {
   }
 
   // ============================================
-  // رندر اصلی
+  // رندر اصلی - بدون هدر و بدون Quick Actions
   // ============================================
   return (
     <div className={`dashboard-new ${isDark ? 'dark' : 'light'}`}>
-      {/* ===== هدر ===== */}
-      <header className="dashboard-header">
-        <div className="header-left-group">
-          <div className="header-left">
-            <h1>
-              📊 ژورنال حرفه‌ای ترید
-              <span className="header-version">v{appVersion}</span>
-            </h1>
-          </div>
-
-          {/* ===== سلکتور پورتفولیو - در کنار عنوان ===== */}
-          <div className="portfolio-selector-wrapper">
-            <PortfolioSelector />
-          </div>
-        </div>
-
-        <div className="header-right">
-          {/* ===== کلید شاخص‌ها ===== */}
-          <button className="header-btn metrics-btn" onClick={handleGoToMetrics} title="شاخص‌های پیشرفته">
-            <span className="btn-icon">📈</span>
-            <span className="btn-text">شاخص‌ها</span>
-          </button>
-
-          {/* ===== کلید مقایسه پورتفولیوها ===== */}
-          <button className="header-btn comparison-btn" onClick={handleGoToComparison} title="مقایسه پورتفولیوها">
-            <span className="btn-icon">📊</span>
-            <span className="btn-text">مقایسه</span>
-          </button>
-
-          {/* ===== کلید انضباط ===== */}
-          <button className="header-btn discipline-btn" onClick={() => navigate('/discipline')} title="ابزارهای انضباطی">
-            <span className="btn-icon">🛡️</span>
-            <span className="btn-text">انضباط</span>
-          </button>
-
-          {/* ===== کلید شب/روز ===== */}
-          <button className="header-btn theme-btn" onClick={toggleTheme} title={isDark ? 'حالت روشن' : 'حالت تاریک'}>
-            <span className="btn-icon">{isDark ? '☀️' : '🌙'}</span>
-            <span className="btn-text">{isDark ? 'روشن' : 'تاریک'}</span>
-          </button>
-
-          {/* ===== کلید خروج ===== */}
-          <button className="header-btn logout-btn" onClick={handleLogout} title="خروج از حساب کاربری">
-            <span className="btn-icon">🚪</span>
-            <span className="btn-text">خروج</span>
-          </button>
-        </div>
-      </header>
-
-
-      {/* ===== دکمه‌های اقدام سریع ===== */}
-      <div className="quick-actions">
-        <div className="action-btn-wrapper" ref={dropdownRef}>
-          <button
-            className="action-btn primary"
-            onClick={handleNewTrade}
-          >
-            <span>ترید جدید</span>
-            <span className="action-icon">➕</span>
-          </button>
-          <button
-            className="dropdown-toggle"
-            onClick={() => setShowTradeDropdown(!showTradeDropdown)}
-            aria-label="گزینه‌های بیشتر"
-          >
-            <span className="arrow-icon">▾</span>
-          </button>
-          {showTradeDropdown && (
-            <div className="dropdown-menu">
-              <button className="dropdown-item" onClick={handleNewTrade}>
-                <span className="dropdown-icon">➕</span>
-                ثبت دستی
-              </button>
-              <button className="dropdown-item" onClick={handleImportCSV}>
-                <span className="dropdown-icon">📥</span>
-                انتقال از فایل CSV
-              </button>
-            </div>
-          )}
-        </div>
-
-        <button className="action-btn secondary" onClick={() => navigate('/trades')}>
-          <span className="action-icon">📋</span><span>لیست تریدها</span>
-        </button>
-        <button className="action-btn success" onClick={() => navigate('/analytics')}>
-          <span className="action-icon">📊</span><span>تحلیل عملکرد</span>
-        </button>
-        <button className="action-btn warning" onClick={() => navigate('/reports')}>
-          <span className="action-icon">📈</span><span>گزارش‌های پیشرفته</span>
-        </button>
-        <button
-          className="action-btn ai"
-          onClick={() => navigate('/ai-consultation')}
-          disabled={hasActiveConsultation}
-        >
-          <span className="action-icon">🧠</span>
-          <span>{hasActiveConsultation ? '⏳ مشاوره در حال انجام...' : 'مشاور AI'}</span>
-        </button>
-        <button className="action-btn info" onClick={() => navigate('/profile')}>
-          <span className="action-icon">👤</span><span>پنل کاربری</span>
-        </button>
-      </div>
-
       {/* ===== پیام‌های سیستم ===== */}
       <SystemMessages />
       <DisciplineWidget onNavigate={navigate} />
@@ -927,318 +1035,7 @@ const Dashboard = () => {
                 ))}
               </div>
               <div className="detail-content">
-                {activeTab === 'general' && (
-                  <div className="tab-panel">
-                    <div className="detail-row">
-                      <span className="detail-label">نماد</span>
-                      <span className="detail-value">{selectedTrade.symbol}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">تاریخ</span>
-                      <span className="detail-value">{selectedTrade.trade_date || new Date(selectedTrade.created_at).toLocaleDateString('fa-IR')}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">نوع</span>
-                      <span className={`detail-value ${selectedTrade.trade_type === 'Buy' ? 'buy' : 'sell'}`}>
-                        {selectedTrade.trade_type === 'Buy' ? 'خرید' : 'فروش'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">دسته‌بندی</span>
-                      <span className="detail-value">
-                        {categories.find(c => c.id === (selectedTrade.group?.id ?? selectedTrade.group_id))?.name || 'بدون دسته‌بندی'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">سود/زیان</span>
-                      <span className={`detail-value ${parseFloat(selectedTrade.profit) >= 0 ? 'profit' : 'loss'}`}>
-                        {parseFloat(selectedTrade.profit) >= 0 ? '+' : ''}{parseFloat(selectedTrade.profit) || 0}$
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">کیفیت اجرا</span>
-                      <span className={`detail-value quality-${selectedTrade.execution_quality_score >= 7 ? 'high' : selectedTrade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>
-                        {selectedTrade.execution_quality_score || '-'}/10
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">نوع جلسه</span>
-                      <span className="detail-value">{selectedTrade.session_type || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">ساعت (نیویورک)</span>
-                      <span className="detail-value">{selectedTrade.time_ny || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">روز هفته</span>
-                      <span className="detail-value">{selectedTrade.day_of_week || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">یادداشت هفتگی</span>
-                      <span className="detail-value">{selectedTrade.weekly_profile_note || '-'}</span>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'execution' && (
-                  <div className="tab-panel">
-                    <div className="detail-row">
-                      <span className="detail-label">قیمت ورود</span>
-                      <span className="detail-value">{selectedTrade.entry_price || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">قیمت خروج</span>
-                      <span className="detail-value">{selectedTrade.close_price || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حد ضرر (SL)</span>
-                      <span className="detail-value">{selectedTrade.stop_loss || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حد سود اول (TP1)</span>
-                      <span className="detail-value">{selectedTrade.take_profit_1 || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حد سود دوم (TP2)</span>
-                      <span className="detail-value">{selectedTrade.take_profit_2 || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حد سود سوم (TP3)</span>
-                      <span className="detail-value">{selectedTrade.take_profit_3 || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حد خورده شده</span>
-                      <span className="detail-value">{selectedTrade.tp_sl_hit || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">نسبت R:R</span>
-                      <span className="detail-value">{selectedTrade.risk_reward_ratio || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">ریسک (دلار)</span>
-                      <span className="detail-value">${selectedTrade.risk_usd || '0'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">درصد ریسک</span>
-                      <span className="detail-value">{selectedTrade.risk_percent || '0'}%</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">کیفیت اجرا</span>
-                      <span className={`detail-value quality-${selectedTrade.execution_quality_score >= 7 ? 'high' : selectedTrade.execution_quality_score >= 4 ? 'medium' : 'low'}`}>
-                        {selectedTrade.execution_quality_score || '-'}/10
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'psychology' && (
-                  <div className="tab-panel">
-                    <div className="detail-row">
-                      <span className="detail-label">کیفیت خواب</span>
-                      <span className={`detail-value sleep-${selectedTrade.sleep_quality}`}>{selectedTrade.sleep_quality || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">تغذیه مناسب</span>
-                      <span className={`detail-value ${selectedTrade.food_status ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.food_status ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">احساس غالب</span>
-                      <span className="detail-value">{selectedTrade.dominant_feeling || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">استرس قبل معامله</span>
-                      <span className="detail-value">{selectedTrade.pre_trade_stress || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">کنترل هیجان هنگام ورود</span>
-                      <span className="detail-value">{selectedTrade.entry_emotion_control || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">واکنش به سود</span>
-                      <span className="detail-value">{selectedTrade.reaction_to_profit || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">مدیریت انتظار</span>
-                      <span className="detail-value">{selectedTrade.expectation_management || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">کنترل احساسات پس از ضرر</span>
-                      <span className="detail-value">{selectedTrade.emotion_after_losses || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">احساسات</span>
-                      <span className="detail-value">
-                        {Object.keys(selectedTrade)
-                          .filter(key => ['focus', 'calm', 'excited', 'fear', 'greed', 'relaxed', 'happy', 'sad', 'energetic', 'tired', 'fomo', 'patience', 'contentment'].includes(key) && selectedTrade[key])
-                          .map(key => {
-                            const labels = { focus: 'تمرکز', calm: 'آرامش', excited: 'هیجان', fear: 'ترس', greed: 'طمع', relaxed: 'ریلکس', happy: 'خوشحال', sad: 'غمگین', energetic: 'پرانرژی', tired: 'خسته', fomo: 'FOMO', patience: 'صبر', contentment: 'قناعت' };
-                            return <span key={key} className="emotion-badge">{labels[key]}</span>;
-                          }) || '-'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'checklist' && (
-                  <div className="tab-panel">
-                    <div className="detail-row">
-                      <span className="detail-label">SMT تایید شد</span>
-                      <span className={`detail-value ${selectedTrade.smt_confirmed ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.smt_confirmed ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">سطوح کلیدی بررسی شد</span>
-                      <span className={`detail-value ${selectedTrade.key_levels_reviewed ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.key_levels_reviewed ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">حمایت BOND/DXY</span>
-                      <span className={`detail-value ${selectedTrade.bond_dxy_support ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.bond_dxy_support ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">اخبار هفتگی چاپ شد</span>
-                      <span className={`detail-value ${selectedTrade.weekly_news_printed ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.weekly_news_printed ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">ساعت صفر مشخص شد</span>
-                      <span className={`detail-value ${selectedTrade.zero_hour_identified ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.zero_hour_identified ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">رنج آسیا مشخص شد</span>
-                      <span className={`detail-value ${selectedTrade.asian_range_identified ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.asian_range_identified ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">رنج لندن مشخص شد</span>
-                      <span className={`detail-value ${selectedTrade.london_range_identified ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.london_range_identified ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Judas LO مشخص شد</span>
-                      <span className={`detail-value ${selectedTrade.judas_lo_identified ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.judas_lo_identified ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">توضیحات تکمیلی</span>
-                      <span className="detail-value">{selectedTrade.checklist_extra || '-'}</span>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'review' && (
-                  <div className="tab-panel">
-                    <div className="detail-row">
-                      <span className="detail-label">کد اشتباه</span>
-                      <span className="detail-value">{selectedTrade.mistake_code || 'بدون اشتباه'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">وزن اشتباه</span>
-                      <span className="detail-value">{selectedTrade.mistake_weight || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">پایبندی به حد ضرر</span>
-                      <span className={`detail-value ${selectedTrade.stop_loss_adherence ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.stop_loss_adherence ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">پایبندی به استراتژی</span>
-                      <span className={`detail-value ${selectedTrade.strategy_adherence ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.strategy_adherence ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">پایبندی به مدیریت سرمایه</span>
-                      <span className={`detail-value ${selectedTrade.capital_management_adherence ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.capital_management_adherence ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">اورترید</span>
-                      <span className={`detail-value ${selectedTrade.over_trade ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.over_trade ? '⚠️ بله' : '✅ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">اسکن پس از معامله</span>
-                      <span className={`detail-value ${selectedTrade.post_trade_scan ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.post_trade_scan ? '✅ انجام شد' : '❌ انجام نشد'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">دلیل ورود یادداشت شد</span>
-                      <span className={`detail-value ${selectedTrade.entry_reason_written ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.entry_reason_written ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">دلیل خروج یادداشت شد</span>
-                      <span className={`detail-value ${selectedTrade.exit_reason_written ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.exit_reason_written ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">اشتباهات ثبت شد</span>
-                      <span className={`detail-value ${selectedTrade.mistakes_recorded ? 'checked' : 'unchecked'}`}>
-                        {selectedTrade.mistakes_recorded ? '✅ بله' : '❌ خیر'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'ict' && (
-                  <div className="tab-panel">
-                    <div className="detail-row">
-                      <span className="detail-label">FVG</span>
-                      <span className="detail-value">{selectedTrade.fvg || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Order Block</span>
-                      <span className="detail-value">{selectedTrade.order_block || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">BOS</span>
-                      <span className="detail-value">{selectedTrade.bos || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">CHOCH</span>
-                      <span className="detail-value">{selectedTrade.choch || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">MSS</span>
-                      <span className="detail-value">{selectedTrade.mss || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Liquidity Sweep</span>
-                      <span className="detail-value">{selectedTrade.liquidity_sweep || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">POI</span>
-                      <span className="detail-value">{selectedTrade.poi || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Demand Zone</span>
-                      <span className="detail-value">{selectedTrade.demand_zone || '-'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Supply Zone</span>
-                      <span className="detail-value">{selectedTrade.supply_zone || '-'}</span>
-                    </div>
-                  </div>
-                )}
+                {renderContent()}
               </div>
             </>
           ) : (
@@ -1359,75 +1156,75 @@ const Dashboard = () => {
       )}
 
       {showDeleteCategoryModal && categoryToDelete && (
-      <div className="modal-overlay" onClick={() => setShowDeleteCategoryModal(false)}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-icon">🗑️</div>
-          <h3>حذف دسته‌بندی</h3>
-          <p>آیا از حذف دسته‌بندی <strong>{categoryToDelete.name}</strong> اطمینان دارید؟</p>
+        <div className="modal-overlay" onClick={() => setShowDeleteCategoryModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">🗑️</div>
+            <h3>حذف دسته‌بندی</h3>
+            <p>آیا از حذف دسته‌بندی <strong>{categoryToDelete.name}</strong> اطمینان دارید؟</p>
 
-          {(() => {
-            const categoryTrades = trades.filter(t => {
-              const tradeGroupId = t.group || t.group_id || t.group?.id;
-              return Number(tradeGroupId) === Number(categoryToDelete.id);
-            });
-
-            if (categoryTrades.length > 0) {
-              const portfoliosWithTrades = new Set();
-              categoryTrades.forEach(t => {
-                let portfolioName = 'بدون پورتفولیو';
-
-                if (t.portfolio && typeof t.portfolio === 'object') {
-                  portfolioName = t.portfolio.name || t.portfolio.portfolio_name || 'بدون پورتفولیو';
-                } else if (t.portfolio_name) {
-                  portfolioName = t.portfolio_name;
-                } else if (t.portfolio_id) {
-                  const foundPortfolio = portfolios.find(p => Number(p.id) === Number(t.portfolio_id));
-                  portfolioName = foundPortfolio?.name || 'بدون پورتفولیو';
-                }
-
-                portfoliosWithTrades.add(portfolioName);
+            {(() => {
+              const categoryTrades = trades.filter(t => {
+                const tradeGroupId = t.group || t.group_id || t.group?.id;
+                return Number(tradeGroupId) === Number(categoryToDelete.id);
               });
 
-              const portfolioList = Array.from(portfoliosWithTrades).join('، ');
+              if (categoryTrades.length > 0) {
+                const portfoliosWithTrades = new Set();
+                categoryTrades.forEach(t => {
+                  let portfolioName = 'بدون پورتفولیو';
+
+                  if (t.portfolio && typeof t.portfolio === 'object') {
+                    portfolioName = t.portfolio.name || t.portfolio.portfolio_name || 'بدون پورتفولیو';
+                  } else if (t.portfolio_name) {
+                    portfolioName = t.portfolio_name;
+                  } else if (t.portfolio_id) {
+                    const foundPortfolio = portfolios.find(p => Number(p.id) === Number(t.portfolio_id));
+                    portfolioName = foundPortfolio?.name || 'بدون پورتفولیو';
+                  }
+
+                  portfoliosWithTrades.add(portfolioName);
+                });
+
+                const portfolioList = Array.from(portfoliosWithTrades).join('، ');
+
+                return (
+                  <>
+                    <p className="modal-warning" style={{ color: '#c62828', fontWeight: 'bold' }}>
+                      ⚠️ این دسته‌بندی در {categoryTrades.length} ترید استفاده شده است.
+                    </p>
+                    <p className="modal-warning" style={{ color: '#c62828' }}>
+                      📂 پورتفولیوهای دارای ترید: {portfolioList}
+                    </p>
+                    <p className="modal-warning" style={{ color: '#c62828', fontSize: '14px' }}>
+                      ❌ برای حذف این دسته‌بندی، ابتدا تمام تریدهای آن را در تمام پورتفولیوها
+                      حذف یا به دسته‌بندی دیگری منتقل کنید.
+                    </p>
+                    <div className="modal-actions">
+                      <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>
+                        بستن
+                      </button>
+                    </div>
+                  </>
+                );
+              }
 
               return (
                 <>
-                  <p className="modal-warning" style={{ color: '#c62828', fontWeight: 'bold' }}>
-                    ⚠️ این دسته‌بندی در {categoryTrades.length} ترید استفاده شده است.
-                  </p>
-                  <p className="modal-warning" style={{ color: '#c62828' }}>
-                    📂 پورتفولیوهای دارای ترید: {portfolioList}
-                  </p>
-                  <p className="modal-warning" style={{ color: '#c62828', fontSize: '14px' }}>
-                    ❌ برای حذف این دسته‌بندی، ابتدا تمام تریدهای آن را در تمام پورتفولیوها
-                    حذف یا به دسته‌بندی دیگری منتقل کنید.
-                  </p>
+                  <p className="modal-warning">⚠️ این عمل غیرقابل بازگشت است!</p>
                   <div className="modal-actions">
                     <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>
-                      بستن
+                      انصراف
+                    </button>
+                    <button className="btn-confirm-delete" onClick={handleDeleteCategory}>
+                      حذف دسته‌بندی
                     </button>
                   </div>
                 </>
               );
-            }
-
-            return (
-              <>
-                <p className="modal-warning">⚠️ این عمل غیرقابل بازگشت است!</p>
-                <div className="modal-actions">
-                  <button className="btn-cancel" onClick={() => setShowDeleteCategoryModal(false)}>
-                    انصراف
-                  </button>
-                  <button className="btn-confirm-delete" onClick={handleDeleteCategory}>
-                    حذف دسته‌بندی
-                  </button>
-                </div>
-              </>
-            );
-          })()}
+            })()}
+          </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 };

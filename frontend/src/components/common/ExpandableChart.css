@@ -9,17 +9,18 @@
 }
 
 .expandable-chart-wrapper:hover {
-  opacity: 0.98;
+  opacity: 0.95;
 }
 
+/* ============================================
+   مودال بزرگ‌نمایی
+   ============================================ */
 .expandable-chart-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -29,72 +30,241 @@
   box-sizing: border-box;
 }
 
+/* ===== تم روشن ===== */
+.expandable-chart-modal.light {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.expandable-chart-modal.light .expandable-chart-modal-content {
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.expandable-chart-modal.light .expandable-chart-close {
+  background: rgba(0, 0, 0, 0.08);
+  color: #333;
+}
+
+.expandable-chart-modal.light .expandable-chart-close:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ===== تم تاریک ===== */
+.expandable-chart-modal.dark {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+}
+
+.expandable-chart-modal.dark .expandable-chart-modal-content {
+  background: #1a1a2e;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.expandable-chart-modal.dark .expandable-chart-close {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e0e0e0;
+}
+
+.expandable-chart-modal.dark .expandable-chart-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== محتوای مودال ===== */
 .expandable-chart-modal-content {
-  background: #fff;
   width: 100%;
   height: 100%;
   position: relative;
   padding: 0;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
+  transition: background 0.3s ease;
 }
 
-.dark .expandable-chart-modal-content {
-  background: #2d2d44;
-}
-
+/* ===== دکمه بستن ===== */
 .expandable-chart-close {
   position: absolute;
-  top: 12px;
-  right: 16px;
-  background: rgba(0,0,0,0.1);
+  top: 20px;
+  right: 24px;
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 22px;
+  width: 44px;
+  height: 44px;
+  font-size: 26px;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
   z-index: 10;
-  color: #333;
-}
-
-.dark .expandable-chart-close {
-  background: rgba(255,255,255,0.15);
-  color: #eee;
+  font-weight: 300;
 }
 
 .expandable-chart-close:hover {
-  background: rgba(0,0,0,0.2);
+  transform: scale(1.1);
 }
 
-.dark .expandable-chart-close:hover {
-  background: rgba(255,255,255,0.25);
-}
-
+/* ===== کانتینر نمودار در مودال ===== */
 .expandable-chart-modal-chart {
   flex: 1;
   width: 100%;
-  padding: 0;
+  padding: 30px 50px 50px 50px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  box-sizing: border-box;
 }
 
-@media (max-width: 600px) {
+/* ==========================================================
+   ✅ استایل‌های مخصوص PieChart در مودال
+   ========================================================== */
+
+/* بزرگ‌تر کردن کل نمودار دایره‌ای */
+.expandable-chart-modal-chart .recharts-pie .recharts-sector {
+  stroke: none !important;
+}
+
+.expandable-chart-modal-chart .recharts-pie .recharts-pie-sector {
+  stroke: #fff !important;
+  stroke-width: 2px !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-pie .recharts-pie-sector {
+  stroke: #1a1a2e !important;
+}
+
+/* فونت برچسب‌های بزرگ‌تر */
+.expandable-chart-modal-chart .recharts-pie-label .recharts-text {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+}
+
+/* فونت راهنما بزرگ‌تر */
+.expandable-chart-modal-chart .recharts-legend-item-text {
+  font-size: 16px !important;
+}
+
+/* ==========================================================
+   ✅ استایل‌های عمومی recharts در مودال
+   ========================================================== */
+
+.expandable-chart-modal-chart .recharts-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.expandable-chart-modal-chart .recharts-surface {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.expandable-chart-modal-chart .recharts-xaxis .recharts-text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.expandable-chart-modal-chart .recharts-yaxis .recharts-text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* ==========================================================
+   ✅ تم تاریک برای recharts
+   ========================================================== */
+
+.dark .expandable-chart-modal-chart .recharts-cartesian-grid-horizontal line,
+.dark .expandable-chart-modal-chart .recharts-cartesian-grid-vertical line {
+  stroke: #444 !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-text {
+  fill: #cccccc !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-legend-item-text {
+  fill: #cccccc !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #2d2d44 !important;
+  border-color: #444 !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-tooltip-wrapper .recharts-tooltip-label {
+  color: #e0e0e0 !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-tooltip-wrapper .recharts-tooltip-item {
+  color: #cccccc !important;
+}
+
+.dark .expandable-chart-modal-chart .recharts-pie .recharts-pie-sector {
+  stroke: #1a1a2e !important;
+}
+
+/* ============================================
+   واکنش‌گرایی
+   ============================================ */
+@media (max-width: 768px) {
   .expandable-chart-close {
-    top: 8px;
+    top: 14px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .expandable-chart-modal-chart {
+    padding: 20px 20px 30px 20px;
+  }
+
+  .expandable-chart-modal-chart .recharts-xaxis .recharts-text {
+    font-size: 12px !important;
+  }
+
+  .expandable-chart-modal-chart .recharts-yaxis .recharts-text {
+    font-size: 12px !important;
+  }
+
+  .expandable-chart-modal-chart .recharts-pie-label .recharts-text {
+    font-size: 15px !important;
+  }
+
+  .expandable-chart-modal-chart .recharts-legend-item-text {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .expandable-chart-close {
+    top: 10px;
     right: 12px;
     width: 32px;
     height: 32px;
     font-size: 18px;
+  }
+
+  .expandable-chart-modal-chart {
+    padding: 16px 12px 24px 12px;
+  }
+
+  .expandable-chart-modal-chart .recharts-xaxis .recharts-text {
+    font-size: 10px !important;
+  }
+
+  .expandable-chart-modal-chart .recharts-yaxis .recharts-text {
+    font-size: 10px !important;
+  }
+
+  .expandable-chart-modal-chart .recharts-pie-label .recharts-text {
+    font-size: 12px !important;
+  }
+
+  .expandable-chart-modal-chart .recharts-legend-item-text {
+    font-size: 12px !important;
   }
 }

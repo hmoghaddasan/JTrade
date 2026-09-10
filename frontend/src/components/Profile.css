@@ -1088,6 +1088,7 @@
     max-width: 100px;
   }
 }
+
 /* ==========================================================
    ✅ ریسپانسیو - وسط‌چین کردن عنوان در موبایل
    ========================================================== */
@@ -1110,5 +1111,223 @@
   .profile-header .header-actions {
     width: 100% !important;
     justify-content: center !important;
+  }
+}
+
+/* ==========================================================
+   ✅ دکمه بازگشت - اندازه کامل در موبایل
+   ========================================================== */
+@media (max-width: 768px) {
+  .btn-back {
+    width: 100% !important;
+    display: block !important;
+    text-align: center !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    border-radius: 8px !important;
+    margin-top: 4px !important;
+  }
+
+  /* تنظیم هدر برای نمایش بهتر دکمه در موبایل */
+  .profile-header {
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-back {
+    padding: 14px 16px !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+  }
+}
+/* frontend/src/components/Profile.css - اضافه کردن به انتهای فایل */
+
+/* ============================================
+   ✅ توضیحات تکمیلی راهنمای قوانین
+   ============================================ */
+
+.guide-extra-info {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 2px solid var(--border-color, #e0e0e0);
+}
+
+.dark .guide-extra-info {
+  border-top-color: var(--border-color-dark, #333);
+}
+
+.guide-extra-info .guide-section {
+  margin-bottom: 18px;
+}
+
+.guide-extra-info .guide-section:last-child {
+  margin-bottom: 0;
+}
+
+.guide-extra-info .guide-section h4 {
+  font-size: 15px;
+  color: var(--primary, #1a237e);
+  margin-bottom: 6px;
+}
+
+.dark .guide-extra-info .guide-section h4 {
+  color: #90caf9;
+}
+
+.guide-extra-info .guide-section p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary, #555);
+  margin-bottom: 6px;
+}
+
+.dark .guide-extra-info .guide-section p {
+  color: #aaa;
+}
+
+.guide-extra-info .guide-section ul {
+  margin: 4px 0 0 0;
+  padding-right: 20px;
+}
+
+.guide-extra-info .guide-section ul li {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary, #555);
+  margin-bottom: 4px;
+}
+
+.dark .guide-extra-info .guide-section ul li {
+  color: #aaa;
+}
+
+.guide-extra-info .guide-section ul li strong {
+  color: var(--text-primary, #1a1a2e);
+}
+
+.dark .guide-extra-info .guide-section ul li strong {
+  color: #e0e0e0;
+}
+
+.guide-tip-success {
+  background: #e8f5e9;
+  padding: 14px 18px;
+  border-radius: 8px;
+  border-right: 4px solid #2e7d32;
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.dark .guide-tip-success {
+  background: #1a2e1a;
+  border-color: #4caf50;
+}
+
+.guide-tip-success .tip-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.guide-tip-success div {
+  flex: 1;
+}
+
+.guide-tip-success strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+  color: #2e7d32;
+}
+
+.dark .guide-tip-success strong {
+  color: #81c784;
+}
+
+.guide-tip-success ul {
+  margin: 4px 0 0 0;
+  padding-right: 20px;
+}
+
+.guide-tip-success ul li {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary, #555);
+  margin-bottom: 4px;
+}
+
+.dark .guide-tip-success ul li {
+  color: #aaa;
+}
+
+.guide-tip-success ul li strong {
+  color: #2e7d32;
+}
+
+.dark .guide-tip-success ul li strong {
+  color: #81c784;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا
+   ============================================ */
+
+@media (max-width: 768px) {
+  .guide-extra-info .guide-section p {
+    font-size: 13px;
+  }
+
+  .guide-extra-info .guide-section ul li {
+    font-size: 13px;
+  }
+
+  .guide-extra-info .guide-section h4 {
+    font-size: 14px;
+  }
+
+  .guide-tip-success {
+    padding: 10px 14px;
+    flex-direction: column;
+  }
+
+  .guide-tip-success ul li {
+    font-size: 13px;
+  }
+
+  .guide-tip-success strong {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .guide-extra-info {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+
+  .guide-extra-info .guide-section p {
+    font-size: 12px;
+  }
+
+  .guide-extra-info .guide-section ul li {
+    font-size: 12px;
+  }
+
+  .guide-extra-info .guide-section h4 {
+    font-size: 13px;
+  }
+
+  .guide-tip-success {
+    padding: 8px 10px;
+  }
+
+  .guide-tip-success ul li {
+    font-size: 12px;
+  }
+
+  .guide-tip-success strong {
+    font-size: 13px;
   }
 }

@@ -12,6 +12,7 @@ import ComparisonChart from '../components/portfolio/ComparisonChart';
 import ComparisonTable from '../components/portfolio/ComparisonTable';
 import './PortfolioComparisonPage.css';
 import LoadingBar from '../components/common/LoadingBar';
+
 // ============================================
 // داده‌های راهنمای شاخص‌ها
 // ============================================
@@ -21,60 +22,70 @@ const METRICS_GUIDE = [
         en: 'Total Profit',
         formula: 'Σ (Profit)',
         description: 'مجموع سود یا زیان تمام تریدهای پورتفولیو. نشان‌دهنده عملکرد کلی مالی است.',
+        interpretation: '🟢 هرچه بالاتر، بهتر. مقدار مثبت نشان‌دهنده سودآوری کلی است.'
     },
     {
         fa: 'نرخ برد',
         en: 'Win Rate',
         formula: '(Wins / Total Trades) × 100',
         description: 'درصد تریدهایی که با سود بسته شده‌اند. هرچه بالاتر، عملکرد موفق‌تر.',
+        interpretation: '🟢 بالای ۵۰٪ خوب است. 🔴 زیر ۴۰٪ نیاز به بهبود دارد.'
     },
     {
         fa: 'فاکتور سود',
         en: 'Profit Factor',
         formula: 'Total Profit / Total Loss',
         description: 'نسبت کل سود به کل ضرر. مقدار > ۱ نشان‌دهنده سودآوری است. هرچه بالاتر، بهتر.',
+        interpretation: '🟢 > ۱.۵ عالی | 🟡 ۱ تا ۱.۵ خوب | 🔴 < ۱ ضررده'
     },
     {
         fa: 'میانگین R:R',
         en: 'Average R/R',
         formula: 'Σ (Risk/Reward) / N',
         description: 'میانگین نسبت ریسک به ریوارد در تمام تریدها. نشان‌دهنده کیفیت متوسط ستاپ‌هاست.',
+        interpretation: '🟢 > ۲ عالی | 🟡 ۱.۵ تا ۲ خوب | 🔴 < ۱.۵ نیاز به بهبود'
     },
     {
         fa: 'حداکثر افت',
         en: 'Max Drawdown',
         formula: '(Peak - Trough) / Peak × 100',
         description: 'بزرگترین کاهش از اوج به کف (درصدی). ریسک نزولی پورتفولیو را نشان می‌دهد.',
+        interpretation: '🟢 < ۱۰٪ عالی | 🟡 ۱۰-۲۵٪ قابل قبول | 🔴 > ۲۵٪ خطرناک'
     },
     {
         fa: 'امید ریاضی',
         en: 'Expectancy',
         formula: '(Avg Win × Win Rate) - (Avg Loss × Loss Rate)',
         description: 'سود مورد انتظار به ازای هر ترید. مقدار مثبت نشان‌دهنده لبه معاملاتی است.',
+        interpretation: '🟢 مثبت = لبه معاملاتی | 🔴 منفی = نیاز به بازنگری'
     },
     {
         fa: 'تعداد تریدها',
         en: 'Total Trades',
         formula: 'Count',
         description: 'تعداد کل تریدهای انجام‌شده در پورتفولیو. نشان‌دهنده حجم فعالیت است.',
+        interpretation: '📊 هرچه بیشتر، داده‌ها معتبرتر. حداقل ۲۰ ترید برای تحلیل معتبر.'
     },
     {
         fa: 'سودده',
         en: 'Wins',
         formula: 'Count of Profitable Trades',
         description: 'تعداد تریدهایی که با سود بسته شده‌اند.',
+        interpretation: '✅ نشان‌دهنده قدرت استراتژی در کسب سود است.'
     },
     {
         fa: 'ضررده',
         en: 'Losses',
         formula: 'Count of Losing Trades',
         description: 'تعداد تریدهایی که با زیان بسته شده‌اند.',
+        interpretation: '❌ نشان‌دهنده نقاط ضعف و نیاز به مدیریت ریسک بهتر است.'
     },
     {
         fa: 'مساوی',
         en: 'Breakevens',
         formula: 'Count of Breakeven Trades',
         description: 'تعداد تریدهایی که با سود صفر (مساوی) بسته شده‌اند.',
+        interpretation: '⚖️ نشان‌دهنده فرصت‌های از دست‌رفته برای سود است.'
     },
 ];
 
@@ -178,32 +189,44 @@ const PortfolioComparisonPage = () => {
             {/* ===== هدر ===== */}
             <div className="comparison-page-header">
                 <div className="header-left">
-                    <h1>📊 مقایسه پورتفولیوها</h1>
+                    <h1>⚖️ مقایسه پورتفولیوها</h1>
                 </div>
                 <div className="header-right">
-                    {/* ✅ دکمه بازگشت به اینجا منتقل شد */}
-                    <button className="btn-back" onClick={handleBack}>← بازگشت</button>
-                    <button className="btn-print" onClick={handlePrint}>🖨️ چاپ</button>
+                    <button className="btn-back" onClick={handleBack}>
+                        <span>← بازگشت</span>
+                    </button>
+                    <button className="btn-print" onClick={handlePrint}>
+                        <span>🖨️ چاپ</span>
+                    </button>
                 </div>
             </div>
 
             {/* ===== فیلتر ===== */}
             <ComparisonFilter onFilterChange={handleFilterChange} initialFilter={filter} />
 
-            {/* ===== دکمه راهنما ===== */}
-            <div className="guide-toggle-wrapper">
+            {/* ===== دکمه راهنما - تمام عرض ===== */}
+            <div className="guide-toggle-wrapper full-width">
                 <button
                     className={`btn-guide-toggle ${showGuide ? 'active' : ''}`}
                     onClick={() => setShowGuide(!showGuide)}
                 >
-                    {showGuide ? '🔽 مخفی کردن راهنما' : '❓ نمایش راهنمای شاخص‌ها'}
+                    {showGuide ? '🔽 مخفی کردن راهنما' : '📖 راهنمای شاخص‌های مقایسه پورتفولیوها'}
                 </button>
             </div>
 
             {/* ===== بخش راهنما ===== */}
             {showGuide && (
                 <div className="guide-container">
-                    <h3>📖 راهنمای شاخص‌های مقایسه پورتفولیو</h3>
+                    <h3>📊 راهنمای شاخص‌های مقایسه پورتفولیوها</h3>
+
+                    <div className="guide-intro">
+                        <p>
+                            <strong>شاخص‌های زیر</strong> به شما کمک می‌کنند تا عملکرد پورتفولیوهای مختلف را
+                            در ابعاد گوناگون بررسی کنید و بهترین تصمیم‌ها را برای سرمایه‌گذاری خود بگیرید.
+                            هر شاخص نشان‌دهنده جنبه‌ای از عملکرد معاملاتی است و ترکیب آنها تصویر کاملی از وضعیت شما ارائه می‌دهد.
+                        </p>
+                    </div>
+
                     <div className="guide-table-wrapper">
                         <table className="guide-table">
                             <thead>
@@ -212,6 +235,7 @@ const PortfolioComparisonPage = () => {
                                     <th>نام لاتین</th>
                                     <th>فرمول</th>
                                     <th>توضیحات</th>
+                                    <th>تفسیر</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -223,10 +247,83 @@ const PortfolioComparisonPage = () => {
                                             <code>{item.formula}</code>
                                         </td>
                                         <td className="guide-desc">{item.description}</td>
+                                        <td className="guide-interpretation">{item.interpretation}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* ===== توضیحات تکمیلی زیر جدول ===== */}
+                    <div className="guide-extra-info">
+                        <div className="guide-tip guide-tip-important">
+                            <span className="tip-icon">💡</span>
+                            <div>
+                                <strong>نکات کلیدی برای مقایسه پورتفولیوها:</strong>
+                                <ul>
+                                    <li>
+                                        <strong>بهترین عملکرد:</strong> پورتفولیویی با بالاترین سود کل و نرخ برد مناسب
+                                        (ترکیب سود بالا و نرخ برد بالای ۵۰٪)
+                                    </li>
+                                    <li>
+                                        <strong>کم‌ریسک‌ترین:</strong> پورتفولیویی با کمترین حداکثر افت (زیر ۱۰٪)
+                                        و فاکتور سود بالای ۱.۵
+                                    </li>
+                                    <li>
+                                        <strong>پایدارترین:</strong> پورتفولیویی با امید ریاضی مثبت و میانگین R:R بالای ۲
+                                    </li>
+                                    <li>
+                                        <strong>تنوع‌بخشی:</strong> مقایسه پورتفولیوها به شما کمک می‌کند تا بهترین ترکیب را
+                                        برای سرمایه‌گذاری انتخاب کنید
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-tip guide-tip-success">
+                            <span className="tip-icon">🚀</span>
+                            <div>
+                                <strong>چگونه از این تحلیل استفاده کنیم؟</strong>
+                                <ul>
+                                    <li>
+                                        <strong>شناسایی نقاط قوت:</strong> پورتفولیویی که در بیشتر شاخص‌ها عملکرد بهتری دارد
+                                    </li>
+                                    <li>
+                                        <strong>شناسایی نقاط ضعف:</strong> پورتفولیویی که در برخی شاخص‌ها ضعیف عمل کرده است
+                                    </li>
+                                    <li>
+                                        <strong>تنظیم استراتژی:</strong> از بهترین پورتفولیوها الگو بگیرید و استراتژی خود را بهبود دهید
+                                    </li>
+                                    <li>
+                                        <strong>مدیریت ریسک:</strong> پورتفولیوهای با افت کمتر را برای سرمایه‌گذاری بلندمدت انتخاب کنید
+                                    </li>
+                                    <li>
+                                        <strong>تخصیص سرمایه:</strong> سرمایه خود را بین پورتفولیوهای با عملکرد بهتر توزیع کنید
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-tip guide-tip-warning">
+                            <span className="tip-icon">⚠️</span>
+                            <div>
+                                <strong>هشدارهای مهم:</strong>
+                                <ul>
+                                    <li>
+                                        <strong>دوره کوتاه:</strong> تحلیل کمتر از ۲۰ ترید معتبر نیست
+                                    </li>
+                                    <li>
+                                        <strong>تنوع نمادها:</strong> مقایسه پورتفولیوهای با نمادهای کاملاً متفاوت ممکن است گمراه‌کننده باشد
+                                    </li>
+                                    <li>
+                                        <strong>شرایط بازار:</strong> عملکرد در بازارهای مختلف (روندی، رنج، پرنوسان) متفاوت است
+                                    </li>
+                                    <li>
+                                        <strong>اندازه سرمایه:</strong> پورتفولیوهای با سرمایه متفاوت را با نسبت‌ها (درصدی) مقایسه کنید
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -305,7 +402,9 @@ const PortfolioComparisonPage = () => {
 
             {/* ===== جدول مقایسه ===== */}
             {data?.portfolios && (
-                <ComparisonTable data={data.portfolios} />
+                <div className="comparison-table-wrapper">
+                    <ComparisonTable data={data.portfolios} />
+                </div>
             )}
 
             {/* ===== بدون داده ===== */}

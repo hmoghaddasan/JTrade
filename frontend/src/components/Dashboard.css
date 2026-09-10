@@ -2336,3 +2336,144 @@
     justify-content: flex-end !important;
   }
 }
+/* frontend/src/components/Dashboard.css */
+
+/* ===== اضافه کردن استایل‌های قوانین به Dashboard.css ===== */
+
+/* ===== قوانین در داشبورد ===== */
+.rules-compliance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.rules-summary-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.compliance-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.compliance-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.rules-category-detail {
+  margin-bottom: 12px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.rules-category-detail .category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rules-category-detail .category-icon {
+  font-size: 16px;
+}
+
+.rules-category-detail .category-name {
+  font-weight: 600;
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.rules-category-detail .category-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.rules-list-detail {
+  padding: 4px 0;
+}
+
+.rule-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.rule-detail-item:last-child {
+  border-bottom: none;
+}
+
+.rule-detail-item .rule-status {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.rule-detail-item .rule-text {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.rule-detail-item.checked {
+  background: rgba(46, 125, 50, 0.04);
+}
+
+.rule-detail-item.checked .rule-text {
+  color: var(--text-primary);
+}
+
+.rule-detail-item.unchecked {
+  background: rgba(198, 40, 40, 0.04);
+}
+
+.rule-detail-item.unchecked .rule-text {
+  color: var(--text-muted);
+}
+
+.no-data-message {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ===== چارت در داشبورد ===== */
+.screenshot-container {
+  margin-top: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.screenshot-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.screenshot-container img:hover {
+  opacity: 0.95;
+}

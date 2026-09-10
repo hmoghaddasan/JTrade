@@ -1,0 +1,39 @@
+/* frontend/src/components/common/AppLayout.css */
+
+.app-main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg-primary, #f5f7fa);
+  transition: background 0.3s ease;
+}
+
+.app-main-content {
+  flex: 1;
+  padding: 16px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===== حالت تاریک ===== */
+.dark-theme .app-main-layout {
+  background: #121212;
+}
+
+.dark-theme .app-main-content {
+  background: transparent;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .app-main-content {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main-content {
+    padding: 8px 8px;
+  }
+}

@@ -1,7 +1,7 @@
 // frontend/src/pages/Admin/Settings/Settings.js
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import adminService from '../../../services/adminService';
 import LoadingSpinner from '../../../components/Admin/LoadingSpinner';
 import './Settings.css';
 
@@ -9,7 +9,6 @@ import './Settings.css';
 // ✅ تعریف نوع تأثیر هر تنظیم
 // ============================================
 const SETTING_IMPACT = {
-  // 🔵 نیاز به ریستارت بک‌اند (ستاره آبی)
   backend_restart: [
     'secret_key', 'debug', 'allowed_hosts',
     'db_name', 'db_user', 'db_password', 'db_host', 'db_port',
@@ -22,14 +21,14 @@ const SETTING_IMPACT = {
     'alphavantage_api_key',
     'zarinpal_merchant_id', 'zarinpal_sandbox', 'zarinpal_callback_url',
     'sms_api_key', 'sms_sender_number', 'sms_otp_template',
-    // ✅ تنظیمات جدید Gapgpt.app
+    'sms_provider',
+    'smsir_api_key', 'smsir_line_number',
     'ai_provider_mode',
     'gapgpt_api_key',
     'gapgpt_base_url',
     'gapgpt_default_model',
     'gapgpt_available_models',
   ],
-  // 🔴 نیاز به ریستارت فرانت‌اند (ستاره قرمز)
   frontend_restart: [
     'app_name', 'app_version', 'default_font',
     'primary_color', 'secondary_color',
@@ -37,21 +36,18 @@ const SETTING_IMPACT = {
     'footer_text',
     'site_email', 'site_phone', 'site_address',
   ],
-  // بدون ستاره - بدون نیاز به ریستارت
   no_restart: [
     'max_trades_per_day', 'min_trade_interval',
     'trial_days', 'trial_trades_limit', 'trial_ai_consultations_limit',
     'max_image_width', 'max_image_height', 'image_quality',
     'max_image_size_mb', 'show_screenshot_upload',
-    'sms_enabled', 'enable_payment',
+    'enable_payment',
     'ollama_available_models', 'ai_temperature',
     'save_ai_prompt', 'admin_phone_number',
+    'admin_bypass_otp',
   ]
 };
 
-// ============================================
-// ✅ تابع تشخیص نوع تأثیر یک تنظیم
-// ============================================
 const getSettingImpact = (key) => {
   if (SETTING_IMPACT.backend_restart.includes(key)) {
     return 'backend';
@@ -83,7 +79,6 @@ const groups = {
     'ai_model', 'ai_temperature', 'ai_timeout',
     'ollama_url', 'ollama_model', 'ollama_available_models', 'ollama_timeout',
     'save_ai_prompt',
-    // ✅ تنظیمات جدید Gapgpt.app
     'ai_provider_mode',
     'gapgpt_api_key',
     'gapgpt_base_url',
@@ -94,8 +89,10 @@ const groups = {
     'max_image_width', 'max_image_height', 'image_quality',
     'max_image_size_mb', 'show_screenshot_upload'
   ],
-  'پیامک (SMS)': [
-    'sms_enabled', 'sms_api_key', 'sms_sender_number', 'sms_otp_template'
+  'ارائه‌دهنده پیامک': [
+    'sms_provider',
+    'smsir_api_key',
+    'smsir_line_number',
   ],
   'پرداخت (زرین‌پال)': [
     'zarinpal_merchant_id', 'zarinpal_sandbox', 'zarinpal_callback_url', 'enable_payment'
@@ -114,8 +111,84 @@ const groups = {
     'cors_allowed_origins'
   ],
   'ادمین': [
-    'admin_phone_number'
+    'admin_phone_number',
+    'admin_bypass_otp'
   ],
+    'روش‌های پرداخت': [
+    'bank_payment_enabled',
+    'card_payment_enabled'
+  ],
+};
+
+// ============================================
+// ✅ اطلاعات فایل هر تنظیم
+// ============================================
+const getSettingFileInfo = (key) => {
+  const fileInfo = {
+    // از .env
+    'sms_provider': { file: '.env', field: 'SMS_PROVIDER' },
+    'smsir_api_key': { file: '.env', field: 'SMSIR_API_KEY' },
+    'smsir_line_number': { file: '.env', field: 'SMSIR_LINE_NUMBER' },
+    'debug': { file: '.env', field: 'DEBUG' },
+    'secret_key': { file: '.env', field: 'SECRET_KEY' },
+    'db_name': { file: '.env', field: 'DB_NAME' },
+    'db_user': { file: '.env', field: 'DB_USER' },
+    'db_password': { file: '.env', field: 'DB_PASSWORD' },
+    'db_host': { file: '.env', field: 'DB_HOST' },
+    'db_port': { file: '.env', field: 'DB_PORT' },
+    'zarinpal_merchant_id': { file: '.env', field: 'ZARINPAL_MERCHANT_ID' },
+    'zarinpal_sandbox': { file: '.env', field: 'ZARINPAL_SANDBOX' },
+    'zarinpal_callback_url': { file: '.env', field: 'ZARINPAL_CALLBACK_URL' },
+    'live_price_provider': { file: '.env', field: 'LIVE_PRICE_PROVIDER' },
+    'twelvedata_api_key': { file: '.env', field: 'TWELVEDATA_API_KEY' },
+    'twelvedata_base_url': { file: '.env', field: 'TWELVEDATA_BASE_URL' },
+    'finnhub_api_key': { file: '.env', field: 'FINNHUB_API_KEY' },
+    'finnhub_base_url': { file: '.env', field: 'FINNHUB_BASE_URL' },
+    'alphavantage_api_key': { file: '.env', field: 'ALPHA_VANTAGE_API_KEY' },
+    'ollama_url': { file: '.env', field: 'OLLAMA_URL' },
+    'ollama_model': { file: '.env', field: 'OLLAMA_MODEL' },
+    'ollama_available_models': { file: '.env', field: 'OLLAMA_AVAILABLE_MODELS' },
+    'ollama_timeout': { file: '.env', field: 'OLLAMA_TIMEOUT' },
+    'admin_phone_number': { file: '.env', field: 'ADMIN_PHONE_NUMBER' },
+    'max_image_width': { file: '.env', field: 'MAX_IMAGE_WIDTH' },
+    'max_image_height': { file: '.env', field: 'MAX_IMAGE_HEIGHT' },
+    'image_quality': { file: '.env', field: 'IMAGE_QUALITY' },
+    'max_image_size_mb': { file: '.env', field: 'MAX_IMAGE_SIZE_MB' },
+    'show_screenshot_upload': { file: '.env', field: 'SHOW_SCREENSHOT_UPLOAD' },
+    'gapgpt_api_key': { file: '.env', field: 'GAPGPT_API_KEY' },
+    'gapgpt_base_url': { file: '.env', field: 'GAPGPT_BASE_URL' },
+    'gapgpt_default_model': { file: '.env', field: 'GAPGPT_DEFAULT_MODEL' },
+    'gapgpt_available_models': { file: '.env', field: 'GAPGPT_AVAILABLE_MODELS' },
+    'ai_provider_mode': { file: '.env', field: 'AI_PROVIDER_MODE' },
+
+    // از دیتابیس
+    'app_name': { file: 'دیتابیس', field: 'app_name' },
+    'app_version': { file: 'دیتابیس', field: 'app_version' },
+    'default_font': { file: 'دیتابیس', field: 'default_font' },
+    'primary_color': { file: 'دیتابیس', field: 'primary_color' },
+    'secondary_color': { file: 'دیتابیس', field: 'secondary_color' },
+    'site_email': { file: 'دیتابیس', field: 'site_email' },
+    'site_phone': { file: 'دیتابیس', field: 'site_phone' },
+    'site_address': { file: 'دیتابیس', field: 'site_address' },
+    'footer_text': { file: 'دیتابیس', field: 'footer_text' },
+    'logo_path': { file: 'دیتابیس', field: 'logo_path' },
+    'favicon_path': { file: 'دیتابیس', field: 'favicon_path' },
+    'bg_image_path': { file: 'دیتابیس', field: 'bg_image_path' },
+    'max_trades_per_day': { file: 'دیتابیس', field: 'max_trades_per_day' },
+    'min_trade_interval': { file: 'دیتابیس', field: 'min_trade_interval' },
+    'trial_days': { file: 'دیتابیس', field: 'trial_days' },
+    'trial_trades_limit': { file: 'دیتابیس', field: 'trial_trades_limit' },
+    'trial_ai_consultations_limit': { file: 'دیتابیس', field: 'trial_ai_consultations_limit' },
+    'ai_model': { file: 'دیتابیس', field: 'ai_model' },
+    'ai_temperature': { file: 'دیتابیس', field: 'ai_temperature' },
+    'ai_timeout': { file: 'دیتابیس', field: 'ai_timeout' },
+    'enable_payment': { file: 'دیتابیس', field: 'enable_payment' },
+    'cors_allowed_origins': { file: 'دیتابیس', field: 'cors_allowed_origins' },
+    'admin_bypass_otp': { file: 'دیتابیس', field: 'admin_bypass_otp' },
+    'save_ai_prompt': { file: 'دیتابیس', field: 'save_ai_prompt' },
+  };
+
+  return fileInfo[key] || { file: 'دیتابیس', field: key };
 };
 
 const Settings = () => {
@@ -131,32 +204,19 @@ const Settings = () => {
 
   const loadSettings = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const response = await adminService.getSettings();
       let allSettings = [];
-      let nextPage = '/api/admin/settings/?page_size=100';
 
-      while (nextPage) {
-        const response = await axios.get(nextPage, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (response.data && response.data.results) {
-          allSettings = [...allSettings, ...response.data.results];
-          nextPage = response.data.next;
-        } else {
-          break;
-        }
+      if (response.data && response.data.results) {
+        allSettings = response.data.results;
+      } else if (Array.isArray(response.data)) {
+        allSettings = response.data;
       }
 
       console.log('📊 Total settings loaded:', allSettings.length);
       setSettings(allSettings);
-
-      const aiSettings = allSettings.filter(s =>
-        s.setting_key.includes('ollama') || s.setting_key.includes('ai_') || s.setting_key.includes('gapgpt')
-      );
-      console.log('🤖 AI Settings found:', aiSettings);
-
     } catch (error) {
       console.error('Error loading settings:', error);
       setError('خطا در بارگذاری تنظیمات');
@@ -171,9 +231,6 @@ const Settings = () => {
     );
   };
 
-  // ============================================
-  // ✅ اصلاح شده: متد handleSubmit با آدرس صحیح و متد POST
-  // ============================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -183,53 +240,20 @@ const Settings = () => {
     try {
       const data = {};
       settings.forEach(s => {
-        if (s.is_editable !== false) {
+        if (s.is_editable !== false && s.setting_key) {
           data[s.setting_key] = s.setting_value;
         }
       });
 
-      // ✅ لاگ کامل برای دیباگ
-      console.log('📤 ===== SENDING SETTINGS =====');
-      console.log('📤 All keys:', Object.keys(data));
-      console.log('📤 gapgpt_api_key:', data.gapgpt_api_key);
-      console.log('📤 gapgpt_api_key type:', typeof data.gapgpt_api_key);
-      console.log('📤 gapgpt_api_key length:', data.gapgpt_api_key?.length || 0);
-      console.log('📤 Full data:', JSON.stringify(data, null, 2));
+      console.log('📤 SENDING SETTINGS:', data);
 
-      const token = localStorage.getItem('token');
-
-      // ✅ اصلاح: آدرس صحیح و متد POST
-      const response = await axios({
-        method: 'POST',
-        url: '/api/admin/settings/update/',
-        data: data,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('📥 ===== RESPONSE =====');
-      console.log('📥 Response:', response.data);
-
+      const response = await adminService.updateSettings(data);
       setSuccess(response.data.message || 'تنظیمات با موفقیت ذخیره شد');
       setTimeout(() => setSuccess(null), 5000);
-
-      // ✅ بعد از ذخیره، دوباره بارگذاری کن
       await loadSettings();
-
     } catch (error) {
-      console.error('❌ ===== ERROR =====');
-      console.error('❌ Error saving settings:', error);
-      console.error('❌ Error response:', error.response?.data);
-      console.error('❌ Error status:', error.response?.status);
-
-      // نمایش پیام خطای دقیق‌تر
-      const errorMessage = error.response?.data?.detail ||
-                          error.response?.data?.error ||
-                          error.response?.data?.message ||
-                          'خطا در ذخیره تنظیمات';
-      setError(errorMessage);
+      console.error('Error saving settings:', error);
+      setError('خطا در ذخیره تنظیمات');
     } finally {
       setSaving(false);
     }
@@ -250,40 +274,122 @@ const Settings = () => {
     return settings.filter(s => keys.includes(s.setting_key));
   };
 
-  // ============================================
-  // ✅ رندر تنظیمات بر اساس نوع
-  // ============================================
   const renderSettingInput = (setting) => {
     const value = setting.setting_value || '';
+    const fileInfo = getSettingFileInfo(setting.setting_key);
 
     const sensitiveKeys = [
       'secret_key', 'db_password', 'sms_api_key',
       'twelvedata_api_key', 'finnhub_api_key',
       'alphavantage_api_key', 'zarinpal_merchant_id',
-      'gapgpt_api_key'
+      'gapgpt_api_key', 'smsir_api_key'
     ];
     const isSensitive = sensitiveKeys.includes(setting.setting_key);
 
-    // ===== تنظیم ai_provider_mode با select =====
-    if (setting.setting_key === 'ai_provider_mode') {
+    // ===== تنظیم admin_bypass_otp =====
+    if (setting.setting_key === 'admin_bypass_otp') {
       return (
-        <select
-          id={setting.setting_key}
-          value={value || 'hybrid'}
-          onChange={(e) => handleChange(setting.setting_key, e.target.value)}
-          disabled={setting.is_editable === false}
-          className="setting-select"
-        >
-          <option value="offline">🔴 فقط آفلاین (Ollama)</option>
-          <option value="online">🟢 فقط آنلاین (Gapgpt.app)</option>
-          <option value="hybrid">🔵 ترکیبی (آنلاین + آفلاین)</option>
-        </select>
+        <div>
+          <div className="toggle-wrapper">
+            <input
+              type="checkbox"
+              id={setting.setting_key}
+              checked={value === 'true' || value === true || value === 'True' || value === '1'}
+              onChange={(e) => handleChange(setting.setting_key, String(e.target.checked))}
+              disabled={setting.is_editable === false}
+            />
+            <span className="toggle-label">
+              {value === 'true' || value === true || value === 'True' || value === '1' ? 'فعال' : 'غیرفعال'}
+            </span>
+          </div>
+          <small className="hint">
+            ⚠️ با فعال کردن این گزینه، <strong>ادمین</strong> با شماره تماس خود مستقیماً وارد نرم‌افزار می‌شود
+            <strong style={{ color: '#d32f2f' }}> بدون نیاز به کد تایید</strong>. فقط برای کاربران ادمین اعمال می‌شود.
+          </small>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+        </div>
       );
     }
 
-    // ===== تنظیم gapgpt_available_models با textarea و توضیحات کامل =====
+    // ===== تنظیم sms_provider (انتخاب ارائه‌دهنده) =====
+    if (setting.setting_key === 'sms_provider') {
+      return (
+        <div>
+          <select
+            id={setting.setting_key}
+            value={value || 'smsir'}
+            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+            disabled={setting.is_editable === false}
+            className="setting-select"
+          >
+            <option value="smsir">📱 فقط SMS.IR</option>
+            <option value="ghasedak">📱 فقط قاصدک (Ghasedak)</option>
+          </select>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+        </div>
+      );
+    }
+
+    // ===== تنظیم smsir_api_key (معمولی - نه کد شده) =====
+    if (setting.setting_key === 'smsir_api_key') {
+      return (
+        <div>
+          <input
+            type="text"
+            id={setting.setting_key}
+            value={value}
+            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+            disabled={setting.is_editable === false}
+            placeholder="کلید API SMS.IR را وارد کنید"
+            style={{ direction: 'ltr' }}
+          />
+          <small className="hint">🔑 کلید API را از پنل SMS.IR (بخش برنامه‌نویسان) دریافت کنید.</small>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+        </div>
+      );
+    }
+
+    // ===== تنظیم smsir_line_number =====
+    if (setting.setting_key === 'smsir_line_number') {
+      return (
+        <div>
+          <input
+            type="text"
+            id={setting.setting_key}
+            value={value}
+            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+            disabled={setting.is_editable === false}
+            placeholder="مثال: 30002108036135"
+            style={{ direction: 'ltr' }}
+          />
+          <small className="hint">📞 شماره خط اختصاصی خود را وارد کنید (بدون صفر ابتدا).</small>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+        </div>
+      );
+    }
+
+    // ===== تنظیم ai_provider_mode =====
+    if (setting.setting_key === 'ai_provider_mode') {
+      return (
+        <div>
+          <select
+            id={setting.setting_key}
+            value={value || 'hybrid'}
+            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+            disabled={setting.is_editable === false}
+            className="setting-select"
+          >
+            <option value="offline">🔴 فقط آفلاین (Ollama)</option>
+            <option value="online">🟢 فقط آنلاین (Gapgpt.app)</option>
+            <option value="hybrid">🔵 ترکیبی (آنلاین + آفلاین)</option>
+          </select>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+        </div>
+      );
+    }
+
+    // ===== تنظیم gapgpt_available_models =====
     if (setting.setting_key === 'gapgpt_available_models') {
-      // لیست کامل مدل‌های پیشنهادی (همان ۳۶ مدل موجود)
       const fullModelList = [
         '🟢 رایگان: GapGPT 5.6 Lite',
         '🟢 اقتصادی: GPT-5.6 Luna, DeepSeek V4 Flash, Gemini 3.5 Flash Lite, GPT-5.4 nano, GPT-5.4 mini',
@@ -298,20 +404,13 @@ const Settings = () => {
             id={setting.setting_key}
             value={value}
             onChange={(e) => handleChange(setting.setting_key, e.target.value)}
-            rows={8}
+            rows={6}
             disabled={setting.is_editable === false}
             placeholder="لیست مدل‌ها با کاما جدا شوند..."
             style={{ fontFamily: 'monospace', fontSize: '13px', direction: 'ltr' }}
           />
           <small className="hint">
-            📌 <strong>راهنمای فعال/غیرفعال کردن مدل‌ها:</strong>
-            <br />
-            ✅ برای <strong>فعال</strong> کردن یک مدل، نام دقیق آن را به لیست اضافه کنید.
-            <br />
-            ❌ برای <strong>غیرفعال</strong> کردن یک مدل، نام آن را از لیست حذف کنید.
-            <br />
-            🔹 نام مدل‌ها باید با <strong>کاما (،)</strong> از هم جدا شوند.
-            <br />
+            📌 نام مدل‌ها باید با <strong>کاما (،)</strong> از هم جدا شوند.
             <br />
             💡 <strong>لیست کامل مدل‌های Gapgpt.app (۳۶ مدل):</strong>
             <br />
@@ -322,67 +421,78 @@ const Settings = () => {
               </span>
             ))}
           </small>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
         </div>
       );
     }
 
+    // ===== سایر تنظیمات =====
     switch (setting.setting_type) {
       case 'boolean':
         return (
-          <div className="toggle-wrapper">
-            <input
-              type="checkbox"
-              id={setting.setting_key}
-              checked={value === 'true' || value === true}
-              onChange={(e) => handleChange(setting.setting_key, String(e.target.checked))}
-              disabled={setting.is_editable === false}
-            />
-            <span className="toggle-label">
-              {value === 'true' || value === true ? 'فعال' : 'غیرفعال'}
-            </span>
+          <div>
+            <div className="toggle-wrapper">
+              <input
+                type="checkbox"
+                id={setting.setting_key}
+                checked={value === 'true' || value === true || value === 'True' || value === '1'}
+                onChange={(e) => handleChange(setting.setting_key, String(e.target.checked))}
+                disabled={setting.is_editable === false}
+              />
+              <span className="toggle-label">
+                {value === 'true' || value === true || value === 'True' || value === '1' ? 'فعال' : 'غیرفعال'}
+              </span>
+            </div>
+            <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
           </div>
         );
 
       case 'integer':
         return (
-          <input
-            type="number"
-            id={setting.setting_key}
-            value={value}
-            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
-            disabled={setting.is_editable === false}
-          />
+          <div>
+            <input
+              type="number"
+              id={setting.setting_key}
+              value={value}
+              onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+              disabled={setting.is_editable === false}
+            />
+            <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+          </div>
         );
 
       case 'text':
         return (
-          <textarea
-            id={setting.setting_key}
-            value={value}
-            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
-            rows={3}
-            disabled={setting.is_editable === false}
-            placeholder="متن را وارد کنید..."
-          />
+          <div>
+            <textarea
+              id={setting.setting_key}
+              value={value}
+              onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+              rows={3}
+              disabled={setting.is_editable === false}
+              placeholder="متن را وارد کنید..."
+            />
+            <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+          </div>
         );
 
       default:
         return (
-          <input
-            type="text"
-            id={setting.setting_key}
-            value={value}
-            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
-            disabled={setting.is_editable === false}
-            placeholder={isSensitive ? '⚠️ مقدار حساس - با احتیاط تغییر دهید' : 'مقدار را وارد کنید...'}
-          />
+          <div>
+            <input
+              type="text"
+              id={setting.setting_key}
+              value={value}
+              onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+              disabled={setting.is_editable === false}
+              placeholder={isSensitive ? '⚠️ مقدار حساس - با احتیاط تغییر دهید' : 'مقدار را وارد کنید...'}
+            />
+            <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+          </div>
         );
     }
   };
 
-  // ============================================
-  // ✅ رندر افسانه (Legend) ستاره‌ها
-  // ============================================
   const renderLegend = () => {
     return (
       <div className="settings-legend">
@@ -405,9 +515,6 @@ const Settings = () => {
     );
   };
 
-  // ============================================
-  // ✅ نمایش تنظیمات دسته‌بندی شده
-  // ============================================
   const renderSettings = () => {
     const hasSettings = Object.entries(groups).some(([_, keys]) => {
       return getGroupSettings(keys).length > 0;
@@ -429,7 +536,7 @@ const Settings = () => {
         'secret_key', 'db_password', 'sms_api_key',
         'twelvedata_api_key', 'finnhub_api_key',
         'alphavantage_api_key', 'zarinpal_merchant_id',
-        'gapgpt_api_key'
+        'gapgpt_api_key', 'smsir_api_key'
       ];
       const hasSensitive = groupSettings.some(s =>
         sensitiveKeys.includes(s.setting_key)
@@ -482,9 +589,6 @@ const Settings = () => {
     });
   };
 
-  // ============================================
-  // ✅ رندر اصلی
-  // ============================================
   return (
     <div className="settings-page">
       <div className="page-header">
@@ -510,7 +614,6 @@ const Settings = () => {
         </div>
       )}
 
-      {/* ===== افسانه (Legend) ===== */}
       {renderLegend()}
 
       <form onSubmit={handleSubmit}>

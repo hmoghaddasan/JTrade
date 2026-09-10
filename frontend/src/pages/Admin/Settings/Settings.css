@@ -658,3 +658,109 @@
     max-height: 150px;
   }
 }
+/* frontend/src/pages/Admin/Settings/Settings.css */
+
+/* ... استایل‌های موجود ... */
+
+/* ============================================
+   ✅ اطلاعات فایل هر تنظیم
+   ============================================ */
+.file-info {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  display: inline-block;
+  direction: ltr;
+  font-family: monospace;
+}
+
+.dark-theme .file-info {
+  background: #2a2a3a;
+  color: #888;
+}
+
+/* ============================================
+   ✅ استایل hint
+   ============================================ */
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.dark-theme .hint {
+  color: #aaa;
+}
+
+/* ============================================
+   ✅ استایل sensitive-badge
+   ============================================ */
+.sensitive-badge {
+  font-size: 11px;
+  background: #c62828;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+/* ============================================
+   ✅ استایل sensitive-icon
+   ============================================ */
+.sensitive-icon {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+/* ============================================
+   ✅ استایل readonly-badge
+   ============================================ */
+.readonly-badge {
+  font-size: 11px;
+  color: #999;
+  margin-left: 4px;
+}
+
+/* ============================================
+   ✅ استایل sensitive-hint
+   ============================================ */
+.sensitive-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #c62828;
+}
+
+/* ============================================
+   ✅ استایل setting-select
+   ============================================ */
+.setting-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.setting-select:focus {
+  border-color: #1a237e;
+  outline: none;
+}
+
+.dark-theme .setting-select {
+  background: #1a1a2e;
+  border-color: #333;
+  color: #e0e0e0;
+}
+
+.dark-theme .setting-select:focus {
+  border-color: #42a5f5;
+}

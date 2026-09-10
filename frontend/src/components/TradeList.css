@@ -30,7 +30,7 @@
   margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 2px solid var(--border-color);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
 }
 
@@ -39,15 +39,27 @@
   font-size: 22px;
   margin: 0;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* ✅ هدر اکشن‌ها - دکمه‌ها در یک ردیف (دسکتاپ) */
 .header-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  flex-wrap: nowrap;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+  flex-wrap: nowrap !important;
+  margin-right: auto;
+}
+
+/* ✅ کلاس اختصاصی برای اطمینان در دسکتاپ */
+.desktop-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 /* ============================================
@@ -55,60 +67,82 @@
    ============================================ */
 .header-actions .btn-print-list,
 .header-actions .btn-excel-list,
-.header-actions .btn-secondary {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  height: 34px;
-  min-width: 60px;
-  white-space: nowrap;
-  flex-shrink: 0;
+.header-actions .btn-secondary,
+.desktop-actions .btn-print-list,
+.desktop-actions .btn-excel-list,
+.desktop-actions .btn-secondary {
+  padding: 6px 14px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  font-family: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  height: 36px !important;
+  min-width: 70px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  flex: 0 0 auto !important;
 }
 
-/* دکمه چاپ */
-.header-actions .btn-print-list {
-  background: #1a237e;
-  color: white;
+/* ============================================
+   دکمه بازگشت - تنظیم اندازه دقیق
+   ============================================ */
+.header-actions .btn-secondary,
+.desktop-actions .btn-secondary {
+  min-width: 70px !important;
+  max-width: 90px !important;
+  width: auto !important;
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  height: 36px !important;
+  background: var(--border-color) !important;
+  color: var(--text-secondary) !important;
 }
 
-.header-actions .btn-print-list:hover {
-  background: #0d47a1;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
+.header-actions .btn-secondary:hover,
+.desktop-actions .btn-secondary:hover {
+  background: var(--text-muted) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* دکمه اکسل */
-.header-actions .btn-excel-list {
-  background: #2e7d32;
-  color: white;
+/* دکمه چاپ - تغییر نام از چاپ کامل به چاپ */
+.header-actions .btn-print-list,
+.desktop-actions .btn-print-list {
+  background: #1a237e !important;
+  color: white !important;
+  min-width: 70px !important;
+  max-width: 90px !important;
 }
 
-.header-actions .btn-excel-list:hover {
-  background: #1b5e20;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+.header-actions .btn-print-list:hover,
+.desktop-actions .btn-print-list:hover {
+  background: #0d47a1 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4) !important;
 }
 
-/* دکمه بازگشت */
-.header-actions .btn-secondary {
-  background: var(--border-color);
-  color: var(--text-secondary);
+/* دکمه اکسل - تغییر نام از اکسل کامل به اکسل */
+.header-actions .btn-excel-list,
+.desktop-actions .btn-excel-list {
+  background: #2e7d32 !important;
+  color: white !important;
+  min-width: 70px !important;
+  max-width: 90px !important;
 }
 
-.header-actions .btn-secondary:hover {
-  background: var(--text-muted);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.header-actions .btn-excel-list:hover,
+.desktop-actions .btn-excel-list:hover {
+  background: #1b5e20 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4) !important;
 }
 
 /* ============================================
@@ -222,19 +256,35 @@
 }
 
 /* ============================================
-   Table
+   Table Wrapper - برای اسکرول فقط جدول
+   ============================================ */
+.table-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* ============================================
+   Table Container - فقط جدول اسکرول می‌خورد
    ============================================ */
 .table-container {
-  overflow-x: auto;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
   background: var(--card-bg);
   border-radius: 10px;
   border: 1px solid var(--border-color);
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 0 !important;
 }
 
+/* ✅ جدول - حداقل عرض برای نمایش کامل ستون‌ها */
 .tradelist-table {
-  width: 100%;
+  width: 100% !important;
+  min-width: 900px !important;
   border-collapse: collapse;
   font-size: 13px;
+  table-layout: auto !important;
 }
 
 .tradelist-table thead {
@@ -251,12 +301,27 @@
   text-align: right;
   font-weight: 600;
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .tradelist-table td {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* اجازه بده بعضی ستون‌ها مثل کیفیت و عملیات کم‌تر فضا بگیرند */
+.tradelist-table th:last-child,
+.tradelist-table td:last-child {
+  min-width: 80px;
+}
+
+.tradelist-table th:nth-last-child(2),
+.tradelist-table td:nth-last-child(2) {
+  min-width: 60px;
 }
 
 .tradelist-table tbody tr:hover {
@@ -279,6 +344,7 @@
   border-radius: 16px;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .type-badge.buy {
@@ -308,6 +374,7 @@
   font-weight: 600;
   background: #e8f5e9;
   color: #2e7d32;
+  white-space: nowrap;
 }
 
 .dark-theme .badge-success {
@@ -322,6 +389,7 @@
   font-weight: 600;
   background: #ffebee;
   color: #c62828;
+  white-space: nowrap;
 }
 
 .dark-theme .badge-danger {
@@ -336,6 +404,7 @@
   font-weight: 600;
   background: #fff3e0;
   color: #e65100;
+  white-space: nowrap;
 }
 
 .dark-theme .badge-warning {
@@ -355,6 +424,7 @@
   border-radius: 16px;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .score.high {
@@ -477,7 +547,7 @@
 }
 
 /* ============================================
-   Pagination
+   Pagination - خارج از کانتینر اسکرول
    ============================================ */
 .pagination {
   display: flex;
@@ -486,6 +556,12 @@
   gap: 12px;
   padding: 12px 16px;
   flex-wrap: wrap;
+  margin-top: 12px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .pagination .btn-secondary {
@@ -751,6 +827,10 @@
     background: white !important;
   }
 
+  .tradelist-table {
+    min-width: 100% !important;
+  }
+
   .tradelist-table thead {
     background: #1a237e !important;
     color: white !important;
@@ -787,6 +867,17 @@
   .stats-bar {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  /* ===== جدول با اسکرول افقی ===== */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .tradelist-table {
+    min-width: 900px !important;
+    width: 100% !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -798,6 +889,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+    flex-wrap: wrap !important;
   }
 
   .tradelist-header h2 {
@@ -806,20 +898,25 @@
   }
 
   /* ==========================================================
-     ✅ اصلاح: سه دکمه هدر - هر کدام 33% عرض صفحه
+     ✅ اصلاح: سه دکمه هدر - هر کدام 33.33% عرض صفحه
      ========================================================== */
-  .header-actions {
+  .header-actions,
+  .desktop-actions {
     display: flex !important;
     width: 100% !important;
     justify-content: center !important;
     gap: 4px !important;
     flex-wrap: nowrap !important;
     flex-shrink: 0 !important;
+    margin-right: 0 !important;
   }
 
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
-  .header-actions .btn-secondary {
+  .header-actions .btn-secondary,
+  .desktop-actions .btn-print-list,
+  .desktop-actions .btn-excel-list,
+  .desktop-actions .btn-secondary {
     flex: 1 1 0 !important;
     flex-grow: 1 !important;
     flex-shrink: 1 !important;
@@ -846,13 +943,27 @@
     font-size: 15px;
   }
 
+  /* ===== جدول با اسکرول افقی در موبایل ===== */
+  .table-wrapper {
+    overflow: hidden !important;
+  }
+
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 8px !important;
+  }
+
   .tradelist-table {
-    font-size: 11px;
+    min-width: 900px !important;
+    width: 100% !important;
+    font-size: 11px !important;
   }
 
   .tradelist-table th,
   .tradelist-table td {
-    padding: 6px 8px;
+    padding: 6px 10px !important;
+    white-space: nowrap !important;
   }
 
   .tradelist-container .action-buttons {
@@ -869,9 +980,28 @@
     height: 28px;
   }
 
+  /* ===== Pagination در موبایل ===== */
   .pagination {
     flex-wrap: wrap;
     gap: 8px;
+    padding: 10px 12px;
+    margin-top: 10px;
+  }
+
+  .pagination .btn-secondary {
+    font-size: 11px;
+    padding: 4px 12px;
+    height: 30px;
+  }
+
+  .page-info {
+    font-size: 12px;
+  }
+
+  .items-per-page {
+    font-size: 12px;
+    padding: 4px 8px;
+    height: 30px;
   }
 }
 
@@ -881,15 +1011,19 @@
   }
 
   /* ==========================================================
-     ✅ اصلاح نهایی برای موبایل کوچک - سه دکمه 33%
+     ✅ اصلاح نهایی برای موبایل کوچک - سه دکمه 33.33%
      ========================================================== */
-  .header-actions {
+  .header-actions,
+  .desktop-actions {
     gap: 3px !important;
   }
 
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
-  .header-actions .btn-secondary {
+  .header-actions .btn-secondary,
+  .desktop-actions .btn-print-list,
+  .desktop-actions .btn-excel-list,
+  .desktop-actions .btn-secondary {
     flex: 1 1 0 !important;
     flex-grow: 1 !important;
     flex-shrink: 1 !important;
@@ -921,13 +1055,27 @@
     font-size: 10px;
   }
 
+  /* ===== جدول با اسکرول افقی در موبایل کوچک ===== */
+  .table-wrapper {
+    overflow: hidden !important;
+  }
+
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 6px !important;
+  }
+
   .tradelist-table {
-    font-size: 10px;
+    min-width: 900px !important;
+    width: 100% !important;
+    font-size: 10px !important;
   }
 
   .tradelist-table th,
   .tradelist-table td {
-    padding: 4px 6px;
+    padding: 4px 8px !important;
+    white-space: nowrap !important;
   }
 
   .modal-content {
@@ -949,8 +1097,12 @@
     border-width: 1px !important;
   }
 
+  /* ===== Pagination در موبایل کوچک ===== */
   .pagination {
-    gap: 4px;
+    gap: 6px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
   }
 
   .pagination .btn-secondary {
@@ -973,7 +1125,10 @@
 @media (max-width: 360px) {
   .header-actions .btn-print-list,
   .header-actions .btn-excel-list,
-  .header-actions .btn-secondary {
+  .header-actions .btn-secondary,
+  .desktop-actions .btn-print-list,
+  .desktop-actions .btn-excel-list,
+  .desktop-actions .btn-secondary {
     flex: 1 1 0 !important;
     flex-grow: 1 !important;
     flex-shrink: 1 !important;
@@ -998,5 +1153,195 @@
 
   .tradelist-header h2 {
     font-size: 14px;
+  }
+
+  /* ===== جدول با اسکرول افقی در موبایل خیلی کوچک ===== */
+  .tradelist-table {
+    min-width: 850px !important;
+  }
+
+  .tradelist-table th,
+  .tradelist-table td {
+    padding: 3px 6px !important;
+    font-size: 9px !important;
+  }
+
+  /* ===== Pagination در موبایل خیلی کوچک ===== */
+  .pagination {
+    gap: 4px;
+    padding: 6px 8px;
+  }
+
+  .pagination .btn-secondary {
+    font-size: 10px;
+    padding: 3px 8px;
+    height: 24px;
+  }
+
+  .page-info {
+    font-size: 10px;
+  }
+
+  .items-per-page {
+    font-size: 10px;
+    padding: 3px 4px;
+    height: 24px;
+  }
+}
+
+/* ============================================
+   اسکرول بار سفارشی برای جدول
+   ============================================ */
+.table-container::-webkit-scrollbar {
+  height: 8px !important;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: var(--bg-secondary) !important;
+  border-radius: 4px !important;
+}
+
+.dark-theme .table-container::-webkit-scrollbar-track {
+  background: #1a1a2e !important;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--gradient-start) !important;
+  border-radius: 4px !important;
+}
+
+.dark-theme .table-container::-webkit-scrollbar-thumb {
+  background: #0d47a1 !important;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-end) !important;
+}
+
+.dark-theme .table-container::-webkit-scrollbar-thumb:hover {
+  background: #1565c0 !important;
+}
+/* frontend/src/components/TradeList.css - اصلاح بخش فیلترهای تاریخ */
+
+/* ============================================
+   Filters - اصلاح تم تاریک
+   ============================================ */
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  align-items: center;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 100px;
+}
+
+.filter-input,
+.filter-select,
+.filter-date {
+  width: 100%;
+  padding: 6px 10px;
+  border: 2px solid var(--input-border, #e0e0e0);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-secondary, #333);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.filter-input:focus,
+.filter-select:focus,
+.filter-date:focus {
+  border-color: var(--input-focus, #1a237e);
+  outline: none;
+}
+
+/* ============================================
+   ✅ تم تاریک برای فیلترهای تاریخ و سایر فیلترها
+   ============================================ */
+.dark-theme .filter-input,
+.dark-theme .filter-select,
+.dark-theme .filter-date {
+  background: #1a1a2e !important;
+  border-color: #444444 !important;
+  color: #e0e0e0 !important;
+}
+
+.dark-theme .filter-input::placeholder,
+.dark-theme .filter-select::placeholder,
+.dark-theme .filter-date::placeholder {
+  color: #666666 !important;
+}
+
+.dark-theme .filter-input:focus,
+.dark-theme .filter-select:focus,
+.dark-theme .filter-date:focus {
+  border-color: #6c63ff !important;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15) !important;
+}
+
+.dark-theme .filter-input:disabled,
+.dark-theme .filter-select:disabled,
+.dark-theme .filter-date:disabled {
+  background: #2a2a3d !important;
+  color: #666666 !important;
+}
+
+/* ============================================
+   ✅ تم تاریک برای استایل‌های مربوط به تاریخ
+   ============================================ */
+.dark-theme .filter-date::-webkit-calendar-picker-indicator {
+  filter: invert(1) !important;
+}
+
+.dark-theme .filter-date::-webkit-datetime-edit {
+  color: #e0e0e0 !important;
+}
+
+.dark-theme .filter-date::-webkit-datetime-edit-fields-wrapper {
+  color: #e0e0e0 !important;
+}
+
+.dark-theme .filter-date::-webkit-datetime-edit-text {
+  color: #888888 !important;
+}
+
+.dark-theme .filter-date::-webkit-datetime-edit-month-field {
+  color: #e0e0e0 !important;
+}
+
+.dark-theme .filter-date::-webkit-datetime-edit-day-field {
+  color: #e0e0e0 !important;
+}
+
+.dark-theme .filter-date::-webkit-datetime-edit-year-field {
+  color: #e0e0e0 !important;
+}
+
+/* ============================================
+   ✅ برای مرورگر Firefox
+   ============================================ */
+.dark-theme .filter-date {
+  color-scheme: dark !important;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا برای فیلترها
+   ============================================ */
+@media (max-width: 992px) {
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    min-width: 100%;
   }
 }

@@ -149,7 +149,7 @@ const MessageList = () => {
     <div className="messaging-container">
       <div className="messaging-header">
         <h2>📬 پیام‌ها</h2>
-        <button className="btn-primary" onClick={() => navigate('/messages/new')}>
+        <button className="btn-new-message" onClick={() => navigate('/messages/new')}>
           ✉️ پیام جدید
         </button>
       </div>

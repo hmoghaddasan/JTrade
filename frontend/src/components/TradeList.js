@@ -291,7 +291,7 @@ const TradeList = () => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>لیست تریدها</title>
+        <title>تریدها</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
@@ -374,7 +374,7 @@ const TradeList = () => {
       </head>
       <body>
         <div class="print-header">
-          <h1>📊 لیست تریدها</h1>
+          <h1>📋 لیست تریدها</h1>
           <div class="sub-title">ژورنال حرفه‌ای ترید</div>
           <div class="print-date">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')} - ساعت: ${new Date().toLocaleTimeString('fa-IR')}</div>
         </div>
@@ -386,8 +386,7 @@ const TradeList = () => {
           <div class="summary-item">
             <span class="summary-label">سود کل:</span>
             <span class="summary-value ${totalProfit >= 0 ? 'positive' : 'negative'}">
-              ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}$
-            </span>
+              ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}$</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">نرخ برد:</span>
@@ -561,10 +560,10 @@ const TradeList = () => {
 
   return (
     <div className={`tradelist-container ${isDark ? 'dark' : 'light'}`}>
-      {/* ===== هدر با کلاس‌های CSS (بدون استایل inline) ===== */}
+      {/* ===== هدر ===== */}
       <div className="tradelist-header">
-        <h2>📈 لیست تریدها</h2>
-        <div className="header-actions">
+        <h2>📋 لیست تریدها</h2>
+        <div className="header-actions desktop-actions">
           <button className="btn-print-list" onClick={handlePrintList}>
             🖨️ چاپ
           </button>
@@ -694,15 +693,16 @@ const TradeList = () => {
         </button>
       </div>
 
-      <div className="table-container">
-        {filteredTrades.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📭</div>
-            <h3>هیچ تریدی یافت نشد</h3>
-            <p>با فیلترهای انتخاب شده، هیچ تریدی یافت نشد.</p>
-          </div>
-        ) : (
-          <>
+      {/* ✅ جدول با اسکرول افقی - فقط خود جدول */}
+      <div className="table-wrapper">
+        <div className="table-container">
+          {filteredTrades.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📭</div>
+              <h3>هیچ تریدی یافت نشد</h3>
+              <p>با فیلترهای انتخاب شده، هیچ تریدی یافت نشد.</p>
+            </div>
+          ) : (
             <table className="tradelist-table">
               <thead>
                 <tr>
@@ -780,44 +780,45 @@ const TradeList = () => {
                 ))}
               </tbody>
             </table>
-
-            {totalPages > 1 && (
-              <div className="pagination">
-                <button
-                  className="btn-secondary btn-sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  قبلی
-                </button>
-                <span className="page-info">
-                  صفحه {currentPage} از {totalPages}
-                </span>
-                <button
-                  className="btn-secondary btn-sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  بعدی
-                </button>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="items-per-page"
-                >
-                  <option value={5}>۵</option>
-                  <option value={10}>۱۰</option>
-                  <option value={20}>۲۰</option>
-                  <option value={50}>۵۰</option>
-                </select>
-              </div>
-            )}
-          </>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* ✅ Pagination - خارج از کانتینر اسکرول‌دار */}
+      {filteredTrades.length > 0 && totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="btn-secondary btn-sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            قبلی
+          </button>
+          <span className="page-info">
+            صفحه {currentPage} از {totalPages}
+          </span>
+          <button
+            className="btn-secondary btn-sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            بعدی
+          </button>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="items-per-page"
+          >
+            <option value={5}>۵</option>
+            <option value={10}>۱۰</option>
+            <option value={20}>۲۰</option>
+            <option value={50}>۵۰</option>
+          </select>
+        </div>
+      )}
     </div>
   );
 };

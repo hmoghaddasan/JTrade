@@ -12,6 +12,7 @@ import MetricsTable from './MetricsTable';
 import MetricsChart from './MetricsChart';
 import './AdvancedMetricsReport.css';
 import LoadingBar from '../common/LoadingBar';
+
 const AdvancedMetricsReport = () => {
   const { user } = useAuth();
   const { currentPortfolioId, portfolios } = usePortfolio();
@@ -117,7 +118,7 @@ const AdvancedMetricsReport = () => {
       {/* ===== هدر صفحه ===== */}
       <div className="metrics-header">
         <div className="metrics-header-left">
-          <h1>📊 شاخص‌های پیشرفته معاملاتی</h1>
+          <h1>🎯 شاخص‌های پیشرفته معاملاتی</h1>
         </div>
         <div className="metrics-header-right">
           <button className="btn-print" onClick={handlePrint}>
@@ -147,20 +148,20 @@ const AdvancedMetricsReport = () => {
         portfolios={portfolios}
       />
 
-      {/* ===== دکمه نمایش فرمول‌ها ===== */}
-      <div className="metrics-formula-toggle">
+      {/* ===== دکمه نمایش فرمول‌ها - تمام عرض و راست‌چین ===== */}
+      <div className="metrics-formula-toggle full-width">
         <button
           className={`btn-toggle-formula ${showFormula ? 'active' : ''}`}
           onClick={() => setShowFormula(!showFormula)}
         >
-          {showFormula ? '🔽 مخفی کردن فرمول‌ها' : '🔼 نمایش فرمول‌ها و توضیحات'}
+          {showFormula ? '🔽 مخفی کردن راهنما' : '📖 راهنمای شاخص‌های پیشرفته معاملاتی'}
         </button>
       </div>
 
       {/* ===== بخش فرمول‌ها ===== */}
       {showFormula && (
         <div className="metrics-formulas">
-          <h3>🧮 فرمول‌ها و توضیحات شاخص‌ها</h3>
+          <h3>📊 راهنمای شاخص‌های پیشرفته معاملاتی</h3>
 
           <div className="formula-grid">
             <div className="formula-item">
@@ -283,6 +284,103 @@ const AdvancedMetricsReport = () => {
               <div className="formula-interpret">
                 <span className="label">تفسیر:</span>
                 {'> ۳: بازیابی عالی | ۲-۳: بازیابی خوب | ۱-۲: قابل قبول | < ۱: نیاز به بهبود'}
+              </div>
+            </div>
+          </div>
+
+          {/* ============================================
+              ✅ توضیحات تکمیلی
+              ============================================ */}
+          <div className="formula-extra-info">
+            <div className="formula-tip formula-tip-important">
+              <span className="tip-icon">💡</span>
+              <div>
+                <strong>نکات کلیدی برای استفاده از شاخص‌ها:</strong>
+                <ul>
+                  <li>
+                    <strong>ترکیب شاخص‌ها:</strong> هیچ شاخصی به تنهایی کامل نیست.
+                    ترکیب <strong>شارپ</strong>، <strong>فاکتور سود</strong> و <strong>حداکثر افت</strong>
+                    تصویر کامل‌تری از عملکرد ارائه می‌دهد.
+                  </li>
+                  <li>
+                    <strong>دوره زمانی:</strong> شاخص‌ها در بازه‌های زمانی مختلف معناهای متفاوتی دارند.
+                    یک استراتژی ممکن است در کوتاه‌مدت عالی باشد اما در بلندمدت ضعیف عمل کند.
+                  </li>
+                  <li>
+                    <strong>مقایسه با بازار:</strong> شاخص‌ها را با شاخص‌های بازار یا معیارهای استاندارد مقایسه کنید
+                    تا عملکرد نسبی خود را بسنجید.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="formula-tip formula-tip-success">
+              <span className="tip-icon">🎯</span>
+              <div>
+                <strong>چگونه از این شاخص‌ها در معاملات خود استفاده کنیم؟</strong>
+                <ul>
+                  <li>
+                    <strong>ارزیابی استراتژی:</strong> قبل از استفاده از یک استراتژی جدید،
+                    شاخص‌های آن را با استراتژی فعلی مقایسه کنید.
+                  </li>
+                  <li>
+                    <strong>مدیریت ریسک:</strong> از <strong>حداکثر افت</strong> و <strong>معیار کلی</strong>
+                    برای تعیین اندازه مناسب پوزیشن استفاده کنید.
+                  </li>
+                  <li>
+                    <strong>بهبود مستمر:</strong> شاخص‌های خود را به‌صورت ماهانه بررسی کنید
+                    و نقاط ضعف را شناسایی و بهبود دهید.
+                  </li>
+                  <li>
+                    <strong>تنوع‌بخشی:</strong> پورتفولیوهایی با شاخص‌های مکمل (مثلاً یکی با شارپ بالا و دیگری با فاکتور سود بالا)
+                    ترکیب کنید تا ریسک کلی کاهش یابد.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="formula-tip formula-tip-warning">
+              <span className="tip-icon">⚠️</span>
+              <div>
+                <strong>هشدارهای مهم در تحلیل شاخص‌ها:</strong>
+                <ul>
+                  <li>
+                    <strong>دوره کوتاه:</strong> تحلیل کمتر از <strong>۳۰ ترید</strong> از نظر آماری معتبر نیست.
+                  </li>
+                  <li>
+                    <strong>حجم کم:</strong> با حجم معاملاتی کم، شاخص‌ها ممکن است نوسانات غیرواقعی نشان دهند.
+                  </li>
+                  <li>
+                    <strong>شرایط بازار:</strong> شاخص‌ها در بازارهای مختلف (روندی، رنج، پرنوسان)
+                    عملکرد متفاوتی دارند.
+                  </li>
+                  <li>
+                    <strong>بهینه‌سازی بیش از حد:</strong> تنظیم استراتژی صرفاً بر اساس شاخص‌های گذشته
+                    ممکن است منجر به overfitting شود.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="formula-tip formula-tip-info">
+              <span className="tip-icon">📊</span>
+              <div>
+                <strong>شاخص‌های ترکیبی و پیشرفته:</strong>
+                <ul>
+                  <li>
+                    <strong>نسبت شارپ تعدیل‌شده:</strong> ترکیب <strong>شارپ</strong> و <strong>حداکثر افت</strong>
+                    برای ارزیابی دقیق‌تر ریسک.
+                  </li>
+                  <li>
+                    <strong>شاخص کارایی سرمایه:</strong> نسبت <strong>سود کل</strong> به <strong>حداکثر افت</strong> × ۱۰۰.
+                  </li>
+                  <li>
+                    <strong>شاخص ثبات:</strong> انحراف معیار بازده‌های ماهانه. هرچه کمتر، ثبات بیشتر.
+                  </li>
+                  <li>
+                    <strong>نسبت R:R مؤثر:</strong> میانگین R:R ضرب‌در نرخ برد. نشان‌دهنده کارایی واقعی استراتژی.
+                  </li>
+                </ul>
               </div>
             </div>
           </div>

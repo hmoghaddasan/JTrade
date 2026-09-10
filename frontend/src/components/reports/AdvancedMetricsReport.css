@@ -1,16 +1,11 @@
 /* frontend/src/components/reports/AdvancedMetricsReport.css */
 
-/* ============================================
-   Metrics Report - تمام صفحه
-   ============================================ */
 .metrics-report {
-  padding: 20px 24px;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
+  padding: 20px 30px;
   min-height: 100vh;
+  transition: all 0.3s ease;
   direction: rtl;
-  font-family: 'Vazirmatn', 'IRANSans', sans-serif;
+  font-family: 'Vazir', Tahoma, sans-serif;
   box-sizing: border-box;
 }
 
@@ -18,72 +13,106 @@
   box-sizing: border-box;
 }
 
+.metrics-report.light {
+  background: #f5f7fa;
+  color: #1a1a2e;
+}
+
+.metrics-report.dark {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 /* ============================================
-   هدر صفحه
+   هدر
    ============================================ */
 .metrics-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: var(--bg-secondary, #ffffff);
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
   margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.metrics-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+.metrics-header-left h1 {
+  font-size: 24px;
+  margin: 0;
+  color: var(--primary, #1a237e);
+}
+
+.dark .metrics-header-left h1 {
+  color: #90caf9;
 }
 
 .metrics-header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.btn-back {
-  padding: 8px 16px;
-  background: var(--bg-tertiary, #f5f5f5);
-  border: 1px solid var(--border-color, #e0e0e0);
-  border-radius: 8px;
-  color: var(--text-primary, #1a1a2e);
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.btn-back:hover {
-  background: var(--bg-hover, #e8e8e8);
-}
-
-.btn-print {
-  padding: 8px 20px;
-  background: #2e7d32;
+/* ============================================
+   دکمه‌های هدر
+   ============================================ */
+.metrics-header-right .btn-print,
+.metrics-header-right .btn-back {
+  padding: 8px 18px;
   border: none;
   border-radius: 8px;
-  color: #fff;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  white-space: nowrap;
 }
 
-.btn-print:hover {
-  background: #1b5e20;
+.metrics-header-right .btn-print {
+  background: #1a237e;
+  color: white;
 }
 
-.metrics-header-left h1 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-primary, #1a1a2e);
+.metrics-header-right .btn-print:hover {
+  background: #0d47a1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
+}
+
+.metrics-header-right .btn-back {
+  background: var(--border-color, #e0e0e0);
+  color: var(--text-secondary, #333);
+}
+
+.metrics-header-right .btn-back:hover {
+  background: var(--text-muted, #999);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark .metrics-header-right .btn-print {
+  background: #0d47a1;
+}
+
+.dark .metrics-header-right .btn-print:hover {
+  background: #1565c0;
+}
+
+.dark .metrics-header-right .btn-back {
+  background: #2d2d44;
+  color: #ccc;
+}
+
+.dark .metrics-header-right .btn-back:hover {
+  background: #3d3d5c;
+  color: white;
 }
 
 /* ============================================
@@ -93,26 +122,34 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: var(--bg-secondary, #ffffff);
+  padding: 10px 16px;
+  background: var(--bg-secondary, #f0f0f0);
   border-radius: 8px;
   margin-bottom: 16px;
-  border: 1px solid var(--border-color, #e0e0e0);
   flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.dark .metrics-portfolio-info {
+  background: var(--bg-dark-secondary, #2d2d44);
 }
 
 .portfolio-label {
-  font-weight: 500;
-  color: var(--text-secondary, #666);
+  font-weight: 600;
+  color: var(--text-muted, #666);
 }
 
 .portfolio-name {
-  font-weight: 600;
-  color: var(--text-primary, #1a1a2e);
+  font-weight: 700;
+  color: var(--primary, #1a237e);
+}
+
+.dark .portfolio-name {
+  color: #90caf9;
 }
 
 .date-range {
-  color: var(--text-secondary, #666);
+  color: var(--text-muted, #888);
   font-size: 13px;
 }
 
@@ -120,812 +157,841 @@
    دکمه نمایش فرمول‌ها
    ============================================ */
 .metrics-formula-toggle {
-  margin: 16px 0;
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .btn-toggle-formula {
   padding: 10px 24px;
-  background: var(--bg-secondary, #ffffff);
-  border: 1px solid var(--border-color, #e0e0e0);
+  border: 2px solid var(--primary, #1a237e);
   border-radius: 8px;
-  color: var(--text-primary, #1a1a2e);
+  background: transparent;
+  color: var(--primary, #1a237e);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 .btn-toggle-formula:hover {
-  background: var(--bg-hover, #f0f0f0);
+  background: rgba(26, 35, 126, 0.08);
 }
 
 .btn-toggle-formula.active {
-  background: #1a237e;
-  color: #fff;
-  border-color: #1a237e;
+  background: var(--primary, #1a237e);
+  color: white;
+}
+
+.dark .btn-toggle-formula {
+  border-color: #90caf9;
+  color: #90caf9;
+}
+
+.dark .btn-toggle-formula:hover {
+  background: rgba(144, 202, 249, 0.1);
+}
+
+.dark .btn-toggle-formula.active {
+  background: #90caf9;
+  color: #1a1a2e;
 }
 
 /* ============================================
-   بخش فرمول‌ها
+   فرمول‌ها
    ============================================ */
 .metrics-formulas {
-  padding: 20px;
   background: var(--bg-secondary, #ffffff);
   border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
   border: 1px solid var(--border-color, #e0e0e0);
-  margin-bottom: 24px;
+}
+
+.dark .metrics-formulas {
+  background: var(--bg-dark-secondary, #2d2d44);
+  border-color: var(--border-dark, #444);
 }
 
 .metrics-formulas h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: var(--text-primary, #1a1a2e);
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--primary, #1a237e);
+  font-size: 20px;
+}
+
+.dark .metrics-formulas h3 {
+  color: #90caf9;
 }
 
 .formula-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+@media (max-width: 992px) {
+  .formula-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .formula-item {
   padding: 16px;
-  background: var(--bg-tertiary, #f8f9fa);
-  border-radius: 10px;
-  border: 1px solid var(--border-color, #e0e0e0);
+  background: var(--bg-primary, #f8f9fa);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #eee);
+}
+
+.dark .formula-item {
+  background: var(--bg-dark-primary, #1a1a2e);
+  border-color: var(--border-dark, #444);
 }
 
 .formula-item h4 {
-  font-size: 15px;
-  font-weight: 600;
   margin: 0 0 8px 0;
-  color: var(--text-primary, #1a1a2e);
+  font-size: 15px;
+  color: var(--primary, #1a237e);
+}
+
+.dark .formula-item h4 {
+  color: #90caf9;
 }
 
 .formula-latin {
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  color: var(--text-secondary, #555);
-  padding: 4px 8px;
-  background: var(--bg-secondary, #fff);
+  font-weight: 600;
+  color: var(--primary, #1a237e);
+  padding: 6px 12px;
+  background: rgba(26, 35, 126, 0.06);
   border-radius: 4px;
   margin-bottom: 6px;
-  direction: ltr;
-  text-align: left;
+}
+
+.dark .formula-latin {
+  color: #90caf9;
+  background: rgba(144, 202, 249, 0.08);
 }
 
 .formula-fa {
   font-size: 13px;
-  color: var(--text-secondary, #555);
+  color: var(--text-muted, #666);
   margin-bottom: 6px;
+  line-height: 1.6;
 }
 
 .formula-desc {
   font-size: 13px;
-  color: var(--text-secondary, #555);
+  color: var(--text-secondary, #444);
   margin-bottom: 6px;
-  border-right: 3px solid #1a237e;
-  padding-right: 8px;
+  line-height: 1.6;
 }
 
 .formula-interpret {
-  font-size: 12px;
-  color: var(--text-secondary, #555);
-  padding-top: 6px;
-  border-top: 1px dashed var(--border-color, #ddd);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted, #666);
+  padding: 6px 12px;
+  background: rgba(245, 124, 0, 0.06);
+  border-radius: 4px;
+  border-right: 3px solid #f57c00;
 }
 
 .formula-interpret .label {
-  font-weight: 500;
-  color: var(--text-primary, #1a1a2e);
-  margin-left: 4px;
+  font-weight: 600;
+  color: #f57c00;
 }
 
 /* ============================================
-   جدول شاخص‌ها
-   ============================================ */
-.metrics-table-container {
-  margin: 16px 0;
-  overflow-x: auto;
-  background: var(--bg-secondary, #ffffff);
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #e0e0e0);
-  padding: 4px;
-}
-
-.metrics-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  direction: rtl;
-  min-width: 700px;
-}
-
-.metrics-table thead {
-  background: var(--bg-tertiary, #f5f5f5);
-  border-bottom: 2px solid var(--border-color, #e0e0e0);
-}
-
-.metrics-table th {
-  padding: 12px 16px;
-  text-align: right;
-  font-weight: 600;
-  color: var(--text-secondary, #555);
-  white-space: nowrap;
-}
-
-.metrics-table th.metric-name {
-  min-width: 100px;
-}
-
-.metrics-table th.metric-en {
-  min-width: 100px;
-  font-weight: 400;
-  color: var(--text-secondary, #777);
-  font-size: 12px;
-}
-
-.metrics-table th.period-header {
-  min-width: 85px;
-  text-align: center;
-  font-size: 13px;
-}
-
-.metrics-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border-color, #eee);
-  vertical-align: middle;
-}
-
-.metrics-table tr:last-child td {
-  border-bottom: none;
-}
-
-.metrics-table td.metric-name {
-  font-weight: 500;
-  color: var(--text-primary, #1a1a2e);
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.metrics-table td.metric-en {
-  font-size: 11px;
-  color: var(--text-secondary, #777);
-  white-space: nowrap;
-}
-
-.metrics-table td.period-value {
-  text-align: center;
-  min-width: 70px;
-}
-
-.value-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s;
-  min-width: 50px;
-}
-
-.value-container .value {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.value-container .status-icon {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.value-container .value-desc {
-  font-size: 10px;
-  font-weight: 400;
-  color: var(--text-secondary, #666);
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 1.2;
-}
-
-.value-container.amazing {
-  background: #e8f5e9;
-  color: #1b5e20;
-}
-
-.dark .value-container.amazing {
-  background: #1b3a1b;
-  color: #81c784;
-}
-
-.value-container.excellent {
-  background: #e3f2fd;
-  color: #0d47a1;
-}
-
-.dark .value-container.excellent {
-  background: #1a237e;
-  color: #64b5f6;
-}
-
-.value-container.good {
-  background: #f1f8e9;
-  color: #2e7d32;
-}
-
-.dark .value-container.good {
-  background: #1b3a1b;
-  color: #66bb6a;
-}
-
-.value-container.warning {
-  background: #fff3e0;
-  color: #e65100;
-}
-
-.dark .value-container.warning {
-  background: #3e2a00;
-  color: #ffa726;
-}
-
-.value-container.danger {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.dark .value-container.danger {
-  background: #3a1a1a;
-  color: #ef5350;
-}
-
-.metrics-legend {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-top: 1px solid var(--border-color, #eee);
-  flex-wrap: wrap;
-}
-
-.legend-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary, #555);
-}
-
-.legend-item {
-  font-size: 11px;
-  padding: 2px 10px;
-  border-radius: 4px;
-  background: var(--bg-tertiary, #f5f5f5);
-  color: var(--text-secondary, #555);
-}
-
-.legend-item.amazing { background: #e8f5e9; color: #1b5e20; }
-.legend-item.excellent { background: #e3f2fd; color: #0d47a1; }
-.legend-item.good { background: #f1f8e9; color: #2e7d32; }
-.legend-item.warning { background: #fff3e0; color: #e65100; }
-.legend-item.danger { background: #ffebee; color: #c62828; }
-
-.dark .legend-item.amazing { background: #1b3a1b; color: #81c784; }
-.dark .legend-item.excellent { background: #1a237e; color: #64b5f6; }
-.dark .legend-item.good { background: #1b3a1b; color: #66bb6a; }
-.dark .legend-item.warning { background: #3e2a00; color: #ffa726; }
-.dark .legend-item.danger { background: #3a1a1a; color: #ef5350; }
-
-/* ============================================
-   بخش نمودارها
+   نمودارها
    ============================================ */
 .metrics-charts-section {
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .metrics-charts-section h3 {
   font-size: 18px;
-  font-weight: 600;
   margin-bottom: 16px;
   color: var(--text-primary, #1a1a2e);
 }
 
-.chart-wrapper {
-  background: var(--bg-secondary, #ffffff);
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #e0e0e0);
-  padding: 16px;
-  margin-bottom: 20px;
+.dark .metrics-charts-section h3 {
+  color: #e0e0e0;
 }
 
-.chart-wrapper .chart-container {
-  width: 100%;
-  height: 280px;
+.chart-wrapper {
+  margin-bottom: 24px;
+}
+
+.chart-container {
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  min-height: 320px;
+}
+
+.dark .chart-container {
+  background: var(--bg-dark-secondary, #2d2d44);
+  border-color: var(--border-dark, #444);
 }
 
 /* ============================================
-   خلاصه
+   خلاصه پایین صفحه
    ============================================ */
 .metrics-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
-  margin-top: 24px;
-  padding: 16px;
+  margin-top: 20px;
+  padding: 16px 20px;
   background: var(--bg-secondary, #ffffff);
   border-radius: 12px;
   border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.dark .metrics-summary {
+  background: var(--bg-dark-secondary, #2d2d44);
+  border-color: var(--border-dark, #444);
 }
 
 .summary-item {
   text-align: center;
-  padding: 8px;
 }
 
 .summary-label {
   display: block;
-  font-size: 12px;
-  color: var(--text-secondary, #666);
+  font-size: 11px;
+  color: var(--text-muted, #888);
   margin-bottom: 4px;
 }
 
 .summary-value {
-  display: block;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary, #1a1a2e);
+}
+
+.dark .summary-value {
+  color: #e0e0e0;
 }
 
 .summary-value.positive {
   color: #2e7d32;
 }
 
+.dark .summary-value.positive {
+  color: #4caf50;
+}
+
 .summary-value.negative {
   color: #c62828;
+}
+
+.dark .summary-value.negative {
+  color: #ef5350;
 }
 
 /* ============================================
    لودینگ و خطا
    ============================================ */
-.metrics-report-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  gap: 16px;
-}
-
-.loading-spinner {
-  font-size: 40px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
+.metrics-report-loading,
 .metrics-report-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: 12px;
+  min-height: 60vh;
+  padding: 20px;
 }
 
-.error-icon {
+.metrics-report-error .error-icon {
   font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.metrics-report-error h3 {
+  margin: 0 0 8px 0;
+  color: #c62828;
+}
+
+.dark .metrics-report-error h3 {
+  color: #ef5350;
+}
+
+.metrics-report-error p {
+  color: var(--text-muted, #666);
+  margin-bottom: 16px;
 }
 
 .btn-retry {
-  padding: 10px 24px;
-  background: #1a237e;
+  padding: 10px 28px;
+  background: var(--primary, #1a237e);
+  color: white;
   border: none;
   border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 .btn-retry:hover {
-  opacity: 0.85;
+  background: var(--primary-dark, #0d1b5e);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
 }
 
 /* ============================================
-   واکنش‌گرایی
+   چاپ
    ============================================ */
-@media (max-width: 1024px) {
-  .metrics-table th.period-header {
-    min-width: 70px;
-    font-size: 12px;
-    padding: 8px 10px;
+@media print {
+  .metrics-header-right .btn-print,
+  .metrics-header-right .btn-back,
+  .metrics-formula-toggle,
+  .btn-retry {
+    display: none !important;
   }
 
-  .metrics-table td {
-    padding: 8px 10px;
-  }
-
-  .metrics-table td.metric-name {
-    font-size: 12px;
-  }
-
-  .value-container .value {
-    font-size: 13px;
-  }
-
-  .formula-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
   .metrics-report {
-    padding: 12px 16px;
+    padding: 15px !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .metrics-report.light,
+  .metrics-report.dark {
+    background: white !important;
+    color: black !important;
   }
 
   .metrics-header {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 12px 16px;
-  }
-
-  .metrics-header-left,
-  .metrics-header-right {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .metrics-header-right {
-    justify-content: flex-end;
+    border-bottom-color: #1a237e !important;
   }
 
   .metrics-header-left h1 {
-    font-size: 18px;
+    color: #1a237e !important;
   }
 
-  .btn-back {
-    padding: 6px 12px;
-    font-size: 13px;
+  .chart-container {
+    break-inside: avoid;
+    border: 1px solid #ddd !important;
   }
 
-  .btn-print {
-    padding: 6px 14px;
-    font-size: 13px;
+  .metrics-summary {
+    break-inside: avoid;
+    border: 1px solid #ddd !important;
   }
 
-  .formula-grid {
-    grid-template-columns: 1fr;
+  .formula-item {
+    break-inside: avoid;
+  }
+}
+
+/* ==========================================================
+   ✅ ریسپانسیو - موبایل
+   ========================================================== */
+
+/* ===== تبلت ===== */
+@media (max-width: 992px) {
+  .metrics-report {
+    padding: 16px 20px;
   }
 
   .metrics-summary {
     grid-template-columns: repeat(3, 1fr);
   }
-
-  .chart-wrapper .chart-container {
-    height: 220px;
-  }
-
-  .metrics-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .metrics-table {
-    font-size: 12px;
-    min-width: 600px;
-  }
-
-  .metrics-table th {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
-
-  .metrics-table th.metric-name {
-    min-width: 70px;
-  }
-
-  .metrics-table th.metric-en {
-    min-width: 70px;
-    font-size: 10px;
-  }
-
-  .metrics-table th.period-header {
-    min-width: 60px;
-    font-size: 11px;
-    padding: 6px 8px;
-  }
-
-  .metrics-table td {
-    padding: 6px 8px;
-  }
-
-  .metrics-table td.metric-name {
-    font-size: 11px;
-  }
-
-  .metrics-table td.metric-en {
-    font-size: 10px;
-  }
-
-  .value-container {
-    padding: 3px 4px;
-    min-width: 40px;
-  }
-
-  .value-container .value {
-    font-size: 12px;
-  }
-
-  .value-container .value-desc {
-    display: none;
-  }
-
-  .value-container .status-icon {
-    font-size: 12px;
-  }
-
-  .metrics-legend {
-    gap: 6px;
-    padding: 8px 12px;
-  }
-
-  .legend-item {
-    font-size: 10px;
-    padding: 2px 8px;
-  }
 }
 
-@media (max-width: 480px) {
+/* ===== موبایل (تا 768px) ===== */
+@media (max-width: 768px) {
   .metrics-report {
-    padding: 8px 12px;
+    padding: 12px 16px;
+  }
+
+  /* ==========================================================
+     ✅ هدر - وسط‌چین در موبایل
+     ========================================================== */
+  .metrics-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .metrics-header-left {
+    width: 100% !important;
   }
 
   .metrics-header-left h1 {
-    font-size: 16px;
+    font-size: 20px !important;
+    text-align: center !important;
+    width: 100% !important;
   }
 
-  .btn-back {
-    padding: 4px 10px;
-    font-size: 12px;
+  /* ==========================================================
+     ✅ دو کلید هدر - در یک ردیف با عرض مساوی
+     ========================================================== */
+  .metrics-header-right {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
   }
 
-  .btn-print {
-    padding: 4px 12px;
-    font-size: 12px;
+  .metrics-header-right .btn-print,
+  .metrics-header-right .btn-back {
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    gap: 4px !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
-  .metrics-summary {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    padding: 12px;
+  /* ===== اطلاعات پورتفولیو ===== */
+  .metrics-portfolio-info {
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
   }
 
-  .summary-value {
-    font-size: 16px;
-  }
-
+  /* ===== فرمول‌ها ===== */
   .metrics-formulas {
-    padding: 12px;
+    padding: 16px !important;
+  }
+
+  .metrics-formulas h3 {
+    font-size: 17px !important;
+    text-align: center !important;
   }
 
   .formula-item {
-    padding: 12px;
+    padding: 12px !important;
   }
 
   .formula-item h4 {
-    font-size: 13px;
+    font-size: 14px !important;
   }
 
   .formula-latin {
-    font-size: 12px;
+    font-size: 12px !important;
   }
 
   .formula-fa,
-  .formula-desc {
-    font-size: 12px;
-  }
-
+  .formula-desc,
   .formula-interpret {
-    font-size: 11px;
+    font-size: 12px !important;
   }
 
-  .chart-wrapper .chart-container {
-    height: 180px;
+  /* ===== دکمه نمایش فرمول‌ها ===== */
+  .btn-toggle-formula {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    width: 100% !important;
   }
 
-  .chart-wrapper {
-    padding: 10px;
+  /* ===== نمودارها ===== */
+  .chart-container {
+    padding: 12px !important;
+    min-height: 260px !important;
   }
 
-  .metrics-table {
-    font-size: 11px;
-    min-width: 450px;
+  .metrics-charts-section h3 {
+    font-size: 16px !important;
+    text-align: center !important;
   }
 
-  .metrics-table th {
-    padding: 6px 6px;
-    font-size: 10px;
+  /* ===== خلاصه ===== */
+  .metrics-summary {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
   }
 
-  .metrics-table th.period-header {
-    min-width: 45px;
-    font-size: 10px;
-    padding: 4px 4px;
+  .summary-value {
+    font-size: 14px !important;
   }
 
-  .metrics-table td {
-    padding: 4px 6px;
-  }
-
-  .metrics-table td.metric-name {
-    font-size: 10px;
-    white-space: normal;
-    word-break: break-word;
-    max-width: 60px;
-  }
-
-  .metrics-table td.metric-en {
-    font-size: 9px;
-    white-space: normal;
-    word-break: break-word;
-    max-width: 50px;
-  }
-
-  .value-container {
-    padding: 2px 3px;
-    min-width: 30px;
-  }
-
-  .value-container .value {
-    font-size: 11px;
-    word-break: break-all;
-  }
-
-  .value-container .status-icon {
-    font-size: 10px;
-  }
-
-  .metrics-legend {
-    gap: 4px;
-    padding: 6px 8px;
-  }
-
-  .legend-item {
-    font-size: 9px;
-    padding: 1px 6px;
-  }
-
-  .legend-title {
-    font-size: 11px;
+  .summary-label {
+    font-size: 10px !important;
   }
 }
 
-/* ============================================
-   حالت چاپ
-   ============================================ */
-@media print {
-  .btn-back,
-  .btn-print,
-  .btn-toggle-formula,
-  .metrics-filter {
-    display: none !important;
-  }
-
+/* ===== موبایل کوچک (تا 480px) ===== */
+@media (max-width: 480px) {
   .metrics-report {
-    padding: 0 !important;
-    background: #fff !important;
-  }
-
-  .metrics-header {
-    border: none !important;
-    background: #fff !important;
-    padding: 10px 0 !important;
+    padding: 8px 10px !important;
   }
 
   .metrics-header-left h1 {
     font-size: 18px !important;
-    color: #000 !important;
   }
 
-  .metrics-formulas {
-    border: 1px solid #ddd !important;
-    background: #f9f9f9 !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .metrics-header-right .btn-print,
+  .metrics-header-right .btn-back {
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+    height: 36px !important;
+    border-radius: 6px !important;
   }
 
-  .formula-item {
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .metrics-portfolio-info {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    gap: 6px !important;
   }
 
   .metrics-summary {
-    border: 1px solid #ddd !important;
-    background: #f9f9f9 !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    padding: 10px 12px !important;
   }
 
-  .metrics-table-container {
-    border: 1px solid #ddd !important;
-    background: #fff !important;
-  }
-
-  .metrics-table thead {
-    background: #f5f5f5 !important;
-  }
-
-  .metrics-table th {
-    color: #333 !important;
-    border-bottom: 2px solid #333 !important;
-  }
-
-  .metrics-table td {
-    border-bottom: 1px solid #ddd !important;
-  }
-
-  .value-container {
-    border: none !important;
-    background: transparent !important;
-  }
-
-  .value-container.amazing {
-    background: #e8f5e9 !important;
-    color: #1b5e20 !important;
-  }
-
-  .value-container.excellent {
-    background: #e3f2fd !important;
-    color: #0d47a1 !important;
-  }
-
-  .value-container.good {
-    background: #f1f8e9 !important;
-    color: #2e7d32 !important;
-  }
-
-  .value-container.warning {
-    background: #fff3e0 !important;
-    color: #e65100 !important;
-  }
-
-  .value-container.danger {
-    background: #ffebee !important;
-    color: #c62828 !important;
-  }
-
-  .metrics-legend {
-    border-top: 1px solid #ddd !important;
-  }
-
-  .legend-item {
-    background: #f5f5f5 !important;
-    color: #333 !important;
-  }
-
-  .metrics-charts-section {
-    page-break-inside: avoid;
+  .summary-value {
+    font-size: 13px !important;
   }
 
   .chart-container {
-    max-width: 100% !important;
+    padding: 8px !important;
+    min-height: 220px !important;
   }
 
-  .chart-wrapper {
-    border: 1px solid #ddd !important;
+  .metrics-formulas {
+    padding: 12px !important;
+  }
+
+  .formula-item {
     padding: 10px !important;
   }
 
-  .chart-wrapper .chart-container {
-    height: 200px !important;
+  .formula-item h4 {
+    font-size: 13px !important;
   }
+
+  .formula-latin {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+
+  .formula-fa,
+  .formula-desc,
+  .formula-interpret {
+    font-size: 11px !important;
+  }
+
+  .btn-toggle-formula {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* ===== موبایل خیلی کوچک (تا 360px) ===== */
+@media (max-width: 360px) {
+  .metrics-header-left h1 {
+    font-size: 16px !important;
+  }
+
+  .metrics-header-right .btn-print,
+  .metrics-header-right .btn-back {
+    flex: 1 1 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: 0 !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    font-size: 11px !important;
+    padding: 6px 4px !important;
+    height: 32px !important;
+    border-radius: 4px !important;
+  }
+
+  .metrics-summary {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4px !important;
+    padding: 8px 10px !important;
+  }
+
+  .summary-value {
+    font-size: 12px !important;
+  }
+
+  .summary-label {
+    font-size: 9px !important;
+  }
+}
+/* frontend/src/components/reports/AdvancedMetricsReport.css - اضافه کردن به انتهای فایل */
+
+/* ============================================
+   ✅ دکمه راهنما - تمام عرض و راست‌چین
+   ============================================ */
+
+.metrics-formula-toggle.full-width {
+    width: 100% !important;
+    margin-bottom: 20px !important;
+}
+
+.metrics-formula-toggle.full-width .btn-toggle-formula {
+    width: 100% !important;
+    padding: 12px 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+    justify-content: flex-start !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(13, 71, 161, 0.05)) !important;
+    border: 2px solid rgba(26, 35, 126, 0.15) !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    direction: rtl !important;
+}
+
+.dark .metrics-formula-toggle.full-width .btn-toggle-formula {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.08), rgba(144, 202, 249, 0.05)) !important;
+    border-color: rgba(144, 202, 249, 0.15) !important;
+}
+
+.metrics-formula-toggle.full-width .btn-toggle-formula:hover {
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.15), rgba(13, 71, 161, 0.1)) !important;
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 35, 126, 0.15);
+}
+
+.dark .metrics-formula-toggle.full-width .btn-toggle-formula:hover {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.15), rgba(144, 202, 249, 0.1)) !important;
+    border-color: #64b5f6 !important;
+    box-shadow: 0 4px 16px rgba(144, 202, 249, 0.1);
+}
+
+.metrics-formula-toggle.full-width .btn-toggle-formula.active {
+    background: linear-gradient(135deg, #1a237e, #0d47a1) !important;
+    color: #ffffff !important;
+    border-color: #1a237e !important;
+    box-shadow: 0 4px 16px rgba(26, 35, 126, 0.3);
+}
+
+.dark .metrics-formula-toggle.full-width .btn-toggle-formula.active {
+    background: linear-gradient(135deg, #3949ab, #1a237e) !important;
+    border-color: #3949ab !important;
+    box-shadow: 0 4px 16px rgba(57, 73, 171, 0.3);
+}
+
+/* ============================================
+   ✅ توضیحات تکمیلی فرمول‌ها
+   ============================================ */
+
+.formula-extra-info {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border-color);
+}
+
+.formula-tip {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.formula-tip:first-child {
+    margin-top: 0;
+}
+
+.formula-tip .tip-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.formula-tip div {
+    flex: 1;
+}
+
+.formula-tip strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.formula-tip ul {
+    margin: 4px 0 0 0;
+    padding-right: 20px;
+}
+
+.formula-tip ul li {
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.formula-tip ul li strong {
+    display: inline;
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+/* ===== تیپ‌های مختلف ===== */
+.formula-tip-important {
+    background: #fff3e0;
+    border-right: 4px solid #e65100;
+}
+
+.dark .formula-tip-important {
+    background: #2e1a0a;
+    border-color: #ff6d00;
+}
+
+.formula-tip-important strong {
+    color: #e65100;
+}
+
+.dark .formula-tip-important strong {
+    color: #ff8a65;
+}
+
+.formula-tip-success {
+    background: #e8f5e9;
+    border-right: 4px solid #2e7d32;
+}
+
+.dark .formula-tip-success {
+    background: #1a2e1a;
+    border-color: #4caf50;
+}
+
+.formula-tip-success strong {
+    color: #2e7d32;
+}
+
+.dark .formula-tip-success strong {
+    color: #81c784;
+}
+
+.formula-tip-warning {
+    background: #ffebee;
+    border-right: 4px solid #c62828;
+}
+
+.dark .formula-tip-warning {
+    background: #2d1a1a;
+    border-color: #ef5350;
+}
+
+.formula-tip-warning strong {
+    color: #c62828;
+}
+
+.dark .formula-tip-warning strong {
+    color: #ef9a9a;
+}
+
+.formula-tip-info {
+    background: #e3f2fd;
+    border-right: 4px solid #0d47a1;
+}
+
+.dark .formula-tip-info {
+    background: #0d1a3a;
+    border-color: #42a5f5;
+}
+
+.formula-tip-info strong {
+    color: #0d47a1;
+}
+
+.dark .formula-tip-info strong {
+    color: #64b5f6;
+}
+
+/* ============================================
+   ✅ واکنش‌گرا
+   ============================================ */
+
+@media (max-width: 768px) {
+    .metrics-formula-toggle.full-width .btn-toggle-formula {
+        font-size: 14px !important;
+        padding: 10px 14px !important;
+        text-align: right !important;
+        justify-content: flex-start !important;
+    }
+
+    .formula-tip {
+        padding: 10px 14px;
+        flex-direction: column;
+    }
+
+    .formula-tip ul li {
+        font-size: 12px;
+    }
+
+    .formula-tip strong {
+        font-size: 14px;
+    }
+
+    .formula-extra-info {
+        margin-top: 16px;
+        padding-top: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-formula-toggle.full-width .btn-toggle-formula {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+        text-align: right !important;
+        justify-content: flex-start !important;
+    }
+
+    .formula-tip {
+        padding: 8px 10px;
+    }
+
+    .formula-tip ul li {
+        font-size: 11px;
+    }
+
+    .formula-tip strong {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .metrics-formula-toggle.full-width .btn-toggle-formula {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+        text-align: right !important;
+        justify-content: flex-start !important;
+    }
 }
