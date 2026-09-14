@@ -10,10 +10,20 @@ from django.db import transaction
 from .models import SubscriptionPlan, UserSubscription, DiscountCode
 from .serializers import SubscriptionPlanSerializer, UserSubscriptionSerializer
 from .payments import PaymentManager
-from .sms import send_purchase_confirmation, send_admin_notification
 import logging
 
 logger = logging.getLogger(__name__)
+
+# ============================================
+# ✅ Import SmsService (سیستم جدید پیامک)
+# ============================================
+try:
+    from apps.sms.services import SmsService
+    SMS_SERVICE_AVAILABLE = True
+except ImportError as e:
+    logger.error(f"❌ Failed to import SmsService: {str(e)}")
+    SMS_SERVICE_AVAILABLE = False
+    SmsService = None
 
 
 # ============================================
@@ -167,7 +177,7 @@ class PurchaseSubscriptionView(APIView):
 
 
 # ============================================
-# تایید پرداخت (اصلاح‌شده با ثبت استفاده از کد تخفیف)
+# تایید پرداخت (اصلاح‌شده با SmsService جدید)
 # ============================================
 class VerifyPaymentView(APIView):
     """تایید پرداخت"""
@@ -178,7 +188,6 @@ class VerifyPaymentView(APIView):
         # ============================================
         # ✅ لاگ کامل برای عیب‌یابی
         # ============================================
-        import json
         print("=" * 80)
         print("🔍 VerifyPaymentView called!")
         print(f"📥 Full URL: {request.build_absolute_uri()}")
@@ -186,7 +195,6 @@ class VerifyPaymentView(APIView):
         print(f"📥 Request headers: {dict(request.headers)}")
         print("=" * 80)
 
-        # ✅ استخراج پارامترها با هر دو حالت (بزرگ و کوچک)
         authority = request.GET.get('authority') or request.GET.get('Authority')
         status_param = request.GET.get('status') or request.GET.get('Status')
         subscription_id = request.GET.get('subscription_id') or request.GET.get('subscription_id')
@@ -239,17 +247,16 @@ class VerifyPaymentView(APIView):
             if subscription.discount_code:
                 discount = subscription.discount_code
 
-                # محاسبه مبلغ تخفیف
                 original_price = float(subscription.plan.price)
                 final_price = float(subscription.amount_paid)
-                vat_amount = final_price - (final_price / 1.1)  # VAT 10%
+                vat_amount = final_price - (final_price / 1.1)
                 discount_amount = original_price - (final_price - vat_amount)
 
                 success, message, usage = discount.use(
                     user=subscription.user,
                     subscription=subscription,
                     discount_amount=discount_amount,
-                    final_amount=final_price - vat_amount  # مبلغ بدون مالیات
+                    final_amount=final_price - vat_amount
                 )
 
                 if success:
@@ -257,26 +264,25 @@ class VerifyPaymentView(APIView):
                 else:
                     logger.warning(f"⚠️ Failed to use discount code {discount.code}: {message}")
 
-            try:
-                send_purchase_confirmation(
-                    subscription.user.phone_number,
-                    subscription.plan.plan_name,
-                    subscription.end_date
-                )
-            except Exception as e:
-                logger.error(f"Error sending purchase confirmation SMS: {str(e)}")
-
-            try:
-                admin_message = (
-                    f"🛒 خرید جدید\n"
-                    f"کاربر: {subscription.user.get_full_name()} ({subscription.user.phone_number})\n"
-                    f"پلن: {subscription.plan.plan_name}\n"
-                    f"مبلغ: {subscription.amount_paid:,.0f} تومان\n"
-                    f"تاریخ: {timezone.now().strftime('%Y/%m/%d %H:%M')}"
-                )
-                send_admin_notification(admin_message)
-            except Exception as e:
-                logger.error(f"Error sending admin notification: {str(e)}")
+            # ============================================
+            # 🆕 ارسال پیامک تمدید به کاربر با SmsService جدید
+            # ============================================
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_subscription_renewed_by_user(
+                        user=subscription.user,
+                        plan_name=subscription.plan.plan_name,
+                        end_date=subscription.end_date,
+                        days=subscription.plan.duration_days,
+                        amount=float(subscription.amount_paid),
+                        subscription_id=subscription.id,
+                    )
+                    logger.info(f"✅ Subscription renewed SMS sent to {subscription.user.phone_number}")
+                except Exception as e:
+                    logger.error(f"❌ Error sending subscription renewal SMS: {str(e)}")
+            else:
+                logger.warning("⚠️ SmsService در دسترس نیست - پیامک تمدید ارسال نشد")
 
             return Response({
                 'success': True,
@@ -312,9 +318,7 @@ class ValidateDiscountView(APIView):
         try:
             discount = DiscountCode.objects.get(code=code)
 
-            # ✅ بررسی اعتبار کد با متد is_valid
             if not discount.is_valid():
-                # بررسی دلیل نامعتبر بودن برای پیام دقیق‌تر
                 if not discount.is_active:
                     error_msg = 'کد تخفیف غیرفعال شده است.'
                 elif discount.max_uses <= 0:
@@ -331,7 +335,6 @@ class ValidateDiscountView(APIView):
                     'error': error_msg
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # بررسی تطابق با پلن
             if discount.plan and plan_id:
                 try:
                     plan = SubscriptionPlan.objects.get(id=plan_id)
@@ -355,8 +358,9 @@ class ValidateDiscountView(APIView):
                 'error': 'کد تخفیف یافت نشد.'
             }, status=status.HTTP_404_NOT_FOUND)
 
+
 # ============================================
-# وضعیت اشتراک (اصلاح‌شده با فیلدهای AI)
+# وضعیت اشتراک
 # ============================================
 class SubscriptionStatusView(APIView):
     """دریافت وضعیت اشتراک کاربر"""
@@ -365,7 +369,6 @@ class SubscriptionStatusView(APIView):
     def get(self, request):
         user = request.user
 
-        # اگر کاربر ادمین است
         if user.is_admin:
             return Response({
                 'has_subscription': True,
@@ -437,7 +440,7 @@ class SubscriptionStatusView(APIView):
 # تمدید اشتراک
 # ============================================
 class ExtendSubscriptionView(APIView):
-    """تمدید اشتراک"""
+    """تمدید اشتراک (فقط محاسبه قیمت - پرداخت در PurchaseSubscriptionView)"""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -484,3 +487,446 @@ class ExtendSubscriptionView(APIView):
             },
             'message': 'درخواست تمدید ثبت شد'
         })
+
+
+# ============================================
+# ✅ سیستم پرداخت کارت به کارت
+# ============================================
+
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from .models import PaymentCard, PaymentRequest
+from .serializers import (
+    PaymentCardPublicSerializer,
+    PaymentRequestUserSerializer,
+    CreatePaymentRequestSerializer,
+    SubmitReceiptSerializer,
+)
+from apps.accounts.models import SystemSetting
+
+
+# ---------- Helper: ارسال پیامک ----------
+def _send_sms_safe(event_key, phone_number, context, user=None):
+    """ارسال ایمن پیامک با try/except"""
+    if not SMS_SERVICE_AVAILABLE or not SmsService:
+        logger.warning(f"⚠️ SmsService در دسترس نیست - رویداد {event_key} ارسال نشد")
+        return None
+    try:
+        sms_service = SmsService()
+        result = sms_service.send_event(
+            event_key=event_key,
+            phone_number=phone_number,
+            context=context,
+            user=user,
+        )
+        logger.info(f"✅ SMS sent ({event_key}) to {phone_number}: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"❌ Error sending SMS ({event_key}): {str(e)}")
+        return None
+
+
+# ============================================
+# ۱. لیست کارت‌های بانکی (برای کاربر)
+# ============================================
+class PaymentCardListView(generics.ListAPIView):
+    """
+    لیست کارت‌های بانکی فعال
+    - کاربر عادی: فقط کارت‌های فعال
+    - کارت پیش‌فرض در ابتدای لیست
+    """
+    serializer_class = PaymentCardPublicSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return PaymentCard.objects.filter(is_active=True).order_by('-is_default', 'order_index')
+
+
+# ============================================
+# ۲. ایجاد درخواست پرداخت (کاربر)
+# ============================================
+class CreatePaymentRequestView(APIView):
+    """
+    ایجاد درخواست پرداخت کارت به کارت
+
+    Workflow:
+    1. کاربر پلن انتخاب می‌کند
+    2. درخواست ثبت می‌شود با وضعیت 'pending_payment'
+    3. یک کارت (طبق تنظیمات) انتخاب و اطلاعات آن snapshot می‌شود
+    4. مهلت پرداخت (طبق تنظیمات) تعیین می‌شود
+    5. پیامک به کاربر ارسال می‌شود
+    """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request):
+        # بررسی فعال بودن پرداخت کارت به کارت
+        if not SystemSetting.get_bool('payment_card_to_card_enabled', True):
+            return Response(
+                {'error': 'پرداخت کارت به کارت در حال حاضر غیرفعال است'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = CreatePaymentRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        plan_id = data['plan_id']
+        discount_code_str = data.get('discount_code', '').strip()
+        card_id = data.get('card_id')
+
+        # بررسی پلن
+        try:
+            plan = SubscriptionPlan.objects.get(id=plan_id, is_active=True)
+        except SubscriptionPlan.DoesNotExist:
+            return Response(
+                {'error': 'پلن انتخابی یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # بررسی حداکثر درخواست فعال
+        max_active = SystemSetting.get_int('payment_request_max_active_per_user', 1)
+        active_requests = PaymentRequest.objects.filter(
+            user=request.user,
+            status__in=['pending_payment', 'awaiting_review']
+        ).count()
+        if active_requests >= max_active:
+            return Response(
+                {'error': f'شما حداکثر {max_active} درخواست پرداخت فعال دارید. ابتدا آن‌ها را تکمیل کنید.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # محاسبه مبلغ
+        original_price = float(plan.price)
+        discount = None
+        discount_percent = 0
+        discount_amount = 0
+
+        if discount_code_str:
+            try:
+                discount = DiscountCode.objects.get(code=discount_code_str, is_active=True)
+                if not discount.is_valid():
+                    return Response(
+                        {'error': 'کد تخفیف نامعتبر یا منقضی شده است'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                # بررسی تطابق با پلن
+                if discount.plan and discount.plan_id != plan.id:
+                    return Response(
+                        {'error': 'این کد تخفیف برای این پلن معتبر نیست'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                discount_percent = float(discount.discount_percent)
+                discount_amount = original_price * (discount_percent / 100)
+            except DiscountCode.DoesNotExist:
+                return Response(
+                    {'error': 'کد تخفیف یافت نشد'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        final_amount = original_price - discount_amount
+
+        # انتخاب کارت پرداخت
+        selection_mode = SystemSetting.get('payment_card_selection_mode', 'random')
+        payment_card = None
+
+        if card_id and selection_mode == 'manual':
+            # انتخاب دستی توسط کاربر
+            try:
+                payment_card = PaymentCard.objects.get(id=card_id, is_active=True)
+            except PaymentCard.DoesNotExist:
+                return Response(
+                    {'error': 'کارت انتخابی یافت نشد یا غیرفعال است'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        else:
+            # انتخاب خودکار طبق تنظیمات
+            payment_card = PaymentCard.get_for_payment(mode=selection_mode)
+
+        if not payment_card:
+            return Response(
+                {'error': 'هیچ کارت فعالی برای پرداخت موجود نیست. لطفاً با پشتیبانی تماس بگیرید.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        # مهلت پرداخت
+        timeout_hours = SystemSetting.get_int('payment_request_timeout_hours', 2)
+        expires_at = timezone.now() + timedelta(hours=timeout_hours)
+
+        # ایجاد درخواست
+        payment_request = PaymentRequest.objects.create(
+            user=request.user,
+            plan=plan,
+            discount_code=discount,
+            payment_card=payment_card,
+            destination_card_number=payment_card.card_number,
+            destination_card_holder=payment_card.card_holder,
+            destination_bank_name=payment_card.bank_name,
+            unique_code=PaymentRequest.generate_unique_code(),
+            amount=final_amount,
+            original_amount=original_price,
+            discount_amount=discount_amount,
+            status='pending_payment',
+            expires_at=expires_at,
+        )
+
+        # ارسال پیامک به کاربر (اختیاری - می‌تواند خطا بدهد)
+        user_name = request.user.get_full_name() or request.user.phone_number
+        _send_sms_safe(
+            event_key='payment_request_created',
+            phone_number=request.user.phone_number,
+            context={
+                'user_name': user_name,
+                'amount': f"{int(final_amount):,}",
+                'card_number': payment_card.card_number,
+                'deadline': expires_at.strftime('%H:%M'),
+            },
+            user=request.user,
+        )
+
+        # لاگ اقدام
+        try:
+            from apps.admin_panel.models import AdminActionLog  # فقط برای سازگاری
+        except ImportError:
+            pass
+
+        logger.info(f"✅ PaymentRequest #{payment_request.id} created for user {request.user.id}")
+
+        return Response({
+            'success': True,
+            'payment_request': PaymentRequestUserSerializer(
+                payment_request, context={'request': request}
+            ).data,
+            'message': 'درخواست پرداخت با موفقیت ثبت شد',
+        }, status=status.HTTP_201_CREATED)
+
+
+# ============================================
+# ۳. جزئیات درخواست پرداخت (کاربر)
+# ============================================
+class PaymentRequestDetailView(generics.RetrieveAPIView):
+    """جزئیات یک درخواست پرداخت - فقط برای صاحب درخواست"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = PaymentRequestUserSerializer
+
+    def get_queryset(self):
+        return PaymentRequest.objects.filter(user=self.request.user)
+
+
+# ============================================
+# ۴. لیست درخواست‌های کاربر
+# ============================================
+class UserPaymentRequestListView(generics.ListAPIView):
+    """لیست درخواست‌های پرداخت کاربر جاری"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = PaymentRequestUserSerializer
+
+    def get_queryset(self):
+        queryset = PaymentRequest.objects.filter(user=self.request.user)
+
+        # فیلتر بر اساس وضعیت
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        return queryset.order_by('-created_at')
+
+
+# ============================================
+# ۵. درخواست‌های فعال کاربر (برای بنر بالای صفحه)
+# ============================================
+class ActivePaymentRequestsView(APIView):
+    """
+    دریافت درخواست‌های فعال کاربر برای نمایش در بنر
+    شامل: pending_payment, awaiting_review
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        active_requests = PaymentRequest.objects.filter(
+            user=request.user,
+            status__in=['pending_payment', 'awaiting_review']
+        ).order_by('-created_at')
+
+        data = PaymentRequestUserSerializer(
+            active_requests, many=True, context={'request': request}
+        ).data
+
+        return Response({
+            'count': len(data),
+            'requests': data,
+        })
+
+
+# ============================================
+# ۶. ثبت فیش توسط کاربر
+# ============================================
+class SubmitPaymentReceiptView(APIView):
+    """
+    ثبت اطلاعات فیش توسط کاربر
+    - دریافت شماره پیگیری، نام واریزکننده، ۴ رقم آخر کارت، تصویر فیش (اختیاری)
+    - وضعیت: pending_payment → awaiting_review
+    """
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    @transaction.atomic
+    def post(self, request, pk):
+        try:
+            payment_request = PaymentRequest.objects.get(
+                id=pk,
+                user=request.user
+            )
+        except PaymentRequest.DoesNotExist:
+            return Response(
+                {'error': 'درخواست پرداخت یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # بررسی وضعیت
+        if not payment_request.can_submit_receipt():
+            if payment_request.status == 'expired':
+                return Response(
+                    {'error': 'مهلت پرداخت این درخواست به پایان رسیده است'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if payment_request.status == 'awaiting_review':
+                return Response(
+                    {'error': 'اطلاعات فیش قبلاً ثبت شده است'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {'error': 'امکان ثبت فیش در وضعیت فعلی وجود ندارد'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = SubmitReceiptSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+
+        # بررسی الزامی بودن تصویر فیش
+        receipt_image = request.FILES.get('receipt_image')
+        if SystemSetting.get_bool('payment_receipt_image_required', False) and not receipt_image:
+            return Response(
+                {'error': 'ارسال تصویر فیش الزامی است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # ثبت فیش
+        success, message = payment_request.submit_receipt(
+            tracking_number=data['tracking_number'],
+            payer_name=data.get('payer_name', ''),
+            payer_card_last4=data.get('payer_card_last4', ''),
+            paid_at=data.get('paid_at'),
+            receipt_image=receipt_image,
+            user_note=data.get('user_note', ''),
+        )
+
+        if not success:
+            return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # اطلاع به ادمین‌ها (پیامک)
+        _notify_admins_new_payment(payment_request)
+
+        # پیامک به کاربر
+        user_name = request.user.get_full_name() or request.user.phone_number
+        _send_sms_safe(
+            event_key='payment_awaiting_review',
+            phone_number=request.user.phone_number,
+            context={'user_name': user_name},
+            user=request.user,
+        )
+
+        logger.info(f"✅ Receipt submitted for PaymentRequest #{payment_request.id}")
+
+        return Response({
+            'success': True,
+            'payment_request': PaymentRequestUserSerializer(
+                payment_request, context={'request': request}
+            ).data,
+            'message': 'اطلاعات فیش با موفقیت ثبت شد. پس از بررسی، نتیجه به شما اطلاع داده می‌شود.',
+        })
+
+
+# ============================================
+# ۷. لغو درخواست توسط کاربر
+# ============================================
+class CancelPaymentRequestView(APIView):
+    """لغو درخواست پرداخت توسط کاربر"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            payment_request = PaymentRequest.objects.get(
+                id=pk,
+                user=request.user
+            )
+        except PaymentRequest.DoesNotExist:
+            return Response(
+                {'error': 'درخواست پرداخت یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        success, message = payment_request.cancel()
+        if not success:
+            return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'success': True,
+            'message': message,
+        })
+
+
+# ============================================
+# ✅ Helper: اطلاع به ادمین‌ها
+# ============================================
+def _notify_admins_new_payment(payment_request):
+    """اطلاع‌رسانی به ادمین‌ها هنگام ثبت فیش جدید"""
+    if not SMS_SERVICE_AVAILABLE or not SmsService:
+        return
+
+    # دریافت لیست ادمین‌ها
+    notify_all = SystemSetting.get_bool('payment_admin_notify_all', True)
+    notify_phone = SystemSetting.get('payment_admin_notify_phone', '')
+
+    admin_phones = []
+
+    if notify_all:
+        from apps.accounts.models import User
+        admin_phones = list(
+            User.objects.filter(is_admin=True, is_active=True)
+            .exclude(phone_number='')
+            .values_list('phone_number', flat=True)
+        )
+    elif notify_phone:
+        admin_phones = [notify_phone]
+    else:
+        # اگر هیچ تنظیمی نبود، به ادمین اصلی
+        admin_phone = SystemSetting.get('admin_phone_number', '')
+        if admin_phone:
+            admin_phones = [admin_phone]
+
+    if not admin_phones:
+        logger.warning("⚠️ هیچ شماره ادمینی برای اطلاع‌رسانی یافت نشد")
+        return
+
+    user_name = payment_request.user.get_full_name() or payment_request.user.phone_number
+    tracking = payment_request.tracking_number or '-'
+
+    for phone in admin_phones:
+        _send_sms_safe(
+            event_key='payment_admin_new_request',
+            phone_number=phone,
+            context={
+                'user_name': user_name,
+                'amount': f"{int(payment_request.amount):,}",
+                'tracking_number': tracking,
+                'request_id': str(payment_request.id),
+            },
+        )
+
+    payment_request.admin_notified = True
+    payment_request.admin_notified_at = timezone.now()
+    payment_request.save(update_fields=['admin_notified', 'admin_notified_at'])

@@ -267,3 +267,60 @@
     height: 40px;
   }
 }
+/* ============================================ */
+/* ✅ لینک پنل ادمین در فوتر */
+/* ============================================ */
+.footer-admin-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  background: rgba(255, 215, 0, 0.2) !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  transition: all 0.3s ease !important;
+  text-decoration: none !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  margin-right: 4px;
+}
+
+.footer-admin-link:hover {
+  background: rgba(255, 215, 0, 0.4) !important;
+  border-color: rgba(255, 215, 0, 0.6) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* حالت تاریک */
+.app-footer.dark .footer-admin-link {
+  background: rgba(255, 215, 0, 0.15) !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
+}
+.app-footer.dark .footer-admin-link:hover {
+  background: rgba(255, 215, 0, 0.3) !important;
+  border-color: rgba(255, 215, 0, 0.4) !important;
+}
+
+/* حالت auth-footer (صفحات احراز هویت) */
+.app-footer.auth-footer .footer-admin-link {
+  background: rgba(255, 215, 0, 0.15) !important;
+  border-color: rgba(255, 215, 0, 0.3) !important;
+}
+.app-footer.auth-footer .footer-admin-link:hover {
+  background: rgba(255, 215, 0, 0.3) !important;
+  border-color: rgba(255, 215, 0, 0.5) !important;
+}
+
+/* ریسپانسیو */
+@media (max-width: 480px) {
+  .footer-admin-link {
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+  }
+}

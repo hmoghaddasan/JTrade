@@ -1,0 +1,305 @@
+/* frontend/src/pages/Admin/SMS/SmsDashboard.css */
+
+.sms-dashboard-page {
+  padding: 0;
+  max-width: 100%;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.sms-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sms-dashboard-header h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sms-dashboard-subtitle {
+  font-size: 13px;
+  color: #868e96;
+  margin: 0;
+}
+
+.btn-refresh {
+  padding: 10px 14px;
+  background: #f1f3f5;
+  border: 1px solid #e8ecf1;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh:hover {
+  background: #e8ecf1;
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+.sms-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sms-stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #f1f3f5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.sms-stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.sms-stat-card .stat-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.sms-stat-card .stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sms-stat-card .stat-label {
+  font-size: 12px;
+  color: #868e96;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sms-stat-card .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.sms-stat-card.success {
+  border-left: 4px solid #28a745;
+}
+
+.sms-stat-card.danger {
+  border-left: 4px solid #dc3545;
+}
+
+.sms-stat-card.warning {
+  border-left: 4px solid #ffc107;
+}
+
+.sms-stat-card.info {
+  border-left: 4px solid #17a2b8;
+}
+
+.sms-stat-card.cost {
+  border-left: 4px solid #6c63ff;
+}
+
+/* ============================================
+   Tabs Navigation
+   ============================================ */
+.sms-tabs-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f1f3f5;
+  padding-bottom: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.sms-tab-btn {
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #868e96;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  margin-bottom: -2px;
+}
+
+.sms-tab-btn:hover {
+  color: #1a1a2e;
+  background: #f8f9fa;
+}
+
+.sms-tab-btn.active {
+  color: #6c63ff;
+  border-bottom-color: #6c63ff;
+  font-weight: 600;
+}
+
+/* ============================================
+   Tabs Content
+   ============================================ */
+.sms-tabs-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 400px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .sms-dashboard-header h1 {
+    font-size: 20px;
+  }
+
+  .sms-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sms-stat-card {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .sms-stat-card .stat-icon {
+    font-size: 22px;
+  }
+
+  .sms-stat-card .stat-value {
+    font-size: 16px;
+  }
+
+  .sms-tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sms-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sms-dashboard-header {
+    flex-direction: column;
+  }
+
+  .sms-tabs-content {
+    padding: 12px;
+  }
+}
+/* ============================================ */
+/* ✅ تم تاریک - SmsDashboard */
+/* ============================================ */
+.admin-layout.dark .sms-dashboard-header h1,
+.admin-layout.dark-theme .sms-dashboard-header h1,
+body.dark-theme .sms-dashboard-header h1,
+html[data-theme="dark"] .sms-dashboard-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .sms-dashboard-subtitle,
+.admin-layout.dark-theme .sms-dashboard-subtitle,
+body.dark-theme .sms-dashboard-subtitle,
+html[data-theme="dark"] .sms-dashboard-subtitle {
+  color: #888 !important;
+}
+
+/* دکمه refresh */
+.admin-layout.dark .btn-refresh,
+.admin-layout.dark-theme .btn-refresh,
+body.dark-theme .btn-refresh,
+html[data-theme="dark"] .btn-refresh {
+  background: #2a3040 !important;
+  border-color: #3a4050 !important;
+  color: #b0b8c8 !important;
+}
+
+/* کارت آمار */
+.admin-layout.dark .sms-stat-card,
+.admin-layout.dark-theme .sms-stat-card,
+body.dark-theme .sms-stat-card,
+html[data-theme="dark"] .sms-stat-card {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .sms-stat-card .stat-label,
+.admin-layout.dark-theme .sms-stat-card .stat-label,
+body.dark-theme .sms-stat-card .stat-label,
+html[data-theme="dark"] .sms-stat-card .stat-label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .sms-stat-card .stat-value,
+.admin-layout.dark-theme .sms-stat-card .stat-value,
+body.dark-theme .sms-stat-card .stat-value,
+html[data-theme="dark"] .sms-stat-card .stat-value {
+  color: #e0e0e0 !important;
+}
+
+/* تب‌ها */
+.admin-layout.dark .sms-tabs-nav,
+.admin-layout.dark-theme .sms-tabs-nav,
+body.dark-theme .sms-tabs-nav,
+html[data-theme="dark"] .sms-tabs-nav {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .sms-tab-btn,
+.admin-layout.dark-theme .sms-tab-btn,
+body.dark-theme .sms-tab-btn,
+html[data-theme="dark"] .sms-tab-btn {
+  color: #888 !important;
+}
+
+.admin-layout.dark .sms-tab-btn:hover,
+.admin-layout.dark-theme .sms-tab-btn:hover,
+body.dark-theme .sms-tab-btn:hover,
+html[data-theme="dark"] .sms-tab-btn:hover {
+  color: #e0e0e0 !important;
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .sms-tab-btn.active,
+.admin-layout.dark-theme .sms-tab-btn.active,
+body.dark-theme .sms-tab-btn.active,
+html[data-theme="dark"] .sms-tab-btn.active {
+  color: #90caf9 !important;
+  border-bottom-color: #90caf9 !important;
+}
+
+/* محتوای تب */
+.admin-layout.dark .sms-tabs-content,
+.admin-layout.dark-theme .sms-tabs-content,
+body.dark-theme .sms-tabs-content,
+html[data-theme="dark"] .sms-tabs-content {
+  background: #1a1f2e !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}

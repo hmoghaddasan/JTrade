@@ -126,3 +126,60 @@
     justify-content: flex-start;
   }
 }
+/* ============================================ */
+/* ✅ تم تاریک - UserDetail */
+/* ============================================ */
+.admin-layout.dark .user-detail-page .page-header h1,
+.admin-layout.dark-theme .user-detail-page .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .btn-back,
+.admin-layout.dark-theme .btn-back {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+.admin-layout.dark .btn-back:hover,
+.admin-layout.dark-theme .btn-back:hover {
+  background: #3a4050 !important;
+}
+
+.admin-layout.dark .info-card,
+.admin-layout.dark-theme .info-card {
+  background: #1a1f2e !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.admin-layout.dark .info-card h3,
+.admin-layout.dark-theme .info-card h3 {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .info-row,
+.admin-layout.dark-theme .info-row {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .info-row .label,
+.admin-layout.dark-theme .info-row .label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .info-row .value,
+.admin-layout.dark-theme .info-row .value {
+  color: #e0e0e0 !important;
+}
+
+/* جدول کوچک */
+.admin-layout.dark .mini-table th,
+.admin-layout.dark-theme .mini-table th {
+  color: #b0b8c8 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .mini-table td,
+.admin-layout.dark-theme .mini-table td {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}

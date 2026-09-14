@@ -1,0 +1,752 @@
+/* frontend/src/pages/Admin/SMS/SmsTemplates.css */
+
+.sms-templates {
+  padding: 0;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.templates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.templates-header h2 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.templates-hint {
+  font-size: 13px;
+  color: #495057;
+  background: #f0f4ff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-right: 3px solid #6c63ff;
+  margin: 0;
+  line-height: 1.8;
+}
+
+.templates-hint strong {
+  color: #6c63ff;
+}
+
+/* ============================================
+   Filter Buttons
+   ============================================ */
+.templates-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  background: #f1f3f5;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: #495057;
+}
+
+.filter-btn:hover {
+  background: #e8ecf1;
+}
+
+.filter-btn.active {
+  background: #6c63ff;
+  color: #fff;
+  border-color: #6c63ff;
+}
+
+/* ============================================
+   Templates List
+   ============================================ */
+.templates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================
+   Template Card
+   ============================================ */
+.template-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #f1f3f5;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.template-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.template-card.inactive {
+  opacity: 0.7;
+  background: #f8f9fa;
+}
+
+/* ============================================
+   Card Header
+   ============================================ */
+.template-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.template-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.template-event-key {
+  font-family: monospace;
+  font-size: 12px;
+  padding: 4px 10px;
+  background: #e7f3ff;
+  color: #0066cc;
+  border-radius: 6px;
+  direction: ltr;
+}
+
+.template-event-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.template-system-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.template-status {
+  font-size: 13px;
+}
+
+.status-active {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-inactive {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* ============================================
+   Description
+   ============================================ */
+.template-description {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0 0 16px 0;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-right: 3px solid #dee2e6;
+}
+
+/* ============================================
+   Three Columns
+   ============================================ */
+.template-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.template-column {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f1f3f5;
+  background: #fafbfc;
+}
+
+.template-column.ghasedak {
+  background: #f0fdf4;
+  border-color: #d4edda;
+}
+
+.template-column.smsir {
+  background: #f0f4ff;
+  border-color: #d0e7ff;
+}
+
+.template-column.single {
+  background: #fff9f0;
+  border-color: #ffe4b5;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.column-icon {
+  font-size: 18px;
+}
+
+.column-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #495057;
+}
+
+/* ============================================
+   Fields
+   ============================================ */
+.template-column .field {
+  margin-bottom: 10px;
+}
+
+.template-column .field:last-child {
+  margin-bottom: 0;
+}
+
+.template-column .field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.template-column input,
+.template-column textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.template-column input:focus,
+.template-column textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.template-column textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.field-value {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.field-label {
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.field-value strong {
+  color: #212529;
+  font-family: monospace;
+}
+
+.params-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.param-chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: #fff;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  font-family: monospace;
+  direction: ltr;
+}
+
+.empty-value {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.single-message-preview {
+  font-size: 12px;
+  color: #212529;
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ffe4b5;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  min-height: 60px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+/* ============================================
+   Card Actions
+   ============================================ */
+.template-card-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f3f5;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.template-card-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-edit {
+  background: #e7f3ff;
+  color: #0066cc;
+}
+
+.btn-edit:hover {
+  background: #d0e7ff;
+}
+
+.btn-save {
+  background: #28a745;
+  color: #fff;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #1e7e34;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.toggle-active input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #6c63ff;
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #adb5bd;
+  font-size: 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 900px) {
+  .template-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .templates-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .templates-filter {
+    justify-content: space-between;
+  }
+
+  .filter-btn {
+    flex: 1;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .template-card {
+    padding: 14px;
+  }
+
+  .template-event-key {
+    font-size: 11px;
+  }
+
+  .template-event-name {
+    font-size: 14px;
+  }
+
+  .template-card-actions {
+    flex-direction: column;
+  }
+
+  .template-card-actions button,
+  .toggle-active {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* ============================================
+   Send Method Selector
+   ============================================ */
+.template-send-method {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-right: 3px solid #6c63ff;
+}
+
+.send-method-label {
+  font-size: 13px;
+  color: #495057;
+}
+
+.send-method-select {
+  padding: 6px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.send-method-select:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.send-method-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.send-method-badge.otp {
+  background: #e7f3ff;
+  color: #0066cc;
+}
+
+.send-method-badge.single {
+  background: #fff9f0;
+  color: #cc7a00;
+}
+/* ============================================ */
+/* ✅ تم تاریک - SmsTemplates */
+/* ============================================ */
+.admin-layout.dark .templates-header h2,
+.admin-layout.dark-theme .templates-header h2,
+body.dark-theme .templates-header h2,
+html[data-theme="dark"] .templates-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .templates-hint,
+.admin-layout.dark-theme .templates-hint,
+body.dark-theme .templates-hint,
+html[data-theme="dark"] .templates-hint {
+  background: #1f2535 !important;
+  color: #b0b8c8 !important;
+  border-right-color: #6c63ff !important;
+}
+
+.admin-layout.dark .templates-hint strong,
+.admin-layout.dark-theme .templates-hint strong,
+body.dark-theme .templates-hint strong,
+html[data-theme="dark"] .templates-hint strong {
+  color: #90caf9 !important;
+}
+
+/* فیلتر دکمه‌ها */
+.admin-layout.dark .filter-btn,
+.admin-layout.dark-theme .filter-btn,
+body.dark-theme .filter-btn,
+html[data-theme="dark"] .filter-btn {
+  background: #2a3040 !important;
+  border-color: #3a4050 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .filter-btn:hover,
+.admin-layout.dark-theme .filter-btn:hover,
+body.dark-theme .filter-btn:hover,
+html[data-theme="dark"] .filter-btn:hover {
+  background: #3a4050 !important;
+}
+
+/* کارت قالب */
+.admin-layout.dark .template-card,
+.admin-layout.dark-theme .template-card,
+body.dark-theme .template-card,
+html[data-theme="dark"] .template-card {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .template-card.inactive,
+.admin-layout.dark-theme .template-card.inactive,
+body.dark-theme .template-card.inactive,
+html[data-theme="dark"] .template-card.inactive {
+  background: #151a26 !important;
+  opacity: 0.8;
+}
+
+.admin-layout.dark .template-event-key,
+.admin-layout.dark-theme .template-event-key,
+body.dark-theme .template-event-key,
+html[data-theme="dark"] .template-event-key {
+  background: #1f3a5f !important;
+  color: #90caf9 !important;
+}
+
+.admin-layout.dark .template-event-name,
+.admin-layout.dark-theme .template-event-name,
+body.dark-theme .template-event-name,
+html[data-theme="dark"] .template-event-name {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .template-description,
+.admin-layout.dark-theme .template-description,
+body.dark-theme .template-description,
+html[data-theme="dark"] .template-description {
+  background: #151a26 !important;
+  color: #888 !important;
+  border-right-color: #2a3040 !important;
+}
+
+/* ستون‌ها */
+.admin-layout.dark .template-column,
+.admin-layout.dark-theme .template-column,
+body.dark-theme .template-column,
+html[data-theme="dark"] .template-column {
+  background: #151a26 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .template-column.ghasedak,
+.admin-layout.dark-theme .template-column.ghasedak,
+body.dark-theme .template-column.ghasedak,
+html[data-theme="dark"] .template-column.ghasedak {
+  background: #1a2e1f !important;
+  border-color: #2a4a30 !important;
+}
+
+.admin-layout.dark .template-column.smsir,
+.admin-layout.dark-theme .template-column.smsir,
+body.dark-theme .template-column.smsir,
+html[data-theme="dark"] .template-column.smsir {
+  background: #1f2535 !important;
+  border-color: #2a3a5f !important;
+}
+
+.admin-layout.dark .template-column.single,
+.admin-layout.dark-theme .template-column.single,
+body.dark-theme .template-column.single,
+html[data-theme="dark"] .template-column.single {
+  background: #2e2a1f !important;
+  border-color: #4a3f2f !important;
+}
+
+.admin-layout.dark .column-title,
+.admin-layout.dark-theme .column-title,
+body.dark-theme .column-title,
+html[data-theme="dark"] .column-title {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .template-column .field label,
+.admin-layout.dark-theme .template-column .field label,
+body.dark-theme .template-column .field label,
+html[data-theme="dark"] .template-column .field label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .template-column input,
+.admin-layout.dark-theme .template-column input,
+.admin-layout.dark .template-column textarea,
+.admin-layout.dark-theme .template-column textarea,
+body.dark-theme .template-column input,
+html[data-theme="dark"] .template-column input,
+body.dark-theme .template-column textarea,
+html[data-theme="dark"] .template-column textarea {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .field-label,
+.admin-layout.dark-theme .field-label,
+body.dark-theme .field-label,
+html[data-theme="dark"] .field-label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .field-value strong,
+.admin-layout.dark-theme .field-value strong,
+body.dark-theme .field-value strong,
+html[data-theme="dark"] .field-value strong {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .param-chip,
+.admin-layout.dark-theme .param-chip,
+body.dark-theme .param-chip,
+html[data-theme="dark"] .param-chip {
+  background: #0f1419 !important;
+  color: #b0b8c8 !important;
+  border-color: #3a4050 !important;
+}
+
+.admin-layout.dark .single-message-preview,
+.admin-layout.dark-theme .single-message-preview,
+body.dark-theme .single-message-preview,
+html[data-theme="dark"] .single-message-preview {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #4a3f2f !important;
+}
+
+/* دکمه‌های کارت */
+.admin-layout.dark .template-card-actions,
+.admin-layout.dark-theme .template-card-actions,
+body.dark-theme .template-card-actions,
+html[data-theme="dark"] .template-card-actions {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .btn-edit,
+.admin-layout.dark-theme .btn-edit,
+body.dark-theme .btn-edit,
+html[data-theme="dark"] .btn-edit {
+  background: #1f3a5f !important;
+  color: #64b5f6 !important;
+}
+
+.admin-layout.dark .btn-cancel,
+.admin-layout.dark-theme .btn-cancel,
+body.dark-theme .btn-cancel,
+html[data-theme="dark"] .btn-cancel {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .toggle-active,
+.admin-layout.dark-theme .toggle-active,
+body.dark-theme .toggle-active,
+html[data-theme="dark"] .toggle-active {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+/* حالت خالی */
+.admin-layout.dark .empty-state,
+.admin-layout.dark-theme .empty-state,
+body.dark-theme .empty-state,
+html[data-theme="dark"] .empty-state {
+  background: #151a26 !important;
+  color: #888 !important;
+  border-color: #2a3040 !important;
+}
+
+/* Send Method Selector */
+.admin-layout.dark .template-send-method,
+.admin-layout.dark-theme .template-send-method,
+body.dark-theme .template-send-method,
+html[data-theme="dark"] .template-send-method {
+  background: #151a26 !important;
+  border-right-color: #6c63ff !important;
+}
+
+.admin-layout.dark .send-method-label,
+.admin-layout.dark-theme .send-method-label,
+body.dark-theme .send-method-label,
+html[data-theme="dark"] .send-method-label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .send-method-select,
+.admin-layout.dark-theme .send-method-select,
+body.dark-theme .send-method-select,
+html[data-theme="dark"] .send-method-select {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}

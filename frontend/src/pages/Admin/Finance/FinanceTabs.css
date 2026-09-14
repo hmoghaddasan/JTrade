@@ -1,0 +1,136 @@
+/* frontend/src/pages/Admin/Finance/FinanceTabs.css */
+
+.finance-tabs-container {
+  padding: 0;
+  width: 100%;
+}
+
+/* ============================================ */
+/* تب‌بندی */
+/* ============================================ */
+.finance-tabs-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f1f3f5;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  padding: 8px 12px 0 12px;
+}
+
+.finance-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #868e96;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  margin-bottom: -2px;
+  border-radius: 8px 8px 0 0;
+}
+
+.finance-tab-btn:hover {
+  color: #1a1a2e;
+  background: #f8f9fa;
+}
+
+.finance-tab-btn.active {
+  color: #6c63ff;
+  border-bottom-color: #6c63ff;
+  font-weight: 600;
+  background: #f8f9fa;
+}
+
+.finance-tab-btn .tab-icon {
+  font-size: 18px;
+}
+
+.finance-tab-btn .tab-label {
+  font-size: 14px;
+}
+
+.finance-tabs-content {
+  min-height: 400px;
+}
+
+/* ============================================ */
+/* تم تاریک */
+/* ============================================ */
+.admin-layout.dark .finance-tabs-nav,
+.admin-layout.dark-theme .finance-tabs-nav,
+body.dark-theme .finance-tabs-nav,
+html[data-theme="dark"] .finance-tabs-nav {
+  background: #1a1f2e !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .finance-tab-btn,
+.admin-layout.dark-theme .finance-tab-btn,
+body.dark-theme .finance-tab-btn,
+html[data-theme="dark"] .finance-tab-btn {
+  color: #888 !important;
+}
+
+.admin-layout.dark .finance-tab-btn:hover,
+.admin-layout.dark-theme .finance-tab-btn:hover,
+body.dark-theme .finance-tab-btn:hover,
+html[data-theme="dark"] .finance-tab-btn:hover {
+  color: #e0e0e0 !important;
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .finance-tab-btn.active,
+.admin-layout.dark-theme .finance-tab-btn.active,
+body.dark-theme .finance-tab-btn.active,
+html[data-theme="dark"] .finance-tab-btn.active {
+  color: #90caf9 !important;
+  border-bottom-color: #90caf9 !important;
+  background: #1f2535 !important;
+}
+
+/* ============================================ */
+/* Responsive */
+/* ============================================ */
+@media (max-width: 768px) {
+  .finance-tabs-nav {
+    padding: 6px 8px 0 8px;
+  }
+
+  .finance-tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .finance-tab-btn .tab-label {
+    font-size: 12px;
+  }
+
+  .finance-tab-btn .tab-icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .finance-tab-btn .tab-label {
+    display: none;
+  }
+
+  .finance-tab-btn {
+    padding: 10px 12px;
+  }
+
+  .finance-tab-btn .tab-icon {
+    font-size: 20px;
+  }
+}

@@ -1,4 +1,10 @@
-/* frontend/src/pages/Admin/Brokers/BrokerForm.css */
-/* می‌تواند خالی باشد یا استایل‌های مشترک modal را از PortfolioList.css استفاده کند */
-/* برای سادگی، از همان استایل‌های مودال PortfolioList استفاده می‌کنیم */
-/* در صورت نیاز، می‌توانید استایل‌های اختصاصی اینجا اضافه کنید */
+/* ============================================ */
+/* ✅ BrokerForm - استفاده از استایل مودال PortfolioList */
+/* ============================================ */
+/* نیازی به استایل اضافی نیست، از PortfolioList.css استفاده می‌کند */
+
+/* تم تاریک */
+.admin-layout.dark .broker-form,
+.admin-layout.dark-theme .broker-form {
+  color: #e0e0e0;
+}

@@ -4,6 +4,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
+# ✅ Import admin_views از subscriptions برای پرداخت کارت به کارت
+from apps.subscriptions import admin_views as payment_admin_views
+
 app_name = 'admin_panel'
 
 # ===== ایجاد Router برای ViewSet تنظیمات =====
@@ -37,6 +40,41 @@ urlpatterns = [
     path('transactions/', views.AdminTransactionListView.as_view(), name='admin_transactions'),
     path('sales/report/', views.AdminSalesReportView.as_view(), name='admin_sales_report'),
     path('sales/export/', views.AdminSalesExportView.as_view(), name='admin_sales_export'),
+
+    # ============================================
+    # ✅ سیستم پرداخت کارت به کارت
+    # ============================================
+
+    # ----- کارت‌های بانکی -----
+    path('payment-cards/',
+         payment_admin_views.AdminPaymentCardListView.as_view(),
+         name='admin_payment_card_list'),
+    path('payment-cards/<int:pk>/',
+         payment_admin_views.AdminPaymentCardDetailView.as_view(),
+         name='admin_payment_card_detail'),
+    path('payment-cards/<int:pk>/set-default/',
+         payment_admin_views.AdminPaymentCardSetDefaultView.as_view(),
+         name='admin_payment_card_set_default'),
+    path('payment-cards/<int:pk>/toggle/',
+         payment_admin_views.AdminPaymentCardToggleView.as_view(),
+         name='admin_payment_card_toggle'),
+
+    # ----- درخواست‌های پرداخت -----
+    path('payment-requests/',
+         payment_admin_views.AdminPaymentRequestListView.as_view(),
+         name='admin_payment_request_list'),
+    path('payment-requests/stats/',
+         payment_admin_views.AdminPaymentRequestStatsView.as_view(),
+         name='admin_payment_request_stats'),
+    path('payment-requests/<int:pk>/',
+         payment_admin_views.AdminPaymentRequestDetailView.as_view(),
+         name='admin_payment_request_detail'),
+    path('payment-requests/<int:pk>/approve/',
+         payment_admin_views.AdminPaymentRequestApproveView.as_view(),
+         name='admin_payment_request_approve'),
+    path('payment-requests/<int:pk>/reject/',
+         payment_admin_views.AdminPaymentRequestRejectView.as_view(),
+         name='admin_payment_request_reject'),
 
     # ===== تخفیف‌ها =====
     path('discounts/', views.AdminDiscountListView.as_view(), name='admin_discounts'),
@@ -78,7 +116,7 @@ urlpatterns = [
     path('portfolios/<int:pk>/', views.AdminPortfolioDetailView.as_view(), name='admin_portfolio_detail'),
 
     # ============================================
-    # ✅ تنظیمات سیستم - مسیرهای اصلی (در بالای router قرار دهید)
+    # ✅ تنظیمات سیستم - مسیرهای اصلی
     # ============================================
     path('settings-list/', views.AdminSettingsListView.as_view(), name='admin_settings_list'),
     path('settings-update/', views.AdminSettingsUpdateView.as_view(), name='admin_settings_update'),

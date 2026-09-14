@@ -1,16 +1,52 @@
 /* frontend/src/pages/Admin/AdminLayout.css */
+
+/* ============================================ */
+/* چیدمان اصلی - اسکرول فقط روی محتوا */
+/* ============================================ */
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+/* ============================================ */
+/* تم روشن */
+/* ============================================ */
+.admin-layout.light {
   background: #f5f7fa;
 }
 
+.admin-layout.light .admin-content {
+  background: #f5f7fa;
+  color: #1a1a2e;
+}
+
+/* ============================================ */
+/* تم تاریک */
+/* ============================================ */
+.admin-layout.dark,
+.admin-layout.dark-theme {
+  background: #0f1419;
+}
+
+.admin-layout.dark .admin-content,
+.admin-layout.dark-theme .admin-content {
+  background: #0f1419;
+  color: #e0e0e0;
+}
+
+/* ============================================ */
+/* بدنه اصلی */
+/* ============================================ */
 .admin-main {
   flex: 1;
   margin-right: 260px;
-  transition: margin-right 0.3s ease;
+  transition: margin-right 0.3s ease, background 0.3s ease;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .admin-main.sidebar-open {
@@ -21,16 +57,165 @@
   margin-right: 0;
 }
 
+/* ============================================ */
+/* محتوای ادمین - ✅ اینجا اسکرول می‌شود */
+/* ============================================ */
 .admin-content {
   flex: 1;
   padding: 24px;
   margin-top: 64px;
   overflow-y: auto;
-  min-height: calc(100vh - 64px);
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+  /* ارتفاع: از بالای content تا پایین viewport */
+  height: calc(100vh - 64px);
+  /* اسکرول نرم */
+  scrollbar-width: thin;
 }
 
+/* اسکرول‌بار سفارشی - تم روشن */
+.admin-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.admin-content::-webkit-scrollbar-track {
+  background: #f1f3f5;
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 5px;
+  border: 2px solid #f1f3f5;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* اسکرول‌بار سفارشی - تم تاریک */
+.admin-layout.dark .admin-content::-webkit-scrollbar-track,
+.admin-layout.dark-theme .admin-content::-webkit-scrollbar-track {
+  background: #151a26;
+}
+
+.admin-layout.dark .admin-content::-webkit-scrollbar-thumb,
+.admin-layout.dark-theme .admin-content::-webkit-scrollbar-thumb {
+  background: #3a4050;
+  border-color: #151a26;
+}
+
+.admin-layout.dark .admin-content::-webkit-scrollbar-thumb:hover,
+.admin-layout.dark-theme .admin-content::-webkit-scrollbar-thumb:hover {
+  background: #4a5060;
+}
+
+/* ============================================ */
+/* کارت‌ها در تم تاریک */
+/* ============================================ */
+.admin-layout.dark .stat-card,
+.admin-layout.dark-theme .stat-card,
+.admin-layout.dark .chart-card,
+.admin-layout.dark-theme .chart-card,
+.admin-layout.dark .recent-logs,
+.admin-layout.dark-theme .recent-logs,
+.admin-layout.dark .settings-group,
+.admin-layout.dark-theme .settings-group,
+.admin-layout.dark .sms-stat-card,
+.admin-layout.dark-theme .sms-stat-card,
+.admin-layout.dark .sms-tabs-content,
+.admin-layout.dark-theme .sms-tabs-content,
+.admin-layout.dark .empty-message,
+.admin-layout.dark-theme .empty-message {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+  color: #e0e0e0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ============================================ */
+/* عناوین */
+/* ============================================ */
+.admin-layout.dark h1,
+.admin-layout.dark-theme h1,
+.admin-layout.dark h2,
+.admin-layout.dark-theme h2,
+.admin-layout.dark h3,
+.admin-layout.dark-theme h3,
+.admin-layout.dark h4,
+.admin-layout.dark-theme h4 {
+  color: #e0e0e0 !important;
+}
+
+/* ============================================ */
+/* جدول‌ها */
+/* ============================================ */
+.admin-layout.dark table,
+.admin-layout.dark-theme table {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark table thead,
+.admin-layout.dark-theme table thead {
+  background: #151a26 !important;
+}
+
+.admin-layout.dark table thead th,
+.admin-layout.dark-theme table thead th {
+  color: #b0b8c8 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark table tbody tr,
+.admin-layout.dark-theme table tbody tr {
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark table tbody tr:hover,
+.admin-layout.dark-theme table tbody tr:hover {
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark table tbody td,
+.admin-layout.dark-theme table tbody td {
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+/* ============================================ */
+/* فرم‌ها */
+/* ============================================ */
+.admin-layout.dark input:not([type="checkbox"]):not([type="radio"]),
+.admin-layout.dark-theme input:not([type="checkbox"]):not([type="radio"]),
+.admin-layout.dark textarea,
+.admin-layout.dark-theme textarea,
+.admin-layout.dark select,
+.admin-layout.dark-theme select {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark label,
+.admin-layout.dark-theme label {
+  color: #b0b8c8 !important;
+}
+
+/* ============================================ */
+/* ریسپانسیو */
+/* ============================================ */
 @media (max-width: 768px) {
   .admin-main {
     margin-right: 0 !important;
+  }
+
+  .admin-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 12px;
   }
 }

@@ -21,8 +21,6 @@ const SETTING_IMPACT = {
     'alphavantage_api_key',
     'zarinpal_merchant_id', 'zarinpal_sandbox', 'zarinpal_callback_url',
     'sms_api_key', 'sms_sender_number', 'sms_otp_template',
-    'sms_provider',
-    'smsir_api_key', 'smsir_line_number',
     'ai_provider_mode',
     'gapgpt_api_key',
     'gapgpt_base_url',
@@ -89,11 +87,6 @@ const groups = {
     'max_image_width', 'max_image_height', 'image_quality',
     'max_image_size_mb', 'show_screenshot_upload'
   ],
-  'ارائه‌دهنده پیامک': [
-    'sms_provider',
-    'smsir_api_key',
-    'smsir_line_number',
-  ],
   'پرداخت (زرین‌پال)': [
     'zarinpal_merchant_id', 'zarinpal_sandbox', 'zarinpal_callback_url', 'enable_payment'
   ],
@@ -126,9 +119,6 @@ const groups = {
 const getSettingFileInfo = (key) => {
   const fileInfo = {
     // از .env
-    'sms_provider': { file: '.env', field: 'SMS_PROVIDER' },
-    'smsir_api_key': { file: '.env', field: 'SMSIR_API_KEY' },
-    'smsir_line_number': { file: '.env', field: 'SMSIR_LINE_NUMBER' },
     'debug': { file: '.env', field: 'DEBUG' },
     'secret_key': { file: '.env', field: 'SECRET_KEY' },
     'db_name': { file: '.env', field: 'DB_NAME' },

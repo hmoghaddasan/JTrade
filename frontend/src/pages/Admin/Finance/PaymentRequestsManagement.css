@@ -1,0 +1,206 @@
+/* frontend/src/pages/Admin/Finance/PaymentRequestsManagement.css */
+
+.payment-requests-management {
+  padding: 0;
+  width: 100%;
+}
+
+.payment-requests-management .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.payment-requests-management .page-header h1 {
+  font-size: 22px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+/* ============================================ */
+/* Stats Cards */
+/* ============================================ */
+.payment-requests-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card-sm {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #f1f3f5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s;
+}
+
+.stat-card-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card-sm.orange { border-left: 4px solid #ff9800; }
+.stat-card-sm.blue { border-left: 4px solid #2196f3; }
+.stat-card-sm.green { border-left: 4px solid #4caf50; }
+.stat-card-sm.red { border-left: 4px solid #f44336; }
+.stat-card-sm.purple { border-left: 4px solid #6c63ff; }
+
+.stat-icon-sm {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.stat-info-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stat-value-sm {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-label-sm {
+  font-size: 12px;
+  color: #868e96;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================ */
+/* Status Tabs */
+/* ============================================ */
+.status-filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.status-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #f1f3f5;
+  border: 1px solid #e8ecf1;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.status-tab-btn:hover {
+  background: #e8ecf1;
+  border-color: #ced4da;
+}
+
+.status-tab-btn.active {
+  background: #6c63ff;
+  color: #fff;
+  border-color: #6c63ff;
+  font-weight: 600;
+}
+
+/* ============================================ */
+/* تم تاریک */
+/* ============================================ */
+.admin-layout.dark .payment-requests-management .page-header h1,
+.admin-layout.dark-theme .payment-requests-management .page-header h1,
+body.dark-theme .payment-requests-management .page-header h1,
+html[data-theme="dark"] .payment-requests-management .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .stat-card-sm,
+.admin-layout.dark-theme .stat-card-sm,
+body.dark-theme .stat-card-sm,
+html[data-theme="dark"] .stat-card-sm {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .stat-value-sm,
+.admin-layout.dark-theme .stat-value-sm,
+body.dark-theme .stat-value-sm,
+html[data-theme="dark"] .stat-value-sm {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .stat-label-sm,
+.admin-layout.dark-theme .stat-label-sm,
+body.dark-theme .stat-label-sm,
+html[data-theme="dark"] .stat-label-sm {
+  color: #888 !important;
+}
+
+.admin-layout.dark .status-tab-btn,
+.admin-layout.dark-theme .status-tab-btn,
+body.dark-theme .status-tab-btn,
+html[data-theme="dark"] .status-tab-btn {
+  background: #1a1f2e !important;
+  color: #b0b8c8 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .status-tab-btn:hover,
+.admin-layout.dark-theme .status-tab-btn:hover,
+body.dark-theme .status-tab-btn:hover,
+html[data-theme="dark"] .status-tab-btn:hover {
+  background: #2a3040 !important;
+}
+
+.admin-layout.dark .status-tab-btn.active,
+.admin-layout.dark-theme .status-tab-btn.active,
+body.dark-theme .status-tab-btn.active,
+html[data-theme="dark"] .status-tab-btn.active {
+  background: #6c63ff !important;
+  color: #fff !important;
+}
+
+/* ============================================ */
+/* Responsive */
+/* ============================================ */
+@media (max-width: 768px) {
+  .payment-requests-management .page-header h1 {
+    font-size: 18px;
+  }
+
+  .payment-requests-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .status-tab-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-requests-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .status-tab-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

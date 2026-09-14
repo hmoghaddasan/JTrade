@@ -31,3 +31,10 @@
 .btn-analytics:hover {
   background: #5a32a3;
 }
+/* ============================================ */
+/* ✅ تم تاریک - ConsultationList */
+/* ============================================ */
+.admin-layout.dark .consultation-list-page .page-header h1,
+.admin-layout.dark-theme .consultation-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}

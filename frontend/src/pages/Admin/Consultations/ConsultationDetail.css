@@ -85,3 +85,71 @@
     grid-column: 1;
   }
 }
+/* ============================================ */
+/* ✅ تم تاریک - ConsultationDetail */
+/* ============================================ */
+.admin-layout.dark .consultation-detail-page .page-header h1,
+.admin-layout.dark-theme .consultation-detail-page .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .info-card,
+.admin-layout.dark-theme .info-card {
+  background: #1a1f2e !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .info-card h3,
+.admin-layout.dark-theme .info-card h3,
+.admin-layout.dark .info-card h4,
+.admin-layout.dark-theme .info-card h4 {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .info-row,
+.admin-layout.dark-theme .info-row {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .info-row .label,
+.admin-layout.dark-theme .info-row .label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .info-row .value,
+.admin-layout.dark-theme .info-row .value {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .response-list li,
+.admin-layout.dark-theme .response-list li {
+  border-bottom-color: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .suggestion,
+.admin-layout.dark-theme .suggestion,
+.admin-layout.dark .psychology,
+.admin-layout.dark-theme .psychology {
+  background: #1f2535 !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .tip,
+.admin-layout.dark-theme .tip {
+  background: #1f3a5f !important;
+  color: #64b5f6 !important;
+}
+
+.admin-layout.dark .warning-card,
+.admin-layout.dark-theme .warning-card {
+  background: #3a2f1f !important;
+  border-right-color: #e67e22 !important;
+}
+
+.admin-layout.dark .warning-card p,
+.admin-layout.dark-theme .warning-card p {
+  color: #ffb74d !important;
+}

@@ -1,0 +1,376 @@
+/* frontend/src/pages/Admin/Finance/PaymentCardsManagement.css */
+
+.payment-cards-management {
+  padding: 0;
+  width: 100%;
+}
+
+.payment-cards-management .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.payment-cards-management .page-header h1 {
+  font-size: 22px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.btn-add-card {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-add-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+/* ============================================ */
+/* Info Banner */
+/* ============================================ */
+.payment-cards-management .info-banner {
+  background: #e3f2fd;
+  border-right: 3px solid #1a73e8;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.payment-cards-management .info-banner p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #1565c0;
+}
+
+.payment-cards-management .info-banner strong {
+  color: #0d47a1;
+}
+
+/* ============================================ */
+/* Modal */
+/* ============================================ */
+.payment-cards-management .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.payment-cards-management .modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: slideUpCard 0.3s ease;
+}
+
+@keyframes slideUpCard {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.payment-cards-management .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 2px solid #f1f3f5;
+}
+
+.payment-cards-management .modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a1a2e;
+}
+
+.payment-cards-management .modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #adb5bd;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.payment-cards-management .modal-close:hover:not(:disabled) {
+  background: #f1f3f5;
+  color: #dc3545;
+}
+
+.payment-cards-management .modal-close:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.payment-cards-management .modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.payment-cards-management .form-group {
+  margin-bottom: 16px;
+}
+
+.payment-cards-management .form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.payment-cards-management .form-group .required {
+  color: #dc3545;
+}
+
+.payment-cards-management .form-group input[type="text"],
+.payment-cards-management .form-group input[type="number"],
+.payment-cards-management .form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.payment-cards-management .form-group input:focus,
+.payment-cards-management .form-group textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.payment-cards-management .form-group input.error {
+  border-color: #dc3545;
+}
+
+.payment-cards-management .field-error {
+  display: block;
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 4px;
+}
+
+.payment-cards-management .field-hint {
+  display: block;
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+  font-family: monospace;
+}
+
+/* Checkbox Row */
+.payment-cards-management .checkbox-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-top: 1px dashed #dee2e6;
+  border-bottom: 1px dashed #dee2e6;
+  margin-bottom: 16px;
+}
+
+.payment-cards-management .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.payment-cards-management .checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6c63ff;
+}
+
+.payment-cards-management .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.payment-cards-management .modal-footer button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  border: none;
+}
+
+.payment-cards-management .btn-cancel {
+  background: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.payment-cards-management .btn-cancel:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.payment-cards-management .btn-save {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: #fff;
+}
+
+.payment-cards-management .btn-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.payment-cards-management .modal-footer button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================ */
+/* تم تاریک */
+/* ============================================ */
+.admin-layout.dark .payment-cards-management .page-header h1,
+.admin-layout.dark-theme .payment-cards-management .page-header h1,
+body.dark-theme .payment-cards-management .page-header h1,
+html[data-theme="dark"] .payment-cards-management .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .payment-cards-management .info-banner,
+.admin-layout.dark-theme .payment-cards-management .info-banner,
+body.dark-theme .payment-cards-management .info-banner,
+html[data-theme="dark"] .payment-cards-management .info-banner {
+  background: #1f3a5f !important;
+  border-right-color: #64b5f6 !important;
+}
+
+.admin-layout.dark .payment-cards-management .info-banner p,
+.admin-layout.dark-theme .payment-cards-management .info-banner p,
+body.dark-theme .payment-cards-management .info-banner p,
+html[data-theme="dark"] .payment-cards-management .info-banner p {
+  color: #90caf9 !important;
+}
+
+.dark-theme .payment-cards-management .modal-content {
+  background: #1a1f2e;
+}
+
+.dark-theme .payment-cards-management .modal-header {
+  border-bottom-color: #2a3040;
+}
+
+.dark-theme .payment-cards-management .modal-header h2 {
+  color: #e0e0e0;
+}
+
+.dark-theme .payment-cards-management .modal-close {
+  color: #888;
+}
+
+.dark-theme .payment-cards-management .modal-close:hover:not(:disabled) {
+  background: #2a3040;
+  color: #ef5350;
+}
+
+.dark-theme .payment-cards-management .form-group label {
+  color: #b0b8c8;
+}
+
+.dark-theme .payment-cards-management .form-group input,
+.dark-theme .payment-cards-management .form-group textarea {
+  background: #0f1419;
+  color: #e0e0e0;
+  border-color: #2a3040;
+}
+
+.dark-theme .payment-cards-management .checkbox-label {
+  color: #b0b8c8;
+}
+
+.dark-theme .payment-cards-management .checkbox-row {
+  border-color: #2a3040;
+}
+
+.dark-theme .payment-cards-management .modal-footer {
+  border-top-color: #2a3040;
+}
+
+.dark-theme .payment-cards-management .btn-cancel {
+  background: #2a3040;
+  color: #b0b8c8;
+  border-color: #3a4050;
+}
+
+/* ============================================ */
+/* Responsive */
+/* ============================================ */
+@media (max-width: 600px) {
+  .payment-cards-management .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-add-card {
+    width: 100%;
+    text-align: center;
+  }
+
+  .payment-cards-management .modal-content {
+    max-height: 95vh;
+  }
+
+  .payment-cards-management .checkbox-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .payment-cards-management .modal-footer {
+    flex-direction: column;
+  }
+
+  .payment-cards-management .modal-footer button {
+    width: 100%;
+  }
+}

@@ -54,3 +54,34 @@
   border-color: #6c63ff;
   box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
 }
+/* ============================================ */
+/* ✅ تم تاریک - MessageReplyModal */
+/* ============================================ */
+.admin-layout.dark .message-info,
+.admin-layout.dark-theme .message-info {
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .message-info .label,
+.admin-layout.dark-theme .message-info .label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .message-info .value,
+.admin-layout.dark-theme .message-info .value {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .message-text,
+.admin-layout.dark-theme .message-text {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .modal-content .form-group textarea,
+.admin-layout.dark-theme .modal-content .form-group textarea {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}

@@ -117,6 +117,40 @@ def _create_trial_subscription(user):
         logger.error(f"❌ Error creating trial subscription: {str(e)}")
 
 
+def _send_welcome_sms(user, trial_days=7):
+    """
+    🆕 ارسال پیامک خوش‌آمد با SmsService جدید
+    - برای قاصدک: SendOtpSms
+    - برای sms.ir: send/verify
+    """
+    try:
+        # ✅ import سرویس جدید
+        from apps.sms.services import SmsService
+
+        # محاسبه تاریخ پایان دوره آزمایشی
+        end_date = timezone.now() + timezone.timedelta(days=trial_days)
+
+        sms_service = SmsService()
+        result = sms_service.send_welcome_trial(
+            user=user,
+            trial_days=trial_days,
+            end_date=end_date,
+        )
+
+        if result.get('success'):
+            logger.info(f"✅ Welcome SMS sent to {user.phone_number}")
+        else:
+            logger.warning(
+                f"⚠️ Welcome SMS failed for {user.phone_number}: "
+                f"{result.get('error', 'unknown error')}"
+            )
+
+    except ImportError as e:
+        logger.error(f"❌ SmsService import failed: {str(e)}")
+    except Exception as e:
+        logger.error(f"❌ Error sending welcome SMS: {str(e)}")
+
+
 @receiver(post_save, sender=User)
 def user_post_save(sender, instance, created, **kwargs):
     if created:
@@ -128,13 +162,17 @@ def user_post_save(sender, instance, created, **kwargs):
         # ✅ ایجاد دسته‌بندی‌های پیش‌فرض
         _create_default_groups(instance)
 
+        # ✅ ارسال پیامک خوش‌آمد با سرویس جدید
         sms_enabled = SystemSetting.get_setting('enable_sms', True)
         if sms_enabled:
+            # محاسبه trial_days برای استفاده در پیامک
+            trial_days = SystemSetting.get_setting('trial_days', 7)
             try:
-                from apps.subscriptions.sms import send_welcome_sms
-                send_welcome_sms(instance.phone_number, instance.first_name)
-            except Exception as e:
-                logger.error(f"Error sending welcome SMS: {str(e)}")
+                trial_days = int(trial_days)
+            except (ValueError, TypeError):
+                trial_days = 7
+
+            _send_welcome_sms(instance, trial_days=trial_days)
     else:
         logger.info(f"User updated: {instance.phone_number}")
 
@@ -254,6 +292,7 @@ def log_user_logout(user, request=None):
         except Exception as e:
             logger.error(f"Error logging user logout: {str(e)}")
 
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_discipline_settings(sender, instance, created, **kwargs):
     """
@@ -261,4 +300,3 @@ def create_discipline_settings(sender, instance, created, **kwargs):
     """
     if created:
         DisciplineSettings.objects.get_or_create(user=instance)
-

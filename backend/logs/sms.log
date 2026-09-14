@@ -1,0 +1,452 @@
+📱 INFO 2026-09-11 15:24:57,863 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 15:39:03,045 [SMS] ✅ [otp_login] → 09155511393
+📱 ERROR 2026-09-11 16:00:43,858 [SMS] [SmsIr] Request error: HTTPSConnectionPool(host='api.sms.ir', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host='api.sms.ir', port=443): Failed to resolve 'api.sms.ir' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 16:00:43,868 [SMS] ⚠️ [SmsError] sms_ir | unknown (medium): HTTPSConnectionPool(host='api.sms.ir', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host='api.sms.ir', port=443): Failed to resolve 'api.sms.ir' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 16:00:43,883 [SMS] ❌ [otp_login] → 09155511393: HTTPSConnectionPool(host='api.sms.ir', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host='api.sms.ir', port=443): Failed to resolve 'api.sms.ir' ([Errno 11001] getaddrinfo failed)"))
+📱 INFO 2026-09-11 16:07:53,722 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'CODE', 'value': '033585'}]}
+📱 INFO 2026-09-11 16:07:54,582 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713258469, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 16:07:54,599 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 16:10:19,243 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '358073'}]}
+📱 INFO 2026-09-11 16:10:20,318 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713259297, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 16:10:20,332 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 16:11:49,772 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '485504'}]}
+📱 INFO 2026-09-11 16:11:53,354 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713260071, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 16:11:53,354 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 16:17:16,355 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 16:17:17,367 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713271669, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 16:17:17,378 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 16:20:26,835 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 16:20:28,243 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713272919, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 16:20:28,252 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:24:44,337 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 17:24:45,869 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713316249, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:24:45,883 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:26:56,671 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 17:26:57,590 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713307246, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:26:57,600 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:30:53,120 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 17:30:54,491 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713318570, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:30:54,496 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:33:21,608 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 17:33:22,692 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713319625, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:33:22,707 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:39:37,457 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': '#PARAM1#', 'value': ''}]}
+📱 INFO 2026-09-11 17:39:38,313 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713332092, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:39:38,333 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:49:43,431 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': ''}]}
+📱 INFO 2026-09-11 17:49:44,404 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713325835, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:49:44,449 [SMS] ✅ [otp_login] → 09155511393
+📱 INFO 2026-09-11 17:56:45,530 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '329758'}]}
+📱 INFO 2026-09-11 17:56:46,322 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713328216, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 17:56:46,336 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 713328216)
+📱 INFO 2026-09-11 18:02:33,408 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '554044'}]}
+📱 INFO 2026-09-11 18:02:34,606 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713340399, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 18:02:34,606 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 713340399)
+📱 INFO 2026-09-11 18:04:36,631 [SMS] ✅ [admin_single] → 09125511393 (msg_id: 713351079)
+📱 INFO 2026-09-11 18:13:26,543 [SMS] ✅ [admin_single] → 09125511393 (msg_id: 713356100)
+📱 ERROR 2026-09-11 18:37:38,218 [SMS] ❌ خطا در ارسال پیامک: 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+Traceback (most recent call last):
+  File "c:\Trade_Journal\backend\apps\sms\services.py", line 179, in send_event
+    result = self._send_smsir_template(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Trade_Journal\backend\apps\sms\services.py", line 258, in _send_smsir_template
+    context_key = template.get_context_key_for_smsir_param(param_name)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 WARNING 2026-09-11 18:37:38,233 [SMS] ⚠️ [SmsError] sms_ir | unknown (medium): 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 WARNING 2026-09-11 18:37:38,253 [SMS] ⚠️ [SmsError] sms_ir | unknown (medium): 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 WARNING 2026-09-11 18:37:38,263 [SMS] ❌ [otp_login] → 09155511393: 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 ERROR 2026-09-11 18:38:30,766 [SMS] ❌ خطا در ارسال پیامک: 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+Traceback (most recent call last):
+  File "c:\Trade_Journal\backend\apps\sms\services.py", line 179, in send_event
+    result = self._send_smsir_template(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Trade_Journal\backend\apps\sms\services.py", line 258, in _send_smsir_template
+    context_key = template.get_context_key_for_smsir_param(param_name)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 WARNING 2026-09-11 18:38:30,775 [SMS] ⚠️ [SmsError] sms_ir | unknown (medium): 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 WARNING 2026-09-11 18:38:30,790 [SMS] ⚠️ [SmsError] sms_ir | unknown (medium): 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 WARNING 2026-09-11 18:38:30,805 [SMS] ❌ [otp_login] → 09155511393: 'SmsTemplate' object has no attribute 'get_context_key_for_smsir_param'
+📱 INFO 2026-09-11 19:06:30,280 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 19:06:30,290 [SMS] 📤 [otp_login] ارسال OTP sms.ir → 09155511393
+📱 INFO 2026-09-11 19:06:30,290 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '048024'}]}
+📱 INFO 2026-09-11 19:06:38,776 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713386106, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 19:06:38,782 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 713386106)
+📱 INFO 2026-09-11 19:11:11,887 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 19:11:11,898 [SMS] 📤 [otp_login] ارسال OTP sms.ir → 09155511393
+📱 INFO 2026-09-11 19:11:11,899 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '526811'}]}
+📱 INFO 2026-09-11 19:11:13,280 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713397354, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 19:11:13,287 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 713397354)
+📱 INFO 2026-09-11 19:12:26,035 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 19:12:26,041 [SMS] 📤 [otp_login] ارسال OTP sms.ir → 09155511393
+📱 INFO 2026-09-11 19:12:26,041 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '479553'}]}
+📱 INFO 2026-09-11 19:12:27,189 [SMS] [SmsIr] send_otp response: {'data': {'messageId': 713388379, 'cost': 1}, 'status': 1, 'message': 'موفق'}
+📱 INFO 2026-09-11 19:12:27,204 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 713388379)
+📱 INFO 2026-09-11 21:17:49,820 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 21:17:59,902 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 21:17:59,910 [SMS] 📤 [otp_login] ارسال OTP sms.ir → 09155511393
+📱 INFO 2026-09-11 21:17:59,911 [SMS] [SmsIr] send_otp payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '999999'}]}
+📱 ERROR 2026-09-11 21:18:07,052 [SMS] [SmsIr] Request error: HTTPSConnectionPool(host='api.sms.ir', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host='api.sms.ir', port=443): Failed to resolve 'api.sms.ir' ([Errno 11001] getaddrinfo failed)"))
+📱 INFO 2026-09-11 21:18:07,106 [SMS] [SmsIr] send_otp response: {'status': -1, 'message': 'HTTPSConnectionPool(host=\'api.sms.ir\', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host=\'api.sms.ir\', port=443): Failed to resolve \'api.sms.ir\' ([Errno 11001] getaddrinfo failed)"))'}
+📱 WARNING 2026-09-11 21:18:07,327 [SMS] ⚠️ [SmsError] sms_ir | unknown (medium): HTTPSConnectionPool(host='api.sms.ir', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host='api.sms.ir', port=443): Failed to resolve 'api.sms.ir' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 21:18:07,331 [SMS] ❌ [otp_login] → 09155511393: HTTPSConnectionPool(host='api.sms.ir', port=443): Max retries exceeded with url: /v1/send/verify (Caused by NameResolutionError("HTTPSConnection(host='api.sms.ir', port=443): Failed to resolve 'api.sms.ir' ([Errno 11001] getaddrinfo failed)"))
+📱 INFO 2026-09-11 21:22:18,686 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 21:22:18,695 [SMS] 📤 [otp_login] ارسال OTP قاصدک → 09155511393
+📱 ERROR 2026-09-11 21:22:18,706 [SMS] [Ghasedak] Request error: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 21:22:18,721 [SMS] ⚠️ [SmsError] ghasedak | unknown (medium): HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 21:22:18,739 [SMS] ❌ [otp_login] → 09155511393: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+📱 INFO 2026-09-11 21:27:36,735 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 21:27:36,735 [SMS] 📤 [otp_login] ارسال OTP قاصدک → 09155511393
+📱 INFO 2026-09-11 21:27:38,336 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121425981)
+📱 INFO 2026-09-11 22:38:05,426 [SMS] 📋 [otp_login] → send_method = otp (رویداد OTP)
+📱 INFO 2026-09-11 22:38:05,449 [SMS] 📤 [otp_login] ارسال OTP قاصدک → 09155511393
+📱 INFO 2026-09-11 22:38:07,571 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121435339)
+📱 INFO 2026-09-11 22:41:25,609 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (قالب قاصدک)
+📱 ERROR 2026-09-11 22:41:25,615 [SMS] ❌ [send_event] code خالی! event=subscription_renewed_by_admin, context={'user_name': 'hosein moghaddasan', 'plan_name': 'پایه', 'end_date': '2026/11/05', 'days': 30, 'reason': 'تست'}
+📱 INFO 2026-09-11 22:41:25,624 [SMS] 📤 [subscription_renewed_by_admin] ارسال OTP قاصدک → 09155511393
+📱 ERROR 2026-09-11 22:41:36,754 [SMS] [Ghasedak] Request error: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 22:41:36,769 [SMS] ⚠️ [SmsError] ghasedak | unknown (medium): HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+📱 WARNING 2026-09-11 22:41:36,784 [SMS] ❌ [subscription_renewed_by_admin] → 09155511393: HTTPSConnectionPool(host='gateway.ghasedak.me', port=443): Max retries exceeded with url: /rest/api/v1/WebService/SendOtpWithParams (Caused by NameResolutionError("HTTPSConnection(host='gateway.ghasedak.me', port=443): Failed to resolve 'gateway.ghasedak.me' ([Errno 11001] getaddrinfo failed)"))
+📱 INFO 2026-09-11 23:18:29,933 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-11 23:18:29,933 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params={'user_name': 'hosein moghaddasan', 'plan_name': 'پایه', 'days': '20', 'end_date': '2026/11/25', 'reason': 'تستی'}
+📱 INFO 2026-09-11 23:18:29,947 [SMS] 📤 [Ghasedak] send_otp_multi payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '29'}], 'templateName': 'adminTamdid', 'udh': False, 'isVoice': False, 'param1': 'hosein moghaddasan', 'param2': 'پایه', 'param3': '20', 'param4': '2026/11/25', 'param5': 'تستی'}
+📱 WARNING 2026-09-11 23:18:30,756 [SMS] [Ghasedak] SendOtpWithParams → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-11 23:18:30,762 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-11 23:18:31,803 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.72.119"}
+📱 ERROR 2026-09-11 23:18:31,803 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.72.119
+📱 WARNING 2026-09-11 23:18:31,803 [SMS] ❌ [subscription_renewed_by_admin] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-11 23:21:09,696 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-11 23:21:09,696 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params={'user_name': 'hosein moghaddasan', 'plan_name': 'پایه', 'days': '10', 'end_date': '2026/12/05', 'reason': '🌹 با تشکر از اعتماد شما'}
+📱 INFO 2026-09-11 23:21:09,696 [SMS] 📤 [Ghasedak] send_otp_multi payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '30'}], 'templateName': 'adminTamdid', 'udh': False, 'isVoice': False, 'param1': 'hosein moghaddasan', 'param2': 'پایه', 'param3': '10', 'param4': '2026/12/05', 'param5': '🌹 با تشکر از اعتماد شما'}
+📱 INFO 2026-09-11 23:21:10,731 [SMS] ✅ [subscription_renewed_by_admin] → 09155511393 (msg_id: 2121440349)
+📱 INFO 2026-09-11 23:57:55,378 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-11 23:57:55,412 [SMS] 📤 [otp_login] OTP قاصدک | template=Verify | params=[{'name': 'param1', 'value': ''}]
+📱 INFO 2026-09-11 23:57:55,420 [SMS] 📤 [Ghasedak] send_otp_multi payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '31'}], 'templateName': 'Verify', 'udh': False, 'isVoice': False, 'param1': ''}
+📱 WARNING 2026-09-11 23:57:59,030 [SMS] [Ghasedak] SendOtpWithParams → 400: {"Data":null,"IsSuccess":false,"StatusCode":400,"Message":"Validation Error: Atleast one Param is required"}
+📱 WARNING 2026-09-11 23:57:59,060 [SMS] ⚠️ [SmsError] ghasedak | api_error (medium): Validation Error: Atleast one Param is required
+📱 WARNING 2026-09-11 23:57:59,075 [SMS] ❌ [otp_login] → 09155511393: Validation Error: Atleast one Param is required
+📱 INFO 2026-09-12 00:01:21,012 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 00:01:21,658 [SMS] 📤 [otp_login] OTP قاصدک | template=Verify | params=[{'name': 'param1', 'value': '685556'}]
+📱 INFO 2026-09-12 00:01:21,854 [SMS] 📤 [Ghasedak] send_otp_multi payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '32'}], 'templateName': 'Verify', 'udh': False, 'isVoice': False, 'param1': '685556'}
+📱 INFO 2026-09-12 00:01:23,811 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121444091)
+📱 INFO 2026-09-12 00:02:00,770 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 00:02:00,775 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'plan_name', 'value': 'پایه'}, {'name': 'days', 'value': '10'}, {'name': 'end_date', 'value': '2026/12/15'}, {'name': 'reason', 'value': '🌹 با تشکر از اعتماد شما'}]
+📱 INFO 2026-09-12 00:02:00,775 [SMS] 📤 [Ghasedak] send_otp_multi payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '33'}], 'templateName': 'adminTamdid', 'udh': False, 'isVoice': False, 'user_name': 'hosein moghaddasan', 'plan_name': 'پایه', 'days': '10', 'end_date': '2026/12/15', 'reason': '🌹 با تشکر از اعتماد شما'}
+📱 WARNING 2026-09-12 00:02:01,461 [SMS] [Ghasedak] SendOtpWithParams → 400: {"Data":null,"IsSuccess":false,"StatusCode":400,"Message":"Validation Error: Atleast one Param is required"}
+📱 WARNING 2026-09-12 00:02:01,476 [SMS] ⚠️ [SmsError] ghasedak | api_error (medium): Validation Error: Atleast one Param is required
+📱 WARNING 2026-09-12 00:02:01,476 [SMS] ❌ [subscription_renewed_by_admin] → 09155511393: Validation Error: Atleast one Param is required
+📱 INFO 2026-09-12 00:08:47,359 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 00:08:47,359 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'plan_name', 'value': 'پایه'}, {'name': 'days', 'value': '30'}, {'name': 'end_date', 'value': '2027/01/14'}, {'name': 'reason', 'value': '🌹 با تشکر از اعتماد شما'}]
+📱 INFO 2026-09-12 00:08:47,359 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '34'}], 'templateName': 'adminTamdid', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'plan_name', 'value': 'پایه'}, {'param': 'days', 'value': '30'}, {'param': 'end_date', 'value': '2027/01/14'}, {'param': 'reason', 'value': '🌹 با تشکر از اعتماد شما'}], 'isVoice': False}
+📱 INFO 2026-09-12 00:08:48,306 [SMS] ✅ [subscription_renewed_by_admin] → 09155511393 (msg_id: 2121444772)
+📱 INFO 2026-09-12 16:30:35,629 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 ERROR 2026-09-12 16:30:35,665 [SMS] ❌ [send_event] هیچ پارامتری مقدار نگرفت! event=subscription_renewed_by_admin, param_names=['user_name', 'plan_name', 'days', 'end_date', 'reason'], context={}
+📱 INFO 2026-09-12 16:30:35,695 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params=[{'name': 'user_name', 'value': ''}, {'name': 'plan_name', 'value': ''}, {'name': 'days', 'value': ''}, {'name': 'end_date', 'value': ''}, {'name': 'reason', 'value': ''}]
+📱 INFO 2026-09-12 16:30:35,705 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '35'}], 'templateName': 'adminTamdid', 'inputs': [{'param': 'user_name', 'value': ''}, {'param': 'plan_name', 'value': ''}, {'param': 'days', 'value': ''}, {'param': 'end_date', 'value': ''}, {'param': 'reason', 'value': ''}], 'isVoice': False}
+📱 INFO 2026-09-12 16:30:38,217 [SMS] ✅ [subscription_renewed_by_admin] → 09155511393 (msg_id: 2121609304)
+📱 INFO 2026-09-12 16:31:51,331 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 16:31:51,331 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'plan_name', 'value': 'پایه'}, {'name': 'days', 'value': '30'}, {'name': 'end_date', 'value': '2027/02/13'}, {'name': 'reason', 'value': 'بی علت'}]
+📱 INFO 2026-09-12 16:31:51,341 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '36'}], 'templateName': 'adminTamdid', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'plan_name', 'value': 'پایه'}, {'param': 'days', 'value': '30'}, {'param': 'end_date', 'value': '2027/02/13'}, {'param': 'reason', 'value': 'بی علت'}], 'isVoice': False}
+📱 WARNING 2026-09-12 16:31:52,776 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-12 16:31:52,791 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-12 16:31:54,018 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153"}
+📱 ERROR 2026-09-12 16:31:54,018 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153
+📱 WARNING 2026-09-12 16:31:54,018 [SMS] ❌ [subscription_renewed_by_admin] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-12 16:33:05,981 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 16:33:05,988 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'plan_name', 'value': 'پایه'}, {'name': 'days', 'value': '30'}, {'name': 'end_date', 'value': '2027/03/15'}, {'name': 'reason', 'value': '🌹 با تشکر از اعتماد شما'}]
+📱 INFO 2026-09-12 16:33:05,988 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '37'}], 'templateName': 'adminTamdid', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'plan_name', 'value': 'پایه'}, {'param': 'days', 'value': '30'}, {'param': 'end_date', 'value': '2027/03/15'}, {'param': 'reason', 'value': '🌹 با تشکر از اعتماد شما'}], 'isVoice': False}
+📱 WARNING 2026-09-12 16:33:06,984 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-12 16:33:06,995 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-12 16:33:08,004 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153"}
+📱 ERROR 2026-09-12 16:33:08,008 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153
+📱 WARNING 2026-09-12 16:33:08,008 [SMS] ❌ [subscription_renewed_by_admin] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-12 16:34:38,185 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 ERROR 2026-09-12 16:34:38,185 [SMS] ❌ [send_event] هیچ پارامتری مقدار نگرفت! event=otp_login, param_names=['param1'], context={}
+📱 INFO 2026-09-12 16:34:38,200 [SMS] 📤 [otp_login] OTP قاصدک | template=Verify | params=[{'name': 'param1', 'value': ''}]
+📱 INFO 2026-09-12 16:34:38,204 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9125511393', 'clientReferenceId': '38'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': ''}], 'isVoice': False}
+📱 INFO 2026-09-12 16:34:39,423 [SMS] ✅ [otp_login] → 09125511393 (msg_id: 2121610013)
+📱 INFO 2026-09-12 16:45:16,367 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp (از تنظیمات قالب)
+📱 ERROR 2026-09-12 16:45:16,382 [SMS] ❌ [send_event] هیچ پارامتری مقدار نگرفت! event=subscription_renewed_by_admin, param_names=['user_name', 'plan_name', 'days', 'end_date', 'reason'], context={}
+📱 INFO 2026-09-12 16:45:16,389 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک | template=adminTamdid | params=[{'name': 'user_name', 'value': ''}, {'name': 'plan_name', 'value': ''}, {'name': 'days', 'value': ''}, {'name': 'end_date', 'value': ''}, {'name': 'reason', 'value': ''}]
+📱 INFO 2026-09-12 16:45:16,389 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '39'}], 'templateName': 'adminTamdid', 'inputs': [{'param': 'user_name', 'value': ''}, {'param': 'plan_name', 'value': ''}, {'param': 'days', 'value': ''}, {'param': 'end_date', 'value': ''}, {'param': 'reason', 'value': ''}], 'isVoice': False}
+📱 INFO 2026-09-12 16:45:18,111 [SMS] ✅ [subscription_renewed_by_admin] → 09155511393 (msg_id: 2121612234)
+📱 INFO 2026-09-12 20:18:23,860 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 ERROR 2026-09-12 20:18:23,870 [SMS] ❌ [send_event] هیچ پارامتری مقدار نگرفت! event=otp_login, params=[{'name': 'param1', 'value': ''}], context={}
+📱 INFO 2026-09-12 20:18:23,873 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': ''}]
+📱 INFO 2026-09-12 20:18:23,875 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '40'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': ''}], 'isVoice': False}
+📱 INFO 2026-09-12 20:18:25,494 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121651891)
+📱 INFO 2026-09-12 20:22:59,747 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 20:22:59,762 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '059341'}]
+📱 INFO 2026-09-12 20:22:59,765 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '059341'}]
+📱 INFO 2026-09-12 20:22:59,765 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '41'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '059341'}], 'isVoice': False}
+📱 INFO 2026-09-12 20:23:00,821 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121653493)
+📱 INFO 2026-09-12 20:37:53,268 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 INFO 2026-09-12 20:37:53,301 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'param1', 'value': '499487'}]
+📱 INFO 2026-09-12 20:37:53,301 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '499487'}]
+📱 INFO 2026-09-12 20:37:53,316 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '499487'}]
+📱 INFO 2026-09-12 20:37:53,318 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '42'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '499487'}], 'isVoice': False}
+📱 INFO 2026-09-12 20:37:55,378 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121657340)
+📱 INFO 2026-09-12 20:38:47,001 [SMS] 📋 [otp_login] → send_method = otp (از تنظیمات قالب)
+📱 WARNING 2026-09-12 20:38:47,011 [SMS] ⚠️ [send_event] مقدار پارامتر param1 خالی بود؛ یک کد تصادفی تولید شد: 614629
+📱 INFO 2026-09-12 20:38:47,011 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'param1', 'value': '614629'}]
+📱 INFO 2026-09-12 20:38:47,011 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '614629'}]
+📱 INFO 2026-09-12 20:38:47,011 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '614629'}]
+📱 INFO 2026-09-12 20:38:47,011 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '43'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '614629'}], 'isVoice': False}
+📱 INFO 2026-09-12 20:38:50,711 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 6291623)
+📱 INFO 2026-09-12 20:54:26,294 [SMS] 📋 [otp_login] → send_method = otp
+📱 INFO 2026-09-12 20:54:26,298 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'param1', 'value': '902285'}]
+📱 INFO 2026-09-12 20:54:26,303 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '902285'}]
+📱 INFO 2026-09-12 20:54:26,303 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '902285'}]
+📱 INFO 2026-09-12 20:54:26,303 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '44'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '902285'}], 'isVoice': False}
+📱 INFO 2026-09-12 20:54:27,661 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121660218)
+📱 INFO 2026-09-12 20:55:20,942 [SMS] 📋 [otp_login] → send_method = otp
+📱 WARNING 2026-09-12 20:55:20,946 [SMS] ⚠️ [send_event] مقدار پارامتر 'param1' خالی بود؛ یک کد تصادفی تولید شد: 742412
+📱 INFO 2026-09-12 20:55:20,946 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'param1', 'value': '742412'}]
+📱 INFO 2026-09-12 20:55:20,952 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '742412'}]
+📱 INFO 2026-09-12 20:55:20,952 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '742412'}]
+📱 INFO 2026-09-12 20:55:20,952 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '45'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '742412'}], 'isVoice': False}
+📱 INFO 2026-09-12 20:55:22,318 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121660391)
+📱 INFO 2026-09-12 21:01:10,994 [SMS] 📋 [otp_login] → send_method = otp
+📱 INFO 2026-09-12 21:01:10,994 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'param1', 'value': '12345'}]
+📱 INFO 2026-09-12 21:01:10,994 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '12345'}]
+📱 INFO 2026-09-12 21:01:10,994 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '12345'}]
+📱 INFO 2026-09-12 21:01:10,994 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '46'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '12345'}], 'isVoice': False}
+📱 INFO 2026-09-12 21:01:12,619 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121661883)
+📱 INFO 2026-09-12 21:02:51,751 [SMS] 📋 [admin_alert] → send_method = otp
+📱 INFO 2026-09-12 21:02:51,751 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'provider', 'value': 'حسین'}, {'name': 'error_type', 'value': 'تست'}, {'name': 'error_code', 'value': '12345'}, {'name': 'error_message', 'value': 'وای وای'}, {'name': 'time', 'value': 'دیشب'}]
+📱 INFO 2026-09-12 21:02:51,751 [SMS] 📤 [admin_alert] پارامترهای OTP: [{'name': 'provider', 'value': 'حسین'}, {'name': 'error_type', 'value': 'تست'}, {'name': 'error_code', 'value': '12345'}, {'name': 'error_message', 'value': 'وای وای'}, {'name': 'time', 'value': 'دیشب'}]
+📱 INFO 2026-09-12 21:02:51,751 [SMS] 📤 [admin_alert] OTP قاصدک (SendOtpSms) | template=error | params=[{'name': 'provider', 'value': 'حسین'}, {'name': 'error_type', 'value': 'تست'}, {'name': 'error_code', 'value': '12345'}, {'name': 'error_message', 'value': 'وای وای'}, {'name': 'time', 'value': 'دیشب'}]
+📱 INFO 2026-09-12 21:02:51,751 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '47'}], 'templateName': 'error', 'inputs': [{'param': 'provider', 'value': 'حسین'}, {'param': 'error_type', 'value': 'تست'}, {'param': 'error_code', 'value': '12345'}, {'param': 'error_message', 'value': 'وای وای'}, {'param': 'time', 'value': 'دیشب'}], 'isVoice': False}
+📱 WARNING 2026-09-12 21:02:52,760 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-12 21:02:52,760 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-12 21:02:54,833 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153"}
+📱 ERROR 2026-09-12 21:02:54,833 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153
+📱 WARNING 2026-09-12 21:02:54,848 [SMS] ❌ [admin_alert] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-12 21:05:05,743 [SMS] 📋 [admin_alert] → send_method = otp
+📱 INFO 2026-09-12 21:05:05,758 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'provider', 'value': 'سلام'}, {'name': 'error_type', 'value': 'تست'}, {'name': 'error_code', 'value': '123'}, {'name': 'error_message', 'value': 'وای'}, {'name': 'time', 'value': 'دیشب'}]
+📱 INFO 2026-09-12 21:05:05,758 [SMS] 📤 [admin_alert] پارامترهای OTP: [{'name': 'provider', 'value': 'سلام'}, {'name': 'error_type', 'value': 'تست'}, {'name': 'error_code', 'value': '123'}, {'name': 'error_message', 'value': 'وای'}, {'name': 'time', 'value': 'دیشب'}]
+📱 INFO 2026-09-12 21:05:05,758 [SMS] 📤 [admin_alert] OTP قاصدک (SendOtpSms) | template=error | params=[{'name': 'provider', 'value': 'سلام'}, {'name': 'error_type', 'value': 'تست'}, {'name': 'error_code', 'value': '123'}, {'name': 'error_message', 'value': 'وای'}, {'name': 'time', 'value': 'دیشب'}]
+📱 INFO 2026-09-12 21:05:05,758 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '48'}], 'templateName': 'error', 'inputs': [{'param': 'provider', 'value': 'سلام'}, {'param': 'error_type', 'value': 'تست'}, {'param': 'error_code', 'value': '123'}, {'param': 'error_message', 'value': 'وای'}, {'param': 'time', 'value': 'دیشب'}], 'isVoice': False}
+📱 INFO 2026-09-12 21:05:06,997 [SMS] ✅ [admin_alert] → 09155511393 (msg_id: 2121663401)
+📱 INFO 2026-09-12 21:05:57,186 [SMS] 📋 [admin_single] → send_method = single
+📱 INFO 2026-09-12 21:05:57,188 [SMS] 📝 [admin_single] متن تکی نهایی: سلام علیکم
+
+ژورنال حرفه‌ای ترید...
+📱 INFO 2026-09-12 21:05:57,188 [SMS] 📤 [admin_single] ارسال تکی با سرشماره → 09155511393
+📱 INFO 2026-09-12 21:05:57,989 [SMS] ✅ [admin_single] → 09155511393 (msg_id: )
+📱 INFO 2026-09-12 21:06:55,594 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp
+📱 INFO 2026-09-12 21:06:55,607 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'حسین'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '1'}, {'name': 'end_date', 'value': '1400'}, {'name': 'reason', 'value': 'بیدلیل'}]
+📱 INFO 2026-09-12 21:06:55,607 [SMS] 📤 [subscription_renewed_by_admin] پارامترهای OTP: [{'name': 'user_name', 'value': 'حسین'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '1'}, {'name': 'end_date', 'value': '1400'}, {'name': 'reason', 'value': 'بیدلیل'}]
+📱 INFO 2026-09-12 21:06:55,607 [SMS] 📤 [subscription_renewed_by_admin] OTP قاصدک (SendOtpSms) | template=adminTamdid | params=[{'name': 'user_name', 'value': 'حسین'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '1'}, {'name': 'end_date', 'value': '1400'}, {'name': 'reason', 'value': 'بیدلیل'}]
+📱 INFO 2026-09-12 21:06:55,607 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '50'}], 'templateName': 'adminTamdid', 'inputs': [{'param': 'user_name', 'value': 'حسین'}, {'param': 'plan_name', 'value': 'سبز'}, {'param': 'days', 'value': '1'}, {'param': 'end_date', 'value': '1400'}, {'param': 'reason', 'value': 'بیدلیل'}], 'isVoice': False}
+📱 INFO 2026-09-12 21:06:56,595 [SMS] ✅ [subscription_renewed_by_admin] → 09155511393 (msg_id: 2121663919)
+📱 WARNING 2026-09-12 21:08:36,109 [SMS] [SmsIr] GET credit → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153"}
+📱 WARNING 2026-09-12 21:08:44,519 [SMS] [SmsIr] GET credit → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153"}
+📱 WARNING 2026-09-12 21:09:00,424 [SMS] [SmsIr] GET credit → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.125.225.153"}
+📱 INFO 2026-09-12 21:11:01,110 [SMS] 📋 [otp_login] → send_method = otp
+📱 INFO 2026-09-12 21:11:01,127 [SMS] 📊 [build_params] provider=sms_ir, params=[{'name': 'PARAM1', 'value': '671099'}]
+📱 INFO 2026-09-12 21:11:01,127 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'PARAM1', 'value': '671099'}]
+📱 INFO 2026-09-12 21:11:01,127 [SMS] 📤 [otp_login] OTP sms.ir (send/verify) | template_id=201692 | params=[{'name': 'PARAM1', 'value': '671099'}]
+📱 INFO 2026-09-12 21:11:01,127 [SMS] 📤 [SmsIr] send_otp_multi payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '671099'}]}
+📱 INFO 2026-09-12 21:11:02,130 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 714886024)
+📱 INFO 2026-09-12 21:11:59,281 [SMS] 📋 [otp_login] → send_method = otp
+📱 INFO 2026-09-12 21:11:59,281 [SMS] 📊 [build_params] provider=sms_ir, params=[{'name': 'PARAM1', 'value': '1234'}]
+📱 INFO 2026-09-12 21:11:59,281 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'PARAM1', 'value': '1234'}]
+📱 INFO 2026-09-12 21:11:59,281 [SMS] 📤 [otp_login] OTP sms.ir (send/verify) | template_id=201692 | params=[{'name': 'PARAM1', 'value': '1234'}]
+📱 INFO 2026-09-12 21:11:59,281 [SMS] 📤 [SmsIr] send_otp_multi payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '1234'}]}
+📱 INFO 2026-09-12 21:12:00,010 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 714886412)
+📱 INFO 2026-09-12 21:12:43,586 [SMS] 📋 [subscription_renewed_by_admin] → send_method = otp
+📱 INFO 2026-09-12 21:12:43,596 [SMS] 📊 [build_params] provider=sms_ir, params=[{'name': 'user_name', 'value': 'من'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '5'}, {'name': 'end_date', 'value': '1234'}, {'name': 'reason', 'value': 'های'}]
+📱 INFO 2026-09-12 21:12:43,596 [SMS] 📤 [subscription_renewed_by_admin] پارامترهای OTP: [{'name': 'user_name', 'value': 'من'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '5'}, {'name': 'end_date', 'value': '1234'}, {'name': 'reason', 'value': 'های'}]
+📱 INFO 2026-09-12 21:12:43,596 [SMS] 📤 [subscription_renewed_by_admin] OTP sms.ir (send/verify) | template_id=150864 | params=[{'name': 'user_name', 'value': 'من'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '5'}, {'name': 'end_date', 'value': '1234'}, {'name': 'reason', 'value': 'های'}]
+📱 INFO 2026-09-12 21:12:43,596 [SMS] 📤 [SmsIr] send_otp_multi payload: {'mobile': '9155511393', 'templateId': 150864, 'parameters': [{'name': 'user_name', 'value': 'من'}, {'name': 'plan_name', 'value': 'سبز'}, {'name': 'days', 'value': '5'}, {'name': 'end_date', 'value': '1234'}, {'name': 'reason', 'value': 'های'}]}
+📱 INFO 2026-09-12 21:12:44,325 [SMS] ✅ [subscription_renewed_by_admin] → 09155511393 (msg_id: 714886766)
+📱 INFO 2026-09-12 21:13:33,075 [SMS] 📋 [admin_single] → send_method = single
+📱 INFO 2026-09-12 21:13:33,075 [SMS] 📝 [admin_single] متن تکی نهایی: سلام
+
+ژورنال حرفه‌ای ترید...
+📱 INFO 2026-09-12 21:13:33,095 [SMS] 📤 [admin_single] ارسال تکی با سرشماره → 09155511393
+📱 INFO 2026-09-12 21:13:33,866 [SMS] ✅ [admin_single] → 09155511393 (msg_id: 714887280)
+📱 INFO 2026-09-12 21:22:09,320 [SMS] 📋 [otp_login] → send_method = otp
+📱 INFO 2026-09-12 21:22:09,335 [SMS] 📊 [build_params] provider=sms_ir, params=[{'name': 'PARAM1', 'value': '944992'}]
+📱 INFO 2026-09-12 21:22:09,335 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'PARAM1', 'value': '944992'}]
+📱 INFO 2026-09-12 21:22:09,335 [SMS] 📤 [otp_login] OTP sms.ir (send/verify) | template_id=201692 | params=[{'name': 'PARAM1', 'value': '944992'}]
+📱 INFO 2026-09-12 21:22:09,335 [SMS] 📤 [SmsIr] send_otp_multi payload: {'mobile': '9155511393', 'templateId': 201692, 'parameters': [{'name': 'PARAM1', 'value': '944992'}]}
+📱 INFO 2026-09-12 21:22:10,343 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 714896937)
+📱 INFO 2026-09-13 22:58:41,859 [SMS] 📋 [otp_login] → send_method = otp
+📱 INFO 2026-09-13 22:58:41,934 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'param1', 'value': '938940'}]
+📱 INFO 2026-09-13 22:58:41,964 [SMS] 📤 [otp_login] پارامترهای OTP: [{'name': 'param1', 'value': '938940'}]
+📱 INFO 2026-09-13 22:58:42,009 [SMS] 📤 [otp_login] OTP قاصدک (SendOtpSms) | template=Verify | params=[{'name': 'param1', 'value': '938940'}]
+📱 INFO 2026-09-13 22:58:42,009 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '56'}], 'templateName': 'Verify', 'inputs': [{'param': 'param1', 'value': '938940'}], 'isVoice': False}
+📱 INFO 2026-09-13 22:58:44,275 [SMS] ✅ [otp_login] → 09155511393 (msg_id: 2121939153)
+📱 INFO 2026-09-14 00:03:58,026 [SMS] 📋 [payment_request_created] → send_method = otp
+📱 INFO 2026-09-14 00:03:58,026 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:33'}]
+📱 INFO 2026-09-14 00:03:58,026 [SMS] 📤 [payment_request_created] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:33'}]
+📱 INFO 2026-09-14 00:03:58,026 [SMS] 📤 [payment_request_created] OTP قاصدک (SendOtpSms) | template=paymentRequest | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:33'}]
+📱 INFO 2026-09-14 00:03:58,026 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '57'}], 'templateName': 'paymentRequest', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'card_number', 'value': '6037991234567890'}, {'param': 'deadline', 'value': '22:33'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:03:59,010 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:03:59,027 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:04:00,168 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:04:00,168 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:04:00,168 [SMS] ❌ [payment_request_created] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:16:09,596 [SMS] 📋 [payment_request_created] → send_method = otp
+📱 INFO 2026-09-14 00:16:09,596 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6104331234567890'}, {'name': 'deadline', 'value': '22:46'}]
+📱 INFO 2026-09-14 00:16:09,596 [SMS] 📤 [payment_request_created] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6104331234567890'}, {'name': 'deadline', 'value': '22:46'}]
+📱 INFO 2026-09-14 00:16:09,596 [SMS] 📤 [payment_request_created] OTP قاصدک (SendOtpSms) | template=paymentRequest | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6104331234567890'}, {'name': 'deadline', 'value': '22:46'}]
+📱 INFO 2026-09-14 00:16:09,596 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '58'}], 'templateName': 'paymentRequest', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'card_number', 'value': '6104331234567890'}, {'param': 'deadline', 'value': '22:46'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:16:10,575 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:16:10,590 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:16:11,754 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:16:11,754 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:16:11,754 [SMS] ❌ [payment_request_created] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:17:59,029 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:17:59,029 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '2'}]
+📱 INFO 2026-09-14 00:17:59,029 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '2'}]
+📱 INFO 2026-09-14 00:17:59,029 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '2'}]
+📱 INFO 2026-09-14 00:17:59,029 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '59'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'tracking_number', 'value': '1234'}, {'param': 'request_id', 'value': '2'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:18:00,280 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:18:00,280 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:18:01,720 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:18:01,735 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:18:01,735 [SMS] ❌ [payment_admin_new_request] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:18:01,735 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:18:01,750 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '2'}]
+📱 INFO 2026-09-14 00:18:01,750 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '2'}]
+📱 INFO 2026-09-14 00:18:01,750 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '2'}]
+📱 INFO 2026-09-14 00:18:01,750 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9120000999', 'clientReferenceId': '60'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'tracking_number', 'value': '1234'}, {'param': 'request_id', 'value': '2'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:18:02,929 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:18:02,944 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:18:04,103 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:18:04,109 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:18:04,109 [SMS] ❌ [payment_admin_new_request] → 09120000999: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:18:04,134 [SMS] 📋 [payment_awaiting_review] → send_method = otp
+📱 INFO 2026-09-14 00:18:04,134 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:18:04,134 [SMS] 📤 [payment_awaiting_review] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:18:04,134 [SMS] 📤 [payment_awaiting_review] OTP قاصدک (SendOtpSms) | template=paymentReview | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:18:04,134 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '61'}], 'templateName': 'paymentReview', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:18:05,791 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:18:05,791 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:18:08,532 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:18:08,532 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:18:08,532 [SMS] ❌ [payment_awaiting_review] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:21:51,198 [SMS] 📋 [payment_request_created] → send_method = otp
+📱 INFO 2026-09-14 00:21:51,198 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:51'}]
+📱 INFO 2026-09-14 00:21:51,198 [SMS] 📤 [payment_request_created] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:51'}]
+📱 INFO 2026-09-14 00:21:51,198 [SMS] 📤 [payment_request_created] OTP قاصدک (SendOtpSms) | template=paymentRequest | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:51'}]
+📱 INFO 2026-09-14 00:21:51,198 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '62'}], 'templateName': 'paymentRequest', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '1,000,000'}, {'param': 'card_number', 'value': '6037991234567890'}, {'param': 'deadline', 'value': '22:51'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:21:52,166 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:21:52,181 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:21:53,177 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:21:53,177 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:21:53,177 [SMS] ❌ [payment_request_created] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:22:08,202 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:22:08,208 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'tracking_number', 'value': '392783'}, {'name': 'request_id', 'value': '3'}]
+📱 INFO 2026-09-14 00:22:08,208 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'tracking_number', 'value': '392783'}, {'name': 'request_id', 'value': '3'}]
+📱 INFO 2026-09-14 00:22:08,208 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'tracking_number', 'value': '392783'}, {'name': 'request_id', 'value': '3'}]
+📱 INFO 2026-09-14 00:22:08,208 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '63'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '1,000,000'}, {'param': 'tracking_number', 'value': '392783'}, {'param': 'request_id', 'value': '3'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:22:09,232 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:22:09,247 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:22:10,275 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:22:10,275 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:22:10,275 [SMS] ❌ [payment_admin_new_request] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:22:10,275 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:22:10,275 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'tracking_number', 'value': '392783'}, {'name': 'request_id', 'value': '3'}]
+📱 INFO 2026-09-14 00:22:10,275 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'tracking_number', 'value': '392783'}, {'name': 'request_id', 'value': '3'}]
+📱 INFO 2026-09-14 00:22:10,275 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '1,000,000'}, {'name': 'tracking_number', 'value': '392783'}, {'name': 'request_id', 'value': '3'}]
+📱 INFO 2026-09-14 00:22:10,275 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9120000999', 'clientReferenceId': '64'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '1,000,000'}, {'param': 'tracking_number', 'value': '392783'}, {'param': 'request_id', 'value': '3'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:22:11,149 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:22:11,164 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:22:12,168 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:22:12,175 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:22:12,175 [SMS] ❌ [payment_admin_new_request] → 09120000999: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:22:12,190 [SMS] 📋 [payment_awaiting_review] → send_method = otp
+📱 INFO 2026-09-14 00:22:12,190 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:22:12,190 [SMS] 📤 [payment_awaiting_review] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:22:12,190 [SMS] 📤 [payment_awaiting_review] OTP قاصدک (SendOtpSms) | template=paymentReview | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:22:12,205 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '65'}], 'templateName': 'paymentReview', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:22:13,084 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:22:13,084 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:22:14,110 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:22:14,125 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:22:14,125 [SMS] ❌ [payment_awaiting_review] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:26:09,709 [SMS] 📋 [payment_request_created] → send_method = otp
+📱 INFO 2026-09-14 00:26:09,715 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6104331234567890'}, {'name': 'deadline', 'value': '22:56'}]
+📱 INFO 2026-09-14 00:26:09,715 [SMS] 📤 [payment_request_created] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6104331234567890'}, {'name': 'deadline', 'value': '22:56'}]
+📱 INFO 2026-09-14 00:26:09,715 [SMS] 📤 [payment_request_created] OTP قاصدک (SendOtpSms) | template=paymentRequest | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'card_number', 'value': '6104331234567890'}, {'name': 'deadline', 'value': '22:56'}]
+📱 INFO 2026-09-14 00:26:09,715 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '66'}], 'templateName': 'paymentRequest', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'card_number', 'value': '6104331234567890'}, {'param': 'deadline', 'value': '22:56'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:26:10,641 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:26:10,656 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:26:11,591 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:26:11,604 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:26:11,604 [SMS] ❌ [payment_request_created] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:26:42,873 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:26:42,888 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '4'}]
+📱 INFO 2026-09-14 00:26:42,898 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '4'}]
+📱 INFO 2026-09-14 00:26:42,898 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '4'}]
+📱 INFO 2026-09-14 00:26:42,898 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '67'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'tracking_number', 'value': '1234'}, {'param': 'request_id', 'value': '4'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:26:43,913 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:26:43,928 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:26:44,913 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:26:44,913 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:26:44,913 [SMS] ❌ [payment_admin_new_request] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:26:44,913 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:26:44,913 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '4'}]
+📱 INFO 2026-09-14 00:26:44,913 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '4'}]
+📱 INFO 2026-09-14 00:26:44,913 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '600,000'}, {'name': 'tracking_number', 'value': '1234'}, {'name': 'request_id', 'value': '4'}]
+📱 INFO 2026-09-14 00:26:44,913 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9120000999', 'clientReferenceId': '68'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '600,000'}, {'param': 'tracking_number', 'value': '1234'}, {'param': 'request_id', 'value': '4'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:26:45,833 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:26:45,833 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:26:46,958 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:26:46,973 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:26:46,973 [SMS] ❌ [payment_admin_new_request] → 09120000999: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:26:46,973 [SMS] 📋 [payment_awaiting_review] → send_method = otp
+📱 INFO 2026-09-14 00:26:46,973 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:26:46,973 [SMS] 📤 [payment_awaiting_review] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:26:46,973 [SMS] 📤 [payment_awaiting_review] OTP قاصدک (SendOtpSms) | template=paymentReview | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:26:46,973 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '69'}], 'templateName': 'paymentReview', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:26:48,117 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:26:48,117 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:26:49,318 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:26:49,318 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:26:49,333 [SMS] ❌ [payment_awaiting_review] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:29:55,151 [SMS] 📋 [payment_request_created] → send_method = otp
+📱 INFO 2026-09-14 00:29:55,151 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:59'}]
+📱 INFO 2026-09-14 00:29:55,151 [SMS] 📤 [payment_request_created] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:59'}]
+📱 INFO 2026-09-14 00:29:55,151 [SMS] 📤 [payment_request_created] OTP قاصدک (SendOtpSms) | template=paymentRequest | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'card_number', 'value': '6037991234567890'}, {'name': 'deadline', 'value': '22:59'}]
+📱 INFO 2026-09-14 00:29:55,151 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '70'}], 'templateName': 'paymentRequest', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '250,000'}, {'param': 'card_number', 'value': '6037991234567890'}, {'param': 'deadline', 'value': '22:59'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:29:56,130 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:29:56,130 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:29:57,068 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:29:57,083 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:29:57,083 [SMS] ❌ [payment_request_created] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:30:26,474 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:30:26,474 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'tracking_number', 'value': '5755456546'}, {'name': 'request_id', 'value': '5'}]
+📱 INFO 2026-09-14 00:30:26,489 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'tracking_number', 'value': '5755456546'}, {'name': 'request_id', 'value': '5'}]
+📱 INFO 2026-09-14 00:30:26,489 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'tracking_number', 'value': '5755456546'}, {'name': 'request_id', 'value': '5'}]
+📱 INFO 2026-09-14 00:30:26,489 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '71'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '250,000'}, {'param': 'tracking_number', 'value': '5755456546'}, {'param': 'request_id', 'value': '5'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:30:27,575 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:30:27,575 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:30:28,619 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:30:28,619 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:30:28,619 [SMS] ❌ [payment_admin_new_request] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:30:28,619 [SMS] 📋 [payment_admin_new_request] → send_method = otp
+📱 INFO 2026-09-14 00:30:28,619 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'tracking_number', 'value': '5755456546'}, {'name': 'request_id', 'value': '5'}]
+📱 INFO 2026-09-14 00:30:28,619 [SMS] 📤 [payment_admin_new_request] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'tracking_number', 'value': '5755456546'}, {'name': 'request_id', 'value': '5'}]
+📱 INFO 2026-09-14 00:30:28,619 [SMS] 📤 [payment_admin_new_request] OTP قاصدک (SendOtpSms) | template=paymentAdminAlert | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}, {'name': 'amount', 'value': '250,000'}, {'name': 'tracking_number', 'value': '5755456546'}, {'name': 'request_id', 'value': '5'}]
+📱 INFO 2026-09-14 00:30:28,619 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9120000999', 'clientReferenceId': '72'}], 'templateName': 'paymentAdminAlert', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}, {'param': 'amount', 'value': '250,000'}, {'param': 'tracking_number', 'value': '5755456546'}, {'param': 'request_id', 'value': '5'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:30:29,642 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:30:29,657 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:30:30,771 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:30:30,771 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:30:30,771 [SMS] ❌ [payment_admin_new_request] → 09120000999: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 INFO 2026-09-14 00:30:30,786 [SMS] 📋 [payment_awaiting_review] → send_method = otp
+📱 INFO 2026-09-14 00:30:30,801 [SMS] 📊 [build_params] provider=ghasedak, params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:30:30,801 [SMS] 📤 [payment_awaiting_review] پارامترهای OTP: [{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:30:30,801 [SMS] 📤 [payment_awaiting_review] OTP قاصدک (SendOtpSms) | template=paymentReview | params=[{'name': 'user_name', 'value': 'hosein moghaddasan'}]
+📱 INFO 2026-09-14 00:30:30,801 [SMS] 📤 [Ghasedak] send_otp_multi (SendOtpSms) payload: {'receptors': [{'mobile': '9155511393', 'clientReferenceId': '73'}], 'templateName': 'paymentReview', 'inputs': [{'param': 'user_name', 'value': 'hosein moghaddasan'}], 'isVoice': False}
+📱 WARNING 2026-09-14 00:30:31,868 [SMS] [Ghasedak] SendOtpSms → 401: {"isSuccess":false,"statusCode":401,"message":"\u0634\u0646\u0627\u0633\u0647 IP \u0633\u0631\u0648\u06CC\u0633 \u0645\u0628\u062F\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u0637\u0627\u0628\u0642\u062A \u0646\u062F\u0627\u0631\u062F","data":null}
+📱 WARNING 2026-09-14 00:30:31,882 [SMS] ⚠️ [SmsError] ghasedak | auth_error (critical): شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد
+📱 WARNING 2026-09-14 00:30:32,834 [SMS] [SmsIr] send/bulk → 401: {"data":null,"status":12,"message":"کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189"}
+📱 ERROR 2026-09-14 00:30:32,846 [SMS] ❌ خطا در ارسال هشدار: کلید وب سرویس محدود به آی‌پی‌های تعریف شده می‌باشد. - آی پی شما: 5.126.34.189
+📱 WARNING 2026-09-14 00:30:32,846 [SMS] ❌ [payment_awaiting_review] → 09155511393: شناسه IP سرویس مبدا با تنظیمات مطابقت ندارد

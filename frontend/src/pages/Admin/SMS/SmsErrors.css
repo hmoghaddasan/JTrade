@@ -1,0 +1,884 @@
+/* frontend/src/pages/Admin/SMS/SmsErrors.css */
+
+.sms-errors {
+  padding: 0;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.errors-header {
+  margin-bottom: 20px;
+}
+
+.errors-header h2 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 4px 0;
+}
+
+.errors-hint {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+.errors-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.error-stat-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid #f1f3f5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.error-stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.error-stat-card.danger {
+  border-left: 4px solid #dc3545;
+}
+
+.error-stat-card.info {
+  border-left: 4px solid #17a2b8;
+}
+
+.error-stat-card .stat-icon {
+  font-size: 24px;
+}
+
+.error-stat-card .stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.error-stat-card .stat-label {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.error-stat-card .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* ============================================
+   Filters   ============================================ */
+.errors-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  align-items: end;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.filter-item select,
+.filter-item input {
+  padding: 7px 10px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-item select:focus,
+.filter-item input:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.btn-reset-filters {
+  padding: 8px 14px;
+  background: #fff;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  height: 36px;
+}
+
+.btn-reset-filters:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* ============================================
+   Table
+   ============================================ */
+.errors-table-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #f1f3f5;
+}
+
+.errors-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+}
+
+.errors-table thead {
+  background: #f8f9fa;
+}
+
+.errors-table th {
+  padding: 12px 10px;
+  text-align: right;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #e8ecf1;
+  white-space: nowrap;
+}
+
+.errors-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f3f5;
+  vertical-align: middle;
+}
+
+.errors-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.errors-table tbody tr.resolved-row {
+  opacity: 0.6;
+  background: #f8f9fa;
+}
+
+.date-cell {
+  font-size: 12px;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.type-cell {
+  font-size: 12px;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.error-message-cell {
+  max-width: 350px;
+}
+
+.error-preview {
+  font-size: 12px;
+  color: #495057;
+  line-height: 1.5;
+}
+
+/* ============================================
+   Chips & Badges
+   ============================================ */
+.provider-chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.provider-chip.ghasedak {
+  background: #e7f3ff;
+  color: #0066cc;
+}
+
+.provider-chip.sms_ir {
+  background: #d4edda;
+  color: #155724;
+}
+
+.severity-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.severity-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.severity-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.severity-orange {
+  background: #ffe5cc;
+  color: #cc5500;
+}
+
+.severity-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.severity-secondary {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.status-resolved {
+  font-size: 12px;
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-unresolved {
+  font-size: 12px;
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* ============================================
+   Actions
+   ============================================ */
+.actions-cell {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-icon {
+  padding: 5px 8px;
+  background: #f1f3f5;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #e8ecf1;
+  transform: scale(1.1);
+}
+
+/* ============================================
+   Pagination
+   ============================================ */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #5a52d5;
+}
+
+.pagination button:disabled {
+  background: #dee2e6;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 600;
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #adb5bd;
+  font-size: 14px;
+}
+
+/* ============================================
+   Modal
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.sms-detail-modal,
+.resolve-modal {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.resolve-modal {
+  max-width: 500px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #f1f3f5;
+  color: #dc3545;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.detail-row.full {
+  flex-direction: column;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #6c757d;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #212529;
+  flex: 1;
+  word-break: break-word;
+}
+
+.detail-message {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: #212529;
+  border: 1px solid #e8ecf1;
+  margin-top: 4px;
+}
+
+.detail-message.error-message {
+  background: #fff5f5;
+  border-color: #f8d7da;
+  color: #721c24;
+}
+
+/* ============================================
+   Resolve Modal
+   ============================================ */
+.resolve-info {
+  font-size: 14px;
+  color: #495057;
+  margin: 0;
+}
+
+.resolve-error-preview {
+  background: #fff5f5;
+  border: 1px solid #f8d7da;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.resolve-error-preview strong {
+  font-size: 13px;
+  color: #dc3545;
+}
+
+.resolve-error-preview p {
+  font-size: 13px;
+  color: #721c24;
+  margin: 6px 0 0 0;
+  line-height: 1.6;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.form-group textarea {
+  padding: 8px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.modal-footer button {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-cancel {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+.btn-cancel:hover {
+  background: #e8ecf1;
+}
+
+.btn-confirm {
+  background: #28a745;
+  color: #fff;
+}
+
+.btn-confirm:hover {
+  background: #1e7e34;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .errors-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .errors-table {
+    font-size: 11px;
+  }
+
+  .errors-table th,
+  .errors-table td {
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .errors-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .errors-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ============================================ */
+/* ✅ تم تاریک - SmsErrors */
+/* ============================================ */
+.admin-layout.dark .errors-header h2,
+.admin-layout.dark-theme .errors-header h2,
+body.dark-theme .errors-header h2,
+html[data-theme="dark"] .errors-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .errors-hint,
+.admin-layout.dark-theme .errors-hint,
+body.dark-theme .errors-hint,
+html[data-theme="dark"] .errors-hint {
+  color: #888 !important;
+}
+
+/* کارت آمار */
+.admin-layout.dark .error-stat-card,
+.admin-layout.dark-theme .error-stat-card,
+body.dark-theme .error-stat-card,
+html[data-theme="dark"] .error-stat-card {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .error-stat-card .stat-label,
+.admin-layout.dark-theme .error-stat-card .stat-label,
+body.dark-theme .error-stat-card .stat-label,
+html[data-theme="dark"] .error-stat-card .stat-label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .error-stat-card .stat-value,
+.admin-layout.dark-theme .error-stat-card .stat-value,
+body.dark-theme .error-stat-card .stat-value,
+html[data-theme="dark"] .error-stat-card .stat-value {
+  color: #e0e0e0 !important;
+}
+
+/* فیلترها */
+.admin-layout.dark .errors-filters,
+.admin-layout.dark-theme .errors-filters,
+body.dark-theme .errors-filters,
+html[data-theme="dark"] .errors-filters {
+  background: #1a1f2e !important;
+  border: 1px solid #2a3040 !important;
+}
+
+.admin-layout.dark .filter-item label,
+.admin-layout.dark-theme .filter-item label,
+body.dark-theme .filter-item label,
+html[data-theme="dark"] .filter-item label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .filter-item select,
+.admin-layout.dark-theme .filter-item select,
+.admin-layout.dark .filter-item input,
+.admin-layout.dark-theme .filter-item input,
+body.dark-theme .filter-item select,
+html[data-theme="dark"] .filter-item select,
+body.dark-theme .filter-item input,
+html[data-theme="dark"] .filter-item input {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+/* دکمه ریست فیلتر */
+.admin-layout.dark .btn-reset-filters,
+.admin-layout.dark-theme .btn-reset-filters,
+body.dark-theme .btn-reset-filters,
+html[data-theme="dark"] .btn-reset-filters {
+  background: #1a1f2e !important;
+  color: #ff8888 !important;
+  border-color: #dc3545 !important;
+}
+
+.admin-layout.dark .btn-reset-filters:hover,
+.admin-layout.dark-theme .btn-reset-filters:hover,
+body.dark-theme .btn-reset-filters:hover,
+html[data-theme="dark"] .btn-reset-filters:hover {
+  background: #dc3545 !important;
+  color: #fff !important;
+}
+
+/* جدول */
+.admin-layout.dark .errors-table-wrapper,
+.admin-layout.dark-theme .errors-table-wrapper,
+body.dark-theme .errors-table-wrapper,
+html[data-theme="dark"] .errors-table-wrapper {
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .errors-table,
+.admin-layout.dark-theme .errors-table,
+body.dark-theme .errors-table,
+html[data-theme="dark"] .errors-table {
+  background: #1a1f2e !important;
+}
+
+.admin-layout.dark .errors-table thead,
+.admin-layout.dark-theme .errors-table thead,
+body.dark-theme .errors-table thead,
+html[data-theme="dark"] .errors-table thead {
+  background: #151a26 !important;
+}
+
+.admin-layout.dark .errors-table th,
+.admin-layout.dark-theme .errors-table th,
+body.dark-theme .errors-table th,
+html[data-theme="dark"] .errors-table th {
+  color: #b0b8c8 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .errors-table td,
+.admin-layout.dark-theme .errors-table td,
+body.dark-theme .errors-table td,
+html[data-theme="dark"] .errors-table td {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .errors-table tbody tr:hover,
+.admin-layout.dark-theme .errors-table tbody tr:hover,
+body.dark-theme .errors-table tbody tr:hover,
+html[data-theme="dark"] .errors-table tbody tr:hover {
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .errors-table tbody tr.resolved-row,
+.admin-layout.dark-theme .errors-table tbody tr.resolved-row,
+body.dark-theme .errors-table tbody tr.resolved-row,
+html[data-theme="dark"] .errors-table tbody tr.resolved-row {
+  background: #151a26 !important;
+  opacity: 0.7;
+}
+
+.admin-layout.dark .date-cell,
+.admin-layout.dark-theme .date-cell,
+.admin-layout.dark .type-cell,
+.admin-layout.dark-theme .type-cell,
+body.dark-theme .date-cell,
+html[data-theme="dark"] .date-cell,
+body.dark-theme .type-cell,
+html[data-theme="dark"] .type-cell {
+  color: #888 !important;
+}
+
+.admin-layout.dark .error-preview,
+.admin-layout.dark-theme .error-preview,
+body.dark-theme .error-preview,
+html[data-theme="dark"] .error-preview {
+  color: #b0b8c8 !important;
+}
+
+/* دکمه‌های آیکون */
+.admin-layout.dark .btn-icon,
+.admin-layout.dark-theme .btn-icon,
+body.dark-theme .btn-icon,
+html[data-theme="dark"] .btn-icon {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .btn-icon:hover,
+.admin-layout.dark-theme .btn-icon:hover,
+body.dark-theme .btn-icon:hover,
+html[data-theme="dark"] .btn-icon:hover {
+  background: #3a4050 !important;
+  color: #e0e0e0 !important;
+}
+
+/* صفحه‌بندی */
+.admin-layout.dark .pagination span,
+.admin-layout.dark-theme .pagination span,
+body.dark-theme .pagination span,
+html[data-theme="dark"] .pagination span {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .pagination button:disabled,
+.admin-layout.dark-theme .pagination button:disabled,
+body.dark-theme .pagination button:disabled,
+html[data-theme="dark"] .pagination button:disabled {
+  background: #2a3040 !important;
+  color: #6a7080 !important;
+}
+
+/* حالت خالی */
+.admin-layout.dark .empty-state,
+.admin-layout.dark-theme .empty-state,
+body.dark-theme .empty-state,
+html[data-theme="dark"] .empty-state {
+  color: #888 !important;
+}
+
+/* مودال */
+.admin-layout.dark .sms-detail-modal,
+.admin-layout.dark-theme .sms-detail-modal,
+.admin-layout.dark .resolve-modal,
+.admin-layout.dark-theme .resolve-modal,
+body.dark-theme .sms-detail-modal,
+html[data-theme="dark"] .sms-detail-modal,
+body.dark-theme .resolve-modal,
+html[data-theme="dark"] .resolve-modal {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .modal-header,
+.admin-layout.dark-theme .modal-header,
+body.dark-theme .modal-header,
+html[data-theme="dark"] .modal-header {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .modal-header h3,
+.admin-layout.dark-theme .modal-header h3,
+body.dark-theme .modal-header h3,
+html[data-theme="dark"] .modal-header h3 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .btn-close,
+.admin-layout.dark-theme .btn-close,
+body.dark-theme .btn-close,
+html[data-theme="dark"] .btn-close {
+  color: #888 !important;
+}
+
+.admin-layout.dark .btn-close:hover,
+.admin-layout.dark-theme .btn-close:hover,
+body.dark-theme .btn-close:hover,
+html[data-theme="dark"] .btn-close:hover {
+  background: #2a3040 !important;
+  color: #ff8888 !important;
+}
+
+.admin-layout.dark .detail-label,
+.admin-layout.dark-theme .detail-label,
+body.dark-theme .detail-label,
+html[data-theme="dark"] .detail-label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .detail-value,
+.admin-layout.dark-theme .detail-value,
+body.dark-theme .detail-value,
+html[data-theme="dark"] .detail-value {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .detail-message,
+.admin-layout.dark-theme .detail-message,
+body.dark-theme .detail-message,
+html[data-theme="dark"] .detail-message {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .modal-footer,
+.admin-layout.dark-theme .modal-footer,
+body.dark-theme .modal-footer,
+html[data-theme="dark"] .modal-footer {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .btn-cancel,
+.admin-layout.dark-theme .btn-cancel,
+body.dark-theme .btn-cancel,
+html[data-theme="dark"] .btn-cancel {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .resolve-info,
+.admin-layout.dark-theme .resolve-info,
+body.dark-theme .resolve-info,
+html[data-theme="dark"] .resolve-info {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .resolve-error-preview,
+.admin-layout.dark-theme .resolve-error-preview,
+body.dark-theme .resolve-error-preview,
+html[data-theme="dark"] .resolve-error-preview {
+  background: #4a1f1f !important;
+  border-color: #6a2f2f !important;
+}
+
+.admin-layout.dark .form-group label,
+.admin-layout.dark-theme .form-group label,
+body.dark-theme .form-group label,
+html[data-theme="dark"] .form-group label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .form-group textarea,
+.admin-layout.dark-theme .form-group textarea,
+body.dark-theme .form-group textarea,
+html[data-theme="dark"] .form-group textarea {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}

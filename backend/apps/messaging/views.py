@@ -8,7 +8,6 @@ from django.db.models import Q
 from django.conf import settings
 import logging
 
-# ✅ اصلاح import - حذف UserMessageNotification
 from .models import UserMessage, SystemMessage, SupportInfo, SMSLog
 from .serializers import (
     UserMessageSerializer,
@@ -23,6 +22,14 @@ from .serializers import (
     UnreadMessagesCountSerializer
 )
 from apps.accounts.permissions import IsAdminUser
+
+# ✅ Import سرویس جدید پیامک
+try:
+    from apps.sms.services import SmsService
+    SMS_SERVICE_AVAILABLE = True
+except ImportError:
+    SMS_SERVICE_AVAILABLE = False
+    SmsService = None
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +59,7 @@ class MessageDetailView(generics.RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        # علامت‌گذاری به عنوان خوانده شده
         instance.mark_as_read()
-        # اگر پاسخ جدید بود، آن را به عنوان خوانده شده علامت‌گذاری کن
         if instance.has_new_reply:
             instance.mark_new_reply_as_read()
         serializer = self.get_serializer(instance)
@@ -71,7 +76,7 @@ class MessageCreateView(generics.CreateAPIView):
 
 
 class MessageReplyView(APIView):
-    """پاسخ به پیام (فقط ادمین)"""
+    """پاسخ به پیام (فقط ادمین) - با SmsService جدید"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def post(self, request, pk):
@@ -83,16 +88,20 @@ class MessageReplyView(APIView):
                 reply_message = serializer.validated_data['reply_message']
                 message.reply(reply_message, request.user)
 
-                # ارسال پیامک به کاربر (در صورت وجود تنظیمات)
-                try:
-                    from apps.subscriptions.sms import GhasedakSMS
-                    sms = GhasedakSMS()
-                    sms.send_sms(
-                        message.user.phone_number,
-                        f"پاسخ به پیام شما:\n{reply_message[:200]}"
-                    )
-                except Exception as e:
-                    logger.error(f"Error sending reply SMS: {str(e)}")
+                # ============================================
+                # 🆕 ارسال پیامک پاسخ با SmsService جدید
+                # ============================================
+                if SMS_SERVICE_AVAILABLE and SmsService:
+                    try:
+                        sms_service = SmsService()
+                        sms_service.send_admin_reply(
+                            user=message.user,
+                            subject=message.subject,
+                            message_id=message.id,
+                        )
+                        logger.info(f"✅ Reply SMS sent to {message.user.phone_number}")
+                    except Exception as e:
+                        logger.error(f"❌ Error sending reply SMS: {str(e)}")
 
                 return Response({
                     'message': 'پاسخ با موفقیت ارسال شد',
@@ -271,11 +280,9 @@ class DashboardMessagesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # پیام‌های سیستمی فعال
         system_messages = SystemMessage.get_active_messages()
         system_data = SystemMessageSerializer(system_messages, many=True).data
 
-        # پیام‌های خوانده نشده کاربر
         unread_messages = UserMessage.objects.filter(
             user=request.user,
             is_read=False
@@ -295,10 +302,10 @@ class DashboardMessagesView(APIView):
 
 
 # ============================================
-# ارسال پیامک گروهی (ادمین)
+# ارسال پیامک گروهی (ادمین) - با SmsService جدید
 # ============================================
 class AdminSendSMSView(APIView):
-    """ارسال پیامک گروهی (ادمین)"""
+    """ارسال پیامک گروهی (ادمین) با SmsService جدید"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def post(self, request):
@@ -326,26 +333,38 @@ class AdminSendSMSView(APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            # ارسال پیامک (در صورت وجود تنظیمات)
+            # بررسی در دسترس بودن سرویس
+            if not SMS_SERVICE_AVAILABLE or not SmsService:
+                return Response(
+                    {'error': 'سرویس پیامک در دسترس نیست'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
+            # ============================================
+            # 🆕 ارسال با SmsService جدید
+            # ============================================
+            sms_service = SmsService()
             success_count = 0
             failed_count = 0
+            errors = []
 
             for user in users:
+                if not user.phone_number:
+                    continue
+
                 try:
-                    from apps.subscriptions.sms import GhasedakSMS
-                    sms = GhasedakSMS()
-                    result = sms.send_sms(
-                        user.phone_number,
-                        message
-                    )
-                    if result.get('status') == 'success':
+                    result = sms_service.send_admin_single(user, message)
+                    if result.get('success'):
                         success_count += 1
                     else:
                         failed_count += 1
+                        errors.append(f"{user.phone_number}: {result.get('error_message', 'خطا')}")
                 except Exception as e:
                     logger.error(f"Error sending SMS to {user.phone_number}: {str(e)}")
                     failed_count += 1
+                    errors.append(f"{user.phone_number}: {str(e)}")
 
+            # ثبت لاگ قدیمی (برای سازگاری)
             SMSLog.objects.create(
                 phone_number='BULK',
                 message=message,
@@ -359,14 +378,15 @@ class AdminSendSMSView(APIView):
                 'message': f'پیامک با موفقیت ارسال شد',
                 'total_users': users.count(),
                 'success_count': success_count,
-                'failed_count': failed_count
+                'failed_count': failed_count,
+                'errors': errors[:10] if errors else []
             })
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminSMSHistoryView(generics.ListAPIView):
-    """تاریخچه ارسال پیامک (ادمین)"""
+    """تاریخچه ارسال پیامک (ادمین) - فقط برای سازگاری"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
     serializer_class = SMSLogSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -393,12 +413,10 @@ class AdminMessageListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = UserMessage.objects.all()
 
-        # فیلتر بر اساس وضعیت پاسخ
         is_replied = self.request.query_params.get('is_replied')
         if is_replied is not None:
             queryset = queryset.filter(is_replied=is_replied.lower() == 'true')
 
-        # فیلتر بر اساس خوانده شده
         is_read = self.request.query_params.get('is_read')
         if is_read is not None:
             queryset = queryset.filter(is_read=is_read.lower() == 'true')
@@ -419,7 +437,7 @@ class AdminMessageDetailView(generics.RetrieveAPIView):
 
 
 class AdminMessageReplyView(APIView):
-    """پاسخ به پیام کاربر (ادمین)"""
+    """پاسخ به پیام کاربر (ادمین) - با SmsService جدید"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def post(self, request, pk):
@@ -435,16 +453,20 @@ class AdminMessageReplyView(APIView):
 
             message.reply(reply, request.user)
 
-            # ارسال پیامک به کاربر
-            try:
-                from apps.subscriptions.sms import GhasedakSMS
-                sms = GhasedakSMS()
-                sms.send_sms(
-                    message.user.phone_number,
-                    f"پاسخ به پیام شما:\n{reply[:200]}"
-                )
-            except Exception as e:
-                logger.error(f"Error sending reply SMS: {str(e)}")
+            # ============================================
+            # 🆕 ارسال پیامک پاسخ با SmsService جدید
+            # ============================================
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_admin_reply(
+                        user=message.user,
+                        subject=message.subject,
+                        message_id=message.id,
+                    )
+                    logger.info(f"✅ Reply SMS sent to {message.user.phone_number}")
+                except Exception as e:
+                    logger.error(f"❌ Error sending reply SMS: {str(e)}")
 
             return Response({
                 'message': 'پاسخ با موفقیت ارسال شد',

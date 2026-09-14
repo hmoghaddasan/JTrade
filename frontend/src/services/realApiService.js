@@ -555,5 +555,65 @@ class RealApiService {
       body: JSON.stringify(data)
     });
   }
+
+    // ============================================
+  // ✅ سیستم پرداخت کارت به کارت
+  // ============================================
+
+  async getPaymentCards() {
+    return this.request('/subscription/payment-cards/');
+  }
+
+  async createPaymentRequest(planId, discountCode = '', cardId = null) {
+    const body = {
+      plan_id: planId,
+      discount_code: discountCode || '',
+      payment_method: 'card_to_card',
+    };
+    if (cardId) body.card_id = cardId;
+
+    return this.request('/subscription/payment-requests/create/', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async getPaymentRequests(params = {}) {
+    return this.request('/subscription/payment-requests/', { params });
+  }
+
+  async getActivePaymentRequests() {
+    return this.request('/subscription/payment-requests/active/');
+  }
+
+  async getPaymentRequestDetail(id) {
+    return this.request(`/subscription/payment-requests/${id}/`);
+  }
+
+  async submitPaymentReceipt(requestId, formData) {
+    // FormData - نباید Content-Type تنظیم شود (axios خودش می‌کند)
+    const url = `${this.apiUrl}/subscription/payment-requests/${requestId}/submit-receipt/`;
+    const token = this.getToken();
+
+    const response = await axios({
+      url,
+      method: 'POST',
+      data: formData,
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Accept': 'application/json',
+        // Content-Type توسط axios با FormData ست می‌شود
+      },
+      withCredentials: true,
+    });
+
+    return response;
+  }
+
+  async cancelPaymentRequest(id) {
+    return this.request(`/subscription/payment-requests/${id}/cancel/`, {
+      method: 'POST',
+    });
+  }
 }
 export default new RealApiService();

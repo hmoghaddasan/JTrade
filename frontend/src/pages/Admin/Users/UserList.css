@@ -37,3 +37,10 @@
 .btn-sms:hover {
   background: #138496;
 }
+/* ============================================ */
+/* ✅ تم تاریک - UserList */
+/* ============================================ */
+.admin-layout.dark .user-list-page .page-header h1,
+.admin-layout.dark-theme .user-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}

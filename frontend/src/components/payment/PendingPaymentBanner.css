@@ -1,0 +1,207 @@
+/* frontend/src/components/payment/PendingPaymentBanner.css */
+
+.pending-payment-banner {
+  position: sticky;
+  top: 2px;
+  z-index: 998;
+  margin: 2px 0 0 0;
+  padding: 0 16px;
+  animation: bannerSlideDown 0.4s ease;
+}
+
+@keyframes bannerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f57c00, #e65100);
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(230, 81, 0, 0.3);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.banner-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  animation: bannerPulse 2s infinite;
+}
+
+@keyframes bannerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.banner-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.banner-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.banner-info strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.banner-separator {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.banner-timer {
+  font-family: monospace;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.banner-status {
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.banner-actions {
+  flex-shrink: 0;
+}
+
+.banner-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.banner-btn-primary {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.banner-btn-primary:hover {
+  background: #fff;
+  color: #e65100;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.banner-btn-secondary {
+  background: transparent;
+  color: #fff;
+}
+
+.banner-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .banner-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .banner-icon {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .banner-title,
+  .banner-info {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .banner-actions {
+    width: 100%;
+  }
+
+  .banner-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pending-payment-banner {
+    padding: 0 8px;
+  }
+
+  .banner-inner {
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  .banner-title {
+    font-size: 13px;
+  }
+
+  .banner-info {
+    font-size: 12px;
+  }
+
+  .banner-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+/* ===== دکمه لغو در بنر ===== */
+.banner-btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.banner-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.banner-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.banner-btn-info {
+  background: rgba(100, 180, 255, 0.3);
+  color: #fff;
+  border: 2px solid rgba(100, 180, 255, 0.5);
+}
+
+.banner-btn-info:hover {
+  background: rgba(100, 180, 255, 0.5);
+  transform: translateY(-2px);
+}

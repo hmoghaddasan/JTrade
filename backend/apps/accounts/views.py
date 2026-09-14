@@ -36,17 +36,16 @@ from apps.subscriptions.models import SubscriptionPlan, UserSubscription
 logger = logging.getLogger(__name__)
 
 # ============================================
-# ✅ Import SMS Manager
+# ✅ Import SmsService (سیستم جدید پیامک)
 # ============================================
 try:
-    from apps.subscriptions.sms import sms_manager
-
-    SMS_MANAGER_AVAILABLE = True
-    logger.info("✅ SMS Manager imported successfully")
+    from apps.sms.services import SmsService
+    SMS_SERVICE_AVAILABLE = True
+    logger.info("✅ SMS Service imported successfully")
 except ImportError as e:
-    logger.error(f"❌ Failed to import SMS manager: {str(e)}")
-    SMS_MANAGER_AVAILABLE = False
-    sms_manager = None
+    logger.error(f"❌ Failed to import SmsService: {str(e)}")
+    SMS_SERVICE_AVAILABLE = False
+    SmsService = None
 
 
 # ============================================
@@ -73,7 +72,6 @@ class SendVerificationCodeView(APIView):
             try:
                 user = User.objects.get(phone_number=phone_number)
                 if user.is_admin:
-                    # ادمین - ورود مستقیم بدون کد
                     refresh = RefreshToken.for_user(user)
                     return Response({
                         'access': str(refresh.access_token),
@@ -115,22 +113,26 @@ class SendVerificationCodeView(APIView):
             user.save()
 
         # ============================================
-        # ✅ ارسال پیامک با SMS Manager
+        # ✅ ارسال پیامک با SmsService جدید
         # ============================================
         sms_sent = False
         sms_error = None
 
-        if SMS_MANAGER_AVAILABLE and sms_manager:
+        if SMS_SERVICE_AVAILABLE and SmsService:
             try:
-                # ✅ استفاده از sms_manager برای ارسال کد تایید
-                result = sms_manager.send_verification_code(phone_number, verification_code)
+                sms_service = SmsService()
+                result = sms_service.send_otp_login(
+                    phone_number=phone_number,
+                    code=verification_code,
+                    user=user,
+                )
                 logger.info(f"SMS send result: {result}")
 
                 if result and result.get('success'):
                     sms_sent = True
                     print("✅ پیامک با موفقیت ارسال شد")
                 else:
-                    error_msg = result.get('error', 'Unknown error') if result else 'No result'
+                    error_msg = result.get('error_message', 'Unknown error') if result else 'No result'
                     sms_error = error_msg
                     logger.error(f"Failed to send SMS: {error_msg}")
                     print(f"⚠️ خطا در ارسال پیامک: {error_msg}")
@@ -140,18 +142,7 @@ class SendVerificationCodeView(APIView):
                 sms_error = str(e)
                 print(f"❌ خطا در ارسال پیامک: {str(e)}")
         else:
-            # ✅ اگر SMS Manager در دسترس نیست، از روش قدیمی استفاده کن
-            try:
-                from apps.subscriptions.sms import send_verification_sms
-                result = send_verification_sms(phone_number, verification_code)
-                if result and result.get('status') == 'success':
-                    sms_sent = True
-                    print("✅ پیامک با موفقیت ارسال شد (legacy)")
-                else:
-                    sms_error = result.get('error', 'Unknown error') if result else 'No result'
-            except Exception as e:
-                logger.error(f"Legacy SMS error: {str(e)}")
-                sms_error = str(e)
+            print("⚠️ SmsService در دسترس نیست - پیامک ارسال نشد")
 
         # ============================================
         # ✅ نمایش کد در کنسول
@@ -201,14 +192,12 @@ class VerifyCodeView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # تایید کاربر
         user.is_verified = True
         user.verification_code = None
         user.verification_expiry = None
         user.last_login = timezone.now()
         user.save()
 
-        # تولید توکن
         refresh = RefreshToken.for_user(user)
 
         is_new_user = not user.first_name and not user.last_name
@@ -295,6 +284,8 @@ class RegisterUserView(APIView):
             if not trial_plan:
                 trial_plan = SubscriptionPlan.objects.filter(is_active=True).first()
 
+            trial_end_date = timezone.now() + timezone.timedelta(days=trial_days)
+
             if trial_plan:
                 existing_trial = UserSubscription.objects.filter(
                     user=user,
@@ -307,7 +298,7 @@ class RegisterUserView(APIView):
                         user=user,
                         plan=trial_plan,
                         start_date=timezone.now(),
-                        end_date=timezone.now() + timezone.timedelta(days=trial_days),
+                        end_date=trial_end_date,
                         is_active=True,
                         trades_used=0,
                         trades_limit=trial_plan.monthly_trades_limit,
@@ -317,6 +308,23 @@ class RegisterUserView(APIView):
                         amount_paid=0
                     )
                     logger.info(f"✅ Trial subscription created for user {user.phone_number}")
+
+            # ============================================
+            # 🆕 ارسال پیامک خوش‌آمدگویی دوره آزمایشی
+            # ============================================
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_welcome_trial(
+                        user=user,
+                        trial_days=trial_days,
+                        end_date=trial_end_date,
+                    )
+                    logger.info(f"✅ Welcome trial SMS sent to {user.phone_number}")
+                except Exception as e:
+                    logger.error(f"❌ Failed to send welcome trial SMS: {str(e)}")
+            else:
+                logger.warning("⚠️ SmsService در دسترس نیست - پیامک خوش‌آمد ارسال نشد")
 
             refresh = RefreshToken.for_user(user)
 
@@ -511,26 +519,21 @@ class ForgotPasswordView(APIView):
                 user.verification_expiry = expiry
                 user.save()
 
-                # ✅ استفاده از sms_manager
-                if SMS_MANAGER_AVAILABLE and sms_manager:
+                # ✅ استفاده از SmsService جدید
+                if SMS_SERVICE_AVAILABLE and SmsService:
                     try:
-                        result = sms_manager.send_verification_code(phone_number, verification_code)
+                        sms_service = SmsService()
+                        result = sms_service.send_otp_login(
+                            phone_number=phone_number,
+                            code=verification_code,
+                            user=user,
+                        )
                         if result and result.get('success'):
                             print("✅ پیامک بازیابی ارسال شد")
                         else:
                             print(f"⚠️ خطا در ارسال پیامک بازیابی: {result}")
                     except Exception as e:
                         logger.error(f"Error sending SMS: {str(e)}")
-                        if SystemSetting.get_setting('debug_mode', False):
-                            return Response({
-                                'message': 'کد بازیابی ایجاد شد (حالت تست)',
-                                'test_code': verification_code
-                            }, status=status.HTTP_200_OK)
-                else:
-                    try:
-                        from apps.subscriptions.sms import send_verification_sms
-                        send_verification_sms(phone_number, verification_code)
-                    except:
                         if SystemSetting.get_setting('debug_mode', False):
                             return Response({
                                 'message': 'کد بازیابی ایجاد شد (حالت تست)',

@@ -1,0 +1,444 @@
+/* frontend/src/pages/Admin/SMS/SmsProviderConfig.css */
+
+.sms-provider-config {
+  padding: 0;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.config-header {
+  margin-bottom: 24px;
+}
+
+.config-header h2 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.config-hint {
+  font-size: 13px;
+  color: #495057;
+  background: #f0f4ff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-right: 3px solid #6c63ff;
+  margin: 0;
+  line-height: 1.8;
+}
+
+.config-hint strong {
+  color: #6c63ff;
+}
+
+/* ============================================
+   Providers Grid
+   ============================================ */
+.providers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+/* ============================================
+   Provider Card
+   ============================================ */
+.provider-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 2px solid #f1f3f5;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.provider-card.active {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.1);
+}
+
+.provider-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================
+   Card Header
+   ============================================ */
+.provider-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f3f5;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.provider-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.provider-icon {
+  font-size: 28px;
+}
+
+.provider-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.provider-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.badge-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-ready {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* ============================================
+   Card Body
+   ============================================ */
+.provider-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.provider-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.provider-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.provider-field input,
+.provider-field select,
+.provider-field textarea {
+  padding: 8px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  transition: border-color 0.2s;
+}
+
+.provider-field input:focus,
+.provider-field select:focus,
+.provider-field textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.provider-field textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.field-value {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #495057;
+  word-break: break-all;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.credit-value {
+  font-weight: 700;
+  color: #6c63ff;
+  font-size: 15px;
+}
+
+/* ============================================
+   Card Actions
+   ============================================ */
+.provider-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.provider-card-actions button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.btn-edit {
+  background: #e7f3ff;
+  color: #0066cc;
+}
+
+.btn-edit:hover {
+  background: #d0e7ff;
+}
+
+.btn-save {
+  background: #28a745;
+  color: #fff;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #1e7e34;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-test {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.btn-test:hover:not(:disabled) {
+  background: #ffe69c;
+}
+
+.btn-test:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-credit {
+  background: #d4edda;
+  color: #155724;
+}
+
+.btn-credit:hover:not(:disabled) {
+  background: #c3e6cb;
+}
+
+.btn-credit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-activate {
+  background: #6c63ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-activate:hover:not(:disabled) {
+  background: #5a52d5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+}
+
+.btn-activate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.active-label {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #28a745;
+  padding: 8px 14px;
+  background: #f0fdf4;
+  border-radius: 6px;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 900px) {
+  .providers-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .provider-card {
+    padding: 14px;
+  }
+
+  .provider-icon {
+    font-size: 22px;
+  }
+
+  .provider-name {
+    font-size: 16px;
+  }
+
+  .provider-card-actions {
+    flex-direction: column;
+  }
+
+  .provider-card-actions button,
+  .provider-card-actions .active-label {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+/* ============================================ */
+/* ✅ تم تاریک - SmsProviderConfig */
+/* ============================================ */
+.admin-layout.dark .config-header h2,
+.admin-layout.dark-theme .config-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .config-hint,
+.admin-layout.dark-theme .config-hint {
+  background: #1f2535 !important;
+  color: #b0b8c8 !important;
+  border-right-color: #6c63ff !important;
+}
+
+.admin-layout.dark .config-hint strong,
+.admin-layout.dark-theme .config-hint strong {
+  color: #90caf9 !important;
+}
+
+/* کارت provider */
+.admin-layout.dark .provider-card,
+.admin-layout.dark-theme .provider-card {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .provider-card.active,
+.admin-layout.dark-theme .provider-card.active {
+  border-color: #28a745 !important;
+  background: linear-gradient(135deg, #1a2e1f 0%, #1a1f2e 100%) !important;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.2) !important;
+}
+
+.admin-layout.dark .provider-card-header,
+.admin-layout.dark-theme .provider-card-header {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .provider-name,
+.admin-layout.dark-theme .provider-name {
+  color: #e0e0e0 !important;
+}
+
+/* فیلدها */
+.admin-layout.dark .provider-field label,
+.admin-layout.dark-theme .provider-field label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .provider-field input,
+.admin-layout.dark-theme .provider-field input,
+.admin-layout.dark .provider-field select,
+.admin-layout.dark-theme .provider-field select,
+.admin-layout.dark .provider-field textarea,
+.admin-layout.dark-theme .provider-field textarea {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .field-value,
+.admin-layout.dark-theme .field-value {
+  background: #0f1419 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .credit-value,
+.admin-layout.dark-theme .credit-value {
+  color: #90caf9 !important;
+}
+
+/* دکمه‌ها */
+.admin-layout.dark .provider-card-actions,
+.admin-layout.dark-theme .provider-card-actions {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .btn-edit,
+.admin-layout.dark-theme .btn-edit {
+  background: #1f3a5f !important;
+  color: #64b5f6 !important;
+}
+
+.admin-layout.dark .btn-cancel,
+.admin-layout.dark-theme .btn-cancel {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .btn-test,
+.admin-layout.dark-theme .btn-test {
+  background: #3a2f1f !important;
+  color: #ffb74d !important;
+}
+
+.admin-layout.dark .btn-credit,
+.admin-layout.dark-theme .btn-credit {
+  background: #1f4a2f !important;
+  color: #81c784 !important;
+}
+
+.admin-layout.dark .active-label,
+.admin-layout.dark-theme .active-label {
+  background: #1f4a2f !important;
+  color: #81c784 !important;
+}

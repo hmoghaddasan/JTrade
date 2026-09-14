@@ -1,0 +1,257 @@
+/* frontend/src/components/payment/SubmitReceiptForm.css */
+
+.submit-receipt-form {
+  padding: 20px 24px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.form-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f3f5;
+}
+
+.form-title h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #1a1a2e;
+}
+
+.title-icon {
+  font-size: 20px;
+}
+
+.submit-receipt-form .form-group {
+  margin-bottom: 14px;
+}
+
+.submit-receipt-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.submit-receipt-form .required {
+  color: #dc3545;
+}
+
+.submit-receipt-form input[type="text"],
+.submit-receipt-form input[type="datetime-local"],
+.submit-receipt-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.submit-receipt-form input:focus,
+.submit-receipt-form textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.submit-receipt-form input.error {
+  border-color: #dc3545;
+}
+
+.field-error {
+  display: block;
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 4px;
+}
+
+/* File Upload */
+.file-upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #e7f3ff;
+  color: #0066cc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: 1px solid #d0e7ff;
+}
+
+.file-upload-label:hover {
+  background: #d0e7ff;
+}
+
+.upload-icon {
+  font-size: 16px;
+}
+
+.file-name {
+  font-size: 12px;
+  color: #6c757d;
+  word-break: break-all;
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #dee2e6;
+  max-width: 100%;
+}
+
+.image-preview img {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+}
+
+.remove-image {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-image:hover {
+  background: #dc3545;
+}
+
+/* Actions */
+.submit-receipt-form .form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f1f3f5;
+  margin-top: 8px;
+}
+
+.submit-receipt-form .form-actions button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  border: none;
+}
+
+.submit-receipt-form .btn-cancel {
+  background: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.submit-receipt-form .btn-cancel:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.submit-receipt-form .btn-submit {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: white;
+}
+
+.submit-receipt-form .btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.submit-receipt-form .btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Dark Theme */
+.dark-theme .submit-receipt-form {
+  border-top-color: #2a3040;
+}
+
+.dark-theme .form-title {
+  border-bottom-color: #2a3040;
+}
+
+.dark-theme .form-title h3 {
+  color: #e0e0e0;
+}
+
+.dark-theme .submit-receipt-form label {
+  color: #b0b8c8;
+}
+
+.dark-theme .submit-receipt-form input,
+.dark-theme .submit-receipt-form textarea {
+  background: #0f1419;
+  color: #e0e0e0;
+  border-color: #2a3040;
+}
+
+.dark-theme .file-upload-label {
+  background: #1f3a5f;
+  color: #90caf9;
+  border-color: #2a4a70;
+}
+
+.dark-theme .file-upload-label:hover {
+  background: #2a4a70;
+}
+
+.dark-theme .submit-receipt-form .form-actions {
+  border-top-color: #2a3040;
+}
+
+.dark-theme .submit-receipt-form .btn-cancel {
+  background: #2a3040;
+  color: #b0b8c8;
+  border-color: #3a4050;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .submit-receipt-form {
+    padding: 16px;
+  }
+
+  .submit-receipt-form .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .submit-receipt-form .form-actions button {
+    width: 100%;
+  }
+}

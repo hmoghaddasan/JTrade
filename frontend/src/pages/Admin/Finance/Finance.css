@@ -47,3 +47,28 @@
   color: #1a1a2e;
   margin-bottom: 16px;
 }
+/* ============================================ */
+/* ✅ تم تاریک - Finance */
+/* ============================================ */
+.admin-layout.dark .finance-page .page-header h1,
+.admin-layout.dark-theme .finance-page .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .period-select,
+.admin-layout.dark-theme .period-select {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .chart-card,
+.admin-layout.dark-theme .chart-card {
+  background: #1a1f2e !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.admin-layout.dark .chart-card h3,
+.admin-layout.dark-theme .chart-card h3 {
+  color: #e0e0e0 !important;
+}

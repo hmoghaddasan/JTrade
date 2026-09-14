@@ -20,3 +20,11 @@
     transform: rotate(360deg);
   }
 }
+/* ============================================ */
+/* ✅ تم تاریک - LoadingSpinner (اختیاری) */
+/* ============================================ */
+.admin-layout.dark .spinner,
+.admin-layout.dark-theme .spinner {
+  border-color: #2a3040 !important;
+  border-top-color: #6c63ff !important;
+}

@@ -13,3 +13,10 @@
   color: #1a1a2e;
   margin: 0;
 }
+/* ============================================ */
+/* ✅ تم تاریک - SymbolList */
+/* ============================================ */
+.admin-layout.dark .symbol-list-page .page-header h1,
+.admin-layout.dark-theme .symbol-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}

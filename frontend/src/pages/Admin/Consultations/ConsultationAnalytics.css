@@ -39,3 +39,21 @@
     grid-template-columns: 1fr;
   }
 }
+/* ============================================ */
+/* ✅ تم تاریک - ConsultationAnalytics */
+/* ============================================ */
+.admin-layout.dark .consultation-analytics-page .page-header h1,
+.admin-layout.dark-theme .consultation-analytics-page .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .chart-card,
+.admin-layout.dark-theme .chart-card {
+  background: #1a1f2e !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.admin-layout.dark .chart-card h3,
+.admin-layout.dark-theme .chart-card h3 {
+  color: #e0e0e0 !important;
+}

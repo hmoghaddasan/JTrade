@@ -2,9 +2,11 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './AppFooter.css';
 
 const AppFooter = ({ isAuthPage = false }) => {
+  const { user } = useAuth();
   const currentYear = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
 
   return (
@@ -17,6 +19,16 @@ const AppFooter = ({ isAuthPage = false }) => {
             <Link to="/contact" className="footer-link">تماس با ما</Link>
             <span className="footer-divider">|</span>
             <Link to="/terms" className="footer-link">قوانین</Link>
+
+            {/* ✅ لینک پنل ادمین - فقط برای کاربر ادمین - با استایل یکسان */}
+            {user?.is_admin && (
+              <>
+                <span className="footer-divider">|</span>
+                <Link to="/admin" className="footer-link">
+                  پنل ادمین
+                </Link>
+              </>
+            )}
           </div>
           <div className="footer-copyright">
             <span className="footer-icon">©</span>
@@ -25,8 +37,8 @@ const AppFooter = ({ isAuthPage = false }) => {
         </div>
 
         <div className="footer-right">
-          <a referrerpolicy="origin" target="_blank" href="https://trustseal.enamad.ir/?id=7653755&Code=uDE0FLcRp7BAiVWFzKUfLC7MdBNXac0C">
-            <img referrerpolicy="origin" src="https://trustseal.enamad.ir/logo.aspx?id=7653755&Code=uDE0FLcRp7BAiVWFzKUfLC7MdBNXac0C" alt="" style={{ cursor: 'pointer' }} code="uDE0FLcRp7BAiVWFzKUfLC7MdBNXac0C" />
+          <a referrerPolicy="origin" target="_blank" rel="noopener noreferrer" href="https://trustseal.enamad.ir/?id=7653755&Code=uDE0FLcRp7BAiVWFzKUfLC7MdBNXac0C">
+            <img referrerPolicy="origin" src="https://trustseal.enamad.ir/logo.aspx?id=7653755&Code=uDE0FLcRp7BAiVWFzKUfLC7MdBNXac0C" alt="اینماد" style={{ cursor: 'pointer' }} />
           </a>
         </div>
       </div>

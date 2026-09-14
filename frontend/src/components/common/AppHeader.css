@@ -1540,3 +1540,190 @@
     gap: 2px !important;
   }
 }
+.header-right .home-btn {
+  background: rgba(100, 180, 255, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(100, 180, 255, 0.3) !important;
+}
+/* ============================================ */
+/* ✅ FIX: کلیدهای ردیف بالای هدر */
+/* مشکل: کلاس .btn-icon در فایل‌های SMS تعریف شده بود */
+/* راه‌حل: استفاده از کلاس‌های اختصاصی .header-btn-icon و .header-btn-text */
+/* ============================================ */
+
+/* ===== دکمه پایه ===== */
+.app-header .header-right .header-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 5px 10px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  font-family: inherit !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  overflow: hidden !important;
+}
+
+/* ===== آیکون داخل دکمه‌های هدر (کلاس اختصاصی) ===== */
+.app-header .header-right .header-btn .header-btn-icon {
+  font-size: 14px !important;
+  line-height: 1 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ===== متن داخل دکمه‌های هدر (کلاس اختصاصی) ===== */
+.app-header .header-right .header-btn .header-btn-text {
+  font-size: 11px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  color: inherit !important;
+  display: inline-block !important;
+}
+
+/* ===== ۱. دکمه خانه - آبی روشن ===== */
+.app-header .header-right .home-btn {
+  background: rgba(100, 180, 255, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(100, 180, 255, 0.4) !important;
+}
+.app-header .header-right .home-btn:hover {
+  background: rgba(100, 180, 255, 0.45) !important;
+  border-color: rgba(100, 180, 255, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== ۲. دکمه شاخص‌ها - طلایی ===== */
+.app-header .header-right .metrics-btn {
+  background: rgba(255, 215, 0, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+}
+.app-header .header-right .metrics-btn:hover {
+  background: rgba(255, 215, 0, 0.45) !important;
+  border-color: rgba(255, 215, 0, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== ۳. دکمه مقایسه - فیروزه‌ای ===== */
+.app-header .header-right .comparison-btn {
+  background: rgba(0, 230, 200, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 230, 200, 0.4) !important;
+}
+.app-header .header-right .comparison-btn:hover {
+  background: rgba(0, 230, 200, 0.45) !important;
+  border-color: rgba(0, 230, 200, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== ۴. دکمه انضباط - بنفش ===== */
+.app-header .header-right .discipline-btn {
+  background: rgba(200, 150, 255, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(200, 150, 255, 0.4) !important;
+}
+.app-header .header-right .discipline-btn:hover {
+  background: rgba(200, 150, 255, 0.45) !important;
+  border-color: rgba(200, 150, 255, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== ۵. دکمه تم - نارنجی ===== */
+.app-header .header-right .theme-btn {
+  background: rgba(255, 200, 100, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 200, 100, 0.4) !important;
+}
+.app-header .header-right .theme-btn:hover {
+  background: rgba(255, 200, 100, 0.45) !important;
+  border-color: rgba(255, 200, 100, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== ۶. دکمه خروج - قرمز ===== */
+.app-header .header-right .logout-btn {
+  background: rgba(255, 100, 100, 0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 100, 100, 0.4) !important;
+}
+.app-header .header-right .logout-btn:hover {
+  background: rgba(255, 100, 100, 0.45) !important;
+  border-color: rgba(255, 100, 100, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== در تم دارک ===== */
+.app-header.dark .header-right .header-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #e0e0e0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.app-header.dark .header-right .home-btn {
+  background: rgba(100, 180, 255, 0.15) !important;
+  border-color: rgba(100, 180, 255, 0.25) !important;
+}
+.app-header.dark .header-right .home-btn:hover {
+  background: rgba(100, 180, 255, 0.3) !important;
+}
+
+.app-header.dark .header-right .metrics-btn {
+  background: rgba(255, 215, 0, 0.15) !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
+}
+.app-header.dark .header-right .metrics-btn:hover {
+  background: rgba(255, 215, 0, 0.3) !important;
+}
+
+.app-header.dark .header-right .comparison-btn {
+  background: rgba(0, 230, 200, 0.15) !important;
+  border-color: rgba(0, 230, 200, 0.25) !important;
+}
+.app-header.dark .header-right .comparison-btn:hover {
+  background: rgba(0, 230, 200, 0.3) !important;
+}
+
+.app-header.dark .header-right .discipline-btn {
+  background: rgba(200, 150, 255, 0.15) !important;
+  border-color: rgba(200, 150, 255, 0.25) !important;
+}
+.app-header.dark .header-right .discipline-btn:hover {
+  background: rgba(200, 150, 255, 0.3) !important;
+}
+
+.app-header.dark .header-right .theme-btn {
+  background: rgba(255, 200, 100, 0.15) !important;
+  border-color: rgba(255, 200, 100, 0.25) !important;
+}
+.app-header.dark .header-right .theme-btn:hover {
+  background: rgba(255, 200, 100, 0.3) !important;
+}
+
+.app-header.dark .header-right .logout-btn {
+  background: rgba(255, 100, 100, 0.15) !important;
+  border-color: rgba(255, 100, 100, 0.25) !important;
+}
+.app-header.dark .header-right .logout-btn:hover {
+  background: rgba(255, 100, 100, 0.3) !important;
+}

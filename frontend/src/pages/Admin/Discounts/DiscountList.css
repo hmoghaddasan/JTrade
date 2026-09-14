@@ -31,3 +31,10 @@
 .btn-add:hover {
   background: #5a52d5;
 }
+/* ============================================ */
+/* ✅ تم تاریک - DiscountList */
+/* ============================================ */
+.admin-layout.dark .discount-list-page .page-header h1,
+.admin-layout.dark-theme .discount-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}

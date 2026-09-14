@@ -8,6 +8,10 @@ from django.http import JsonResponse
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+# SMS URLs
+from apps.sms import urls as sms_urls
+from apps.sms import admin_urls as sms_admin_urls
+from apps.sms import error_urls as sms_error_urls  # این را در ادامه می‌سازیم
 
 # ✅ import کلاس‌های تنظیمات از admin_panel
 from apps.admin_panel.views import (
@@ -200,6 +204,9 @@ urlpatterns = [
     path('api/system/', include('apps.accounts.system_urls')),
     path('api/import/', include('apps.import.urls')),
 
+    path('api/sms/', include('apps.sms.urls')),
+    path('api/admin/sms/', include('apps.sms.admin_urls')),
+    path('api/admin/sms/errors/', include('apps.sms.error_urls')),
     # ============================================
     # سلامت سنجی
     # ============================================

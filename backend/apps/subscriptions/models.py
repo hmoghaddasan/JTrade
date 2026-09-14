@@ -3,7 +3,8 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-
+from django.db import transaction
+from datetime import timedelta
 
 class SMSLog(models.Model):
     """لاگ پیامک‌ها"""
@@ -312,3 +313,405 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.phone_number} - {self.total_amount} تومان"
+
+# ============================================
+# ✅ سیستم پرداخت کارت به کارت
+# ============================================
+
+class PaymentCard(models.Model):
+    """
+    کارت بانکی برای پرداخت کارت به کارت
+    در پنل ادمین قابل مدیریت است.
+    """
+    card_number = models.CharField('شماره کارت', max_length=20)
+    card_holder = models.CharField('نام صاحب کارت', max_length=100)
+    bank_name = models.CharField('نام بانک', max_length=100)
+    is_active = models.BooleanField('فعال', default=True)
+    is_default = models.BooleanField('کارت پیش‌فرض', default=False)
+    order_index = models.IntegerField('ترتیب نمایش', default=0)
+    usage_count = models.IntegerField('تعداد استفاده', default=0)
+    notes = models.TextField('یادداشت', blank=True)
+    created_at = models.DateTimeField('تاریخ ثبت', default=timezone.now)
+    updated_at = models.DateTimeField('آخرین ویرایش', auto_now=True)
+
+    class Meta:
+        db_table = 'subscriptions_paymentcard'
+        verbose_name = 'کارت بانکی'
+        verbose_name_plural = 'کارت‌های بانکی'
+        ordering = ['order_index', '-created_at']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['is_default']),
+            models.Index(fields=['order_index']),
+        ]
+
+    def __str__(self):
+        return f"{self.card_holder} - {self.bank_name} - {self.card_number[-4:]}"
+
+    def save(self, *args, **kwargs):
+        # اگر این کارت پیش‌فرض می‌شود، بقیه را غیر پیش‌فرض کن
+        if self.is_default:
+            PaymentCard.objects.exclude(pk=self.pk).update(is_default=False)
+        # اگر این کارت غیرفعال می‌شود، پیش‌فرض هم نباشد
+        if not self.is_active:
+            self.is_default = False
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_default(cls):
+        """دریافت کارت پیش‌فرض"""
+        return cls.objects.filter(is_active=True, is_default=True).first()
+
+    @classmethod
+    def get_random(cls):
+        """انتخاب یک کارت رندوم از کارت‌های فعال"""
+        import random
+        cards = list(cls.objects.filter(is_active=True))
+        if cards:
+            return random.choice(cards)
+        return None
+
+    @classmethod
+    def get_for_payment(cls, mode='random'):
+        """
+        انتخاب کارت بر اساس حالت:
+        - random: رندوم از کارت‌های فعال
+        - manual: پیش‌فرض (یا اولی)
+        - default: کارت پیش‌فرض
+        """
+        if mode == 'default':
+            return cls.get_default()
+        elif mode == 'random':
+            return cls.get_random()
+        else:  # manual
+            return cls.get_default() or cls.objects.filter(is_active=True).first()
+
+
+class PaymentRequest(models.Model):
+    """
+    درخواست پرداخت کارت به کارت
+    کاربر پلن انتخاب می‌کند → درخواست ثبت می‌شود → فیش ارسال می‌کند → ادمین تأیید/رد می‌کند → تمدید خودکار
+    """
+    STATUS_CHOICES = [
+        ('pending_payment', 'در انتظار واریز'),
+        ('awaiting_review', 'در انتظار بررسی'),
+        ('approved', 'تأیید شده'),
+        ('rejected', 'رد شده'),
+        ('expired', 'منقضی شده'),
+        ('canceled', 'لغو شده'),
+    ]
+
+    # ============================================
+    # ارتباط‌ها
+    # ============================================
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='payment_requests',
+        verbose_name='کاربر'
+    )
+    plan = models.ForeignKey(
+        SubscriptionPlan,
+        on_delete=models.PROTECT,
+        related_name='payment_requests',
+        verbose_name='پلن'
+    )
+    subscription = models.ForeignKey(
+        'UserSubscription',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='payment_requests',
+        verbose_name='اشتراک'
+    )
+    discount_code = models.ForeignKey(
+        'DiscountCode',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='payment_requests',
+        verbose_name='کد تخفیف'
+    )
+
+    # ============================================
+    # کارت انتخاب‌شده (snapshot)
+    # ============================================
+    payment_card = models.ForeignKey(
+        PaymentCard,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='payment_requests',
+        verbose_name='کارت پرداخت'
+    )
+    destination_card_number = models.CharField('شماره کارت مقصد', max_length=20)
+    destination_card_holder = models.CharField('نام صاحب کارت', max_length=100)
+    destination_bank_name = models.CharField('نام بانک', max_length=100)
+
+    # ============================================
+    # مبلغ
+    # ============================================
+    unique_code = models.CharField('کد یکتا', max_length=30, unique=True)
+    amount = models.DecimalField('مبلغ نهایی', max_digits=12, decimal_places=2)
+    original_amount = models.DecimalField('مبلغ اصلی', max_digits=12, decimal_places=2)
+    discount_amount = models.DecimalField('مبلغ تخفیف', max_digits=12, decimal_places=2, default=0)
+
+    # ============================================
+    # اطلاعات ثبت‌شده توسط کاربر
+    # ============================================
+    tracking_number = models.CharField('شماره پیگیری', max_length=50, blank=True)
+    payer_name = models.CharField('نام واریزکننده', max_length=100, blank=True)
+    payer_card_last4 = models.CharField('۴ رقم آخر کارت', max_length=4, blank=True)
+    paid_at = models.DateTimeField('زمان واریز', null=True, blank=True)
+    receipt_image = models.ImageField(
+        'تصویر فیش',
+        upload_to='payment_receipts/%Y/%m/',
+        null=True, blank=True
+    )
+    user_note = models.TextField('یادداشت کاربر', blank=True)
+
+    # ============================================
+    # وضعیت
+    # ============================================
+    status = models.CharField(
+        'وضعیت', max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending_payment',
+        db_index=True
+    )
+    reject_reason = models.TextField('دلیل رد', blank=True)
+
+    # ============================================
+    # زمان‌ها
+    # ============================================
+    created_at = models.DateTimeField('تاریخ ایجاد', default=timezone.now, db_index=True)
+    expires_at = models.DateTimeField('مهلت پرداخت')
+    submitted_at = models.DateTimeField('زمان ثبت فیش', null=True, blank=True)
+    reviewed_at = models.DateTimeField('زمان بررسی', null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='reviewed_payment_requests',
+        verbose_name='بررسی‌کننده'
+    )
+
+    # ============================================
+    # اطلاع‌رسانی
+    # ============================================
+    admin_notified = models.BooleanField('اطلاع به ادمین', default=False)
+    admin_notified_at = models.DateTimeField('زمان اطلاع به ادمین', null=True, blank=True)
+    user_notified = models.BooleanField('اطلاع به کاربر', default=False)
+    user_notified_at = models.DateTimeField('زمان اطلاع به کاربر', null=True, blank=True)
+    reminder_sent_at = models.DateTimeField('زمان ارسال یادآوری', null=True, blank=True)
+
+    class Meta:
+        db_table = 'subscriptions_paymentrequest'
+        verbose_name = 'درخواست پرداخت'
+        verbose_name_plural = 'درخواست‌های پرداخت'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['unique_code']),
+            models.Index(fields=['expires_at', 'status']),
+        ]
+
+    def __str__(self):
+        return f"PR#{self.id} - {self.user.phone_number} - {self.get_status_display()}"
+
+    # ============================================
+    # متدهای کمکی
+    # ============================================
+    def is_expired(self):
+        """آیا مهلت پرداخت تمام شده؟"""
+        return self.status == 'pending_payment' and timezone.now() > self.expires_at
+
+    def is_pending_payment(self):
+        return self.status == 'pending_payment'
+
+    def is_awaiting_review(self):
+        return self.status == 'awaiting_review'
+
+    def is_approved(self):
+        return self.status == 'approved'
+
+    def is_rejected(self):
+        return self.status == 'rejected'
+
+    def can_submit_receipt(self):
+        """آیا کاربر می‌تواند فیش ثبت کند؟"""
+        return self.status == 'pending_payment' and timezone.now() <= self.expires_at
+
+    def can_cancel(self):
+        """آیا کاربر می‌تواند لغو کند؟"""
+        return self.status in ('pending_payment', 'awaiting_review')
+
+    def get_remaining_seconds(self):
+        """ثانیه‌های باقیمانده تا انقضا"""
+        if self.status != 'pending_payment':
+            return 0
+        delta = self.expires_at - timezone.now()
+        return max(0, int(delta.total_seconds()))
+
+    # ============================================
+    # تولید کد یکتا
+    # ============================================
+    @classmethod
+    def generate_unique_code(cls):
+        """تولید کد یکتای کوتاه برای درخواست پرداخت"""
+        import uuid
+        from datetime import datetime
+        # PR-YYYYMMDD-XXXX (XXXX = 4 کاراکتر رندوم)
+        timestamp = datetime.now().strftime('%Y%m%d')
+        random_part = uuid.uuid4().hex[:6].upper()
+        return f"PR-{timestamp}-{random_part}"
+
+    # ============================================
+    # Submit receipt
+    # ============================================
+    def submit_receipt(self, tracking_number, payer_name='', payer_card_last4='',
+                       paid_at=None, receipt_image=None, user_note=''):
+        """
+        ثبت اطلاعات فیش توسط کاربر
+        وضعیت از pending_payment به awaiting_review تغییر می‌کند
+        """
+        if not self.can_submit_receipt():
+            return False, 'امکان ثبت فیش در این وضعیت وجود ندارد'
+
+        self.tracking_number = tracking_number
+        self.payer_name = payer_name
+        self.payer_card_last4 = payer_card_last4
+        self.paid_at = paid_at
+        self.user_note = user_note
+        if receipt_image:
+            self.receipt_image = receipt_image
+        self.status = 'awaiting_review'
+        self.submitted_at = timezone.now()
+        self.save()
+
+        # افزایش شمارنده استفاده کارت
+        if self.payment_card:
+            self.payment_card.usage_count = models.F('usage_count') + 1
+            self.payment_card.save(update_fields=['usage_count'])
+
+        return True, 'اطلاعات فیش با موفقیت ثبت شد'
+
+    # ============================================
+    # Approve (ادمین)
+    # ============================================
+    @transaction.atomic
+    def approve(self, admin_user):
+        """
+        تأیید درخواست توسط ادمین:
+        1. تغییر وضعیت به approved
+        2. تمدید خودکار اشتراک
+        3. ارسال پیامک به کاربر
+        """
+        if self.status != 'awaiting_review':
+            return False, 'فقط درخواست‌های در انتظار بررسی قابل تأیید هستند', None
+
+        self.status = 'approved'
+        self.reviewed_by = admin_user
+        self.reviewed_at = timezone.now()
+        self.save()
+
+        # تمدید اشتراک
+        subscription = self._renew_subscription()
+
+        return True, 'پرداخت با موفقیت تأیید شد', subscription
+
+    def _renew_subscription(self):
+        """تمدید یا ایجاد اشتراک بر اساس این پرداخت"""
+        user = self.user
+        plan = self.plan
+
+        # بررسی اشتراک فعال فعلی
+        existing_subscription = UserSubscription.objects.filter(
+            user=user,
+            is_active=True,
+            end_date__gt=timezone.now()
+        ).order_by('-end_date').first()
+
+        now = timezone.now()
+
+        if existing_subscription and not self._should_create_new_subscription(existing_subscription):
+            # تمدید اشتراک موجود
+            existing_subscription.end_date += timedelta(days=plan.duration_days)
+            existing_subscription.payment_status = 'paid'
+            existing_subscription.payment_reference = self.unique_code
+            existing_subscription.amount_paid = self.amount
+            existing_subscription.is_active = True
+            # افزایش محدودیت‌ها
+            existing_subscription.trades_limit += plan.monthly_trades_limit
+            existing_subscription.ai_consultations_limit += plan.monthly_ai_consultations_limit
+            existing_subscription.save()
+
+            self.subscription = existing_subscription
+            self.save(update_fields=['subscription'])
+            return existing_subscription
+        else:
+            # ایجاد اشتراک جدید
+            subscription = UserSubscription.objects.create(
+                user=user,
+                plan=plan,
+                discount_code=self.discount_code,
+                start_date=now,
+                end_date=now + timedelta(days=plan.duration_days),
+                is_active=True,
+                trades_limit=plan.monthly_trades_limit,
+                ai_consultations_limit=plan.monthly_ai_consultations_limit,
+                trades_used=0,
+                ai_consultations_used=0,
+                is_trial=False,
+                payment_status='paid',
+                payment_reference=self.unique_code,
+                amount_paid=self.amount,
+            )
+            self.subscription = subscription
+            self.save(update_fields=['subscription'])
+            return subscription
+
+    def _should_create_new_subscription(self, existing):
+        """آیا باید اشتراک جدید ایجاد شود یا تمدید؟"""
+        # اگر پلن کاربر با پلن جدید متفاوت است، اشتراک جدید بساز
+        if existing.plan_id != self.plan_id:
+            return True
+        # در غیر این صورت، تمدید کن
+        return False
+
+    # ============================================
+    # Reject (ادمین)
+    # ============================================
+    def reject(self, admin_user, reason):
+        """رد درخواست توسط ادمین"""
+        if self.status != 'awaiting_review':
+            return False, 'فقط درخواست‌های در انتظار بررسی قابل رد هستند'
+
+        self.status = 'rejected'
+        self.reject_reason = reason
+        self.reviewed_by = admin_user
+        self.reviewed_at = timezone.now()
+        self.save()
+
+        return True, 'پرداخت رد شد'
+
+    # ============================================
+    # Cancel (کاربر)
+    # ============================================
+    def cancel(self):
+        """لغو درخواست توسط کاربر"""
+        if not self.can_cancel():
+            return False, 'امکان لغو در این وضعیت وجود ندارد'
+
+        self.status = 'canceled'
+        self.save()
+        return True, 'درخواست لغو شد'
+
+    # ============================================
+    # Expire (Celery Task)
+    # ============================================
+    def mark_as_expired(self):
+        """علامت‌گذاری به عنوان منقضی"""
+        if self.status != 'pending_payment':
+            return False
+        self.status = 'expired'
+        self.save(update_fields=['status'])
+        return True

@@ -31,3 +31,10 @@
 .btn-gift:hover {
   background: #e06b0a;
 }
+/* ============================================ */
+/* ✅ تم تاریک - SubscriptionList */
+/* ============================================ */
+.admin-layout.dark .subscription-list-page .page-header h1,
+.admin-layout.dark-theme .subscription-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}

@@ -1,0 +1,692 @@
+/* frontend/src/pages/Admin/SMS/SmsInbox.css */
+
+.sms-inbox {
+  padding: 0;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.inbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.inbox-header h2 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0 0 4px 0;
+}
+
+.inbox-hint {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.unread-count-badge {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.selected-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6c63ff;
+  padding: 6px 12px;
+  background: #e7e5ff;
+  border-radius: 6px;
+}
+
+.btn-fetch-new {
+  padding: 8px 16px;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-fetch-new:hover:not(:disabled) {
+  background: #5a52d5;
+  transform: translateY(-1px);
+}
+
+.btn-fetch-new:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-bulk-mark {
+  padding: 8px 16px;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-bulk-mark:hover {
+  background: #1e7e34;
+}
+
+/* ============================================
+   Filters
+   ============================================ */
+.inbox-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  align-items: end;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.filter-item select,
+.filter-item input {
+  padding: 7px 10px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-item select:focus,
+.filter-item input:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.btn-reset-filters {
+  padding: 8px 14px;
+  background: #fff;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  height: 36px;
+}
+
+.btn-reset-filters:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* ============================================
+   Table
+   ============================================ */
+.inbox-table-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #f1f3f5;
+}
+
+.inbox-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+}
+
+.inbox-table thead {
+  background: #f8f9fa;
+}
+
+.inbox-table th {
+  padding: 12px 10px;
+  text-align: right;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #e8ecf1;
+  white-space: nowrap;
+}
+
+.inbox-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f3f5;
+  vertical-align: middle;
+}
+
+.inbox-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.inbox-table tbody tr.unread-row {
+  background: #fffbf0;
+  font-weight: 500;
+}
+
+.inbox-table tbody tr.unread-row:hover {
+  background: #fff7e6;
+}
+
+.read-indicator-cell {
+  font-size: 16px;
+  text-align: center;
+  width: 30px;
+}
+
+.date-cell {
+  font-size: 12px;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.phone-cell {
+  font-family: monospace;
+  font-size: 12px;
+  color: #212529;
+}
+
+.message-cell {
+  max-width: 400px;
+}
+
+.message-preview {
+  font-size: 13px;
+  color: #495057;
+  line-height: 1.5;
+}
+
+/* ============================================
+   Chips
+   ============================================ */
+.provider-chip {
+  display: inline-block;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.provider-chip.ghasedak {
+  background: #e7f3ff;
+}
+
+.provider-chip.sms_ir {
+  background: #d4edda;
+}
+
+/* ============================================
+   Actions
+   ============================================ */
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  padding: 5px 8px;
+  background: #f1f3f5;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #e8ecf1;
+  transform: scale(1.1);
+}
+
+.btn-icon.flagged {
+  background: #fff3cd;
+}
+
+/* ============================================
+   Pagination
+   ============================================ */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #5a52d5;
+}
+
+.pagination button:disabled {
+  background: #dee2e6;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 600;
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #adb5bd;
+  font-size: 14px;
+}
+
+/* ============================================
+   Modal
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.sms-detail-modal {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #f1f3f5;
+  color: #dc3545;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.detail-row.full {
+  flex-direction: column;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #6c757d;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #212529;
+  flex: 1;
+  word-break: break-word;
+}
+
+.detail-message {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: #212529;
+  border: 1px solid #e8ecf1;
+  margin-top: 4px;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .inbox-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .inbox-table {
+    font-size: 11px;
+  }
+
+  .inbox-table th,
+  .inbox-table td {
+    padding: 8px 6px;
+  }
+
+  .message-preview {
+    font-size: 11px;
+  }
+
+  .message-cell {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inbox-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .inbox-header {
+    flex-direction: column;
+  }
+}
+/* ============================================ */
+/* ✅ تم تاریک - SmsInbox */
+/* ============================================ */
+.admin-layout.dark .inbox-header h2,
+.admin-layout.dark-theme .inbox-header h2,
+body.dark-theme .inbox-header h2,
+html[data-theme="dark"] .inbox-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .inbox-hint,
+.admin-layout.dark-theme .inbox-hint,
+body.dark-theme .inbox-hint,
+html[data-theme="dark"] .inbox-hint {
+  color: #888 !important;
+}
+
+.admin-layout.dark .selected-count,
+.admin-layout.dark-theme .selected-count,
+body.dark-theme .selected-count,
+html[data-theme="dark"] .selected-count {
+  background: #1f3a5f !important;
+  color: #90caf9 !important;
+}
+
+/* فیلترها */
+.admin-layout.dark .inbox-filters,
+.admin-layout.dark-theme .inbox-filters,
+body.dark-theme .inbox-filters,
+html[data-theme="dark"] .inbox-filters {
+  background: #1a1f2e !important;
+  border: 1px solid #2a3040 !important;
+}
+
+.admin-layout.dark .filter-item label,
+.admin-layout.dark-theme .filter-item label,
+body.dark-theme .filter-item label,
+html[data-theme="dark"] .filter-item label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .filter-item select,
+.admin-layout.dark-theme .filter-item select,
+.admin-layout.dark .filter-item input,
+.admin-layout.dark-theme .filter-item input,
+body.dark-theme .filter-item select,
+html[data-theme="dark"] .filter-item select,
+body.dark-theme .filter-item input,
+html[data-theme="dark"] .filter-item input {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+/* جدول */
+.admin-layout.dark .inbox-table-wrapper,
+.admin-layout.dark-theme .inbox-table-wrapper,
+body.dark-theme .inbox-table-wrapper,
+html[data-theme="dark"] .inbox-table-wrapper {
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .inbox-table,
+.admin-layout.dark-theme .inbox-table,
+body.dark-theme .inbox-table,
+html[data-theme="dark"] .inbox-table {
+  background: #1a1f2e !important;
+}
+
+.admin-layout.dark .inbox-table thead,
+.admin-layout.dark-theme .inbox-table thead,
+body.dark-theme .inbox-table thead,
+html[data-theme="dark"] .inbox-table thead {
+  background: #151a26 !important;
+}
+
+.admin-layout.dark .inbox-table th,
+.admin-layout.dark-theme .inbox-table th,
+body.dark-theme .inbox-table th,
+html[data-theme="dark"] .inbox-table th {
+  color: #b0b8c8 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .inbox-table td,
+.admin-layout.dark-theme .inbox-table td,
+body.dark-theme .inbox-table td,
+html[data-theme="dark"] .inbox-table td {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .inbox-table tbody tr:hover,
+.admin-layout.dark-theme .inbox-table tbody tr:hover,
+body.dark-theme .inbox-table tbody tr:hover,
+html[data-theme="dark"] .inbox-table tbody tr:hover {
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .inbox-table tbody tr.unread-row,
+.admin-layout.dark-theme .inbox-table tbody tr.unread-row,
+body.dark-theme .inbox-table tbody tr.unread-row,
+html[data-theme="dark"] .inbox-table tbody tr.unread-row {
+  background: #2a1f0a !important;
+}
+
+.admin-layout.dark .inbox-table tbody tr.unread-row:hover,
+.admin-layout.dark-theme .inbox-table tbody tr.unread-row:hover,
+body.dark-theme .inbox-table tbody tr.unread-row:hover,
+html[data-theme="dark"] .inbox-table tbody tr.unread-row:hover {
+  background: #3a2f1a !important;
+}
+
+.admin-layout.dark .date-cell,
+.admin-layout.dark-theme .date-cell,
+body.dark-theme .date-cell,
+html[data-theme="dark"] .date-cell {
+  color: #888 !important;
+}
+
+.admin-layout.dark .phone-cell,
+.admin-layout.dark-theme .phone-cell,
+body.dark-theme .phone-cell,
+html[data-theme="dark"] .phone-cell {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .message-preview,
+.admin-layout.dark-theme .message-preview,
+body.dark-theme .message-preview,
+html[data-theme="dark"] .message-preview {
+  color: #b0b8c8 !important;
+}
+
+/* دکمه‌های آیکون */
+.admin-layout.dark .btn-icon,
+.admin-layout.dark-theme .btn-icon,
+body.dark-theme .btn-icon,
+html[data-theme="dark"] .btn-icon {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .btn-icon:hover,
+.admin-layout.dark-theme .btn-icon:hover,
+body.dark-theme .btn-icon:hover,
+html[data-theme="dark"] .btn-icon:hover {
+  background: #3a4050 !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .btn-icon.flagged,
+.admin-layout.dark-theme .btn-icon.flagged,
+body.dark-theme .btn-icon.flagged,
+html[data-theme="dark"] .btn-icon.flagged {
+  background: #4a3f1f !important;
+  color: #ffb74d !important;
+}
+
+/* صفحه‌بندی */
+.admin-layout.dark .pagination span,
+.admin-layout.dark-theme .pagination span,
+body.dark-theme .pagination span,
+html[data-theme="dark"] .pagination span {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .pagination button:disabled,
+.admin-layout.dark-theme .pagination button:disabled,
+body.dark-theme .pagination button:disabled,
+html[data-theme="dark"] .pagination button:disabled {
+  background: #2a3040 !important;
+  color: #6a7080 !important;
+}
+
+/* حالت خالی */
+.admin-layout.dark .empty-state,
+.admin-layout.dark-theme .empty-state,
+body.dark-theme .empty-state,
+html[data-theme="dark"] .empty-state {
+  color: #888 !important;
+}
+
+/* مودال */
+.admin-layout.dark .sms-detail-modal,
+.admin-layout.dark-theme .sms-detail-modal,
+body.dark-theme .sms-detail-modal,
+html[data-theme="dark"] .sms-detail-modal {
+  background: #1a1f2e !important;
+}
+
+.admin-layout.dark .modal-header,
+.admin-layout.dark-theme .modal-header,
+body.dark-theme .modal-header,
+html[data-theme="dark"] .modal-header {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .modal-header h3,
+.admin-layout.dark-theme .modal-header h3,
+body.dark-theme .modal-header h3,
+html[data-theme="dark"] .modal-header h3 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .btn-close,
+.admin-layout.dark-theme .btn-close,
+body.dark-theme .btn-close,
+html[data-theme="dark"] .btn-close {
+  color: #888 !important;
+}
+
+.admin-layout.dark .detail-label,
+.admin-layout.dark-theme .detail-label,
+body.dark-theme .detail-label,
+html[data-theme="dark"] .detail-label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .detail-value,
+.admin-layout.dark-theme .detail-value,
+body.dark-theme .detail-value,
+html[data-theme="dark"] .detail-value {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .detail-message,
+.admin-layout.dark-theme .detail-message,
+body.dark-theme .detail-message,
+html[data-theme="dark"] .detail-message {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}

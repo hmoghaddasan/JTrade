@@ -395,3 +395,131 @@
     gap: 4px;
   }
 }
+/* ============================================ */
+/* ✅ تم تاریک - PlanList */
+/* ============================================ */
+.admin-layout.dark .plan-list-page,
+.admin-layout.dark-theme .plan-list-page {
+  background: #0f1419 !important;
+}
+
+.admin-layout.dark .plan-list-page .page-header h1,
+.admin-layout.dark-theme .plan-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+/* جدول */
+.admin-layout.dark .plans-table,
+.admin-layout.dark-theme .plans-table {
+  background: #1a1f2e !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.admin-layout.dark .plans-table table,
+.admin-layout.dark-theme .plans-table table {
+  background: #1a1f2e !important;
+}
+
+.admin-layout.dark .plans-table th,
+.admin-layout.dark-theme .plans-table th {
+  background: #151a26 !important;
+  color: #b0b8c8 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .plans-table td,
+.admin-layout.dark-theme .plans-table td {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .plans-table tr:hover,
+.admin-layout.dark-theme .plans-table tr:hover {
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .plans-table .price,
+.admin-layout.dark-theme .plans-table .price {
+  color: #81c784 !important;
+}
+
+/* دکمه‌های عملیات */
+.admin-layout.dark .plans-table .actions .btn-edit:hover,
+.admin-layout.dark-theme .plans-table .actions .btn-edit:hover {
+  background: #1e3a5f !important;
+}
+
+.admin-layout.dark .plans-table .actions .btn-delete:hover,
+.admin-layout.dark-theme .plans-table .actions .btn-delete:hover {
+  background: #4a1f1f !important;
+}
+
+/* مودال */
+.admin-layout.dark .modal-content,
+.admin-layout.dark-theme .modal-content {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .modal-header h2,
+.admin-layout.dark-theme .modal-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .btn-close,
+.admin-layout.dark-theme .btn-close {
+  color: #888 !important;
+}
+
+.admin-layout.dark .btn-close:hover,
+.admin-layout.dark-theme .btn-close:hover {
+  color: #fff !important;
+}
+
+/* فرم */
+.admin-layout.dark .plan-form .form-group label,
+.admin-layout.dark-theme .plan-form .form-group label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .plan-form .form-group input,
+.admin-layout.dark-theme .plan-form .form-group input,
+.admin-layout.dark .plan-form .form-group select,
+.admin-layout.dark-theme .plan-form .form-group select,
+.admin-layout.dark .plan-form .form-group textarea,
+.admin-layout.dark-theme .plan-form .form-group textarea {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .plan-form .form-actions,
+.admin-layout.dark-theme .plan-form .form-actions {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .plan-form .btn-cancel,
+.admin-layout.dark-theme .plan-form .btn-cancel {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+  border-color: #3a4050 !important;
+}
+
+.admin-layout.dark .plan-form .btn-cancel:hover,
+.admin-layout.dark-theme .plan-form .btn-cancel:hover {
+  background: #3a4050 !important;
+}
+
+/* هشدار خطا */
+.admin-layout.dark .alert.error,
+.admin-layout.dark-theme .alert.error {
+  background: #4a1f1f !important;
+  color: #ff8888 !important;
+  border-color: #6a2f2f !important;
+}
+
+/* حالت خالی */
+.admin-layout.dark .empty-message,
+.admin-layout.dark-theme .empty-message {
+  color: #888 !important;
+}

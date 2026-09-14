@@ -1,4 +1,5 @@
 /* frontend/src/pages/Admin/Users/SendSMSModal.css */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -10,44 +11,62 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
 .modal-content {
   background: #fff;
   border-radius: 16px;
   padding: 32px;
-  max-width: 500px;
-  width: 90%;
+  max-width: 600px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-content h2 {
+.sms-send-modal h2 {
   font-size: 20px;
   color: #1a1a2e;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f3f5;
 }
 
+/* ============================================
+   Form Groups
+   ============================================ */
 .form-group {
   margin-bottom: 16px;
 }
 
-.form-group label {
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
   cursor: pointer;
+  font-weight: 500;
+  color: #495057;
 }
 
-.form-group input[type="checkbox"] {
+.checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: #6c63ff;
+  cursor: pointer;
 }
 
-.form-group textarea {
+.form-group > label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.form-group textarea,
+.form-group input[type="text"] {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #e8ecf1;
@@ -55,16 +74,31 @@
   font-size: 14px;
   font-family: inherit;
   resize: vertical;
-  min-height: 120px;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group input[type="text"]:focus {
   outline: none;
   border-color: #6c63ff;
   box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
 }
 
+/* ============================================
+   Hint
+   ============================================ */
+.form-group .hint {
+  display: block;
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* ============================================
+   Info Box
+   ============================================ */
 .info-box {
   background: #e8f0fe;
   padding: 10px 16px;
@@ -74,23 +108,220 @@
   margin-bottom: 16px;
 }
 
+.info-box strong {
+  color: #0d47a1;
+}
+
+/* ============================================
+   Template Select
+   ============================================ */
+.template-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  cursor: pointer;
+}
+
+.template-select:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.loading-templates,
+.empty-templates {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #6c757d;
+  text-align: center;
+}
+
+.empty-templates {
+  color: #dc3545;
+  background: #fff5f5;
+}
+
+/* ============================================
+   Template Info Box
+   ============================================ */
+.template-info-box {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-right: 3px solid #6c63ff;
+}
+
+.template-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.template-info-header strong {
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.template-info-desc {
+  font-size: 12px;
+  color: #6c757d;
+  margin: 4px 0 0 0;
+  line-height: 1.6;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.badge-otp {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-single {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* ============================================
+   Params Form
+   ============================================ */
+.params-form {
+  background: #f0f4ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-right: 3px solid #6c63ff;
+}
+
+.params-form .form-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.param-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.param-field:last-child {
+  margin-bottom: 0;
+}
+
+.param-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.param-key {
+  font-size: 11px;
+  color: #adb5bd;
+  font-family: monospace;
+  font-weight: normal;
+  direction: ltr;
+}
+
+.param-field input,
+.param-field textarea {
+  padding: 8px 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: #212529;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.param-field input:focus,
+.param-field textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+/* ============================================
+   Preview Box
+   ============================================ */
+.preview-box {
+  background: #fff9f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-right: 3px solid #f57c00;
+}
+
+.preview-box .form-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 10px;
+}
+
+.preview-content {
+  font-size: 13px;
+  color: #212529;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  background: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ffe4b5;
+  max-height: 250px;
+  overflow-y: auto;
+  word-break: break-word;
+}
+
+/* ============================================
+   Result Box
+   ============================================ */
 .result-box {
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: 6px;
   font-size: 14px;
   margin-bottom: 16px;
+  border-right: 3px solid;
 }
 
 .result-box.success {
   background: #e6f9ee;
   color: #28a745;
+  border-right-color: #28a745;
 }
 
 .result-box.error {
   background: #fee;
   color: #dc3545;
+  border-right-color: #dc3545;
 }
 
+/* ============================================
+   Modal Actions
+   ============================================ */
 .modal-actions {
   display: flex;
   gap: 12px;
@@ -100,10 +331,11 @@
 }
 
 .modal-actions button {
-  padding: 8px 20px;
+  padding: 10px 20px;
   border: none;
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -113,20 +345,215 @@
   color: #495057;
 }
 
-.modal-actions button[type="button"]:hover {
+.modal-actions button[type="button"]:hover:not(:disabled) {
   background: #e8ecf1;
 }
 
-.modal-actions button[type="submit"] {
+.modal-actions .btn-send {
   background: #6c63ff;
   color: #fff;
+  font-weight: 600;
 }
 
-.modal-actions button[type="submit"]:hover:not(:disabled) {
+.modal-actions .btn-send:hover:not(:disabled) {
   background: #5a52d5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
 }
 
 .modal-actions button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 20px;
+  }
+
+  .sms-send-modal h2 {
+    font-size: 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* ============================================ */
+/* ✅ تم تاریک - SendSMSModal */
+/* ============================================ */
+.admin-layout.dark .modal-content,
+.admin-layout.dark-theme .modal-content {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .sms-send-modal h2,
+.admin-layout.dark-theme .sms-send-modal h2 {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .checkbox-label,
+.admin-layout.dark-theme .checkbox-label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .form-group > label,
+.admin-layout.dark-theme .form-group > label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .form-group textarea,
+.admin-layout.dark-theme .form-group textarea,
+.admin-layout.dark .form-group input[type="text"],
+.admin-layout.dark-theme .form-group input[type="text"] {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .form-group .hint,
+.admin-layout.dark-theme .form-group .hint {
+  color: #888 !important;
+}
+
+/* Info Box */
+.admin-layout.dark .info-box,
+.admin-layout.dark-theme .info-box {
+  background: #1f3a5f !important;
+  color: #64b5f6 !important;
+}
+
+.admin-layout.dark .info-box strong,
+.admin-layout.dark-theme .info-box strong {
+  color: #90caf9 !important;
+}
+
+/* Template Select */
+.admin-layout.dark .template-select,
+.admin-layout.dark-theme .template-select {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .loading-templates,
+.admin-layout.dark-theme .loading-templates,
+.admin-layout.dark .empty-templates,
+.admin-layout.dark-theme .empty-templates {
+  background: #0f1419 !important;
+  color: #888 !important;
+}
+
+.admin-layout.dark .empty-templates,
+.admin-layout.dark-theme .empty-templates {
+  color: #ff8888 !important;
+  background: #4a1f1f !important;
+}
+
+/* Template Info Box */
+.admin-layout.dark .template-info-box,
+.admin-layout.dark-theme .template-info-box {
+  background: #0f1419 !important;
+  border-right-color: #6c63ff !important;
+}
+
+.admin-layout.dark .template-info-header strong,
+.admin-layout.dark-theme .template-info-header strong {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .template-info-desc,
+.admin-layout.dark-theme .template-info-desc {
+  color: #888 !important;
+}
+
+/* Params Form */
+.admin-layout.dark .params-form,
+.admin-layout.dark-theme .params-form {
+  background: #1f2535 !important;
+  border-right-color: #6c63ff !important;
+}
+
+.admin-layout.dark .params-form .form-title,
+.admin-layout.dark-theme .params-form .form-title {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .param-field label,
+.admin-layout.dark-theme .param-field label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .param-key,
+.admin-layout.dark-theme .param-key {
+  color: #6a7080 !important;
+}
+
+.admin-layout.dark .param-field input,
+.admin-layout.dark-theme .param-field input,
+.admin-layout.dark .param-field textarea,
+.admin-layout.dark-theme .param-field textarea {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+/* Preview Box */
+.admin-layout.dark .preview-box,
+.admin-layout.dark-theme .preview-box {
+  background: #3a2f1f !important;
+  border-right-color: #f57c00 !important;
+}
+
+.admin-layout.dark .preview-box .form-title,
+.admin-layout.dark-theme .preview-box .form-title {
+  color: #ffb74d !important;
+}
+
+.admin-layout.dark .preview-content,
+.admin-layout.dark-theme .preview-content {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #4a3f2f !important;
+}
+
+/* Result Box */
+.admin-layout.dark .result-box.success,
+.admin-layout.dark-theme .result-box.success {
+  background: #1f4a2f !important;
+  color: #81c784 !important;
+}
+
+.admin-layout.dark .result-box.error,
+.admin-layout.dark-theme .result-box.error {
+  background: #4a1f1f !important;
+  color: #ff8888 !important;
+}
+
+/* Modal Actions */
+.admin-layout.dark .modal-actions,
+.admin-layout.dark-theme .modal-actions {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .modal-actions button[type="button"],
+.admin-layout.dark-theme .modal-actions button[type="button"] {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .modal-actions button[type="button"]:hover:not(:disabled),
+.admin-layout.dark-theme .modal-actions button[type="button"]:hover:not(:disabled) {
+  background: #3a4050 !important;
 }

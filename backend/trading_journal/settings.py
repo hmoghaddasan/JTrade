@@ -207,22 +207,40 @@ DB_HOST = get_db_setting('db_host', os.environ.get('DB_HOST', 'localhost'))
 DB_PORT = get_db_setting('db_port', os.environ.get('DB_PORT', '3306'))
 
 # ============================================
-# ✅ SMS Providers Settings
+# ✅ SMS Settings (تنظیمات جدید - از دیتابیس)
 # ============================================
+# توجه: تمام تنظیمات پیامک الان از جدول sms_provider_config خوانده می‌شوند.
+# این متغیرها فقط برای سازگاری با کدهای قدیمی نگه داشته شده‌اند و
+# در آینده حذف خواهند شد.
 
-# SMS Provider (ghasedak / smsir / both)
-SMS_PROVIDER = get_db_setting('sms_provider', os.environ.get('SMS_PROVIDER', 'both'))
+# -- عمومی پیامک --
+ENABLE_SMS = get_db_bool('enable_sms', True)  # فعال/غیرفعال کلی سیستم پیامک
 
-# Ghasedak SMS Settings
-SMS_ENABLED = get_db_bool('sms_enabled', os.environ.get('SMS_ENABLED', 'False'))
-SMS_API_KEY = get_db_setting('sms_api_key', os.environ.get('SMS_API_KEY', ''))
-SMS_SENDER_NUMBER = get_db_setting('sms_sender_number', os.environ.get('SMS_SENDER_NUMBER', '3000****'))
-SMS_OTP_TEMPLATE = get_db_setting('sms_otp_template', os.environ.get('SMS_OTP_TEMPLATE', 'verifycode'))
+# -- اتوماسیون پیامک --
+SMS_AUTO_CHECK_STATUS = get_db_bool('sms_auto_check_status', True)
+SMS_AUTO_FETCH_INBOX = get_db_bool('sms_auto_fetch_inbox', True)
+SMS_CHECK_INTERVAL_MINUTES = get_db_int('sms_check_interval_minutes', 5)
+SMS_FETCH_INTERVAL_MINUTES = get_db_int('sms_fetch_interval_minutes', 5)
 
-# SMS.IR Settings
-SMSIR_API_KEY = get_db_setting('smsir_api_key', os.environ.get('SMSIR_API_KEY', ''))
-SMSIR_LINE_NUMBER = get_db_setting('smsir_line_number', os.environ.get('SMSIR_LINE_NUMBER', ''))
-SMSIR_VERIFY_TEMPLATE_ID = get_db_int('smsir_verify_template_id', int(os.environ.get('SMSIR_VERIFY_TEMPLATE_ID', 123456)))
+# -- هشدار به ادمین --
+SMS_ADMIN_ALERT_ENABLED = get_db_bool('sms_admin_alert_enabled', True)
+SMS_ALERT_MIN_SEVERITY = get_db_setting('sms_alert_min_severity', 'high')
+SMS_ALERT_COOLDOWN_MINUTES = get_db_int('sms_alert_cooldown_minutes', 15)
+SMS_ALERT_USE_FALLBACK_PROVIDER = get_db_bool('sms_alert_use_fallback_provider', True)
+
+# ============================================
+# ⚠️ تنظیمات قدیمی SMS (برای سازگاری با کدهای قبلی در apps/subscriptions/sms.py)
+# این‌ها نگه داشته می‌شوند تا وقتی که کدهای قدیمی حذف شوند.
+# پس از مهاجرت کامل، این بخش کامنت یا حذف می‌شود.
+# ============================================
+SMS_PROVIDER = get_db_setting('sms_provider', 'smsir')
+SMS_ENABLED = get_db_bool('sms_enabled', False)
+SMS_API_KEY = get_db_setting('sms_api_key', '')
+SMS_SENDER_NUMBER = get_db_setting('sms_sender_number', '')
+SMS_OTP_TEMPLATE = get_db_setting('sms_otp_template', 'Verify')
+SMSIR_API_KEY = get_db_setting('smsir_api_key', '')
+SMSIR_LINE_NUMBER = get_db_setting('smsir_line_number', '')
+SMSIR_VERIFY_TEMPLATE_ID = get_db_int('smsir_verify_template_id', 201692)
 
 # -- پرداخت (زرین‌پال) --
 ZARINPAL_MERCHANT_ID = get_db_setting('zarinpal_merchant_id', os.environ.get('ZARINPAL_MERCHANT_ID', 'c9f6ca76-02cf-11e9-a61e-005056a205be'))
@@ -243,7 +261,7 @@ ADMIN_PHONE_NUMBER = get_db_setting('admin_phone_number', os.environ.get('ADMIN_
 
 
 # ============================================
-# ✅ تنظیمات لاگ (بهینه‌شده - با نمایش لاگ‌های OTP)
+# ✅ تنظیمات لاگ (بهینه‌شده)
 # ============================================
 LOGGING = {
     'version': 1,
@@ -259,6 +277,10 @@ LOGGING = {
         },
         'ai_formatter': {
             'format': '🧠 {levelname} {asctime} [AI] {message}',
+            'style': '{',
+        },
+        'sms_formatter': {
+            'format': '📱 {levelname} {asctime} [SMS] {message}',
             'style': '{',
         },
     },
@@ -278,6 +300,12 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'ai_consultations.log'),
             'formatter': 'ai_formatter',
+            'encoding': 'utf-8',
+        },
+        'sms_file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'sms.log'),
+            'formatter': 'sms_formatter',
             'encoding': 'utf-8',
         },
     },
@@ -336,6 +364,12 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        # 🆕 لاگ‌های سیستم پیامک
+        'apps.sms': {
+            'handlers': ['console', 'sms_file', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'requests': {
             'handlers': ['console', 'file'],
             'level': 'ERROR',
@@ -374,6 +408,7 @@ INSTALLED_APPS = [
     'apps.messaging',
     'apps.admin_panel',
     'apps.import',
+    'apps.sms',                # 🆕 سیستم پیامک
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -546,15 +581,6 @@ ZARINPAL_CALLBACK_URL = os.environ.get('ZARINPAL_CALLBACK_URL', 'http://localhos
 
 
 # ============================================
-# تنظیمات SMS (سازگاری با کدهای قبلی)
-# ============================================
-SMS_API_KEY = os.environ.get('SMS_API_KEY', '')
-SMS_SENDER_NUMBER = os.environ.get('SMS_SENDER_NUMBER', '3000****')
-SMS_OTP_TEMPLATE = os.environ.get('SMS_OTP_TEMPLATE', 'verifycode')
-SMS_ENABLED = bool(SMS_API_KEY)
-
-
-# ============================================
 # تنظیمات سرویس‌های قیمت لحظه‌ای
 # ============================================
 LIVE_PRICE_PROVIDER = os.environ.get('LIVE_PRICE_PROVIDER', 'none')
@@ -573,6 +599,37 @@ MAX_IMAGE_HEIGHT = int(os.environ.get('MAX_IMAGE_HEIGHT', 2000))
 IMAGE_QUALITY = int(os.environ.get('IMAGE_QUALITY', 85))
 MAX_IMAGE_SIZE_MB = int(os.environ.get('MAX_IMAGE_SIZE_MB', 5))
 SHOW_SCREENSHOT_UPLOAD = os.environ.get('SHOW_SCREENSHOT_UPLOAD', 'True') == 'True'
+
+
+# ============================================
+# 🆕 Celery Settings (اختیاری - فقط اگر Redis نصب است)
+# ============================================
+# ⚠️ توجه: در حال حاضر Celery غیرفعال است چون Redis روی ویندوز نصب نیست.
+# برای فعال‌سازی، Redis را نصب کنید و این بخش را از کامنت خارج کنید.
+# در غیر این صورت، از management commands استفاده کنید:
+#   python manage.py check_sms_status
+#   python manage.py fetch_sms_inbox
+
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'
+
+# ⚠️ این بخش را فقط وقتی Redis و Celery فعال است، از کامنت خارج کنید:
+# CELERY_BEAT_SCHEDULE = {
+#     'check-sms-status': {
+#         'task': 'sms.check_pending_status',
+#         'schedule': 300.0,  # هر ۵ دقیقه
+#     },
+#     'fetch-sms-inbox': {
+#         'task': 'sms.fetch_inbox',
+#         'schedule': 300.0,  # هر ۵ دقیقه
+#     },
+# }
+
+CELERY_BEAT_SCHEDULE = {}  # فعلاً خالی
 
 
 # ============================================

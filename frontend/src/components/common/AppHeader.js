@@ -22,9 +22,7 @@ const AppHeader = () => {
   const dropdownRef = useRef(null);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // ============================================
-  // ✅ دریافت نسخه از سرور - مانند Dashboard.js
-  // ============================================
+  // دریافت نسخه از سرور
   useEffect(() => {
     const loadVersion = async () => {
       try {
@@ -35,7 +33,6 @@ const AppHeader = () => {
         }
       } catch (error) {
         console.warn('⚠️ Unable to fetch version from server, using fallback:', error);
-        // استفاده از نسخه پیش‌فرض در صورت خطا
         const envVersion = process.env.REACT_APP_VERSION;
         if (envVersion) {
           setAppVersion(envVersion);
@@ -45,20 +42,17 @@ const AppHeader = () => {
     loadVersion();
   }, []);
 
-  // تشخیص اسکرول - محو شدن عنوان و کلیدها
+  // تشخیص اسکرول
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (currentScrollY > 50) {
         setScrolled(true);
       } else {
         setScrolled(false);
       }
-
       setLastScrollY(currentScrollY);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -79,33 +73,136 @@ const AppHeader = () => {
     setShowTradeDropdown(false);
     navigate('/trades/new');
   };
-
   const handleImportCSV = () => {
     setShowTradeDropdown(false);
     navigate('/import');
   };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
   const handleGoToMetrics = () => navigate('/advanced-metrics');
   const handleGoToComparison = () => navigate('/portfolio-comparison');
   const handleGoToDiscipline = () => navigate('/discipline');
   const handleGoToDashboard = () => navigate('/dashboard');
 
-  // تشخیص صفحه فعلی برای هایلایت منوها
   const isActive = (path) => location.pathname === path;
 
-  // اگر کاربر ادمین است، هدر متفاوت نمایش داده نشود
   if (user?.is_admin && location.pathname.startsWith('/admin')) {
     return null;
   }
 
+  // ============================================
+  // ✅ استایل‌های inline - قطعی و بدون نیاز به CSS
+  // ============================================
+  const headerBtnBase = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '4px',
+    padding: '5px 10px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: '500',
+    fontFamily: 'inherit',
+    whiteSpace: 'nowrap',
+    textDecoration: 'none',
+    transition: 'all 0.3s ease',
+    minHeight: '32px',
+    height: '32px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
+    overflow: 'hidden',
+    border: 'none',
+    outline: 'none',
+  };
+
+  const iconStyle = {
+    fontSize: '14px',
+    lineHeight: '1',
+    background: 'transparent',
+    backgroundColor: 'transparent',
+    padding: '0',
+    margin: '0',
+    border: 'none',
+    color: 'inherit',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 'auto',
+    height: 'auto',
+    boxShadow: 'none',
+  };
+
+  const textStyle = {
+    fontSize: '11px',
+    background: 'transparent',
+    backgroundColor: 'transparent',
+    padding: '0',
+    margin: '0',
+    border: 'none',
+    color: 'inherit',
+    display: 'inline-block',
+  };
+
+  // استایل‌های رنگی برای هر دکمه (inline)
+  const homeBtnStyle = {
+    ...headerBtnBase,
+    background: 'rgba(100, 180, 255, 0.25)',
+    color: '#ffffff',
+    border: '1px solid rgba(100, 180, 255, 0.4)',
+  };
+
+  const metricsBtnStyle = {
+    ...headerBtnBase,
+    background: 'rgba(255, 215, 0, 0.25)',
+    color: '#ffffff',
+    border: '1px solid rgba(255, 215, 0, 0.4)',
+  };
+
+  const comparisonBtnStyle = {
+    ...headerBtnBase,
+    background: 'rgba(0, 230, 200, 0.25)',
+    color: '#ffffff',
+    border: '1px solid rgba(0, 230, 200, 0.4)',
+  };
+
+  const disciplineBtnStyle = {
+    ...headerBtnBase,
+    background: 'rgba(200, 150, 255, 0.25)',
+    color: '#ffffff',
+    border: '1px solid rgba(200, 150, 255, 0.4)',
+  };
+
+  const themeBtnStyle = {
+    ...headerBtnBase,
+    background: 'rgba(255, 200, 100, 0.25)',
+    color: '#ffffff',
+    border: '1px solid rgba(255, 200, 100, 0.4)',
+  };
+
+  const logoutBtnStyle = {
+    ...headerBtnBase,
+    background: 'rgba(255, 100, 100, 0.25)',
+    color: '#ffffff',
+    border: '1px solid rgba(255, 100, 100, 0.4)',
+  };
+
+  // هندلرهای هاور
+  const handleHoverIn = (e) => {
+    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.25)';
+  };
+
+  const handleHoverOut = (e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.12)';
+  };
+
   return (
     <header className={`app-header ${scrolled ? 'scrolled' : ''} ${isDark ? 'dark' : 'light'}`}>
-      {/* ===== بخش بالایی هدر (عنوان + کلیدهای سریع) - در حالت اسکرول مخفی می‌شود ===== */}
       <div className={`header-top ${scrolled ? 'header-top-hidden' : ''}`}>
         <div className="header-left-group">
           <Link to="/dashboard" className="header-title-link">
@@ -118,71 +215,87 @@ const AppHeader = () => {
           </Link>
         </div>
 
+        {/* ============================================ */}
+        {/* ✅ کلیدهای ردیف بالا با Inline Style */}
+        {/* ============================================ */}
         <div className="header-right">
-          {/* ===== کلید خانه (داشبورد) - اولین کلید ===== */}
+          {/* کلید خانه */}
           <button
-            className="header-btn home-btn"
+            style={homeBtnStyle}
             onClick={handleGoToDashboard}
+            onMouseEnter={handleHoverIn}
+            onMouseLeave={handleHoverOut}
             title="داشبورد اصلی"
           >
-            <span className="btn-icon">🏠</span>
-            {/* <span className="btn-text">داشبورد</span>*/}
+            <span style={iconStyle}>🏠</span>
           </button>
 
+          {/* کلید شاخص‌ها */}
           <button
-            className="header-btn metrics-btn"
+            style={metricsBtnStyle}
             onClick={handleGoToMetrics}
+            onMouseEnter={handleHoverIn}
+            onMouseLeave={handleHoverOut}
             title="شاخص‌های پیشرفته"
           >
-            <span className="btn-icon">🎯</span>
-            <span className="btn-text">شاخص‌ها</span>
+            <span style={iconStyle}>🎯</span>
+            <span style={textStyle}>شاخص‌ها</span>
           </button>
 
+          {/* کلید مقایسه */}
           <button
-            className="header-btn comparison-btn"
+            style={comparisonBtnStyle}
             onClick={handleGoToComparison}
+            onMouseEnter={handleHoverIn}
+            onMouseLeave={handleHoverOut}
             title="مقایسه پورتفولیوها"
           >
-            <span className="btn-icon">⚖️</span>
-            <span className="btn-text">مقایسه</span>
+            <span style={iconStyle}>⚖️</span>
+            <span style={textStyle}>مقایسه</span>
           </button>
 
+          {/* کلید انضباط */}
           <button
-            className="header-btn discipline-btn"
+            style={disciplineBtnStyle}
             onClick={handleGoToDiscipline}
+            onMouseEnter={handleHoverIn}
+            onMouseLeave={handleHoverOut}
             title="ابزارهای انضباطی"
           >
-            <span className="btn-icon">🛡️</span>
-            <span className="btn-text">انضباط</span>
+            <span style={iconStyle}>🛡️</span>
+            <span style={textStyle}>انضباط</span>
           </button>
 
+          {/* کلید تم */}
           <button
-            className="header-btn theme-btn"
+            style={themeBtnStyle}
             onClick={toggleTheme}
+            onMouseEnter={handleHoverIn}
+            onMouseLeave={handleHoverOut}
             title={isDark ? 'حالت روشن' : 'حالت تاریک'}
           >
-            <span className="btn-icon">{isDark ? '☀️' : '🌙'}</span>
-            <span className="btn-text">{isDark ? 'روشن' : 'تاریک'}</span>
+            <span style={iconStyle}>{isDark ? '☀️' : '🌙'}</span>
+            <span style={textStyle}>{isDark ? 'روشن' : 'تاریک'}</span>
           </button>
 
+          {/* کلید خروج */}
           <button
-            className="header-btn logout-btn"
+            style={logoutBtnStyle}
             onClick={handleLogout}
+            onMouseEnter={handleHoverIn}
+            onMouseLeave={handleHoverOut}
             title="خروج از حساب کاربری"
           >
-            <span className="btn-icon">❌</span>
-            {/*<span className="btn-text">خروج</span>*/}
+            <span style={iconStyle}>❌</span>
           </button>
         </div>
       </div>
 
-      {/* ===== خط فاصله بین عنوان و منوها ===== */}
       <div className="header-divider"></div>
 
-      {/* ===== بخش منوهای اصلی (شش‌گانه + پورتفولیو) - همیشه قابل مشاهده ===== */}
+      {/* ===== منوهای ردیف پایین - بدون تغییر ===== */}
       <div className="header-menu">
         <div className="menu-items">
-          {/* منوی ترید جدید - یکپارچه با فلش */}
           <div className="menu-item-wrapper" ref={dropdownRef}>
             <div className="menu-dropdown-container">
               <button
@@ -218,7 +331,6 @@ const AppHeader = () => {
             </div>
           </div>
 
-          {/* سایر منوها */}
           <button
             className={`menu-btn secondary-btn ${isActive('/trades') ? 'active' : ''}`}
             onClick={() => navigate('/trades')}
@@ -262,7 +374,6 @@ const AppHeader = () => {
             <span className="menu-text">پنل کاربری</span>
           </button>
 
-          {/* ===== سلکتور پورتفولیو ===== */}
           <div className="portfolio-menu-wrapper">
             <div className="portfolio-selector-container">
               <PortfolioSelector />

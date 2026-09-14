@@ -14,3 +14,10 @@
   color: #1a1a2e;
   margin: 0;
 }
+/* ============================================ */
+/* ✅ تم تاریک - BrokerList */
+/* ============================================ */
+.admin-layout.dark .broker-list-page .page-header h1,
+.admin-layout.dark-theme .broker-list-page .page-header h1 {
+  color: #e0e0e0 !important;
+}

@@ -5,6 +5,7 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   margin-top: 16px;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .table-wrapper {
@@ -21,6 +22,7 @@
 .data-table thead {
   background: #f8f9fa;
   border-bottom: 2px solid #e8ecf1;
+  transition: background 0.3s ease;
 }
 
 .data-table th {
@@ -30,6 +32,7 @@
   color: #495057;
   white-space: nowrap;
   user-select: none;
+  transition: color 0.3s ease;
 }
 
 .data-table td {
@@ -37,10 +40,11 @@
   border-bottom: 1px solid #f1f3f5;
   color: #212529;
   vertical-align: middle;
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
 
-.data-table tbody tr:hover {
-  background: #f8f9fa;
+.data-table tbody tr {
+  transition: background 0.2s ease;
 }
 
 .data-table tbody tr:last-child td {
@@ -80,23 +84,6 @@
   color: #495057;
 }
 
-.action-btn:hover {
-  background: #f1f3f5;
-  border-color: #ced4da;
-}
-
-.action-btn.danger:hover {
-  background: #fee;
-  border-color: #dc3545;
-  color: #dc3545;
-}
-
-.action-btn.success:hover {
-  background: #e6f9ee;
-  border-color: #28a745;
-  color: #28a745;
-}
-
 .table-pagination {
   display: flex;
   justify-content: center;
@@ -104,6 +91,7 @@
   padding: 16px 20px;
   border-top: 1px solid #e8ecf1;
   gap: 16px;
+  transition: border-color 0.3s ease;
 }
 
 .table-pagination button {
@@ -114,11 +102,6 @@
   cursor: pointer;
   font-size: 13px;
   transition: all 0.2s ease;
-}
-
-.table-pagination button:hover:not(:disabled) {
-  background: #f1f3f5;
-  border-color: #ced4da;
 }
 
 .table-pagination button:disabled {

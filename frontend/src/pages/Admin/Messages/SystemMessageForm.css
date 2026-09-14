@@ -265,3 +265,54 @@
     width: 100%;
   }
 }
+/* ============================================ */
+/* ✅ تم تاریک - SystemMessageForm (هماهنگ با AdminLayout) */
+/* ============================================ */
+.admin-layout.dark .system-message-form,
+.admin-layout.dark-theme .system-message-form {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .system-message-form .page-header h2,
+.admin-layout.dark-theme .system-message-form .page-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .system-message-form .form-container,
+.admin-layout.dark-theme .system-message-form .form-container {
+  background: #1a1f2e !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.admin-layout.dark .system-message-form .form-group label,
+.admin-layout.dark-theme .system-message-form .form-group label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .system-message-form .form-group input,
+.admin-layout.dark-theme .system-message-form .form-group input,
+.admin-layout.dark .system-message-form .form-group textarea,
+.admin-layout.dark-theme .system-message-form .form-group textarea,
+.admin-layout.dark .system-message-form .form-group select,
+.admin-layout.dark-theme .system-message-form .form-group select {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .system-message-form .form-group .hint,
+.admin-layout.dark-theme .system-message-form .form-group .hint {
+  color: #888 !important;
+}
+
+.admin-layout.dark .system-message-form .form-actions,
+.admin-layout.dark-theme .system-message-form .form-actions {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .system-message-form .btn-cancel,
+.admin-layout.dark-theme .system-message-form .btn-cancel {
+  border-color: #3a4050 !important;
+  color: #b0b8c8 !important;
+}

@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import RealApiService from '../../services/realApiService';
+import PaymentRequestModal from '../payment/PaymentRequestModal';
 import './SubscriptionRenewal.css';
 import LoadingBar from './../common/LoadingBar';
 
@@ -24,6 +25,9 @@ const SubscriptionRenewal = () => {
   const [discountMessage, setDiscountMessage] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  // ✅ State برای مودال پرداخت کارت به کارت
+  const [createdPaymentRequest, setCreatedPaymentRequest] = useState(null);
 
   const [bankPaymentEnabled, setBankPaymentEnabled] = useState(true);
   const [cardPaymentEnabled, setCardPaymentEnabled] = useState(true);
@@ -213,6 +217,9 @@ const SubscriptionRenewal = () => {
     }
   };
 
+  // ============================================
+  // ✅ پرداخت از درگاه بانکی (زرین‌پال)
+  // ============================================
   const handleBankPayment = async () => {
     if (!selectedPlan) {
       setMessage({ type: 'error', text: 'لطفاً یک پلن را انتخاب کنید.' });
@@ -250,89 +257,75 @@ const SubscriptionRenewal = () => {
     }
   };
 
-  const handleCardPayment = () => {
+  // ============================================
+  // ✅ پرداخت کارت به کارت (سیستم جدید)
+  // ============================================
+  const handleCardPayment = async () => {
     if (!selectedPlan) {
       setMessage({ type: 'error', text: 'لطفاً یک پلن را انتخاب کنید.' });
       return;
     }
 
-    const priceWithoutVat = getPriceWithoutVat(selectedPlan?.price || 0);
-
-    const now = new Date();
-    const persianDate = now.toLocaleDateString('fa-IR');
-    const persianTime = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-
-    const userFullName = user?.full_name || user?.first_name + ' ' + user?.last_name || 'کاربر';
-    const userPhone = user?.phone_number || 'نامشخص';
-    const userEmail = user?.email || 'ثبت نشده';
-
-    const planName = selectedPlan?.plan_name || 'نامشخص';
-    const planType = selectedPlan?.plan_type || 'basic';
-    const planTypeLabel = getPlanTypeLabel(planType);
-    const durationDays = selectedPlan?.duration_days || 0;
-    const tradesLimit = selectedPlan?.monthly_trades_limit || 0;
-    const aiLimit = selectedPlan?.monthly_ai_consultations_limit || 0;
-
-    const aiDisplay = aiLimit >= 999 ? '♾️ نامحدود' : `${aiLimit} عدد`;
-
-    const originalPrice = parseFloat(selectedPlan?.price || 0);
-    const priceWithoutVatRounded = Math.round(priceWithoutVat);
-    const discountedPrice = getPriceWithDiscount(originalPrice);
-    const discountedPriceRounded = Math.round(discountedPrice);
-
-    const messageText =
-`📋 درخواست پرداخت کارت به کارت
-━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-👤 **اطلاعات کاربر:**
-• نام و نام خانوادگی: ${userFullName}
-• شماره تلفن: ${userPhone}
-• ایمیل: ${userEmail}
-• شناسه کاربری: #${user?.id || 'نامشخص'}
-
-📌 **اطلاعات پلن انتخابی:**
-• نام پلن: ${planName} (${planTypeLabel})
-• مدت زمان: ${durationDays} روز
-• تعداد ترید: ${tradesLimit} ترید در ماه
-• مشاوره AI: ${aiDisplay}
-• شناسه پلن: #${selectedPlan?.id || 'نامشخص'}
-
-💰 **جزئیات مالی:`
-    + (discountApplied && discountPercent > 0 ? `
-• قیمت اصلی: ${originalPrice.toLocaleString()} تومان
-• تخفیف (${discountPercent}%): -${Math.round(originalPrice * discountPercent / 100).toLocaleString()} تومان
-• قیمت پس از تخفیف: ${discountedPriceRounded.toLocaleString()} تومان` : `
-• قیمت: ${originalPrice.toLocaleString()} تومان`)
-    + `
-• مالیات (۱۰٪): ${Math.round(originalPrice * 0.1).toLocaleString()} تومان (معاف برای کارت به کارت)
-• مبلغ قابل پرداخت: ${priceWithoutVatRounded.toLocaleString()} تومان
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📅 تاریخ درخواست: ${persianDate} - ${persianTime}
-
-🔹 لطفاً شماره کارت را برای واریز مبلغ ${priceWithoutVatRounded.toLocaleString()} تومان ارسال فرمایید.
-
-با تشکر
-${userFullName}`;
+    setProcessing(true);
+    setMessage({ type: '', text: '' });
 
     try {
-      RealApiService.sendMessage({
-        subject: `درخواست پرداخت کارت به کارت - ${userFullName}`,
-        message: messageText
-      }).then((response) => {
-        console.log('📨 Message sent successfully:', response.data);
-        showToast('✅ درخواست شما با موفقیت به پشتیبانی ارسال شد.', 'success');
-        setMessage({ type: 'success', text: '✅ درخواست شما به پشتیبانی ارسال شد.' });
-      }).catch((error) => {
-        console.error('❌ Error sending message:', error);
-        showToast('❌ خطا در ارسال درخواست.', 'error');
-        setMessage({ type: 'error', text: '❌ خطا در ارسال درخواست.' });
-      });
+      const response = await RealApiService.createPaymentRequest(
+        selectedPlan.id,
+        discountApplied ? discountCode : '',
+        null  // کارت خودکار (طبق تنظیمات ادمین: random/default/manual)
+      );
+
+      if (response.data?.success) {
+        const paymentRequest = response.data.payment_request;
+
+        if (paymentRequest) {
+          showToast('✅ درخواست پرداخت با موفقیت ثبت شد', 'success');
+          setMessage({
+            type: 'success',
+            text: '✅ درخواست پرداخت ثبت شد. لطفاً اطلاعات کارت را ببینید و فیش را ثبت کنید.'
+          });
+
+          // ✅ نمایش مودال اطلاعات کارت (بدون ریدایرکت فوری)
+          setCreatedPaymentRequest(paymentRequest);
+        } else {
+          setMessage({
+            type: 'success',
+            text: '✅ درخواست پرداخت ثبت شد'
+          });
+        }
+      } else {
+        setMessage({
+          type: 'error',
+          text: response.data?.error || 'خطا در ثبت درخواست پرداخت'
+        });
+      }
     } catch (error) {
-      console.error('❌ Error:', error);
-      showToast('❌ خطا در ارسال درخواست.', 'error');
-      setMessage({ type: 'error', text: '❌ خطا در ارسال درخواست.' });
+      console.error('Card payment error:', error);
+
+      let errorMsg = 'خطا در ثبت درخواست پرداخت';
+      if (error.response?.data?.error) {
+        errorMsg = error.response.data.error;
+      } else if (error.response?.data?.detail) {
+        errorMsg = error.response.data.detail;
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+
+      setMessage({ type: 'error', text: `❌ ${errorMsg}` });
+      showToast(`❌ ${errorMsg}`, 'error');
+    } finally {
+      setProcessing(false);
     }
+  };
+
+  // ============================================
+  // ✅ پس از بسته شدن مودال
+  // ============================================
+  const handlePaymentModalClose = () => {
+    setCreatedPaymentRequest(null);
+    // اختیاری: به داشبورد برو تا بنر بالای صفحه دیده شود
+    navigate('/dashboard');
   };
 
   if (loading) {
@@ -517,7 +510,7 @@ ${userFullName}`;
 
           {selectedPlan ? (
             <>
-              {/* باکس خلاصه سفارش - کل عرض - کامل‌تر */}
+              {/* باکس خلاصه سفارش */}
               <div className="summary-order-box">
                 <div className="order-info">
                   <span className="order-item">
@@ -605,7 +598,7 @@ ${userFullName}`;
                     onClick={handleCardPayment}
                     disabled={processing || !cardPaymentEnabled}
                   >
-                    {!cardPaymentEnabled ? '⛔ غیرفعال' : '📨 درخواست شماره کارت از پشتیبانی'}
+                    {!cardPaymentEnabled ? '⛔ غیرفعال' : processing ? '⏳ در حال ثبت...' : '📨 درخواست شماره کارت از پشتیبانی'}
                   </button>
                 </div>
               </div>
@@ -619,6 +612,17 @@ ${userFullName}`;
           )}
         </div>
       </div>
+
+      {/* ============================================ */}
+      {/* ✅ مودال پرداخت کارت به کارت */}
+      {/* ============================================ */}
+      {createdPaymentRequest && (
+        <PaymentRequestModal
+          paymentRequest={createdPaymentRequest}
+          onClose={handlePaymentModalClose}
+          onSuccess={handlePaymentModalClose}
+        />
+      )}
     </div>
   );
 };

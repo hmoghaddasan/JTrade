@@ -26,6 +26,7 @@ const menuItems = [
       { path: '/admin/system-messages', icon: '📢', label: 'پیام‌های سیستمی' },
     ]
   },
+  { path: '/admin/sms/providers', icon: '📱', label: 'پیامک' },   // 🆕 خط جدید
   { path: '/admin/versions', icon: '📌', label: 'نسخه‌ها' },
   { path: '/admin/settings', icon: '⚙️', label: 'تنظیمات' },
 ];

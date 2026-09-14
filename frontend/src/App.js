@@ -13,6 +13,9 @@ import PaymentVerify from './components/PaymentVerify';
 import RealApiService from './services/realApiService';
 import PortfolioComparisonPage from './pages/PortfolioComparisonPage';
 import DisciplineDashboard from './pages/DisciplineDashboard';
+import SmsDashboard from './pages/Admin/SMS/SmsDashboard';
+// ===== Finance Tabs و صفحات جدید =====
+import FinanceTabs from './pages/Admin/Finance/FinanceTabs';
 
 // ===== کامپوننت Layout =====
 import AppLayout from './components/common/AppLayout';
@@ -400,8 +403,10 @@ function AppRoutes() {
           <Route path="subscriptions" element={<SubscriptionList />} />
           <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
           <Route path="subscription-plans" element={<PlanList />} />
-          <Route path="finance" element={<TransactionList />} />
-          <Route path="finance/report" element={<SalesReport />} />
+          <Route path="finance" element={<FinanceTabs />} />
+          <Route path="finance/payment-requests" element={<FinanceTabs />} />
+          <Route path="finance/payment-cards" element={<FinanceTabs />} />
+          <Route path="finance/report" element={<FinanceTabs />} />
           <Route path="discounts" element={<DiscountList />} />
           <Route path="symbols" element={<SymbolList />} />
           <Route path="brokers" element={<BrokerList />} />
@@ -416,6 +421,7 @@ function AppRoutes() {
           <Route path="system-messages/:id/edit" element={<SystemMessageForm />} />
           <Route path="portfolios" element={<PortfolioList />} />
           <Route path="versions" element={<VersionList />} />
+          <Route path="sms/*" element={<SmsDashboard />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 

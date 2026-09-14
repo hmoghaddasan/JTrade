@@ -395,3 +395,108 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+/* ============================================ */
+/* ✅ تم تاریک - PortfolioList (هماهنگ با AdminLayout) */
+/* ============================================ */
+.admin-layout.dark .admin-portfolio-list,
+.admin-layout.dark-theme .admin-portfolio-list {
+  background: #0f1419 !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .admin-portfolio-list .page-header h1,
+.admin-layout.dark-theme .admin-portfolio-list .page-header h1 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .filter-bar select,
+.admin-layout.dark-theme .filter-bar select {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .table-container,
+.admin-layout.dark-theme .table-container {
+  background: #1a1f2e !important;
+}
+
+.admin-layout.dark .portfolios-table th,
+.admin-layout.dark-theme .portfolios-table th {
+  background: #151a26 !important;
+  color: #b0b8c8 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .portfolios-table td,
+.admin-layout.dark-theme .portfolios-table td {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .portfolios-table tr:hover,
+.admin-layout.dark-theme .portfolios-table tr:hover {
+  background: #1f2535 !important;
+}
+
+.admin-layout.dark .empty-state,
+.admin-layout.dark-theme .empty-state {
+  color: #888 !important;
+}
+
+/* مودال */
+.admin-layout.dark .modal-content,
+.admin-layout.dark-theme .modal-content {
+  background: #1a1f2e !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .modal-header h2,
+.admin-layout.dark-theme .modal-header h2 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .modal-close,
+.admin-layout.dark-theme .modal-close {
+  color: #888 !important;
+}
+
+.admin-layout.dark .form-group label,
+.admin-layout.dark-theme .form-group label {
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .form-group input,
+.admin-layout.dark-theme .form-group input,
+.admin-layout.dark .form-group select,
+.admin-layout.dark-theme .form-group select,
+.admin-layout.dark .form-group textarea,
+.admin-layout.dark-theme .form-group textarea {
+  background: #0f1419 !important;
+  border-color: #2a3040 !important;
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .icon-btn,
+.admin-layout.dark-theme .icon-btn {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .icon-btn.selected,
+.admin-layout.dark-theme .icon-btn.selected {
+  background: rgba(76, 175, 80, 0.2) !important;
+  border-color: #4CAF50 !important;
+}
+
+.admin-layout.dark .btn-cancel,
+.admin-layout.dark-theme .btn-cancel {
+  background: #2a3040 !important;
+  border-color: #3a4050 !important;
+  color: #b0b8c8 !important;
+}
+
+.admin-layout.dark .form-actions,
+.admin-layout.dark-theme .form-actions {
+  border-top-color: #2a3040 !important;
+}

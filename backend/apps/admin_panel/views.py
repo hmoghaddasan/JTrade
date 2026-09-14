@@ -24,7 +24,15 @@ from apps.subscriptions.models import SubscriptionPlan, UserSubscription, Discou
 from apps.trading.models import Trade, TradeGroup, CurrencyPair, AIConsultation, AIPromptVersion, AIConsultationAnalytics, Portfolio, Broker
 from apps.messaging.models import UserMessage, SystemMessage, SupportInfo
 from apps.accounts.permissions import IsAdminUser
-from apps.subscriptions.sms import GhasedakSMS
+
+# ✅ Import سرویس جدید پیامک
+try:
+    from apps.sms.services import SmsService
+    SMS_SERVICE_AVAILABLE = True
+except ImportError as e:
+    SMS_SERVICE_AVAILABLE = False
+    SmsService = None
+
 from .models import AdminActionLog
 from .serializers import (
     AdminUserSerializer, AdminUserUpdateSerializer, AdminUserDetailSerializer,
@@ -253,7 +261,6 @@ class AdminUserListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = User.objects.all()
 
-        # فیلتر بر اساس وضعیت
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active.lower() == 'true')
@@ -266,7 +273,6 @@ class AdminUserListView(generics.ListAPIView):
         if is_verified is not None:
             queryset = queryset.filter(is_verified=is_verified.lower() == 'true')
 
-        # فیلتر بر اساس اشتراک فعال
         has_subscription = self.request.query_params.get('has_subscription')
         if has_subscription is not None:
             if has_subscription.lower() == 'true':
@@ -280,7 +286,6 @@ class AdminUserListView(generics.ListAPIView):
                     user_subscriptions__end_date__gt=timezone.now()
                 ).distinct()
 
-        # فیلتر بر اساس تاریخ ثبت
         date_from = self.request.query_params.get('date_from')
         if date_from:
             queryset = queryset.filter(created_at__date__gte=date_from)
@@ -355,7 +360,6 @@ class AdminUserDeleteView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # بررسی اشتراک‌های فعال
             if user.user_subscriptions.filter(is_active=True).exists():
                 return Response(
                     {'error': 'این کاربر دارای اشتراک فعال است. ابتدا اشتراک را لغو کنید.'},
@@ -376,22 +380,59 @@ class AdminUserDeleteView(APIView):
 
 
 class AdminUserSendSMSView(APIView):
-    """ارسال پیامک به کاربر (تکی یا گروهی)"""
+    """
+    ارسال پیامک به کاربر (تکی یا گروهی) با SmsService جدید
+
+    ✅ نکته مهم:
+    فرانت‌اند context را در فیلد 'context' می‌فرستد.
+    بک‌اند باید context را مستقیماً به SmsService.send_event پاس بدهد
+    تا پارامترها با همان نام اصلی به provider ارسال شوند.
+
+    برای قالب‌های send_method='single' (admin_single, admin_bulk):
+    - SmsService به صورت خودکار از send_single (سرشماره) استفاده می‌کند
+    - متن از template.render_single(context) ساخته می‌شود
+
+    برای قالب‌های send_method='otp':
+    - SmsService از send_otp_multi استفاده می‌کند
+    - context باید پارامترهای provider را داشته باشد
+    """
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def post(self, request):
         user_ids = request.data.get('user_ids', [])
-        message_text = request.data.get('message', '')
+        message_text = request.data.get('message', '').strip()
         send_to_all = request.data.get('send_to_all', False)
+        use_template = request.data.get('use_template', False)
+        template_event = request.data.get('template_event', '')
 
-        if not message_text:
+        # ✅ اصلاح کلیدی: هم context و هم template_context را بپذیر
+        # فرانت‌اند از فیلد 'context' استفاده می‌کند
+        template_context = (
+            request.data.get('context')
+            or request.data.get('template_context')
+            or {}
+        )
+
+        logger.info(f"📥 [AdminSendSMS] user_ids={user_ids}, send_to_all={send_to_all}")
+        logger.info(f"📥 [AdminSendSMS] use_template={use_template}, event={template_event}")
+        logger.info(f"📥 [AdminSendSMS] context={template_context}")
+
+        # اعتبارسنجی
+        if use_template and not template_event:
+            return Response(
+                {'error': 'اگر از قالب استفاده می‌کنید، انتخاب رویداد الزامی است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not use_template and not message_text:
             return Response(
                 {'error': 'متن پیامک الزامی است'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # انتخاب گیرندگان
         if send_to_all:
-            users = User.objects.filter(is_active=True)
+            users = User.objects.filter(is_active=True, is_verified=True)
         elif user_ids:
             users = User.objects.filter(id__in=user_ids, is_active=True)
         else:
@@ -406,32 +447,67 @@ class AdminUserSendSMSView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        sms = GhasedakSMS()
+        # بررسی در دسترس بودن سرویس
+        if not SMS_SERVICE_AVAILABLE or not SmsService:
+            return Response(
+                {'error': 'سرویس پیامک در دسترس نیست'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        # ارسال با SmsService جدید
+        sms_service = SmsService()
         sent_count = 0
         failed_count = 0
         errors = []
 
         for user in users:
-            if user.phone_number:
-                try:
-                    result = sms.send_sms(user.phone_number, message_text)
-                    if result.get('success'):
-                        sent_count += 1
-                    else:
-                        failed_count += 1
-                        errors.append(f"{user.phone_number}: {result.get('error', 'خطا')}")
-                except Exception as e:
-                    failed_count += 1
-                    errors.append(f"{user.phone_number}: {str(e)}")
+            if not user.phone_number:
+                continue
 
-            # ثبت لاگ
-            AdminActionLog.objects.create(
-                admin=request.user,
-                action_type='send_sms',
-                target_model='User',
-                target_id=user.id,
-                description=f'ارسال پیامک به {user.phone_number}'
-            )
+            try:
+                if use_template:
+                    # ✅ ارسال با قالب - context مستقیم ارسال می‌شود
+                    # SmsService خودش تصمیم می‌گیرد که از send_single یا send_otp_multi استفاده کند
+                    # بر اساس send_method قالب
+                    logger.info(
+                        f"📤 [AdminSendSMS] ارسال با قالب '{template_event}' "
+                        f"به {user.phone_number} با context={template_context}"
+                    )
+                    result = sms_service.send_event(
+                        event_key=template_event,
+                        phone_number=user.phone_number,
+                        context=template_context,     # ← context دقیقاً همان‌طور که فرستاده شده
+                        user=user,
+                        related_object_type='admin_bulk',
+                        priority='high',
+                    )
+                else:
+                    # ارسال با متن آزاد
+                    # این حالت از event_key='admin_single' یا 'admin_bulk' استفاده می‌کند
+                    # که send_method='single' دارند و با سرشماره ارسال می‌شوند
+                    if len(users) == 1:
+                        result = sms_service.send_admin_single(user, message_text)
+                    else:
+                        result = sms_service.send_admin_bulk(user, message_text)
+
+                if result.get('success'):
+                    sent_count += 1
+                else:
+                    failed_count += 1
+                    errors.append(f"{user.phone_number}: {result.get('error_message', 'خطا')}")
+
+            except Exception as e:
+                failed_count += 1
+                errors.append(f"{user.phone_number}: {str(e)}")
+                logger.error(f"Error sending SMS to {user.phone_number}: {e}")
+
+        # ثبت لاگ ادمین
+        AdminActionLog.objects.create(
+            admin=request.user,
+            action_type='send_sms',
+            target_model='User',
+            description=f'ارسال پیامک به {sent_count} کاربر'
+        )
 
         return Response({
             'sent_count': sent_count,
@@ -519,6 +595,22 @@ class AdminSubscriptionExtendView(APIView):
                            (f' - {reason}' if reason else '')
             )
 
+            # ارسال پیامک تمدید توسط ادمین
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_subscription_renewed_by_admin(
+                        user=subscription.user,
+                        plan_name=subscription.plan.plan_name,
+                        end_date=subscription.end_date,
+                        days=additional_days,
+                        reason=reason or '',
+                        subscription_id=subscription.id,
+                    )
+                    logger.info(f"✅ Admin extend SMS sent to {subscription.user.phone_number}")
+                except Exception as e:
+                    logger.error(f"❌ Error sending admin extend SMS: {str(e)}")
+
             return Response({
                 'message': 'اشتراک با موفقیت تمدید شد',
                 'new_end_date': subscription.end_date,
@@ -542,7 +634,6 @@ class AdminSubscriptionGiftView(APIView):
         only_active = serializer.validated_data.get('only_active', True)
         reason = serializer.validated_data.get('reason', '')
 
-        # فیلتر اشتراک‌ها
         queryset = UserSubscription.objects.filter(is_active=True)
         if only_active:
             queryset = queryset.filter(end_date__gt=timezone.now())
@@ -560,6 +651,22 @@ class AdminSubscriptionGiftView(APIView):
         for subscription in queryset:
             subscription.end_date = subscription.end_date + timedelta(days=days)
             subscription.save()
+
+            # ارسال پیامک هدیه به هر کاربر
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_subscription_renewed_by_admin(
+                        user=subscription.user,
+                        plan_name=subscription.plan.plan_name,
+                        end_date=subscription.end_date,
+                        days=days,
+                        reason=reason or '🎁 هدیه از طرف مدیریت',
+                        subscription_id=subscription.id,
+                    )
+                except Exception as e:
+                    logger.error(f"❌ Error sending gift SMS to {subscription.user.phone_number}: {str(e)}")
+
             count += 1
 
         AdminActionLog.objects.create(
@@ -668,7 +775,6 @@ class AdminSalesReportView(APIView):
         total_revenue = transactions.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         avg_price = transactions.aggregate(Avg('total_amount'))['total_amount__avg'] or 0
 
-        # تفکیک بر اساس پلن
         plan_breakdown = []
         plans = SubscriptionPlan.objects.filter(is_active=True)
         for plan in plans:
@@ -683,7 +789,6 @@ class AdminSalesReportView(APIView):
                     'percentage': round((count / total_sales * 100), 2) if total_sales > 0 else 0
                 })
 
-        # داده‌های روزانه/ماهانه
         daily_data = transactions.annotate(
             date=group_by
         ).values('date').annotate(
@@ -691,7 +796,6 @@ class AdminSalesReportView(APIView):
             revenue=Sum('total_amount')
         ).order_by('date')
 
-        # داده‌های ماهانه
         monthly_data = transactions.annotate(
             month=TruncMonth('created_at')
         ).values('month').annotate(
@@ -748,7 +852,7 @@ class AdminSalesExportView(APIView):
 
 
 # ================================
-# ۵. مدیریت کدهای تخفیف (توسعه کامل)
+# ۵. مدیریت کدهای تخفیف
 # ================================
 class AdminDiscountListView(generics.ListCreateAPIView):
     """لیست و ایجاد کد تخفیف"""
@@ -806,7 +910,7 @@ class AdminDiscountDeleteView(APIView):
 
 
 # ================================
-# ۶. مدیریت نمادها (جفت ارزها) - جدید
+# ۶. مدیریت نمادها
 # ================================
 class AdminCurrencyPairListView(generics.ListCreateAPIView):
     """لیست و ایجاد نماد"""
@@ -866,7 +970,7 @@ class AdminCurrencyPairDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # ================================
-# ۷. مدیریت مشاوره‌های AI - جدید
+# ۷. مدیریت مشاوره‌های AI
 # ================================
 class AdminAIConsultationListView(generics.ListAPIView):
     """لیست مشاوره‌ها با فیلترهای پیشرفته"""
@@ -880,27 +984,22 @@ class AdminAIConsultationListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = AIConsultation.objects.all()
 
-        # فیلتر بر اساس وضعیت
-        status = self.request.query_params.get('status')
-        if status:
-            queryset = queryset.filter(status=status)
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
 
-        # فیلتر بر اساس نماد
         symbol = self.request.query_params.get('symbol')
         if symbol:
             queryset = queryset.filter(symbol__icontains=symbol)
 
-        # فیلتر بر اساس کاربر
         user_id = self.request.query_params.get('user_id')
         if user_id:
             queryset = queryset.filter(user_id=user_id)
 
-        # فیلتر بر اساس مدل
         model_used = self.request.query_params.get('model_used')
         if model_used:
             queryset = queryset.filter(model_used=model_used)
 
-        # فیلتر بر اساس بازخورد
         has_feedback = self.request.query_params.get('has_feedback')
         if has_feedback is not None:
             if has_feedback.lower() == 'true':
@@ -908,7 +1007,6 @@ class AdminAIConsultationListView(generics.ListAPIView):
             else:
                 queryset = queryset.filter(feedback_score__isnull=True)
 
-        # فیلتر بر اساس تاریخ
         date_from = self.request.query_params.get('date_from')
         if date_from:
             queryset = queryset.filter(created_at__date__gte=date_from)
@@ -927,13 +1025,12 @@ class AdminAIConsultationDetailView(generics.RetrieveAPIView):
 
 
 class AdminAIAnalyticsView(APIView):
-    """تحلیل عملکرد AI - جدید"""
+    """تحلیل عملکرد AI"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def get(self, request):
         consultations = AIConsultation.objects.all()
 
-        # تحلیل بر اساس مدل
         model_analytics = []
         models = consultations.values_list('model_used', flat=True).distinct()
 
@@ -950,11 +1047,9 @@ class AdminAIAnalyticsView(APIView):
             avg_score = model_cons.aggregate(avg=Avg('ai_score'))['avg'] or 0
             avg_feedback = model_cons.filter(feedback_score__isnull=False).aggregate(avg=Avg('feedback_score'))['avg'] or 0
 
-            # محاسبه نرخ موفقیت (بر اساس بازخورد مثبت)
             positive_feedback = model_cons.filter(feedback_score__gte=4).count()
             success_rate = (positive_feedback / with_feedback * 100) if with_feedback > 0 else 0
 
-            # نمادهای پرکاربرد
             top_symbol = model_cons.values('symbol').annotate(count=Count('id')).order_by('-count').first()
 
             model_analytics.append({
@@ -968,7 +1063,6 @@ class AdminAIAnalyticsView(APIView):
                 'usage_percentage': round((total / consultations.count() * 100), 1) if consultations.count() > 0 else 0
             })
 
-        # آمار کلی بازخورد
         feedback_stats = consultations.filter(feedback_score__isnull=False).aggregate(
             avg=Avg('feedback_score'),
             count=Count('id'),
@@ -979,7 +1073,6 @@ class AdminAIAnalyticsView(APIView):
             score_1=Count('id', filter=Q(feedback_score=1)),
         )
 
-        # توزیع امتیازات
         score_distribution = {
             '1': feedback_stats['score_1'] or 0,
             '2': feedback_stats['score_2'] or 0,
@@ -1005,7 +1098,7 @@ class AdminAIAnalyticsView(APIView):
 
 
 # ================================
-# ۸. مدیریت نسخه نرم‌افزار - جدید
+# ۸. مدیریت نسخه نرم‌افزار
 # ================================
 class AdminAppVersionListView(generics.ListCreateAPIView):
     """لیست و ایجاد نسخه"""
@@ -1021,7 +1114,6 @@ class AdminAppVersionListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         version = serializer.save()
-        # اگر current است، بقیه را غیرفعال کن
         if version.is_current:
             AppVersion.objects.exclude(id=version.id).update(is_current=False)
 
@@ -1080,7 +1172,7 @@ class AdminAppVersionDeleteView(APIView):
 
 
 # ================================
-# ۹. مدیریت پلن‌های اشتراک - جدید
+# ۹. مدیریت پلن‌های اشتراک
 # ================================
 class AdminSubscriptionPlanListView(generics.ListCreateAPIView):
     """لیست و ایجاد پلن اشتراک"""
@@ -1129,7 +1221,6 @@ class AdminSubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
         )
 
     def perform_destroy(self, instance):
-        # بررسی وجود اشتراک فعال برای این پلن
         if instance.user_subscriptions.filter(is_active=True).exists():
             return Response(
                 {'error': 'این پلن دارای اشتراک فعال است. ابتدا اشتراک‌ها را غیرفعال کنید.'},
@@ -1146,14 +1237,10 @@ class AdminSubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # ================================
-# ۹. مدیریت تنظیمات سیستم - نسخه نهایی با ViewSet + پشتیبانی از روش قبلی
+# ۱۰. مدیریت تنظیمات سیستم
 # ================================
-
-# ===== قسمت ۱: ViewSet جدید برای تنظیمات =====
 class SystemSettingViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet برای مدیریت تنظیمات سیستم
-    """
+    """ViewSet برای مدیریت تنظیمات سیستم"""
     queryset = SystemSetting.objects.all()
     serializer_class = AdminSystemSettingSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
@@ -1164,10 +1251,7 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['put', 'post', 'patch'], url_path='update')
     def update_settings(self, request):
-        """
-        به‌روزرسانی دسته‌ای تنظیمات
-        پشتیبانی از PUT, POST, PATCH
-        """
+        """به‌روزرسانی دسته‌ای تنظیمات"""
         data = request.data
         updated = []
         errors = []
@@ -1177,12 +1261,10 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
         logger.info("📥 RECEIVED SETTINGS UPDATE (ViewSet)")
         logger.info(f"📥 Method: {request.method}")
         logger.info(f"📥 All keys: {list(data.keys())}")
-        logger.info(f"📥 gapgpt_api_key: {data.get('gapgpt_api_key', 'NOT FOUND')}")
         logger.info("=" * 60)
 
         for key, value in data.items():
             try:
-                # تبدیل boolean به string
                 if isinstance(value, bool):
                     value = str(value).lower()
 
@@ -1196,7 +1278,6 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
                     else:
                         errors.append(f"{key}: قابل ویرایش نیست")
                 except SystemSetting.DoesNotExist:
-                    # اگر تنظیم وجود ندارد، ایجاد کن
                     setting = SystemSetting.objects.create(
                         setting_key=key,
                         setting_value=str(value),
@@ -1211,7 +1292,6 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
                 errors.append(f"{key}: {str(e)}")
                 logger.error(f"❌ Error updating {key}: {str(e)}")
 
-        # ثبت لاگ
         try:
             AdminActionLog.objects.create(
                 admin=request.user,
@@ -1231,7 +1311,6 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
         })
 
 
-# ===== قسمت ۲: کلاس قبلی برای لیست تنظیمات =====
 class AdminSettingsListView(generics.ListAPIView):
     """لیست تنظیمات سیستم"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
@@ -1245,10 +1324,9 @@ class AdminSettingsListView(generics.ListAPIView):
         return SystemSetting.objects.all()
 
 
-# ===== قسمت ۳: کلاس پشتیبان برای سازگاری با مسیر قبلی =====
 @method_decorator(csrf_exempt, name='dispatch')
 class AdminSettingsUpdateView(APIView):
-    """به‌روزرسانی تنظیمات (دسته‌ای) - نسخه پشتیبان برای سازگاری"""
+    """به‌روزرسانی تنظیمات (دسته‌ای) - نسخه پشتیبان"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def put(self, request):
@@ -1261,22 +1339,13 @@ class AdminSettingsUpdateView(APIView):
         return self._update_settings(request)
 
     def _update_settings(self, request):
-        """هسته اصلی به‌روزرسانی تنظیمات - نسخه پشتیبان"""
         data = request.data
         updated = []
         errors = []
         created = []
 
-        logger.info("=" * 60)
-        logger.info("📥 RECEIVED SETTINGS UPDATE (Fallback)")
-        logger.info(f"📥 Method: {request.method}")
-        logger.info(f"📥 All keys: {list(data.keys())}")
-        logger.info(f"📥 gapgpt_api_key: {data.get('gapgpt_api_key', 'NOT FOUND')}")
-        logger.info("=" * 60)
-
         for key, value in data.items():
             try:
-                # تبدیل boolean به string
                 if isinstance(value, bool):
                     value = str(value).lower()
 
@@ -1286,11 +1355,9 @@ class AdminSettingsUpdateView(APIView):
                         setting.setting_value = str(value)
                         setting.save()
                         updated.append(key)
-                        logger.info(f"✅ Updated setting: {key} = {value}")
                     else:
                         errors.append(f"{key}: قابل ویرایش نیست")
                 except SystemSetting.DoesNotExist:
-                    # اگر تنظیم وجود ندارد، ایجاد کن
                     setting = SystemSetting.objects.create(
                         setting_key=key,
                         setting_value=str(value),
@@ -1299,13 +1366,10 @@ class AdminSettingsUpdateView(APIView):
                         is_editable=True
                     )
                     created.append(key)
-                    logger.info(f"✅ Created setting: {key} = {value}")
 
             except Exception as e:
                 errors.append(f"{key}: {str(e)}")
-                logger.error(f"❌ Error updating {key}: {str(e)}")
 
-        # ثبت لاگ
         try:
             AdminActionLog.objects.create(
                 admin=request.user,
@@ -1326,7 +1390,7 @@ class AdminSettingsUpdateView(APIView):
 
 
 # ================================
-# ۱۰. مدیریت پیام‌های کاربران - توسعه کامل
+# ۱۱. مدیریت پیام‌های کاربران
 # ================================
 class AdminMessageListView(generics.ListAPIView):
     """لیست پیام‌های کاربران"""
@@ -1370,7 +1434,7 @@ class AdminMessageDetailView(generics.RetrieveAPIView):
 
 
 class AdminMessageReplyView(APIView):
-    """پاسخ به پیام کاربر"""
+    """پاسخ به پیام کاربر - با SmsService جدید"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def post(self, request, pk):
@@ -1393,16 +1457,18 @@ class AdminMessageReplyView(APIView):
                 description=f'پاسخ به پیام کاربر {message.user.phone_number}'
             )
 
-            # ارسال پیامک
-            if send_sms:
+            # ارسال پیامک پاسخ با SmsService جدید
+            if send_sms and SMS_SERVICE_AVAILABLE and SmsService:
                 try:
-                    sms = GhasedakSMS()
-                    sms.send_sms(
-                        message.user.phone_number,
-                        f"پاسخ به پیام شما در ژورنال ترید:\n{reply[:200]}"
+                    sms_service = SmsService()
+                    sms_service.send_admin_reply(
+                        user=message.user,
+                        subject=message.subject,
+                        message_id=message.id,
                     )
+                    logger.info(f"✅ Reply SMS sent to {message.user.phone_number}")
                 except Exception as e:
-                    logger.error(f"Error sending reply SMS: {str(e)}")
+                    logger.error(f"❌ Error sending reply SMS: {str(e)}")
 
             return Response({
                 'message': 'پاسخ با موفقیت ارسال شد',
@@ -1433,7 +1499,7 @@ class AdminMessageDeleteView(APIView):
 
 
 # ================================
-# ۱۱. مدیریت تریدها (ادمین) - جدید
+# ۱۲. مدیریت تریدها (ادمین)
 # ================================
 class AdminTradeListView(generics.ListAPIView):
     """لیست تریدها با فیلترهای پیشرفته"""
@@ -1551,7 +1617,7 @@ class AdminTradesExportView(APIView):
 
 
 # ================================
-# ۱۲. خروجی‌های اکسل عمومی
+# ۱۳. خروجی‌های اکسل عمومی
 # ================================
 class ExportUsersExcelView(APIView):
     """خروجی اکسل کاربران"""
@@ -1616,7 +1682,7 @@ class ExportSubscriptionsExcelView(APIView):
 
 
 # ================================
-# مدیریت پورتفولیوها (ادمین)
+# ۱۴. مدیریت پورتفولیوها (ادمین)
 # ================================
 class AdminPortfolioListView(generics.ListCreateAPIView):
     """لیست و ایجاد پورتفولیو برای ادمین"""
@@ -1646,7 +1712,7 @@ class AdminPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # ================================
-# مدیریت بروکرها (کارگزاران) - جدید
+# ۱۵. مدیریت بروکرها (کارگزاران)
 # ================================
 class AdminBrokerListView(generics.ListCreateAPIView):
     """لیست و ایجاد بروکر"""

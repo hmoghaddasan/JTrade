@@ -37,3 +37,41 @@
   background: #f0e6ff;
   color: #6c63ff;
 }
+/* ============================================ */
+/* ✅ تم تاریک - StatusBadge */
+/* ============================================ */
+.admin-layout.dark .status-badge.green,
+.admin-layout.dark-theme .status-badge.green {
+  background: #1f4a2f !important;
+  color: #81c784 !important;
+}
+
+.admin-layout.dark .status-badge.red,
+.admin-layout.dark-theme .status-badge.red {
+  background: #4a1f1f !important;
+  color: #ff8888 !important;
+}
+
+.admin-layout.dark .status-badge.orange,
+.admin-layout.dark-theme .status-badge.orange {
+  background: #4a351f !important;
+  color: #ffb74d !important;
+}
+
+.admin-layout.dark .status-badge.blue,
+.admin-layout.dark-theme .status-badge.blue {
+  background: #1f3a5f !important;
+  color: #64b5f6 !important;
+}
+
+.admin-layout.dark .status-badge.gray,
+.admin-layout.dark-theme .status-badge.gray {
+  background: #2a3040 !important;
+  color: #9aa5b5 !important;
+}
+
+.admin-layout.dark .status-badge.purple,
+.admin-layout.dark-theme .status-badge.purple {
+  background: #3a2a5f !important;
+  color: #b39ddb !important;
+}
