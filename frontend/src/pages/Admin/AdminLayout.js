@@ -8,10 +8,20 @@ import './AdminLayout.css';
 import './AdminStyles.css';
 
 const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // ✅ در دسکتاپ پیش‌فرض باز، در موبایل پیش‌فرض بسته
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 992;
+    }
+    return true;
+  });
+
   const navigate = useNavigate();
   const { isDark } = useTheme();
 
+  // ============================================
+  // ✅ بررسی احراز هویت ادمین
+  // ============================================
   useEffect(() => {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
@@ -37,14 +47,38 @@ const AdminLayout = () => {
     }
   }, [navigate]);
 
+  // ============================================
+  // ✅ مدیریت resize - بستن/باز کردن خودکار سایدبار
+  // ============================================
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 992) {
+        // در موبایل، همیشه بسته شود
+        setSidebarOpen(false);
+      } else {
+        // در دسکتاپ، باز شود
+        setSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // ============================================
+  // ✅ توابع کنترل سایدبار
+  // ============================================
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const closeSidebar = () => setSidebarOpen(false);
+
   // ✅ اعمال هر دو کلاس "dark" و "dark-theme" برای سازگاری با CSS موجود
   const themeClass = isDark ? 'dark dark-theme' : 'light';
 
   return (
     <div className={`admin-layout ${themeClass}`}>
-      <AdminSidebar isOpen={sidebarOpen} />
+      <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className={`admin-main ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <AdminHeader toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <AdminHeader toggleSidebar={toggleSidebar} />
         <div className="admin-content">
           <Outlet />
         </div>

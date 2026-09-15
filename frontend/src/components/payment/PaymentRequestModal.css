@@ -1,55 +1,71 @@
 /* frontend/src/components/payment/PaymentRequestModal.css */
 
+/* ============================================ */
+/* مودال اصلی اطلاعات پرداخت                     */
+/* ============================================ */
 .payment-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 3000;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: modalOverlayFadeIn 0.25s ease;
 }
 
-@keyframes fadeIn {
+@keyframes modalOverlayFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 .payment-modal-content {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
   max-width: 560px;
   width: 100%;
   max-height: 92vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  animation: slideUp 0.3s ease;
+  animation: modalSlideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* ===== Header ===== */
+/* ============================================ */
+/* Header                                        */
+/* ============================================ */
 .payment-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 18px 24px;
   border-bottom: 2px solid #f1f3f5;
+  flex-shrink: 0;
 }
 
 .payment-modal-header h2 {
   margin: 0;
   font-size: 18px;
   color: #1a1a2e;
+  font-weight: 700;
 }
 
 .payment-modal-close {
@@ -58,11 +74,15 @@
   font-size: 28px;
   cursor: pointer;
   color: #adb5bd;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   transition: all 0.2s;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .payment-modal-close:hover {
@@ -70,46 +90,58 @@
   color: #dc3545;
 }
 
-/* ===== Timer ===== */
+/* ============================================ */
+/* Timer / Status Banner                        */
+/* ============================================ */
 .payment-timer {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: #e8f5e9;
-  color: #2e7d32;
-  font-weight: 600;
+  gap: 10px;
+  padding: 12px 18px;
+  margin: 16px 24px;
+  background: #e3f2fd;
+  border-right: 4px solid #1a73e8;
+  border-radius: 10px;
   font-size: 14px;
-  border-bottom: 1px solid #c8e6c9;
+  color: #1565c0;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .payment-timer.warning {
-  background: #fff3e0;
+  background: #fff8e1;
+  border-right-color: #ff9800;
   color: #e65100;
-  border-bottom-color: #ffe0b2;
 }
 
 .payment-timer.expired {
   background: #ffebee;
+  border-right-color: #dc3545;
   color: #c62828;
-  border-bottom-color: #ffcdd2;
+}
+
+.payment-timer.awaiting {
+  background: #f3e5f5;
+  border-right-color: #9c27b0;
+  color: #6a1b9a;
 }
 
 .timer-icon {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .timer-text {
-  font-family: monospace;
-  font-size: 15px;
+  flex: 1;
 }
 
-/* ===== Card Info ===== */
+/* ============================================ */
+/* Card Info                                     */
+/* ============================================ */
 .payment-card-info {
-  padding: 20px 24px;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .payment-card-row {
@@ -117,94 +149,100 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px dashed #f1f3f5;
-}
-
-.payment-card-row:last-child {
-  border-bottom: none;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #f1f3f5;
+  flex-wrap: wrap;
 }
 
 .payment-card-row.highlight {
-  background: #f0fdf4;
-  margin: 0 -12px;
-  padding: 12px;
-  border-radius: 8px;
-  border-bottom: none;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border: 2px solid #c8e6c9;
+  padding: 14px;
 }
 
 .payment-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #6c757d;
-  font-weight: 500;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
 .payment-value {
-  font-size: 15px;
+  font-size: 14px;
   color: #1a1a2e;
-  font-weight: 600;
-  text-align: left;
+  font-weight: 700;
   word-break: break-word;
+  text-align: left;
+  direction: rtl;
 }
 
 .payment-value.card-number {
   font-family: 'Courier New', monospace;
-  letter-spacing: 1px;
-  font-size: 16px;
-  color: #1a237e;
+  letter-spacing: 0.5px;
+  font-size: 15px;
 }
 
 .payment-value.amount {
-  font-size: 18px;
   color: #2e7d32;
+  font-size: 17px;
+  font-weight: 800;
 }
 
 .payment-value.code {
-  font-family: monospace;
-  font-size: 13px;
+  font-family: 'Courier New', monospace;
   color: #6c63ff;
+  font-size: 13px;
+  letter-spacing: 0.5px;
 }
 
 .payment-value-with-copy {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .copy-btn {
-  background: #f1f3f5;
+  background: #fff;
   border: 1px solid #dee2e6;
   border-radius: 6px;
-  width: 30px;
-  height: 30px;
   cursor: pointer;
-  font-size: 14px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
   transition: all 0.2s;
   flex-shrink: 0;
+  color: #495057;
 }
 
 .copy-btn:hover {
-  background: #e8ecf1;
+  background: #f1f3f5;
   border-color: #adb5bd;
+  transform: translateY(-1px);
 }
 
-/* ===== Instructions ===== */
+/* ============================================ */
+/* Instructions                                  */
+/* ============================================ */
 .payment-instructions {
-  padding: 16px 24px;
-  background: #fff9f0;
-  border-top: 1px solid #ffe4b5;
-  border-bottom: 1px solid #ffe4b5;
+  margin: 16px 24px;
+  padding: 14px 16px;
+  background: #f0f7ff;
+  border-right: 4px solid #2196f3;
+  border-radius: 10px;
 }
 
 .payment-instructions p {
   margin: 0 0 8px 0;
   font-size: 13px;
   line-height: 1.8;
-  color: #495057;
+  color: #1565c0;
 }
 
 .payment-instructions p:last-child {
@@ -212,401 +250,352 @@
 }
 
 .payment-instructions strong {
-  color: #1a1a2e;
+  color: #0d47a1;
 }
 
-/* ===== Actions ===== */
-.payment-modal-actions {
-  display: flex;
-  gap: 10px;
-  padding: 18px 24px;
-  justify-content: flex-end;
-  border-top: 1px solid #f1f3f5;
-}
-
-.payment-modal-actions button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-
-.btn-cancel {
-  background: #f1f3f5;
-  color: #495057;
-  border: 1px solid #dee2e6;
-}
-
-.btn-cancel:hover {
-  background: #e8ecf1;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #1a237e, #0d47a1);
-  color: white;
-  border: none;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ===== Dark Theme ===== */
-.dark-theme .payment-modal-content {
-  background: #1a1f2e;
-  color: #e0e0e0;
-}
-
-.dark-theme .payment-modal-header {
-  border-bottom-color: #2a3040;
-}
-
-.dark-theme .payment-modal-header h2 {
-  color: #e0e0e0;
-}
-
-.dark-theme .payment-modal-close {
-  color: #888;
-}
-
-.dark-theme .payment-modal-close:hover {
-  background: #2a3040;
-}
-
-.dark-theme .payment-card-info {
-  background: #1a1f2e;
-}
-
-.dark-theme .payment-card-row {
-  border-bottom-color: #2a3040;
-}
-
-.dark-theme .payment-card-row.highlight {
-  background: #1a2e1f;
-}
-
-.dark-theme .payment-label {
-  color: #888;
-}
-
-.dark-theme .payment-value {
-  color: #e0e0e0;
-}
-
-.dark-theme .payment-value.card-number {
-  color: #90caf9;
-}
-
-.dark-theme .payment-value.amount {
-  color: #81c784;
-}
-
-.dark-theme .copy-btn {
-  background: #2a3040;
-  border-color: #3a4050;
-  color: #e0e0e0;
-}
-
-.dark-theme .copy-btn:hover {
-  background: #3a4050;
-}
-
-.dark-theme .payment-instructions {
-  background: #2e2a1f;
-  border-color: #4a3f2f;
-}
-
-.dark-theme .payment-instructions p {
-  color: #b0b8c8;
-}
-
-.dark-theme .payment-instructions strong {
-  color: #e0e0e0;
-}
-
-.dark-theme .payment-modal-actions {
-  border-top-color: #2a3040;
-}
-
-.dark-theme .btn-cancel {
-  background: #2a3040;
-  color: #b0b8c8;
-  border-color: #3a4050;
-}
-
-.dark-theme .payment-timer {
-  background: #1a2e1f;
-  color: #81c784;
-}
-
-.dark-theme .payment-timer.warning {
-  background: #3a2f1f;
-  color: #ffb74d;
-}
-
-.dark-theme .payment-timer.expired {
-  background: #3a1f1f;
-  color: #ef5350;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 600px) {
-  .payment-modal-content {
-    max-width: 100%;
-    margin: 0;
-    border-radius: 12px;
-  }
-
-  .payment-modal-header {
-    padding: 14px 16px;
-  }
-
-  .payment-card-info {
-    padding: 16px;
-  }
-
-  .payment-card-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .payment-value-with-copy {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .payment-value.card-number {
-    font-size: 14px;
-    letter-spacing: 0.5px;
-  }
-
-  .payment-value.amount {
-    font-size: 16px;
-  }
-
-  .payment-instructions {
-    padding: 12px 16px;
-  }
-
-  .payment-modal-actions {
-    flex-direction: column-reverse;
-    padding: 12px 16px;
-  }
-
-  .payment-modal-actions button {
-    width: 100%;
-  }
-}
-/* ===== دکمه لغو درخواست ===== */
-.btn-cancel-request {
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-  margin-left: auto;
-}
-
-.btn-cancel-request:hover:not(:disabled) {
-  background: #dc3545;
-  color: #fff;
-  border-color: #dc3545;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-.btn-cancel-request:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-close-modal {
-  background: #f1f3f5;
-  color: #495057;
-  border: 1px solid #dee2e6;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-
-.btn-close-modal:hover {
-  background: #e8ecf1;
-}
-
-/* Dark Theme */
-.dark-theme .btn-cancel-request {
-  background: rgba(220, 53, 69, 0.15);
-  border-color: rgba(220, 53, 69, 0.4);
-  color: #ef5350;
-}
-
-.dark-theme .btn-cancel-request:hover:not(:disabled) {
-  background: #dc3545;
-  color: #fff;
-}
-
-.dark-theme .btn-close-modal {
-  background: #2a3040;
-  color: #b0b8c8;
-  border-color: #3a4050;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .payment-modal-actions {
-    flex-direction: column-reverse;
-    gap: 8px;
-  }
-
-  .btn-cancel-request {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .btn-close-modal {
-    width: 100%;
-  }
-}
-/* ===== استایل بنر انتظار بررسی ===== */
-.payment-timer.awaiting {
-  background: #e3f2fd;
-  color: #1565c0;
-  border-bottom-color: #bbdefb;
-}
-
-.dark-theme .payment-timer.awaiting {
-  background: #1a2e3f;
-  color: #64b5f6;
-}
-
-/* ===== استایل دکمه لغو ===== */
-.btn-cancel-request {
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-  margin-left: auto;
-}
-
-.btn-cancel-request:hover:not(:disabled) {
-  background: #dc3545;
-  color: #fff;
-  border-color: #dc3545;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-.btn-cancel-request:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-close-modal {
-  background: #f1f3f5;
-  color: #495057;
-  border: 1px solid #dee2e6;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-
-.btn-close-modal:hover {
-  background: #e8ecf1;
-}
-
-.expired-btn {
-  background: #adb5bd !important;
-  cursor: not-allowed !important;
-}
-
-/* Dark Theme */
-.dark-theme .btn-cancel-request {
-  background: rgba(220, 53, 69, 0.15);
-  border-color: rgba(220, 53, 69, 0.4);
-  color: #ef5350;
-}
-
-.dark-theme .btn-cancel-request:hover:not(:disabled) {
-  background: #dc3545;
-  color: #fff;
-}
-
-.dark-theme .btn-close-modal {
-  background: #2a3040;
-  color: #b0b8c8;
-  border-color: #3a4050;
-}
-
-.dark-theme .btn-close-modal:hover {
-  background: #3a4050;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .payment-modal-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .btn-cancel-request {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .btn-close-modal {
-    width: 100%;
-  }
-}
-/* ===== بنر اطلاعات (awaiting_review) ===== */
+/* ============================================ */
+/* Info Banner (awaiting_review)                 */
+/* ============================================ */
 .payment-info-banner {
-  background: #e3f2fd;
-  border-top: 1px solid #bbdefb;
-  border-bottom: 1px solid #bbdefb;
-  padding: 14px 24px;
+  margin: 16px 24px;
+  padding: 14px 16px;
+  background: #f3e5f5;
+  border-right: 4px solid #9c27b0;
+  border-radius: 10px;
 }
 
 .payment-info-banner p {
   margin: 0;
   font-size: 13px;
   line-height: 1.8;
-  color: #1565c0;
+  color: #6a1b9a;
 }
 
-.dark-theme .payment-info-banner {
-  background: #1a2e3f;
-  border-color: #2a4a70;
+/* ============================================ */
+/* Actions                                       */
+/* ============================================ */
+.payment-modal-actions {
+  display: flex;
+  gap: 10px;
+  padding: 18px 24px 24px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
-.dark-theme .payment-info-banner p {
-  color: #64b5f6;
+.payment-modal-actions button {
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: #fff;
+  flex: 1;
+  min-width: 200px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.4);
+}
+
+.btn-primary.expired-btn {
+  background: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.btn-close-modal {
+  background: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6 !important;
+}
+
+.btn-close-modal:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.btn-cancel-request {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3) !important;
+}
+
+.btn-cancel-request:hover:not(:disabled) {
+  background: #dc3545;
+  color: #fff;
+  border-color: #dc3545 !important;
+}
+
+.payment-modal-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================ */
+/* ✅ مودال ثبت فیش — Fixed overlay در body       */
+/* ============================================ */
+.receipt-modal-overlay-fixed {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 99999 !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 20px !important;
+  direction: rtl;
+  animation: receiptOverlayFadeIn 0.25s ease;
+}
+
+@keyframes receiptOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.receipt-modal-content-fixed {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  max-width: 560px !important;
+  width: 100% !important;
+  max-height: 92vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5) !important;
+  animation: receiptModalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes receiptModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.receipt-modal-header {
+  border-bottom: 2px solid #f1f3f5 !important;
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border-radius: 16px 16px 0 0;
+}
+
+.receipt-modal-body {
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ============================================ */
+/* تم تاریک - مودال اصلی                          */
+/* ============================================ */
+body.dark-theme .payment-modal-content,
+html[data-theme="dark"] .payment-modal-content,
+.admin-layout.dark .payment-modal-content,
+.admin-layout.dark-theme .payment-modal-content {
+  background: #1a1f2e !important;
+}
+
+body.dark-theme .payment-modal-header,
+html[data-theme="dark"] .payment-modal-header,
+.admin-layout.dark .payment-modal-header,
+.admin-layout.dark-theme .payment-modal-header {
+  border-bottom-color: #2a3040 !important;
+}
+
+body.dark-theme .payment-modal-header h2,
+html[data-theme="dark"] .payment-modal-header h2,
+.admin-layout.dark .payment-modal-header h2,
+.admin-layout.dark-theme .payment-modal-header h2 {
+  color: #e0e0e0 !important;
+}
+
+body.dark-theme .payment-modal-close,
+html[data-theme="dark"] .payment-modal-close,
+.admin-layout.dark .payment-modal-close,
+.admin-layout.dark-theme .payment-modal-close {
+  color: #888 !important;
+}
+
+body.dark-theme .payment-modal-close:hover,
+html[data-theme="dark"] .payment-modal-close:hover,
+.admin-layout.dark .payment-modal-close:hover,
+.admin-layout.dark-theme .payment-modal-close:hover {
+  background: #2a3040 !important;
+  color: #ef5350 !important;
+}
+
+body.dark-theme .payment-card-row,
+html[data-theme="dark"] .payment-card-row,
+.admin-layout.dark .payment-card-row,
+.admin-layout.dark-theme .payment-card-row {
+  background: #151a26 !important;
+  border-color: #2a3040 !important;
+}
+
+body.dark-theme .payment-card-row.highlight,
+html[data-theme="dark"] .payment-card-row.highlight,
+.admin-layout.dark .payment-card-row.highlight,
+.admin-layout.dark-theme .payment-card-row.highlight {
+  background: linear-gradient(135deg, #1a2e1f, #253528) !important;
+  border-color: #2a4a30 !important;
+}
+
+body.dark-theme .payment-label,
+html[data-theme="dark"] .payment-label,
+.admin-layout.dark .payment-label,
+.admin-layout.dark-theme .payment-label {
+  color: #888 !important;
+}
+
+body.dark-theme .payment-value,
+html[data-theme="dark"] .payment-value,
+.admin-layout.dark .payment-value,
+.admin-layout.dark-theme .payment-value {
+  color: #e0e0e0 !important;
+}
+
+body.dark-theme .payment-value.amount,
+html[data-theme="dark"] .payment-value.amount,
+.admin-layout.dark .payment-value.amount,
+.admin-layout.dark-theme .payment-value.amount {
+  color: #81c784 !important;
+}
+
+body.dark-theme .payment-value.code,
+html[data-theme="dark"] .payment-value.code,
+.admin-layout.dark .payment-value.code,
+.admin-layout.dark-theme .payment-value.code {
+  color: #90caf9 !important;
+}
+
+body.dark-theme .copy-btn,
+html[data-theme="dark"] .copy-btn,
+.admin-layout.dark .copy-btn,
+.admin-layout.dark-theme .copy-btn {
+  background: #0f1419 !important;
+  color: #b0b8c8 !important;
+  border-color: #2a3040 !important;
+}
+
+body.dark-theme .btn-close-modal,
+html[data-theme="dark"] .btn-close-modal,
+.admin-layout.dark .btn-close-modal,
+.admin-layout.dark-theme .btn-close-modal {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+  border-color: #3a4050 !important;
+}
+
+body.dark-theme .payment-instructions,
+html[data-theme="dark"] .payment-instructions,
+.admin-layout.dark .payment-instructions,
+.admin-layout.dark-theme .payment-instructions {
+  background: #1f3a5f !important;
+  border-right-color: #64b5f6 !important;
+}
+
+body.dark-theme .payment-instructions p,
+html[data-theme="dark"] .payment-instructions p,
+.admin-layout.dark .payment-instructions p,
+.admin-layout.dark-theme .payment-instructions p {
+  color: #90caf9 !important;
+}
+
+body.dark-theme .payment-instructions strong,
+html[data-theme="dark"] .payment-instructions strong,
+.admin-layout.dark .payment-instructions strong,
+.admin-layout.dark-theme .payment-instructions strong {
+  color: #bbdefb !important;
+}
+
+/* ============================================ */
+/* تم تاریک - مودال ثبت فیش                       */
+/* ============================================ */
+body.dark-theme .receipt-modal-content-fixed,
+html[data-theme="dark"] .receipt-modal-content-fixed,
+.admin-layout.dark .receipt-modal-content-fixed,
+.admin-layout.dark-theme .receipt-modal-content-fixed {
+  background: #1a1f2e !important;
+  border: 1px solid #2a3040;
+}
+
+body.dark-theme .receipt-modal-header,
+html[data-theme="dark"] .receipt-modal-header,
+.admin-layout.dark .receipt-modal-header,
+.admin-layout.dark-theme .receipt-modal-header {
+  background: linear-gradient(135deg, #151a26, #1a1f2e) !important;
+  border-bottom-color: #2a3040 !important;
+}
+
+body.dark-theme .receipt-modal-header h2,
+html[data-theme="dark"] .receipt-modal-header h2,
+.admin-layout.dark .receipt-modal-header h2,
+.admin-layout.dark-theme .receipt-modal-header h2 {
+  color: #e0e0e0 !important;
+}
+
+/* ============================================ */
+/* Responsive                                    */
+/* ============================================ */
+@media (max-width: 600px) {
+  .payment-modal-content {
+    max-height: 95vh;
+  }
+
+  .payment-modal-header {
+    padding: 14px 18px;
+  }
+
+  .payment-modal-header h2 {
+    font-size: 15px;
+  }
+
+  .payment-card-info,
+  .payment-instructions,
+  .payment-info-banner,
+  .payment-timer {
+    padding-left: 18px;
+    padding-right: 18px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .payment-timer {
+    margin: 14px 18px;
+  }
+
+  .payment-modal-actions {
+    flex-direction: column;
+    padding: 16px 18px 20px;
+  }
+
+  .payment-modal-actions button {
+    width: 100%;
+  }
+
+  .btn-primary {
+    min-width: 0;
+  }
+
+  .receipt-modal-content-fixed {
+    max-height: 95vh !important;
+    border-radius: 12px !important;
+  }
 }

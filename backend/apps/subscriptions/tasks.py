@@ -11,6 +11,15 @@ from celery import shared_task
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q
+# ============================================
+# ✅ Import SmsService
+# ============================================
+try:
+    from apps.sms.services import SmsService
+    SMS_SERVICE_AVAILABLE = True
+except ImportError:
+    SMS_SERVICE_AVAILABLE = False
+    SmsService = None
 
 logger = logging.getLogger(__name__)
 
@@ -142,3 +151,63 @@ def send_payment_reminders():
     logger.info(f"✅ Sent {count} payment reminders")
     return {'reminder_count': count}
 # tasks.py
+
+
+# ============================================
+# ۳. گزارش روزانه/ماهانه به ادمین
+# ============================================
+@shared_task(name='subscriptions.send_daily_sales_summary')
+def send_daily_sales_summary():
+    """
+    ارسال گزارش سرجمع روز و ماه به ادمین
+    - این Task باید هر شب ساعت ۲۳:۵۹ اجرا شود
+    - از طریق CELERY_BEAT_SCHEDULE یا Management Command
+    """
+    from apps.accounts.models import SystemSetting
+    from apps.subscriptions.models import Transaction, UserSubscription
+    from django.db.models import Sum, Count
+
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # آمار امروز
+    today_stats = Transaction.objects.filter(
+        payment_status='paid',
+        created_at__gte=today_start,
+    ).aggregate(count=Count('id'), amount=Sum('total_amount'))
+
+    # آمار این ماه
+    month_stats = Transaction.objects.filter(
+        payment_status='paid',
+        created_at__gte=month_start,
+    ).aggregate(count=Count('id'), amount=Sum('total_amount'))
+
+    today_count = today_stats['count'] or 0
+    today_amount = float(today_stats['amount'] or 0)
+    month_count = month_stats['count'] or 0
+    month_amount = float(month_stats['amount'] or 0)
+
+    # ارسال پیامک
+    if SMS_SERVICE_AVAILABLE and SmsService:
+        try:
+            sms_service = SmsService()
+            result = sms_service.send_admin_daily_summary(
+                today_count=today_count,
+                today_amount=today_amount,
+                month_count=month_count,
+                month_amount=month_amount,
+            )
+            logger.info(f"✅ Daily summary sent: {result}")
+            return {
+                'success': True,
+                'today_count': today_count,
+                'today_amount': today_amount,
+                'month_count': month_count,
+                'month_amount': month_amount,
+            }
+        except Exception as e:
+            logger.error(f"❌ Error sending daily summary: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    return {'success': False, 'error': 'sms_service_unavailable'}

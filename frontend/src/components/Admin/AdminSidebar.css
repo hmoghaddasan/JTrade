@@ -1,17 +1,24 @@
 /* frontend/src/components/Admin/AdminSidebar.css */
+
+/* ============================================ */
+/* سایدبار اصلی - دسکتاپ */
+/* ============================================ */
 .admin-sidebar {
   position: fixed;
-  top: 0;
+  top: 64px;
   right: 0;
   width: 260px;
-  height: 100vh;
+  height: calc(100vh - 64px);
   background: #1a1a2e;
   color: #fff;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1);
 }
 
 .admin-sidebar.closed {
@@ -22,28 +29,61 @@
   transform: translateX(0);
 }
 
+/* ============================================ */
+/* برند سایدبار */
+/* ============================================ */
 .sidebar-brand {
   display: flex;
   align-items: center;
-  padding: 20px 24px;
+  padding: 18px 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   gap: 12px;
+  flex-shrink: 0;
+  min-height: 64px;
 }
 
 .brand-icon {
-  font-size: 28px;
+  font-size: 26px;
+  flex-shrink: 0;
 }
 
 .brand-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
+/* ============================================ */
+/* نوار ناوبری */
+/* ============================================ */
 .sidebar-nav {
   flex: 1;
-  padding: 16px 0;
+  padding: 12px 0 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
+/* اسکرول‌بار نازک */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================ */
+/* لینک‌های ناوبری */
+/* ============================================ */
 .nav-link {
   display: flex;
   align-items: center;
@@ -53,6 +93,8 @@
   transition: all 0.2s ease;
   gap: 12px;
   border-right: 3px solid transparent;
+  cursor: pointer;
+  user-select: none;
 }
 
 .nav-link:hover {
@@ -70,14 +112,20 @@
   font-size: 20px;
   width: 30px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .nav-label {
   font-size: 14px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ===== استایل‌های زیرمنو ===== */
+/* ============================================ */
+/* زیرمنو */
+/* ============================================ */
 .nav-group {
   margin-bottom: 2px;
 }
@@ -92,14 +140,15 @@
 }
 
 .nav-arrow {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.4);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .nav-submenu {
-  background: rgba(255, 255, 255, 0.03);
-  padding-right: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
 
 .nav-sub {
@@ -121,11 +170,82 @@
   border-right-color: #6c63ff;
 }
 
-@media (max-width: 768px) {
-  .admin-sidebar {
-    transform: translateX(260px);
+/* ============================================ */
+/* ✅ Overlay (پس‌زمینه تاریک) - فقط در موبایل */
+/* ============================================ */
+.admin-sidebar-overlay {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  animation: overlayFadeIn 0.25s ease;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
   }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================ */
+/* ✅ حالت موبایل (تا 992px) - Drawer */
+/* ============================================ */
+@media (max-width: 992px) {
+  .admin-sidebar {
+    width: 280px;
+    max-width: 85vw;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .admin-sidebar.closed {
+    transform: translateX(100%);
+    box-shadow: none;
+  }
+
   .admin-sidebar.open {
     transform: translateX(0);
+  }
+}
+
+/* ============================================ */
+/* ✅ موبایل‌های کوچک (تا 480px) */
+/* ============================================ */
+@media (max-width: 480px) {
+  .admin-sidebar {
+    width: 260px;
+    max-width: 85vw;
+  }
+
+  .sidebar-brand {
+    padding: 16px 20px;
+  }
+
+  .brand-icon {
+    font-size: 24px;
+  }
+
+  .brand-text {
+    font-size: 15px;
+  }
+
+  .nav-link {
+    padding: 11px 20px;
+  }
+
+  .nav-icon {
+    font-size: 18px;
+    width: 28px;
+  }
+
+  .nav-label {
+    font-size: 13px;
   }
 }

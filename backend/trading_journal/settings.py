@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import timedelta
-
+from celery.schedules import crontab
 # ============================================
 # مسیر پایه پروژه
 # ============================================
@@ -610,27 +610,34 @@ SHOW_SCREENSHOT_UPLOAD = os.environ.get('SHOW_SCREENSHOT_UPLOAD', 'True') == 'Tr
 #   python manage.py check_sms_status
 #   python manage.py fetch_sms_inbox
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Tehran'
 
-# ⚠️ این بخش را فقط وقتی Redis و Celery فعال است، از کامنت خارج کنید:
-# CELERY_BEAT_SCHEDULE = {
-#     'check-sms-status': {
-#         'task': 'sms.check_pending_status',
-#         'schedule': 300.0,  # هر ۵ دقیقه
-#     },
-#     'fetch-sms-inbox': {
-#         'task': 'sms.fetch_inbox',
-#         'schedule': 300.0,  # هر ۵ دقیقه
-#     },
-# }
+# ✅ تنظیمات اضافی برای Celery
+CELERY_ENABLE_UTC = False
+CELERY_BEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
+CELERY_BEAT_SCHEDULE_FILENAME = '/var/celerybeat/celerybeat-schedule'
 
-CELERY_BEAT_SCHEDULE = {}  # فعلاً خالی
 
+CELERY_BEAT_SCHEDULE = {
+    'check-sms-status': {
+        'task': 'sms.check_pending_status',
+        'schedule': 300.0,
+    },
+    'fetch-sms-inbox': {
+        'task': 'sms.fetch_inbox',
+        'schedule': 300.0,
+    },
+    # ✅ گزارش روزانه به ادمین - هر شب ساعت ۲۳:۵۹
+    'daily-sales-summary': {
+        'task': 'subscriptions.send_daily_sales_summary',
+        'schedule': crontab(hour=23, minute=59),
+    },
+}
 
 # ============================================
 # تنظیمات امنیتی اضافی (برای محیط تولید)

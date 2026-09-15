@@ -284,6 +284,37 @@ class VerifyPaymentView(APIView):
             else:
                 logger.warning("⚠️ SmsService در دسترس نیست - پیامک تمدید ارسال نشد")
 
+            # ============================================
+            # ✅ پیامک به ادمین: پرداخت جدید از درگاه
+            # ============================================
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_admin_payment_new_gateway(
+                        user=subscription.user,
+                        plan_name=subscription.plan.plan_name,
+                        amount=float(subscription.amount_paid),
+                    )
+                    logger.info(f"✅ Admin gateway notification sent")
+                except Exception as e:
+                    logger.error(f"❌ Error sending admin gateway SMS: {str(e)}")
+
+            # ============================================
+            # ✅ پیامک به ادمین: تأیید پرداخت
+            # ============================================
+            if SMS_SERVICE_AVAILABLE and SmsService:
+                try:
+                    sms_service = SmsService()
+                    sms_service.send_admin_payment_approved(
+                        user=subscription.user,
+                        amount=float(subscription.amount_paid),
+                        method='gateway',
+                        new_end_date=subscription.end_date.strftime('%Y/%m/%d'),
+                    )
+                    logger.info(f"✅ Admin approved notification sent")
+                except Exception as e:
+                    logger.error(f"❌ Error sending admin approved SMS: {str(e)}")
+
             return Response({
                 'success': True,
                 'message': 'پرداخت با موفقیت تایید شد',
@@ -883,49 +914,29 @@ class CancelPaymentRequestView(APIView):
 # ✅ Helper: اطلاع به ادمین‌ها
 # ============================================
 def _notify_admins_new_payment(payment_request):
-    """اطلاع‌رسانی به ادمین‌ها هنگام ثبت فیش جدید"""
+    """اطلاع‌رسانی به ادمین اصلی هنگام ثبت فیش جدید"""
     if not SMS_SERVICE_AVAILABLE or not SmsService:
         return
 
-    # دریافت لیست ادمین‌ها
-    notify_all = SystemSetting.get_bool('payment_admin_notify_all', True)
-    notify_phone = SystemSetting.get('payment_admin_notify_phone', '')
-
-    admin_phones = []
-
-    if notify_all:
-        from apps.accounts.models import User
-        admin_phones = list(
-            User.objects.filter(is_admin=True, is_active=True)
-            .exclude(phone_number='')
-            .values_list('phone_number', flat=True)
-        )
-    elif notify_phone:
-        admin_phones = [notify_phone]
-    else:
-        # اگر هیچ تنظیمی نبود، به ادمین اصلی
-        admin_phone = SystemSetting.get('admin_phone_number', '')
-        if admin_phone:
-            admin_phones = [admin_phone]
-
-    if not admin_phones:
-        logger.warning("⚠️ هیچ شماره ادمینی برای اطلاع‌رسانی یافت نشد")
+    # ✅ فقط به ادمین اصلی ارسال شود (نه همه ادمین‌ها)
+    admin_phone = SystemSetting.get('admin_phone_number', '')
+    if not admin_phone:
+        logger.warning("⚠️ شماره ادمین اصلی تنظیم نشده")
         return
 
     user_name = payment_request.user.get_full_name() or payment_request.user.phone_number
     tracking = payment_request.tracking_number or '-'
 
-    for phone in admin_phones:
-        _send_sms_safe(
-            event_key='payment_admin_new_request',
-            phone_number=phone,
-            context={
-                'user_name': user_name,
-                'amount': f"{int(payment_request.amount):,}",
-                'tracking_number': tracking,
-                'request_id': str(payment_request.id),
-            },
-        )
+    _send_sms_safe(
+        event_key='payment_admin_new_request',
+        phone_number=admin_phone,
+        context={
+            'user_name': user_name,
+            'amount': f"{int(payment_request.amount):,}",
+            'tracking_number': tracking,
+            'request_id': str(payment_request.id),
+        },
+    )
 
     payment_request.admin_notified = True
     payment_request.admin_notified_at = timezone.now()

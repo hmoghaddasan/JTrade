@@ -45,6 +45,9 @@ const MessageForm = () => {
       const response = await RealApiService.sendMessage(data);
       console.log('📤 Message sent:', response.data);
 
+      // ✅ اطلاع به سیستم برای به‌روزرسانی Badge ادمین
+      window.dispatchEvent(new CustomEvent('message-created'));
+
       showToast('✅ پیام با موفقیت ارسال شد', 'success');
 
       setTimeout(() => {
@@ -72,7 +75,6 @@ const MessageForm = () => {
     <div className="messaging-container">
       <div className="messaging-header">
         <h2>✉️ ارسال پیام جدید</h2>
-        {/* ✅ دکمه بازگشت به چپ و با سایز استاندارد */}
         <button className="btn-back" onClick={handleCancel}>
           ↩️ بازگشت
         </button>

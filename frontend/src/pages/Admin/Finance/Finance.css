@@ -72,3 +72,209 @@
 .admin-layout.dark-theme .chart-card h3 {
   color: #e0e0e0 !important;
 }
+/* ============================================ */
+/* ✅ کارت‌های خلاصه تراکنش‌ها */
+/* ============================================ */
+.transaction-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border-right: 4px solid #6c63ff;
+  transition: all 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card.summary-total { border-right-color: #6c63ff; }
+.summary-card.summary-amount { border-right-color: #ff9800; }
+.summary-card.summary-paid { border-right-color: #4caf50; }
+.summary-card.summary-paid-amount { border-right-color: #2196f3; }
+
+.summary-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.summary-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #868e96;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* ✅ عنوان بخش (Section Title) */
+/* ============================================ */
+.section-title {
+  font-size: 16px;
+  color: #1a1a2e;
+  margin: 24px 0 12px 0;
+  padding-right: 10px;
+  border-right: 3px solid #6c63ff;
+}
+
+/* ============================================ */
+/* ✅ کارت آمار تفکیکی (Period Stats) */
+/* ============================================ */
+.stats-grid.period-stats {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.period-stat-card {
+  border-right: none;
+  border-left: 4px solid #6c63ff;
+  padding: 16px;
+}
+
+.period-stat-card .stat-icon {
+  font-size: 26px;
+  width: 48px;
+  height: 48px;
+  background: #f8f9fa;
+}
+
+.period-stat-card .stat-value {
+  font-size: 16px;
+}
+
+.period-stat-card .stat-sub {
+  font-size: 11px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* ✅ کارت پرفروش‌ترین پلن (Highlight) */
+/* ============================================ */
+.stat-card.highlight-top-plan {
+  background: linear-gradient(135deg, #fff9e6, #fff3cc);
+  border: 2px solid #ffd54f;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
+}
+
+.stat-card.highlight-top-plan .stat-icon {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+}
+
+.stat-card.highlight-top-plan .stat-value {
+  color: #4a3800;
+}
+
+.stat-card.highlight-top-plan .stat-label {
+  color: #6d5000;
+}
+
+/* ============================================ */
+/* ✅ تم تاریک */
+/* ============================================ */
+.admin-layout.dark .summary-card,
+.admin-layout.dark-theme .summary-card,
+body.dark-theme .summary-card,
+html[data-theme="dark"] .summary-card {
+  background: #1a1f2e !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.admin-layout.dark .summary-value,
+.admin-layout.dark-theme .summary-value,
+body.dark-theme .summary-value,
+html[data-theme="dark"] .summary-value {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .summary-label,
+.admin-layout.dark-theme .summary-label,
+body.dark-theme .summary-label,
+html[data-theme="dark"] .summary-label {
+  color: #888 !important;
+}
+
+.admin-layout.dark .summary-icon,
+.admin-layout.dark-theme .summary-icon,
+body.dark-theme .summary-icon,
+html[data-theme="dark"] .summary-icon {
+  background: #0f1419 !important;
+}
+
+.admin-layout.dark .section-title,
+.admin-layout.dark-theme .section-title,
+body.dark-theme .section-title,
+html[data-theme="dark"] .section-title {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .stat-card.highlight-top-plan,
+.admin-layout.dark-theme .stat-card.highlight-top-plan,
+body.dark-theme .stat-card.highlight-top-plan,
+html[data-theme="dark"] .stat-card.highlight-top-plan {
+  background: linear-gradient(135deg, #2a2418, #3a3018) !important;
+  border-color: #8a6d2b !important;
+}
+
+.admin-layout.dark .stat-card.highlight-top-plan .stat-value,
+.admin-layout.dark-theme .stat-card.highlight-top-plan .stat-value,
+body.dark-theme .stat-card.highlight-top-plan .stat-value,
+html[data-theme="dark"] .stat-card.highlight-top-plan .stat-value {
+  color: #ffd54f !important;
+}
+
+/* ============================================ */
+/* ✅ Responsive */
+/* ============================================ */
+@media (max-width: 768px) {
+  .transaction-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .summary-value {
+    font-size: 15px;
+  }
+
+  .summary-icon {
+    font-size: 22px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .transaction-summary {
+    grid-template-columns: 1fr;
+  }
+}

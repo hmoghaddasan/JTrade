@@ -609,6 +609,7 @@ class AdminUserMessageSerializer(serializers.ModelSerializer):
     user_phone = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     replied_by_phone = serializers.SerializerMethodField()
+    replied_by_name = serializers.SerializerMethodField()
     created_at_fa = serializers.SerializerMethodField()
     reply_date_fa = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
@@ -618,9 +619,9 @@ class AdminUserMessageSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'user_phone', 'user_name',
             'subject', 'message',
-            'is_read', 'is_replied', 'has_new_reply',
+            'is_read', 'is_read_by_admin', 'is_replied', 'has_new_reply',
             'reply_message', 'reply_date', 'reply_date_fa',
-            'replied_by', 'replied_by_phone',
+            'replied_by', 'replied_by_phone', 'replied_by_name',
             'created_at', 'created_at_fa',
             'status_display'
         ]
@@ -634,6 +635,9 @@ class AdminUserMessageSerializer(serializers.ModelSerializer):
     def get_replied_by_phone(self, obj):
         return obj.replied_by.phone_number if obj.replied_by else None
 
+    def get_replied_by_name(self, obj):
+        return obj.replied_by.get_full_name() if obj.replied_by else None
+
     def get_created_at_fa(self, obj):
         return obj.created_at.strftime('%Y/%m/%d %H:%M') if obj.created_at else None
 
@@ -643,10 +647,11 @@ class AdminUserMessageSerializer(serializers.ModelSerializer):
     def get_status_display(self, obj):
         if obj.is_replied:
             return '✅ پاسخ داده شده'
+        elif obj.is_read_by_admin:
+            return '📖 خوانده شده توسط ادمین'
         elif obj.is_read:
             return '📖 خوانده شده'
         return '🆕 جدید'
-
 
 class AdminMessageReplySerializer(serializers.Serializer):
     """سریالایزر پاسخ به پیام"""

@@ -29,14 +29,17 @@ const PaymentRequestDetailModal = ({ request, onClose, onSuccess }) => {
 
       if (response.data?.success) {
         showToast('✅ پرداخت تأیید و اشتراک تمدید شد', 'success');
-        onSuccess();
+        // ✅ اول onSuccess (که والد را inform می‌کند و selectedRequest را null می‌کند)
+        // سپس onClose (که به‌عنوان fallback عمل می‌کند)
+        if (onSuccess) onSuccess();
+        if (onClose) onClose();
       } else {
         showToast(response.data?.error || 'خطا در تأیید پرداخت', 'error');
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error approving:', error);
       showToast(error.response?.data?.error || 'خطا در تأیید پرداخت', 'error');
-    } finally {
       setLoading(false);
     }
   };
@@ -58,32 +61,33 @@ const PaymentRequestDetailModal = ({ request, onClose, onSuccess }) => {
 
       if (response.data?.success) {
         showToast('❌ پرداخت رد شد', 'success');
-        onSuccess();
+        if (onSuccess) onSuccess();
+        if (onClose) onClose();
       } else {
         showToast(response.data?.error || 'خطا در رد پرداخت', 'error');
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error rejecting:', error);
       showToast(error.response?.data?.error || 'خطا در رد پرداخت', 'error');
-    } finally {
       setLoading(false);
     }
   };
 
   const formatAmount = (amount) => Number(amount || 0).toLocaleString('fa-IR');
-  const formatDate = (date) => date ? new Date(date).toLocaleString('fa-IR') : '-';
-  const formatCard = (num) => num ? num.match(/.{1,4}/g)?.join(' - ') : '-';
+  const formatDate = (date) => (date ? new Date(date).toLocaleString('fa-IR') : '-');
+  const formatCard = (num) => (num ? num.match(/.{1,4}/g)?.join(' - ') : '-');
 
   const canApproveOrReject = request.status === 'awaiting_review';
   const isAlreadyReviewed = ['approved', 'rejected', 'expired', 'canceled'].includes(request.status);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={() => !loading && onClose()}>
       <div className="payment-detail-modal" onClick={(e) => e.stopPropagation()}>
         {/* ===== Header ===== */}
         <div className="modal-header">
           <h2>💳 جزئیات درخواست پرداخت #{request.id}</h2>
-          <button className="btn-close" onClick={onClose}>×</button>
+          <button className="btn-close" onClick={onClose} disabled={loading}>×</button>
         </div>
 
         {/* ===== Body ===== */}
@@ -147,7 +151,7 @@ const PaymentRequestDetailModal = ({ request, onClose, onSuccess }) => {
             </div>
           </div>
 
-          {/* اطلاعات فیش (اگر ثبت شده) */}
+          {/* اطلاعات فیش */}
           {request.tracking_number && (
             <div className="detail-section highlight-section">
               <h3>📋 اطلاعات فیش واریزی</h3>
@@ -170,7 +174,6 @@ const PaymentRequestDetailModal = ({ request, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {/* تصویر فیش */}
               {request.receipt_image_url && (
                 <div className="receipt-image-wrapper">
                   <span className="detail-label">تصویر فیش:</span>
@@ -232,6 +235,7 @@ const PaymentRequestDetailModal = ({ request, onClose, onSuccess }) => {
                 placeholder="دلیل رد را وارد کنید (اجباری)..."
                 rows={3}
                 className="reject-textarea"
+                disabled={loading}
               />
             </div>
           )}

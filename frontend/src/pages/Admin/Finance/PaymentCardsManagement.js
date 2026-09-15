@@ -25,6 +25,14 @@ const PaymentCardsManagement = () => {
   const [errors, setErrors] = useState({});
 
   // ============================================
+  // ✅ State جدید برای حالت انتخاب کارت
+  // ============================================
+  const [selectionMode, setSelectionMode] = useState('random');
+  const [originalSelectionMode, setOriginalSelectionMode] = useState('random');
+  const [loadingMode, setLoadingMode] = useState(true);
+  const [savingMode, setSavingMode] = useState(false);
+
+  // ============================================
   // بارگذاری کارت‌ها
   // ============================================
   const loadCards = async () => {
@@ -40,9 +48,69 @@ const PaymentCardsManagement = () => {
     }
   };
 
+  // ============================================
+  // ✅ بارگذاری حالت انتخاب کارت از تنظیمات
+  // ============================================
+  const loadSelectionMode = async () => {
+    setLoadingMode(true);
+    try {
+      const response = await adminService.getSettings();
+      const allSettings = response.data?.results || response.data || [];
+
+      const modeSetting = allSettings.find(
+        (s) => s.setting_key === 'payment_card_selection_mode'
+      );
+
+      if (modeSetting && modeSetting.setting_value) {
+        setSelectionMode(modeSetting.setting_value);
+        setOriginalSelectionMode(modeSetting.setting_value);
+      }
+    } catch (error) {
+      console.error('Error loading selection mode:', error);
+      showToast('خطا در بارگذاری حالت انتخاب کارت', 'error');
+    } finally {
+      setLoadingMode(false);
+    }
+  };
+
   useEffect(() => {
     loadCards();
+    loadSelectionMode();
   }, []);
+
+  // ============================================
+  // ✅ ذخیره حالت انتخاب کارت
+  // ============================================
+  const handleSaveSelectionMode = async () => {
+    if (selectionMode === originalSelectionMode) {
+      showToast('ℹ️ تغییری برای ذخیره وجود ندارد', 'info');
+      return;
+    }
+
+    setSavingMode(true);
+    try {
+      const payload = {
+        payment_card_selection_mode: selectionMode,
+      };
+
+      await adminService.updateSettings(payload);
+      setOriginalSelectionMode(selectionMode);
+      showToast('✅ حالت انتخاب کارت با موفقیت ذخیره شد', 'success');
+    } catch (error) {
+      console.error('Error saving selection mode:', error);
+      showToast('❌ خطا در ذخیره حالت انتخاب کارت', 'error');
+      setSelectionMode(originalSelectionMode);
+    } finally {
+      setSavingMode(false);
+    }
+  };
+
+  // ============================================
+  // ✅ انصراف از تغییر حالت
+  // ============================================
+  const handleCancelSelectionMode = () => {
+    setSelectionMode(originalSelectionMode);
+  };
 
   // ============================================
   // باز کردن مودال ایجاد
@@ -54,7 +122,7 @@ const PaymentCardsManagement = () => {
       card_holder: '',
       bank_name: '',
       is_active: true,
-      is_default: cards.length === 0, // اگر اولین کارت است، پیش‌فرض
+      is_default: cards.length === 0,
       order_index: cards.length,
       notes: '',
     });
@@ -111,7 +179,7 @@ const PaymentCardsManagement = () => {
   };
 
   // ============================================
-  // ذخیره
+  // ذخیره کارت (ایجاد یا ویرایش)
   // ============================================
   const handleSubmit = async () => {
     if (!validate()) return;
@@ -173,22 +241,36 @@ const PaymentCardsManagement = () => {
   };
 
   // ============================================
-  // تنظیم به عنوان پیش‌فرض
+  // ✅ Toggle پیش‌فرض: تنظیم یا حذف
   // ============================================
-  const handleSetDefault = async (card) => {
-    if (card.is_default) return;
+  const handleToggleDefault = async (card) => {
     if (!card.is_active) {
       showToast('❌ ابتدا کارت را فعال کنید', 'error');
       return;
     }
 
     try {
-      await adminService.setDefaultPaymentCard(card.id);
-      showToast('✅ کارت به عنوان پیش‌فرض تنظیم شد', 'success');
+      if (card.is_default) {
+        // برداشتن پیش‌فرض با PUT کامل
+        await adminService.updatePaymentCard(card.id, {
+          card_number: card.card_number,
+          card_holder: card.card_holder,
+          bank_name: card.bank_name,
+          is_active: card.is_active,
+          is_default: false,
+          order_index: card.order_index,
+          notes: card.notes || '',
+        });
+        showToast('✅ پیش‌فرض برداشته شد', 'success');
+      } else {
+        // تنظیم به‌عنوان پیش‌فرض با action اختصاصی
+        await adminService.setDefaultPaymentCard(card.id);
+        showToast('✅ کارت به‌عنوان پیش‌فرض تنظیم شد', 'success');
+      }
       await loadCards();
     } catch (error) {
-      console.error('Error setting default:', error);
-      showToast(error.response?.data?.error || 'خطا در تنظیم پیش‌فرض', 'error');
+      console.error('Error toggling default:', error);
+      showToast(error.response?.data?.error || 'خطا در تغییر پیش‌فرض', 'error');
     }
   };
 
@@ -225,7 +307,25 @@ const PaymentCardsManagement = () => {
     {
       key: 'is_default',
       label: 'پیش‌فرض',
-      render: (val) => (val ? '⭐ بله' : '—'),
+      render: (val) =>
+        val ? (
+          <span
+            style={{
+              background: 'linear-gradient(135deg, #ffd54f, #ffb300)',
+              color: '#4a3800',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '700',
+              whiteSpace: 'nowrap',
+              display: 'inline-block',
+            }}
+          >
+            ⭐ پیش‌فرض
+          </span>
+        ) : (
+          <span style={{ color: '#adb5bd', fontSize: '12px' }}>—</span>
+        ),
     },
     {
       key: 'is_active',
@@ -263,7 +363,7 @@ const PaymentCardsManagement = () => {
       icon: '⭐',
       label: 'پیش‌فرض',
       className: 'success',
-      onClick: (row) => handleSetDefault(row),
+      onClick: (row) => handleToggleDefault(row),
     },
     {
       icon: '🔄',
@@ -289,13 +389,100 @@ const PaymentCardsManagement = () => {
         </button>
       </div>
 
-      {/* ===== Info Banner ===== */}
-      <div className="info-banner">
-        <p>
-          💡 <strong>راهنما:</strong> برای پرداخت کارت به کارت، می‌توانید یک یا چند کارت بانکی تعریف کنید.
-          کارت <strong>پیش‌فرض</strong> در حالت انتخاب «پیش‌فرض» به کاربر نمایش داده می‌شود، در حالت «رندوم» یکی از کارت‌های فعال به صورت تصادفی انتخاب می‌شود،
-          و در حالت «انتخاب دستی» کاربر از بین کارت‌های فعال یکی را انتخاب می‌کند.
-        </p>
+      {/* ============================================ */}
+      {/* ✅ بخش تنظیم حالت انتخاب کارت                */}
+      {/* ============================================ */}
+      <div className="selection-mode-section">
+        <div className="selection-mode-header">
+          <h3>🎯 حالت انتخاب کارت برای کاربر</h3>
+          <p className="selection-mode-hint">
+            تعیین کنید که هنگام پرداخت کارت به کارت، کدام کارت به کاربر نمایش داده شود.
+          </p>
+        </div>
+
+        {loadingMode ? (
+          <div className="selection-mode-loading">⏳ در حال بارگذاری...</div>
+        ) : (
+          <>
+            <div className="selection-mode-options">
+              <label className={`mode-option ${selectionMode === 'default' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="selection_mode"
+                  value="default"
+                  checked={selectionMode === 'default'}
+                  onChange={(e) => setSelectionMode(e.target.value)}
+                />
+                <div className="mode-option-content">
+                  <div className="mode-option-icon">⭐</div>
+                  <div className="mode-option-info">
+                    <div className="mode-option-title">کارت پیش‌فرض</div>
+                    <div className="mode-option-desc">
+                      کارتی که با علامت ⭐ مشخص شده، به کاربر نمایش داده می‌شود.
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              <label className={`mode-option ${selectionMode === 'random' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="selection_mode"
+                  value="random"
+                  checked={selectionMode === 'random'}
+                  onChange={(e) => setSelectionMode(e.target.value)}
+                />
+                <div className="mode-option-content">
+                  <div className="mode-option-icon">🎲</div>
+                  <div className="mode-option-info">
+                    <div className="mode-option-title">انتخاب تصادفی (رندوم)</div>
+                    <div className="mode-option-desc">
+                      هر بار یکی از کارت‌های فعال به صورت تصادفی انتخاب می‌شود.
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              <label className={`mode-option ${selectionMode === 'manual' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="selection_mode"
+                  value="manual"
+                  checked={selectionMode === 'manual'}
+                  onChange={(e) => setSelectionMode(e.target.value)}
+                />
+                <div className="mode-option-content">
+                  <div className="mode-option-icon">✋</div>
+                  <div className="mode-option-info">
+                    <div className="mode-option-title">انتخاب دستی توسط کاربر</div>
+                    <div className="mode-option-desc">
+                      کاربر از بین کارت‌های فعال، خودش یکی را انتخاب می‌کند.
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            {selectionMode !== originalSelectionMode && (
+              <div className="selection-mode-actions">
+                <button
+                  className="btn-cancel-mode"
+                  onClick={handleCancelSelectionMode}
+                  disabled={savingMode}
+                >
+                  انصراف
+                </button>
+                <button
+                  className="btn-save-mode"
+                  onClick={handleSaveSelectionMode}
+                  disabled={savingMode}
+                >
+                  {savingMode ? '⏳ در حال ذخیره...' : '💾 ذخیره حالت انتخاب'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* ===== Table ===== */}

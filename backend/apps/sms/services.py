@@ -450,7 +450,101 @@ class SmsService:
         )
         self.error_service._send_alert_to_admin(log)
         return {'success': True, 'log_id': log.id}
+    # ============================================
+    # ✅ متدهای جدید برای پیامک‌های ادمین
+    # ============================================
 
+    def send_admin_payment_new_gateway(self, user, plan_name: str, amount: float, admin_phone: str = None):
+        """
+        اطلاع به ادمین: پرداخت جدید از درگاه بانکی
+        فقط به شماره admin_phone یا ADMIN_PHONE_NUMBER ارسال می‌شود.
+        """
+        phone = admin_phone or SystemSetting.get('admin_phone_number', '')
+        if not phone:
+            logger.warning("⚠️ شماره ادمین برای اطلاع پرداخت درگاه تنظیم نشده")
+            return {'success': False, 'error': 'no_admin_phone'}
+
+        user_name = user.get_full_name() or user.phone_number
+        amount_str = f"{int(amount):,}"
+
+        return self.send_event(
+            event_key='admin_payment_new_gateway',
+            phone_number=phone,
+            context={
+                'user_name': user_name,
+                'plan_name': plan_name,
+                'amount': amount_str,
+                'param1': user_name,
+                'param2': plan_name,
+                'param3': amount_str,
+            },
+            related_object_type='admin_alert',
+        )
+
+    def send_admin_payment_approved(
+        self, user, amount: float, method: str, new_end_date: str, admin_phone: str = None
+    ):
+        """
+        اطلاع به ادمین: تأیید یک پرداخت (کارت به کارت یا درگاه)
+        method: 'card_to_card' یا 'gateway'
+        """
+        phone = admin_phone or SystemSetting.get('admin_phone_number', '')
+        if not phone:
+            logger.warning("⚠️ شماره ادمین برای اطلاع تأیید پرداخت تنظیم نشده")
+            return {'success': False, 'error': 'no_admin_phone'}
+
+        user_name = user.get_full_name() or user.phone_number
+        amount_str = f"{int(amount):,}"
+        method_fa = 'کارت به کارت' if method == 'card_to_card' else 'درگاه بانکی'
+
+        return self.send_event(
+            event_key='admin_payment_approved',
+            phone_number=phone,
+            context={
+                'user_name': user_name,
+                'amount': amount_str,
+                'method': method_fa,
+                'new_end_date': new_end_date,
+                'param1': user_name,
+                'param2': amount_str,
+                'param3': method_fa,
+                'param4': new_end_date,
+            },
+            related_object_type='admin_alert',
+        )
+
+    def send_admin_daily_summary(
+        self,
+        today_count: int,
+        today_amount: float,
+        month_count: int,
+        month_amount: float,
+        admin_phone: str = None,
+    ):
+        """
+        ارسال گزارش سرجمع روز و ماه به ادمین
+        """
+        phone = admin_phone or SystemSetting.get('admin_phone_number', '')
+        if not phone:
+            logger.warning("⚠️ شماره ادمین برای گزارش روزانه تنظیم نشده")
+            return {'success': False, 'error': 'no_admin_phone'}
+
+        return self.send_event(
+            event_key='admin_daily_summary',
+            phone_number=phone,
+            context={
+                'today_count': str(today_count),
+                'today_amount': f"{int(today_amount):,}",
+                'month_count': str(month_count),
+                'month_amount': f"{int(month_amount):,}",
+                'param1': str(today_count),
+                'param2': f"{int(today_amount):,}",
+                'param3': str(month_count),
+                'param4': f"{int(month_amount):,}",
+            },
+            related_object_type='admin_alert',
+        )
+    
     # ============================================
     # بررسی وضعیت و اینباکس
     # ============================================

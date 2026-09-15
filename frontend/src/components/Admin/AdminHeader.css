@@ -1,7 +1,7 @@
 /* frontend/src/components/Admin/AdminHeader.css */
 
 /* ============================================ */
-/* هدر اصلی پنل ادمین - مشترک */
+/* هدر اصلی پنل ادمین */
 /* ============================================ */
 .admin-header {
   position: fixed;
@@ -14,11 +14,11 @@
   justify-content: space-between;
   padding: 0 24px;
   z-index: 999;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* ============================================ */
-/* ✅ تم روشن - پس‌زمینه گرادیانت آبی، متن سفید */
+/* تم روشن */
 /* ============================================ */
 .admin-header.light {
   background: linear-gradient(135deg, #0d47a1, #1a237e);
@@ -27,9 +27,10 @@
 }
 
 /* ============================================ */
-/* ✅ تم تاریک - پس‌زمینه تیره، متن روشن */
+/* تم تاریک */
 /* ============================================ */
-.admin-header.dark {
+.admin-header.dark,
+.admin-header.dark-theme {
   background: linear-gradient(135deg, #0a1628, #0d2137);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
@@ -44,27 +45,101 @@
   gap: 12px;
 }
 
+/* ============================================ */
+/* ✅ دکمه ☰ - طراحی متمایز با !important */
+/* ============================================ */
 .menu-toggle {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 20px;
-  cursor: pointer;
-  color: #ffffff;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* ابعاد */
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  /* طرح‌بندی */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  /* رنگ و حاشیه - تم روشن (پیش‌فرض) */
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 12px !important;
+  color: #ffffff !important;
+
+  /* محتوا */
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  font-family: inherit !important;
+
+  /* تعامل */
+  cursor: pointer !important;
+  user-select: none;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+
+  /* سایه و افکت */
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.menu-toggle-icon {
+  display: block;
+  font-size: inherit;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .menu-toggle:hover {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.35);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.menu-toggle:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.menu-toggle:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+/* ============================================ */
+/* ✅ تم تاریک - دکمه ☰ (با !important و سلکتورهای چندگانه) */
+/* ============================================ */
+.admin-header.dark .menu-toggle,
+.admin-header.dark-theme .menu-toggle,
+body.dark-theme .admin-header .menu-toggle,
+html[data-theme="dark"] .admin-header .menu-toggle {
+  background: rgba(100, 180, 255, 0.2) !important;
+  border: 2px solid rgba(100, 180, 255, 0.55) !important;
+  color: #64b5f6 !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.admin-header.dark .menu-toggle:hover,
+.admin-header.dark-theme .menu-toggle:hover,
+body.dark-theme .admin-header .menu-toggle:hover,
+html[data-theme="dark"] .admin-header .menu-toggle:hover {
+  background: rgba(100, 180, 255, 0.35) !important;
+  border-color: rgba(100, 180, 255, 0.8) !important;
+  color: #90caf9 !important;
+  box-shadow: 0 6px 16px rgba(100, 180, 255, 0.4) !important;
+}
+
+.admin-header.dark .menu-toggle:active,
+.admin-header.dark-theme .menu-toggle:active,
+body.dark-theme .admin-header .menu-toggle:active,
+html[data-theme="dark"] .admin-header .menu-toggle:active {
+  background: rgba(100, 180, 255, 0.45) !important;
+  transform: translateY(0);
 }
 
 /* ============================================ */
@@ -160,11 +235,7 @@
   font-size: 13px;
 }
 
-/* ============================================ */
-/* دکمه‌های رنگی - مشترک بین دو تم */
-/* ============================================ */
-
-/* دکمه تم - طلایی/نارنجی */
+/* دکمه تم */
 .admin-theme-btn {
   background: rgba(255, 200, 100, 0.25);
   color: #ffffff;
@@ -173,10 +244,9 @@
 .admin-theme-btn:hover {
   background: rgba(255, 200, 100, 0.45);
   border-color: rgba(255, 200, 100, 0.6);
-  color: #ffffff;
 }
 
-/* دکمه داشبورد - آبی روشن */
+/* دکمه داشبورد */
 .admin-home-btn {
   background: rgba(100, 180, 255, 0.25);
   color: #ffffff;
@@ -185,10 +255,9 @@
 .admin-home-btn:hover {
   background: rgba(100, 180, 255, 0.45);
   border-color: rgba(100, 180, 255, 0.6);
-  color: #ffffff;
 }
 
-/* دکمه خروج - قرمز */
+/* دکمه خروج */
 .admin-logout-btn {
   background: rgba(255, 100, 100, 0.2);
   color: #ffffff;
@@ -197,7 +266,6 @@
 .admin-logout-btn:hover {
   background: rgba(255, 100, 100, 0.4);
   border-color: rgba(255, 100, 100, 0.55);
-  color: #ffffff;
 }
 
 /* ============================================ */
@@ -275,68 +343,120 @@
 }
 
 @keyframes pulse-green {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.15);
-  }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
 }
 
 /* ============================================ */
-/* ✅ تم تاریک - تنظیمات خاص */
+/* تم تاریک - بقیه عناصر */
 /* ============================================ */
-.admin-header.dark .menu-toggle {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.admin-header.dark .menu-toggle:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.admin-header.dark .admin-header-brand:hover {
+.admin-header.dark .admin-header-brand:hover,
+.admin-header.dark-theme .admin-header-brand:hover {
   background: rgba(255, 255, 255, 0.06);
 }
 
-.admin-header.dark .admin-theme-btn {
+.admin-header.dark .admin-theme-btn,
+.admin-header.dark-theme .admin-theme-btn {
   background: rgba(255, 200, 100, 0.15);
   border-color: rgba(255, 200, 100, 0.25);
 }
-.admin-header.dark .admin-theme-btn:hover {
+.admin-header.dark .admin-theme-btn:hover,
+.admin-header.dark-theme .admin-theme-btn:hover {
   background: rgba(255, 200, 100, 0.3);
   border-color: rgba(255, 200, 100, 0.4);
 }
 
-.admin-header.dark .admin-home-btn {
+.admin-header.dark .admin-home-btn,
+.admin-header.dark-theme .admin-home-btn {
   background: rgba(100, 180, 255, 0.15);
   border-color: rgba(100, 180, 255, 0.25);
 }
-.admin-header.dark .admin-home-btn:hover {
+.admin-header.dark .admin-home-btn:hover,
+.admin-header.dark-theme .admin-home-btn:hover {
   background: rgba(100, 180, 255, 0.3);
   border-color: rgba(100, 180, 255, 0.4);
 }
 
-.admin-header.dark .admin-logout-btn {
+.admin-header.dark .admin-logout-btn,
+.admin-header.dark-theme .admin-logout-btn {
   background: rgba(255, 100, 100, 0.12);
   border-color: rgba(255, 100, 100, 0.25);
 }
-.admin-header.dark .admin-logout-btn:hover {
+.admin-header.dark .admin-logout-btn:hover,
+.admin-header.dark-theme .admin-logout-btn:hover {
   background: rgba(255, 100, 100, 0.28);
   border-color: rgba(255, 100, 100, 0.4);
 }
 
-.admin-header.dark .admin-user-card {
+.admin-header.dark .admin-user-card,
+.admin-header.dark-theme .admin-user-card {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-.admin-header.dark .admin-user-card:hover {
+.admin-header.dark .admin-user-card:hover,
+.admin-header.dark-theme .admin-user-card:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================ */
+/* Pending (درخواست‌های پرداخت) */
+/* ============================================ */
+.admin-header-btn.admin-pending-btn {
+  position: relative;
+  background: rgba(255, 152, 0, 0.25);
+  color: #ffffff;
+  border-color: rgba(255, 152, 0, 0.4);
+}
+
+.admin-header-btn.admin-pending-btn:hover {
+  background: rgba(255, 152, 0, 0.45);
+  border-color: rgba(255, 152, 0, 0.6);
+}
+
+.pending-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background: #f44336;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.6);
+  border: 2px solid #ffffff;
+  animation: pendingPulse 2s infinite;
+  z-index: 1;
+  line-height: 1;
+}
+
+@keyframes pendingPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.admin-header.dark .admin-header-btn.admin-pending-btn,
+.admin-header.dark-theme .admin-header-btn.admin-pending-btn {
+  background: rgba(255, 152, 0, 0.15);
+  border-color: rgba(255, 152, 0, 0.3);
+}
+
+.admin-header.dark .admin-header-btn.admin-pending-btn:hover,
+.admin-header.dark-theme .admin-header-btn.admin-pending-btn:hover {
+  background: rgba(255, 152, 0, 0.3);
+  border-color: rgba(255, 152, 0, 0.5);
+}
+
+.admin-header.dark .pending-badge,
+.admin-header.dark-theme .pending-badge {
+  border-color: #0a1628;
 }
 
 /* ============================================ */
@@ -352,10 +472,6 @@
 }
 
 @media (max-width: 768px) {
-  .menu-toggle {
-    display: flex;
-  }
-
   .admin-header {
     padding: 0 12px;
   }
@@ -405,6 +521,15 @@
   .admin-user-role {
     font-size: 10px;
   }
+
+  .pending-badge {
+    top: -4px;
+    left: -4px;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -414,9 +539,10 @@
   }
 
   .menu-toggle {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 20px !important;
+    border-radius: 10px !important;
   }
 
   .admin-brand-icon {
@@ -456,5 +582,88 @@
 
   .admin-user-card:hover {
     background: transparent;
+  }
+}
+/* ============================================ */
+/* ✅ دکمه پیام‌های کاربران (Messages) */
+/* ============================================ */
+.admin-header-btn.admin-messages-btn {
+  position: relative;
+  background: rgba(156, 39, 176, 0.25);
+  color: #ffffff;
+  border-color: rgba(156, 39, 176, 0.4);
+}
+
+.admin-header-btn.admin-messages-btn:hover {
+  background: rgba(156, 39, 176, 0.45);
+  border-color: rgba(156, 39, 176, 0.6);
+  color: #ffffff;
+}
+
+/* Badge پیام‌ها - بنفش */
+.messages-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background: #9c27b0;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.6);
+  border: 2px solid #ffffff;
+  animation: messagesPulse 2s infinite;
+  z-index: 1;
+  line-height: 1;
+}
+
+@keyframes messagesPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.6);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(156, 39, 176, 0.9);
+  }
+}
+
+/* تم تاریک - پیام‌ها */
+.admin-header.dark .admin-header-btn.admin-messages-btn,
+.admin-header.dark-theme .admin-header-btn.admin-messages-btn {
+  background: rgba(156, 39, 176, 0.15);
+  border-color: rgba(156, 39, 176, 0.3);
+}
+
+.admin-header.dark .admin-header-btn.admin-messages-btn:hover,
+.admin-header.dark-theme .admin-header-btn.admin-messages-btn:hover {
+  background: rgba(156, 39, 176, 0.3);
+  border-color: rgba(156, 39, 176, 0.5);
+}
+
+.admin-header.dark .messages-badge,
+.admin-header.dark-theme .messages-badge {
+  border-color: #0a1628;
+}
+
+/* ریسپانسیو - در موبایل متن دکمه مخفی */
+@media (max-width: 768px) {
+  .admin-messages-btn .admin-btn-text {
+    display: none;
+  }
+
+  .messages-badge {
+    top: -4px;
+    left: -4px;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
   }
 }

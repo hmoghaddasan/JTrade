@@ -15,6 +15,7 @@ from datetime import timedelta
 import logging
 
 from apps.accounts.permissions import IsAdminUser
+from apps.accounts.models import SystemSetting
 from apps.admin_panel.models import AdminActionLog
 from .models import PaymentCard, PaymentRequest, UserSubscription
 from .serializers import (
@@ -93,7 +94,6 @@ class AdminPaymentCardDetailView(generics.RetrieveUpdateDestroyAPIView):
         )
 
     def perform_destroy(self, instance):
-        # بررسی استفاده نشده باشد
         if instance.payment_requests.exists():
             raise Exception('این کارت در درخواست‌های پرداخت استفاده شده است. فقط می‌توانید آن را غیرفعال کنید.')
 
@@ -147,7 +147,7 @@ class AdminPaymentCardToggleView(APIView):
             card = PaymentCard.objects.get(id=pk)
             card.is_active = not card.is_active
             if not card.is_active:
-                card.is_default = False  # اگر غیرفعال شد، پیش‌فرض نباشد
+                card.is_default = False
             card.save()
 
             AdminActionLog.objects.create(
@@ -182,32 +182,26 @@ class AdminPaymentRequestListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = PaymentRequest.objects.all().select_related('user', 'plan', 'payment_card', 'reviewed_by')
 
-        # فیلتر وضعیت
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
 
-        # فیلتر کارت
         card_id = self.request.query_params.get('card_id')
         if card_id:
             queryset = queryset.filter(payment_card_id=card_id)
 
-        # فیلتر کاربر
         user_id = self.request.query_params.get('user_id')
         if user_id:
             queryset = queryset.filter(user_id=user_id)
 
-        # فیلتر پلن
         plan_id = self.request.query_params.get('plan_id')
         if plan_id:
             queryset = queryset.filter(plan_id=plan_id)
 
-        # فیلتر ادمین بررسی‌کننده
         reviewed_by = self.request.query_params.get('reviewed_by')
         if reviewed_by:
             queryset = queryset.filter(reviewed_by_id=reviewed_by)
 
-        # فیلتر بازه زمانی
         date_from = self.request.query_params.get('date_from')
         if date_from:
             queryset = queryset.filter(created_at__date__gte=date_from)
@@ -215,7 +209,6 @@ class AdminPaymentRequestListView(generics.ListAPIView):
         if date_to:
             queryset = queryset.filter(created_at__date__lte=date_to)
 
-        # فیلتر مبلغ
         min_amount = self.request.query_params.get('min_amount')
         if min_amount:
             queryset = queryset.filter(amount__gte=min_amount)
@@ -241,6 +234,7 @@ class AdminPaymentRequestApproveView(APIView):
     تأیید پرداخت توسط ادمین
     - تمدید خودکار اشتراک
     - پیامک به کاربر
+    - ✅ پیامک به ادمین (جدید)
     """
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
@@ -250,7 +244,6 @@ class AdminPaymentRequestApproveView(APIView):
         except PaymentRequest.DoesNotExist:
             return Response({'error': 'درخواست یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
 
-        # اعتبارسنجی ورودی
         serializer = ApprovePaymentRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -271,10 +264,12 @@ class AdminPaymentRequestApproveView(APIView):
             description=f'تأیید پرداخت #{payment_request.id} - کاربر {payment_request.user.phone_number} - مبلغ {payment_request.amount}' + (f' - {note}' if note else '')
         )
 
-        # پیامک به کاربر
         user_name = payment_request.user.get_full_name() or payment_request.user.phone_number
         end_date_str = subscription.end_date.strftime('%Y/%m/%d') if subscription and subscription.end_date else '-'
 
+        # ============================================
+        # ✅ پیامک به کاربر: تأیید پرداخت
+        # ============================================
         _send_sms_safe(
             event_key='payment_approved',
             phone_number=payment_request.user.phone_number,
@@ -282,9 +277,34 @@ class AdminPaymentRequestApproveView(APIView):
                 'user_name': user_name,
                 'plan_name': payment_request.plan.plan_name,
                 'end_date': end_date_str,
+                'param1': user_name,
+                'param2': payment_request.plan.plan_name,
+                'param3': end_date_str,
             },
             user=payment_request.user,
         )
+
+        # ============================================
+        # ✅ پیامک به ادمین: تأیید پرداخت کارت به کارت
+        # ============================================
+        admin_phone = SystemSetting.get('admin_phone_number', '')
+        if admin_phone:
+            _send_sms_safe(
+                event_key='admin_payment_approved',
+                phone_number=admin_phone,
+                context={
+                    'user_name': user_name,
+                    'amount': f"{int(payment_request.amount):,}",
+                    'method': 'کارت به کارت',
+                    'new_end_date': end_date_str,
+                    'param1': user_name,
+                    'param2': f"{int(payment_request.amount):,}",
+                    'param3': 'کارت به کارت',
+                    'param4': end_date_str,
+                },
+            )
+        else:
+            logger.warning("⚠️ شماره ادمین برای اطلاع تأیید پرداخت تنظیم نشده")
 
         # علامت‌گذاری کاربر اطلاع‌رسانی شده
         payment_request.user_notified = True
@@ -320,12 +340,10 @@ class AdminPaymentRequestRejectView(APIView):
 
         reason = serializer.validated_data['reason']
 
-        # رد
         success, message = payment_request.reject(admin_user=request.user, reason=reason)
         if not success:
             return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
 
-        # لاگ ادمین
         AdminActionLog.objects.create(
             admin=request.user,
             action_type='update',
@@ -334,7 +352,6 @@ class AdminPaymentRequestRejectView(APIView):
             description=f'رد پرداخت #{payment_request.id} - کاربر {payment_request.user.phone_number} - دلیل: {reason}'
         )
 
-        # پیامک به کاربر
         user_name = payment_request.user.get_full_name() or payment_request.user.phone_number
 
         _send_sms_safe(
@@ -343,6 +360,8 @@ class AdminPaymentRequestRejectView(APIView):
             context={
                 'user_name': user_name,
                 'reason': reason,
+                'param1': user_name,
+                'param2': reason,
             },
             user=payment_request.user,
         )
@@ -370,7 +389,6 @@ class AdminPaymentRequestStatsView(APIView):
         now = timezone.now()
         today = now.date()
 
-        # آمار کلی
         all_requests = PaymentRequest.objects.all()
 
         stats = {
@@ -391,7 +409,6 @@ class AdminPaymentRequestStatsView(APIView):
                 'count': count,
             }
 
-        # مجموع مبالغ
         approved_sum = all_requests.filter(status='approved').aggregate(Sum('amount'))['amount__sum'] or 0
         pending_sum = all_requests.filter(
             status__in=['pending_payment', 'awaiting_review']
@@ -400,7 +417,6 @@ class AdminPaymentRequestStatsView(APIView):
         stats['total_amount_approved'] = float(approved_sum)
         stats['total_amount_pending'] = float(pending_sum)
 
-        # امروز
         today_stats = all_requests.filter(created_at__date=today).aggregate(
             count=Count('id'),
             amount=Sum('amount')
@@ -408,7 +424,6 @@ class AdminPaymentRequestStatsView(APIView):
         stats['today_count'] = today_stats['count'] or 0
         stats['today_amount'] = float(today_stats['amount'] or 0)
 
-        # این ماه
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         month_stats = all_requests.filter(created_at__gte=month_start).aggregate(
             count=Count('id'),
@@ -417,7 +432,6 @@ class AdminPaymentRequestStatsView(APIView):
         stats['this_month_count'] = month_stats['count'] or 0
         stats['this_month_amount'] = float(month_stats['amount'] or 0)
 
-        # آمار کارت‌ها
         cards_stats = []
         for card in PaymentCard.objects.all():
             card_requests = all_requests.filter(payment_card=card)

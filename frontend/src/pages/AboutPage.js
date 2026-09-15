@@ -33,9 +33,16 @@ const AboutPage = () => {
   }, []);
 
   // ============================================
-  // ✅ امکانات کلیدی نرم‌افزار (گزارشات، مشاوره، قوانین، پورتفولیو و ...)
+  // ✅ امکانات کلیدی نرم‌افزار
   // ============================================
   const features = [
+    {
+      icon: '🎁',
+      title: 'تست رایگان ۷ روزه',
+      description: 'تمام امکانات نرم‌افزار را به مدت ۷ روز به‌صورت رایگان تست کنید. بدون نیاز به کارت بانکی، بدون محدودیت در ترید و مشاوره AI',
+      color: '#00897b',
+      badge: '7-Day Free Trial'
+    },
     {
       icon: '📊',
       title: 'گزارشات پیشرفته و متنوع',
@@ -45,10 +52,10 @@ const AboutPage = () => {
     },
     {
       icon: '🧠',
-      title: 'تاریخچه مشاوره‌های هوش مصنوعی',
-      description: 'ذخیره و نمایش کامل تاریخچه مشاوره‌های AI با امکان مشاهده جزئیات، تحلیل‌های روانشناختی، تکنیکال و سناریوها',
+      title: 'مشاوره هوشمند AI',
+      description: 'تحلیل عملکرد کاربر و ارائه بازخورد اختصاصی به زبان طبیعی با مدل‌های پیشرفته هوش مصنوعی، ذخیره و نمایش کامل تاریخچه مشاوره‌ها',
       color: '#7c4dff',
-      badge: 'AI History'
+      badge: 'AI Consultation'
     },
     {
       icon: '📋',
@@ -154,7 +161,7 @@ const AboutPage = () => {
     { value: '۳', label: 'پلن اشتراک', icon: '💎' },
     { value: '۱۰', label: 'ابزار انضباطی', icon: '🛡️' },
     { value: '۶', label: 'تب تخصصی ترید', icon: '📋' },
-    { value: '۱۵+', label: 'قابلیت کلیدی', icon: '⚡' }
+    { value: '۷', label: 'روز تست رایگان', icon: '🎁' }
   ];
 
   // ============================================
@@ -180,6 +187,10 @@ const AboutPage = () => {
   // ============================================
   const categories = [
     {
+      title: '🎁 دوره آزمایشی',
+      items: ['۷ روز استفاده رایگان', 'دسترسی کامل به امکانات', 'بدون نیاز به کارت بانکی', 'بدون تعهد و محدودیت', 'پشتیبانی کامل']
+    },
+    {
       title: '📊 گزارشات و تحلیل',
       items: ['۱۲+ گزارش تخصصی', 'نمودارهای پیشرفته', 'شاخص‌های حرفه‌ای', 'تحلیل روانشناسی', 'مدیریت ریسک']
     },
@@ -201,6 +212,7 @@ const AboutPage = () => {
   // ✅ مسیر توسعه
   // ============================================
   const roadmap = [
+    { status: 'done', title: '🎁 تست رایگان ۷ روزه', description: 'دسترسی کامل به تمام امکانات نرم‌افزار به مدت ۷ روز به‌صورت رایگان، بدون نیاز به کارت بانکی' },
     { status: 'done', title: 'گزارشات پیشرفته (۱۲+ گزارش)', description: 'گزارشات P&L، R:R، عملکرد هفتگی، چک‌لیست، خواب و تغذیه، نقشه احساسات، واکنش‌ها، اشتباهات، کیفیت اجرا، بایاس، تایم‌فریم، مدیریت ریسک' },
     { status: 'done', title: 'مشاوره هوشمند AI', description: 'تحلیل عملکرد کاربر و ارائه بازخورد اختصاصی به زبان طبیعی با مدل‌های پیشرفته' },
     { status: 'done', title: 'ژورنال کامل ترید با تصویر', description: 'ثبت ترید با ۶ تب تخصصی، آپلود تصویر چارت و نمایش جزئیات کامل' },
@@ -210,8 +222,11 @@ const AboutPage = () => {
     { status: 'done', title: 'شاخص‌های حرفه‌ای (۵ شاخص)', description: 'Sharpe, Sortino, Calmar, Profit Factor, Max Drawdown, Kelly Criterion' },
     { status: 'done', title: 'پشتیبانی از تحلیل ICT', description: 'تب تخصصی ICT برای تحلیل‌های پیشرفته معاملاتی' },
     { status: 'done', title: 'سیستم پیام‌رسانی داخلی', description: 'ارسال و دریافت پیام بین کاربر و ادمین با اعلان‌های سیستم' },
+    { status: 'done', title: 'سیستم پیامک (SMS)', description: 'ارسال پیامک خودکار برای رویدادهای مختلف (OTP، تمدید، اطلاع‌رسانی)' },
+    { status: 'done', title: 'پرداخت کارت به کارت', description: 'سیستم کامل پرداخت کارت به کارت با تأیید ادمین' },
     { status: 'in-progress', title: 'گیمیفیکیشن (Gamification)', description: 'سیستم سطح‌بندی، کوئست‌های روزانه، نشان‌های افتخار و امتیازدهی' },
     { status: 'in-progress', title: 'شبیه‌سازی (Simulation)', description: 'شبیه‌سازی سناریوهای مختلف بر اساس تاریخچه معاملات کاربر' },
+    { status: 'in-progress', title: 'مربی هوش مصنوعی (AI Coach)', description: 'تحلیل عمیق عملکرد کاربر و ارائه بازخورد منتور حرفه‌ای' },
     { status: 'planned', title: 'ایمپورت آنلاین از بروکرها', description: 'اتصال مستقیم به بروکرها و ایمپورت خودکار تریدها' },
     { status: 'planned', title: 'قابلیت اشتراک‌گذاری عملکرد', description: 'اشتراک‌گذاری گزارش عملکرد با منتور از طریق لینک یکتا' },
     { status: 'planned', title: 'کتابخانه الگوها (Pattern Library)', description: 'مطالعه سبک‌های معامله‌گری بزرگان و الگوهای معروف' }
@@ -251,6 +266,25 @@ const AboutPage = () => {
         </div>
 
         {/* ============================================
+            ✅ بنر تست رایگان ۷ روزه
+            ============================================ */}
+        <div className="trial-banner">
+          <div className="trial-banner-content">
+            <div className="trial-banner-icon">🎁</div>
+            <div className="trial-banner-text">
+              <h3>۷ روز استفاده رایگان از تمام امکانات</h3>
+              <p>
+                بدون نیاز به کارت بانکی، بدون تعهد. همین حالا شروع کنید و تمام
+                قابلیت‌های حرفه‌ای نرم‌افزار را تست کنید.
+              </p>
+            </div>
+          </div>
+          <Link to="/register" className="trial-banner-cta">
+            شروع تست رایگان ←
+          </Link>
+        </div>
+
+        {/* ============================================
             بخش معرفی
             ============================================ */}
         <div className="about-intro">
@@ -267,6 +301,7 @@ const AboutPage = () => {
               تا بتوانند نقاط قوت و ضعف خود را شناسایی کرده و مسیر رشد خود را هموار سازند.
             </p>
             <div className="intro-tags">
+              <span className="tag">🎁 ۷ روز رایگان</span>
               <span className="tag">📊 ۱۲+ گزارش</span>
               <span className="tag">🧠 AI مشاور</span>
               <span className="tag">🛡️ ۱۰ ابزار انضباطی</span>
@@ -288,8 +323,8 @@ const AboutPage = () => {
               <span className="mini-stat-label">شاخص حرفه‌ای</span>
             </div>
             <div className="mini-stat">
-              <span className="mini-stat-number">۱۰</span>
-              <span className="mini-stat-label">ابزار انضباطی</span>
+              <span className="mini-stat-number">۷</span>
+              <span className="mini-stat-label">روز تست رایگان</span>
             </div>
           </div>
         </div>
@@ -300,7 +335,7 @@ const AboutPage = () => {
         <div className="about-categories">
           <h2>📂 دسته‌بندی قابلیت‌ها</h2>
           <p className="categories-subtitle">
-            همه امکانات نرم‌افزار در ۴ دسته اصلی
+            همه امکانات نرم‌افزار در ۵ دسته اصلی
           </p>
           <div className="categories-grid">
             {categories.map((category, index) => (
@@ -407,9 +442,11 @@ const AboutPage = () => {
           <div className="cta-content">
             <span className="cta-icon">🚀</span>
             <h3>آماده‌اید معاملات خود را متحول کنید؟</h3>
-            <p>همین حالا ثبت‌نام کنید و از تمام امکانات حرفه‌ای ژورنال ترید استفاده کنید</p>
+            <p>همین حالا ۷ روز تست رایگان را شروع کنید و از تمام امکانات حرفه‌ای ژورنال ترید استفاده کنید</p>
             <div className="cta-buttons">
-              <Link to="/register" className="cta-btn primary">شروع کنید</Link>
+              <Link to="/register" className="cta-btn primary">
+                🎁 شروع تست رایگان ۷ روزه
+              </Link>
               <Link to="/login" className="cta-btn secondary">ورود به حساب</Link>
             </div>
           </div>

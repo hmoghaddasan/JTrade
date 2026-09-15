@@ -374,3 +374,309 @@ html[data-theme="dark"] .payment-cards-management .info-banner p {
     width: 100%;
   }
 }
+/* ============================================ */
+/* ✅ بخش انتخاب حالت کارت (Selection Mode)    */
+/* ============================================ */
+.payment-cards-management .selection-mode-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.payment-cards-management .selection-mode-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e8ecf1;
+}
+
+.payment-cards-management .selection-mode-header h3 {
+  font-size: 16px;
+  color: #1a1a2e;
+  margin: 0 0 6px 0;
+  font-weight: 700;
+}
+
+.payment-cards-management .selection-mode-hint {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.payment-cards-management .selection-mode-loading {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.payment-cards-management .selection-mode-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.payment-cards-management .mode-option {
+  display: block;
+  cursor: pointer;
+  border: 2px solid #e8ecf1;
+  border-radius: 10px;
+  padding: 14px;
+  transition: all 0.2s ease;
+  background: #fafbfc;
+  position: relative;
+}
+
+.payment-cards-management .mode-option:hover {
+  border-color: #90caf9;
+  background: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.08);
+}
+
+.payment-cards-management .mode-option.active {
+  border-color: #6c63ff;
+  background: linear-gradient(135deg, #f0f4ff, #e8eaff);
+  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.18);
+}
+
+.payment-cards-management .mode-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.payment-cards-management .mode-option-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-cards-management .mode-option-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf1;
+  transition: all 0.2s;
+}
+
+.payment-cards-management .mode-option.active .mode-option-icon {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  transform: scale(1.05);
+}
+
+.payment-cards-management .mode-option-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.payment-cards-management .mode-option-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+}
+
+.payment-cards-management .mode-option.active .mode-option-title {
+  color: #6c63ff;
+}
+
+.payment-cards-management .mode-option-desc {
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+.payment-cards-management .selection-mode-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e8ecf1;
+  animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.payment-cards-management .btn-cancel-mode,
+.payment-cards-management .btn-save-mode {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  border: none;
+}
+
+.payment-cards-management .btn-cancel-mode {
+  background: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.payment-cards-management .btn-cancel-mode:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.payment-cards-management .btn-save-mode {
+  background: linear-gradient(135deg, #6c63ff, #5349d4);
+  color: #fff;
+}
+
+.payment-cards-management .btn-save-mode:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.4);
+}
+
+.payment-cards-management .btn-save-mode:disabled,
+.payment-cards-management .btn-cancel-mode:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================ */
+/* ✅ تم تاریک - Selection Mode */
+/* ============================================ */
+.admin-layout.dark .payment-cards-management .selection-mode-section,
+.admin-layout.dark-theme .payment-cards-management .selection-mode-section,
+body.dark-theme .payment-cards-management .selection-mode-section,
+html[data-theme="dark"] .payment-cards-management .selection-mode-section {
+  background: #1a1f2e !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .payment-cards-management .selection-mode-header h3,
+.admin-layout.dark-theme .payment-cards-management .selection-mode-header h3,
+body.dark-theme .payment-cards-management .selection-mode-header h3,
+html[data-theme="dark"] .payment-cards-management .selection-mode-header h3 {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .payment-cards-management .selection-mode-hint,
+.admin-layout.dark-theme .payment-cards-management .selection-mode-hint,
+body.dark-theme .payment-cards-management .selection-mode-hint,
+html[data-theme="dark"] .payment-cards-management .selection-mode-hint {
+  color: #888 !important;
+}
+
+.admin-layout.dark .payment-cards-management .selection-mode-header,
+.admin-layout.dark-theme .payment-cards-management .selection-mode-header,
+body.dark-theme .payment-cards-management .selection-mode-header,
+html[data-theme="dark"] .payment-cards-management .selection-mode-header {
+  border-bottom-color: #2a3040 !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option,
+.admin-layout.dark-theme .payment-cards-management .mode-option,
+body.dark-theme .payment-cards-management .mode-option,
+html[data-theme="dark"] .payment-cards-management .mode-option {
+  background: #151a26 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option:hover,
+.admin-layout.dark-theme .payment-cards-management .mode-option:hover,
+body.dark-theme .payment-cards-management .mode-option:hover,
+html[data-theme="dark"] .payment-cards-management .mode-option:hover {
+  background: #1f2535 !important;
+  border-color: #3a5a8a !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option.active,
+.admin-layout.dark-theme .payment-cards-management .mode-option.active,
+body.dark-theme .payment-cards-management .mode-option.active,
+html[data-theme="dark"] .payment-cards-management .mode-option.active {
+  background: linear-gradient(135deg, #1f2a4a, #252b45) !important;
+  border-color: #6c63ff !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option-icon,
+.admin-layout.dark-theme .payment-cards-management .mode-option-icon,
+body.dark-theme .payment-cards-management .mode-option-icon,
+html[data-theme="dark"] .payment-cards-management .mode-option-icon {
+  background: #0f1419 !important;
+  border-color: #2a3040 !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option.active .mode-option-icon,
+.admin-layout.dark-theme .payment-cards-management .mode-option.active .mode-option-icon,
+body.dark-theme .payment-cards-management .mode-option.active .mode-option-icon,
+html[data-theme="dark"] .payment-cards-management .mode-option.active .mode-option-icon {
+  background: #6c63ff !important;
+  border-color: #6c63ff !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option-title,
+.admin-layout.dark-theme .payment-cards-management .mode-option-title,
+body.dark-theme .payment-cards-management .mode-option-title,
+html[data-theme="dark"] .payment-cards-management .mode-option-title {
+  color: #e0e0e0 !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option.active .mode-option-title,
+.admin-layout.dark-theme .payment-cards-management .mode-option.active .mode-option-title,
+body.dark-theme .payment-cards-management .mode-option.active .mode-option-title,
+html[data-theme="dark"] .payment-cards-management .mode-option.active .mode-option-title {
+  color: #90caf9 !important;
+}
+
+.admin-layout.dark .payment-cards-management .mode-option-desc,
+.admin-layout.dark-theme .payment-cards-management .mode-option-desc,
+body.dark-theme .payment-cards-management .mode-option-desc,
+html[data-theme="dark"] .payment-cards-management .mode-option-desc {
+  color: #888 !important;
+}
+
+.admin-layout.dark .payment-cards-management .selection-mode-actions,
+.admin-layout.dark-theme .payment-cards-management .selection-mode-actions,
+body.dark-theme .payment-cards-management .selection-mode-actions,
+html[data-theme="dark"] .payment-cards-management .selection-mode-actions {
+  border-top-color: #2a3040 !important;
+}
+
+.admin-layout.dark .payment-cards-management .btn-cancel-mode,
+.admin-layout.dark-theme .payment-cards-management .btn-cancel-mode,
+body.dark-theme .payment-cards-management .btn-cancel-mode,
+html[data-theme="dark"] .payment-cards-management .btn-cancel-mode {
+  background: #2a3040 !important;
+  color: #b0b8c8 !important;
+  border-color: #3a4050 !important;
+}
+
+/* ============================================ */
+/* ✅ Responsive - Selection Mode */
+/* ============================================ */
+@media (max-width: 600px) {
+  .payment-cards-management .selection-mode-section {
+    padding: 16px;
+  }
+
+  .payment-cards-management .selection-mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-cards-management .selection-mode-actions {
+    flex-direction: column-reverse;
+  }
+
+  .payment-cards-management .selection-mode-actions button {
+    width: 100%;
+  }
+}

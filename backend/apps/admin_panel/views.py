@@ -18,6 +18,7 @@ import io
 import json
 from datetime import datetime, timedelta
 import logging
+from apps.subscriptions.models import PaymentRequest
 
 from apps.accounts.models import User, SystemSetting, AppVersion
 from apps.subscriptions.models import SubscriptionPlan, UserSubscription, DiscountCode, Transaction, DiscountCodeUsage
@@ -141,9 +142,26 @@ class AdminDashboardView(APIView):
         ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         pending_payments = Transaction.objects.filter(payment_status='pending').count()
 
-        # ======== پیام‌های خوانده نشده ========
+        # ======== ✅ پیام‌های کاربران ========
+        # پیام‌هایی که ادمین هنوز ندیده (خوانده نشده توسط ادمین)
+        unread_by_admin_messages = UserMessage.objects.filter(is_read_by_admin=False).count()
+
+        # پیام‌هایی که ادمین خوانده اما پاسخ نداده
+        unreplied_messages = UserMessage.objects.filter(
+            is_read_by_admin=True,
+            is_replied=False
+        ).count()
+
+        # پیام‌های خوانده نشده توسط کاربر (پاسخ‌های جدید)
         pending_messages = UserMessage.objects.filter(is_read=False).count()
-        unreplied_messages = UserMessage.objects.filter(is_replied=False, is_read=True).count()
+
+        # ======== ✅ آمار درخواست‌های پرداخت کارت به کارت ========
+        pending_payment_requests = PaymentRequest.objects.filter(
+            status='awaiting_review'
+        ).count()
+        pending_payment_amount = PaymentRequest.objects.filter(
+            status='awaiting_review'
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
 
         # ======== آمار روزهای هفته (برای نمودار) ========
         day_stats = Trade.objects.filter(
@@ -197,6 +215,10 @@ class AdminDashboardView(APIView):
                 'new_week': new_users_week,
                 'new_month': new_users_month,
             },
+            'payment_requests': {
+                'pending_review_count': pending_payment_requests,
+                'pending_review_amount': float(pending_payment_amount),
+            },
             'subscriptions': {
                 'total': total_subscriptions,
                 'active': active_subscriptions,
@@ -235,6 +257,7 @@ class AdminDashboardView(APIView):
             'messages': {
                 'pending': pending_messages,
                 'unreplied': unreplied_messages,
+                'unread_by_admin': unread_by_admin_messages,
             },
             'charts': {
                 'day_stats': list(day_stats),
@@ -382,19 +405,6 @@ class AdminUserDeleteView(APIView):
 class AdminUserSendSMSView(APIView):
     """
     ارسال پیامک به کاربر (تکی یا گروهی) با SmsService جدید
-
-    ✅ نکته مهم:
-    فرانت‌اند context را در فیلد 'context' می‌فرستد.
-    بک‌اند باید context را مستقیماً به SmsService.send_event پاس بدهد
-    تا پارامترها با همان نام اصلی به provider ارسال شوند.
-
-    برای قالب‌های send_method='single' (admin_single, admin_bulk):
-    - SmsService به صورت خودکار از send_single (سرشماره) استفاده می‌کند
-    - متن از template.render_single(context) ساخته می‌شود
-
-    برای قالب‌های send_method='otp':
-    - SmsService از send_otp_multi استفاده می‌کند
-    - context باید پارامترهای provider را داشته باشد
     """
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
@@ -405,8 +415,6 @@ class AdminUserSendSMSView(APIView):
         use_template = request.data.get('use_template', False)
         template_event = request.data.get('template_event', '')
 
-        # ✅ اصلاح کلیدی: هم context و هم template_context را بپذیر
-        # فرانت‌اند از فیلد 'context' استفاده می‌کند
         template_context = (
             request.data.get('context')
             or request.data.get('template_context')
@@ -417,7 +425,6 @@ class AdminUserSendSMSView(APIView):
         logger.info(f"📥 [AdminSendSMS] use_template={use_template}, event={template_event}")
         logger.info(f"📥 [AdminSendSMS] context={template_context}")
 
-        # اعتبارسنجی
         if use_template and not template_event:
             return Response(
                 {'error': 'اگر از قالب استفاده می‌کنید، انتخاب رویداد الزامی است'},
@@ -430,7 +437,6 @@ class AdminUserSendSMSView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # انتخاب گیرندگان
         if send_to_all:
             users = User.objects.filter(is_active=True, is_verified=True)
         elif user_ids:
@@ -447,14 +453,12 @@ class AdminUserSendSMSView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # بررسی در دسترس بودن سرویس
         if not SMS_SERVICE_AVAILABLE or not SmsService:
             return Response(
                 {'error': 'سرویس پیامک در دسترس نیست'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
-        # ارسال با SmsService جدید
         sms_service = SmsService()
         sent_count = 0
         failed_count = 0
@@ -466,9 +470,6 @@ class AdminUserSendSMSView(APIView):
 
             try:
                 if use_template:
-                    # ✅ ارسال با قالب - context مستقیم ارسال می‌شود
-                    # SmsService خودش تصمیم می‌گیرد که از send_single یا send_otp_multi استفاده کند
-                    # بر اساس send_method قالب
                     logger.info(
                         f"📤 [AdminSendSMS] ارسال با قالب '{template_event}' "
                         f"به {user.phone_number} با context={template_context}"
@@ -476,15 +477,12 @@ class AdminUserSendSMSView(APIView):
                     result = sms_service.send_event(
                         event_key=template_event,
                         phone_number=user.phone_number,
-                        context=template_context,     # ← context دقیقاً همان‌طور که فرستاده شده
+                        context=template_context,
                         user=user,
                         related_object_type='admin_bulk',
                         priority='high',
                     )
                 else:
-                    # ارسال با متن آزاد
-                    # این حالت از event_key='admin_single' یا 'admin_bulk' استفاده می‌کند
-                    # که send_method='single' دارند و با سرشماره ارسال می‌شوند
                     if len(users) == 1:
                         result = sms_service.send_admin_single(user, message_text)
                     else:
@@ -501,7 +499,6 @@ class AdminUserSendSMSView(APIView):
                 errors.append(f"{user.phone_number}: {str(e)}")
                 logger.error(f"Error sending SMS to {user.phone_number}: {e}")
 
-        # ثبت لاگ ادمین
         AdminActionLog.objects.create(
             admin=request.user,
             action_type='send_sms',
@@ -595,7 +592,6 @@ class AdminSubscriptionExtendView(APIView):
                            (f' - {reason}' if reason else '')
             )
 
-            # ارسال پیامک تمدید توسط ادمین
             if SMS_SERVICE_AVAILABLE and SmsService:
                 try:
                     sms_service = SmsService()
@@ -652,7 +648,6 @@ class AdminSubscriptionGiftView(APIView):
             subscription.end_date = subscription.end_date + timedelta(days=days)
             subscription.save()
 
-            # ارسال پیامک هدیه به هر کاربر
             if SMS_SERVICE_AVAILABLE and SmsService:
                 try:
                     sms_service = SmsService()
@@ -783,11 +778,65 @@ class AdminSalesReportView(APIView):
             if count > 0:
                 revenue = plan_transactions.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
                 plan_breakdown.append({
+                    'plan_id': plan.id,
                     'plan_name': plan.plan_name,
                     'count': count,
                     'revenue': float(revenue),
                     'percentage': round((count / total_sales * 100), 2) if total_sales > 0 else 0
                 })
+
+        plan_breakdown.sort(key=lambda x: x['count'], reverse=True)
+
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = today_start - timedelta(days=7)
+        month_start = today_start - timedelta(days=30)
+        year_start = today_start - timedelta(days=365)
+
+        paid_transactions = Transaction.objects.filter(payment_status='paid')
+
+        today_stats = paid_transactions.filter(created_at__gte=today_start).aggregate(
+            count=Count('id'), amount=Sum('total_amount')
+        )
+        week_stats = paid_transactions.filter(created_at__gte=week_start).aggregate(
+            count=Count('id'), amount=Sum('total_amount')
+        )
+        month_stats = paid_transactions.filter(created_at__gte=month_start).aggregate(
+            count=Count('id'), amount=Sum('total_amount')
+        )
+        year_stats = paid_transactions.filter(created_at__gte=year_start).aggregate(
+            count=Count('id'), amount=Sum('total_amount')
+        )
+
+        stats_by_period = {
+            'today': {
+                'count': today_stats['count'] or 0,
+                'amount': float(today_stats['amount'] or 0),
+            },
+            'week': {
+                'count': week_stats['count'] or 0,
+                'amount': float(week_stats['amount'] or 0),
+            },
+            'month': {
+                'count': month_stats['count'] or 0,
+                'amount': float(month_stats['amount'] or 0),
+            },
+            'year': {
+                'count': year_stats['count'] or 0,
+                'amount': float(year_stats['amount'] or 0),
+            },
+        }
+
+        payment_requests = PaymentRequest.objects.all()
+        approved_requests = payment_requests.filter(status='approved')
+        pending_requests = payment_requests.filter(status__in=['pending_payment', 'awaiting_review'])
+
+        payment_request_stats = {
+            'total_count': payment_requests.count(),
+            'approved_count': approved_requests.count(),
+            'approved_amount': float(approved_requests.aggregate(Sum('amount'))['amount__sum'] or 0),
+            'pending_count': pending_requests.count(),
+            'pending_amount': float(pending_requests.aggregate(Sum('amount'))['amount__sum'] or 0),
+        }
 
         daily_data = transactions.annotate(
             date=group_by
@@ -809,6 +858,8 @@ class AdminSalesReportView(APIView):
             'total_revenue': float(total_revenue),
             'average_price': float(avg_price),
             'plan_breakdown': plan_breakdown,
+            'stats_by_period': stats_by_period,
+            'payment_request_stats': payment_request_stats,
             'daily_data': list(daily_data),
             'monthly_data': list(monthly_data)
         })
@@ -1408,6 +1459,10 @@ class AdminMessageListView(generics.ListAPIView):
         if is_read is not None:
             queryset = queryset.filter(is_read=is_read.lower() == 'true')
 
+        is_read_by_admin = self.request.query_params.get('is_read_by_admin')
+        if is_read_by_admin is not None:
+            queryset = queryset.filter(is_read_by_admin=is_read_by_admin.lower() == 'true')
+
         is_replied = self.request.query_params.get('is_replied')
         if is_replied is not None:
             queryset = queryset.filter(is_replied=is_replied.lower() == 'true')
@@ -1427,10 +1482,23 @@ class AdminMessageListView(generics.ListAPIView):
 
 
 class AdminMessageDetailView(generics.RetrieveAPIView):
-    """جزئیات پیام"""
+    """جزئیات پیام - با علامت‌گذاری خودکار خوانده‌شده توسط ادمین"""
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
     serializer_class = AdminUserMessageSerializer
     queryset = UserMessage.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        """جزئیات پیام + علامت‌گذاری خوانده‌شده توسط ادمین"""
+        instance = self.get_object()
+
+        # ✅ علامت‌گذاری خودکار به عنوان خوانده‌شده توسط ادمین
+        if not instance.is_read_by_admin:
+            instance.is_read_by_admin = True
+            instance.save(update_fields=['is_read_by_admin'])
+            logger.info(f"✅ Message #{instance.id} marked as read by admin")
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class AdminMessageReplyView(APIView):
@@ -1447,7 +1515,8 @@ class AdminMessageReplyView(APIView):
             reply = serializer.validated_data['reply_message']
             send_sms = serializer.validated_data.get('send_sms', True)
 
-            message.reply(reply, admin=request.user)
+            # ✅ اصلاح: admin_user به‌جای admin
+            message.reply(reply, admin_user=request.user)
 
             AdminActionLog.objects.create(
                 admin=request.user,

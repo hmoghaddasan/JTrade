@@ -2,8 +2,8 @@
 
 import axios from 'axios';
 
-// ✅ اصلاح: فقط از یک متغیر استفاده می‌شود (API_URL)
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// ✅ اصلاح: حذف / انتهایی و اضافه کردن / ابتدایی در متدها
+const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:8000/api').replace(/\/+$/, '');
 
 // ایجاد نمونه axios
 const apiClient = axios.create({
@@ -31,7 +31,9 @@ apiClient.interceptors.request.use(
       delete config.headers['Content-Type'];
     }
 
-    console.log('🚀 Request URL:', config.baseURL + config.url);
+    // ✅ اصلاح: فرمت صحیح URL
+    const fullUrl = config.baseURL + (config.url?.startsWith('/') ? config.url : '/' + (config.url || ''));
+    console.log('🚀 Request URL:', fullUrl);
     console.log('🔑 Token:', token ? '✅ موجود' : '❌ ندارد');
 
     return config;
@@ -57,7 +59,6 @@ apiClient.interceptors.response.use(
         }
 
         if (refreshToken) {
-          // ✅ اصلاح: استفاده از API_URL به جای API_BASE_URL
           const response = await axios.post(`${API_URL}/auth/refresh/`, {
             refresh: refreshToken,
           });
@@ -86,7 +87,7 @@ apiClient.interceptors.response.use(
 );
 
 // ============================================
-// سرویس‌های پورتفولیو (با مسیرهای صحیح - بدون اسلش ابتدایی)
+// سرویس‌های پورتفولیو
 // ============================================
 export const portfolioService = {
   getPortfolios: () => apiClient.get('/trading/portfolios/'),
@@ -98,12 +99,10 @@ export const portfolioService = {
   getCombinedAnalytics: () => apiClient.get('/trading/portfolios/combined-analytics/'),
 };
 
-// ✅ برای دسترسی در کنسول (دیباگ)
 window.apiClient = apiClient;
 
-
 // ============================================
-// ✅ دریافت لیست مدل‌های AI (از طریق API جدید)
+// ✅ دریافت لیست مدل‌های AI
 // ============================================
 export const aiModelService = {
   getAvailableModels: () => {
@@ -112,8 +111,6 @@ export const aiModelService = {
   },
 };
 
-// ✅ برای دسترسی در کنسول (دیباگ)
 window.aiModelService = aiModelService;
-
 
 export default apiClient;

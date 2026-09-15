@@ -42,7 +42,8 @@
 .admin-main {
   flex: 1;
   margin-right: 260px;
-  transition: margin-right 0.3s ease, background 0.3s ease;
+  transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.3s ease;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -202,20 +203,61 @@
 }
 
 /* ============================================ */
-/* ریسپانسیو */
+/* ✅ ریسپانسیو - تبلت و موبایل (تا 992px) */
 /* ============================================ */
-@media (max-width: 768px) {
-  .admin-main {
+@media (max-width: 992px) {
+  /* در موبایل، محتوا همیشه تمام عرض دارد
+     و سایدبار به‌صورت Drawer روی محتوا باز می‌شود */
+  .admin-main,
+  .admin-main.sidebar-open,
+  .admin-main:not(.sidebar-open) {
     margin-right: 0 !important;
   }
 
   .admin-content {
     padding: 16px;
+    width: 100%;
   }
 }
 
+/* ============================================ */
+/* ✅ موبایل (تا 768px) */
+/* ============================================ */
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 14px;
+  }
+}
+
+/* ============================================ */
+/* ✅ موبایل‌های کوچک (تا 480px) */
+/* ============================================ */
 @media (max-width: 480px) {
   .admin-content {
-    padding: 12px;
+    padding: 12px 10px;
+  }
+
+  /* جلوگیری از سرریز افقی در موبایل‌های کوچک */
+  .admin-layout,
+  .admin-main {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* جداول در موبایل - اسکرول افقی */
+  .admin-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ============================================ */
+/* ✅ موبایل‌های بسیار کوچک (تا 360px) */
+/* ============================================ */
+@media (max-width: 360px) {
+  .admin-content {
+    padding: 10px 8px;
   }
 }

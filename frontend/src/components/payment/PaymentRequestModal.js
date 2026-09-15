@@ -1,5 +1,6 @@
 // frontend/src/components/payment/PaymentRequestModal.js
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { useToast } from '../../contexts/ToastContext';
 import RealApiService from '../../services/realApiService';
 import SubmitReceiptForm from './SubmitReceiptForm';
@@ -9,7 +10,7 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
   const { showToast } = useToast();
   const [copied, setCopied] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
-  const [showReceiptForm, setShowReceiptForm] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [localStatus, setLocalStatus] = useState(paymentRequest?.status || 'pending_payment');
 
@@ -59,6 +60,20 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
     }
   }, [paymentRequest?.status]);
 
+  // ============================================
+  // ✅ Effect: قفل کردن اسکرول body وقتی هر مودالی باز است
+  // ============================================
+  useEffect(() => {
+    const anyModalOpen = !!paymentRequest;
+    if (anyModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [paymentRequest]);
+
   const formatTime = useCallback((seconds) => {
     if (seconds <= 0) return '۰۰:۰۰';
     const h = Math.floor(seconds / 3600);
@@ -89,16 +104,29 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
     return Number(amount || 0).toLocaleString('fa-IR');
   };
 
+  // ============================================
+  // ✅ موفقیت ثبت فیش
+  // ============================================
   const handleReceiptSuccess = () => {
-    // ✅ ارسال رویداد برای رفرش بنر
+    // ارسال رویداد برای رفرش بنر
     window.dispatchEvent(new CustomEvent('payment-request-updated'));
     showToast('✅ اطلاعات فیش ثبت شد. در انتظار تأیید ادمین.', 'success');
+    // بستن مودال ثبت فیش
+    setShowReceiptModal(false);
+    // بستن مودال اصلی + اطلاع به والد
     if (onSuccess) onSuccess();
     onClose();
   };
 
   // ============================================
-  // ✅ لغو درخواست (فقط در وضعیت pending_payment)
+  // ✅ لغو مودال ثبت فیش
+  // ============================================
+  const handleReceiptCancel = () => {
+    setShowReceiptModal(false);
+  };
+
+  // ============================================
+  // ✅ لغو درخواست پرداخت
   // ============================================
   const handleCancel = async () => {
     if (!window.confirm('آیا از لغو این درخواست پرداخت اطمینان دارید؟ این عملیات قابل بازگشت نیست.')) {
@@ -130,27 +158,32 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
   const isExpired = remainingSeconds <= 0;
   const isPendingPayment = localStatus === 'pending_payment';
   const isAwaitingReview = localStatus === 'awaiting_review';
-
-  // ✅ لغو فقط در وضعیت pending_payment
   const canCancel = isPendingPayment;
-
-  // ✅ ثبت فیش فقط در وضعیت pending_payment و بدون انقضا
   const canSubmitReceipt = isPendingPayment && !isExpired;
 
-  return (
+  // ============================================
+  // ✅ مودال اصلی
+  // ============================================
+  const mainModal = (
     <div className="payment-modal-overlay" onClick={onClose}>
       <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
         {/* ===== Header ===== */}
         <div className="payment-modal-header">
           <h2>
-            {isAwaitingReview ? '⏳ جزئیات پرداخت (در انتظار بررسی)' : '💳 اطلاعات پرداخت کارت به کارت'}
+            {isAwaitingReview
+              ? '⏳ جزئیات پرداخت (در انتظار بررسی)'
+              : '💳 اطلاعات پرداخت کارت به کارت'}
           </h2>
           <button className="payment-modal-close" onClick={onClose}>×</button>
         </div>
 
         {/* ===== Timer / Status Banner ===== */}
         {isPendingPayment && (
-          <div className={`payment-timer ${isExpired ? 'expired' : remainingSeconds < 600 ? 'warning' : ''}`}>
+          <div
+            className={`payment-timer ${
+              isExpired ? 'expired' : remainingSeconds < 600 ? 'warning' : ''
+            }`}
+          >
             <span className="timer-icon">⏱️</span>
             <span className="timer-text">
               {isExpired
@@ -179,7 +212,9 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
               </span>
               <button
                 className="copy-btn"
-                onClick={() => handleCopy(paymentRequest.destination_card_number, 'card')}
+                onClick={() =>
+                  handleCopy(paymentRequest.destination_card_number, 'card')
+                }
                 title="کپی شماره کارت"
               >
                 {copied === 'card' ? '✓' : '📋'}
@@ -189,12 +224,16 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
 
           <div className="payment-card-row">
             <span className="payment-label">👤 صاحب کارت:</span>
-            <span className="payment-value">{paymentRequest.destination_card_holder}</span>
+            <span className="payment-value">
+              {paymentRequest.destination_card_holder}
+            </span>
           </div>
 
           <div className="payment-card-row">
             <span className="payment-label">🏦 نام بانک:</span>
-            <span className="payment-value">{paymentRequest.destination_bank_name}</span>
+            <span className="payment-value">
+              {paymentRequest.destination_bank_name}
+            </span>
           </div>
 
           <div className="payment-card-row highlight">
@@ -215,7 +254,9 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
 
           <div className="payment-card-row">
             <span className="payment-label">🆔 کد درخواست:</span>
-            <span className="payment-value code" dir="ltr">{paymentRequest.unique_code}</span>
+            <span className="payment-value code" dir="ltr">
+              {paymentRequest.unique_code}
+            </span>
           </div>
 
           {/* ✅ اطلاعات فیش ثبت‌شده (فقط در awaiting_review) */}
@@ -223,7 +264,9 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
             <>
               <div className="payment-card-row">
                 <span className="payment-label">🔢 شماره پیگیری:</span>
-                <span className="payment-value" dir="ltr">{paymentRequest.tracking_number}</span>
+                <span className="payment-value" dir="ltr">
+                  {paymentRequest.tracking_number}
+                </span>
               </div>
               {paymentRequest.payer_name && (
                 <div className="payment-card-row">
@@ -234,7 +277,9 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
               {paymentRequest.payer_card_last4 && (
                 <div className="payment-card-row">
                   <span className="payment-label">💳 ۴ رقم آخر کارت:</span>
-                  <span className="payment-value" dir="ltr">****{paymentRequest.payer_card_last4}</span>
+                  <span className="payment-value" dir="ltr">
+                    ****{paymentRequest.payer_card_last4}
+                  </span>
                 </div>
               )}
               {paymentRequest.submitted_at && (
@@ -253,14 +298,17 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
         {isPendingPayment && (
           <div className="payment-instructions">
             <p>
-              لطفاً مبلغ <strong>{formatAmount(paymentRequest.amount)} تومان</strong> را دقیقاً به کارت
-              {' '}<strong dir="ltr">{formatCardNumber(paymentRequest.destination_card_number)}</strong>{' '}
-              به نام <strong>{paymentRequest.destination_card_holder}</strong> در بانک{' '}
-              <strong>{paymentRequest.destination_bank_name}</strong> واریز کنید.
+              لطفاً مبلغ{' '}
+              <strong>{formatAmount(paymentRequest.amount)} تومان</strong> را دقیقاً به کارت{' '}
+              <strong dir="ltr">
+                {formatCardNumber(paymentRequest.destination_card_number)}
+              </strong>{' '}
+              به نام <strong>{paymentRequest.destination_card_holder}</strong> در
+              بانک <strong>{paymentRequest.destination_bank_name}</strong> واریز کنید.
             </p>
             <p>
-              پس از واریز، دکمه «واریز کردم / ثبت اطلاعات پرداخت» را بزنید و شماره پیگیری
-              و سایر مشخصات را وارد کنید.
+              پس از واریز، دکمه «واریز کردم / ثبت اطلاعات پرداخت» را بزنید و
+              شماره پیگیری و سایر مشخصات را وارد کنید.
             </p>
           </div>
         )}
@@ -269,58 +317,93 @@ const PaymentRequestModal = ({ paymentRequest, onClose, onSuccess }) => {
         {isAwaitingReview && (
           <div className="payment-info-banner">
             <p>
-              📌 اطلاعات پرداخت شما در سیستم ثبت شده است. پس از بررسی توسط ادمین،
-              نتیجه از طریق پیامک به شما اعلام می‌شود. لطفاً منتظر بمانید.
+              📌 اطلاعات پرداخت شما در سیستم ثبت شده است. پس از بررسی توسط
+              ادمین، نتیجه از طریق پیامک به شما اعلام می‌شود. لطفاً منتظر بمانید.
             </p>
           </div>
         )}
 
         {/* ===== Actions ===== */}
-        {!showReceiptForm ? (
-          <div className="payment-modal-actions">
-            {/* ✅ دکمه لغو فقط در pending_payment */}
-            {canCancel && (
-              <button
-                className="btn-cancel-request"
-                onClick={handleCancel}
-                disabled={canceling}
-                title="لغو درخواست"
-              >
-                {canceling ? '⏳ در حال لغو...' : '❌ لغو درخواست'}
-              </button>
-            )}
-
-            <button className="btn-close-modal" onClick={onClose}>
-              بستن
+        <div className="payment-modal-actions">
+          {/* ✅ دکمه لغو فقط در pending_payment */}
+          {canCancel && (
+            <button
+              className="btn-cancel-request"
+              onClick={handleCancel}
+              disabled={canceling}
+              title="لغو درخواست"
+            >
+              {canceling ? '⏳ در حال لغو...' : '❌ لغو درخواست'}
             </button>
+          )}
 
-            {canSubmitReceipt && (
-              <button
-                className="btn-primary"
-                onClick={() => setShowReceiptForm(true)}
-              >
-                ✓ واریز کردم / ثبت اطلاعات پرداخت
-              </button>
-            )}
+          <button className="btn-close-modal" onClick={onClose}>
+            بستن
+          </button>
 
-            {isPendingPayment && isExpired && (
-              <button
-                className="btn-primary expired-btn"
-                disabled
-              >
-                ⏰ مهلت تمام شده
-              </button>
-            )}
-          </div>
-        ) : (
-          <SubmitReceiptForm
-            paymentRequest={paymentRequest}
-            onSuccess={handleReceiptSuccess}
-            onCancel={() => setShowReceiptForm(false)}
-          />
-        )}
+          {canSubmitReceipt && (
+            <button
+              className="btn-primary"
+              onClick={() => setShowReceiptModal(true)}
+            >
+              ✓ واریز کردم / ثبت اطلاعات پرداخت
+            </button>
+          )}
+
+          {isPendingPayment && isExpired && (
+            <button className="btn-primary expired-btn" disabled>
+              ⏰ مهلت تمام شده
+            </button>
+          )}
+        </div>
       </div>
     </div>
+  );
+
+  // ============================================
+  // ✅ مودال ثبت فیش — با ReactDOM.createPortal در body
+  // این تضمین می‌کند که مودال همیشه روی همه چیز نمایش داده شود
+  // ============================================
+  const receiptModal = showReceiptModal
+    ? ReactDOM.createPortal(
+        <div
+          className="receipt-modal-overlay-fixed"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleReceiptCancel();
+          }}
+        >
+          <div
+            className="receipt-modal-content-fixed"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="payment-modal-header receipt-modal-header">
+              <h2>📋 ثبت اطلاعات پرداخت</h2>
+              <button
+                className="payment-modal-close"
+                onClick={handleReceiptCancel}
+                title="بستن"
+              >
+                ×
+              </button>
+            </div>
+            <div className="receipt-modal-body">
+              <SubmitReceiptForm
+                paymentRequest={paymentRequest}
+                onSuccess={handleReceiptSuccess}
+                onCancel={handleReceiptCancel}
+              />
+            </div>
+          </div>
+        </div>,
+        document.body
+      )
+    : null;
+
+  return (
+    <>
+      {mainModal}
+      {receiptModal}
+    </>
   );
 };
 

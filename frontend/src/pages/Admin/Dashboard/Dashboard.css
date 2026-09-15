@@ -152,3 +152,136 @@
     grid-template-columns: 1fr;
   }
 }
+/* ============================================ */
+/* ✅ بنر اطلاع‌رسانی پرداخت‌های در انتظار */
+/* ============================================ */
+.pending-payment-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #fff3cd, #ffe082);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.25);
+  animation: bannerSlideIn 0.5s ease;
+  flex-wrap: wrap;
+}
+
+@keyframes bannerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+  animation: bellRing 2s infinite;
+}
+
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(-12deg); }
+  20%, 40% { transform: rotate(12deg); }
+  50% { transform: rotate(0); }
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #663c00;
+  margin-bottom: 4px;
+}
+
+.banner-subtitle {
+  font-size: 13px;
+  color: #8a5300;
+  font-weight: 500;
+}
+
+.banner-action {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+}
+
+.banner-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.55);
+  background: linear-gradient(135deg, #ffa726, #ef6c00);
+}
+
+/* ============================================ */
+/* ✅ تم تاریک - بنر */
+/* ============================================ */
+.admin-layout.dark .pending-payment-banner,
+.admin-layout.dark-theme .pending-payment-banner,
+body.dark-theme .pending-payment-banner,
+html[data-theme="dark"] .pending-payment-banner {
+  background: linear-gradient(135deg, #3a2e10, #4a3818) !important;
+  border-color: #8a6d2b !important;
+}
+
+.admin-layout.dark .banner-title,
+.admin-layout.dark-theme .banner-title,
+body.dark-theme .banner-title,
+html[data-theme="dark"] .banner-title {
+  color: #ffd54f !important;
+}
+
+.admin-layout.dark .banner-subtitle,
+.admin-layout.dark-theme .banner-subtitle,
+body.dark-theme .banner-subtitle,
+html[data-theme="dark"] .banner-subtitle {
+  color: #c9a961 !important;
+}
+
+/* ============================================ */
+/* ✅ Responsive - بنر */
+/* ============================================ */
+@media (max-width: 768px) {
+  .pending-payment-banner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .banner-action {
+    width: 100%;
+  }
+}

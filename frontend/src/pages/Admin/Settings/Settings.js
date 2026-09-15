@@ -43,6 +43,12 @@ const SETTING_IMPACT = {
     'ollama_available_models', 'ai_temperature',
     'save_ai_prompt', 'admin_phone_number',
     'admin_bypass_otp',
+    'bank_payment_enabled', 'card_payment_enabled',
+    'payment_card_to_card_enabled', 'payment_bank_gateway_enabled',
+    'payment_request_timeout_hours', 'payment_request_reminder_minutes',
+    'payment_card_selection_mode', 'payment_request_max_active_per_user',
+    'payment_receipt_image_required', 'payment_admin_notify_all',
+    'payment_admin_notify_phone',
   ]
 };
 
@@ -69,9 +75,14 @@ const groups = {
   'ظاهر': [
     'logo_path', 'favicon_path', 'bg_image_path'
   ],
+  // ✅ گروه جدید - دوره آزمایشی
+  '🎁 دوره آزمایشی (Trial)': [
+    'trial_days',
+    'trial_trades_limit',
+    'trial_ai_consultations_limit',
+  ],
   'ترید': [
-    'max_trades_per_day', 'min_trade_interval', 'trial_days',
-    'trial_trades_limit', 'trial_ai_consultations_limit'
+    'max_trades_per_day', 'min_trade_interval',
   ],
   'هوش مصنوعی': [
     'ai_model', 'ai_temperature', 'ai_timeout',
@@ -90,6 +101,20 @@ const groups = {
   'پرداخت (زرین‌پال)': [
     'zarinpal_merchant_id', 'zarinpal_sandbox', 'zarinpal_callback_url', 'enable_payment'
   ],
+  '💳 روش‌های پرداخت': [
+    'bank_payment_enabled',
+    'card_payment_enabled',
+  ],
+  '💳 پرداخت کارت به کارت': [
+    'payment_card_to_card_enabled',
+    'payment_card_selection_mode',
+    'payment_request_timeout_hours',
+    'payment_request_reminder_minutes',
+    'payment_request_max_active_per_user',
+    'payment_receipt_image_required',
+    'payment_admin_notify_all',
+    'payment_admin_notify_phone',
+  ],
   'قیمت لحظه‌ای': [
     'live_price_provider', 'twelvedata_api_key', 'twelvedata_base_url',
     'finnhub_api_key', 'finnhub_base_url', 'alphavantage_api_key'
@@ -106,10 +131,6 @@ const groups = {
   'ادمین': [
     'admin_phone_number',
     'admin_bypass_otp'
-  ],
-    'روش‌های پرداخت': [
-    'bank_payment_enabled',
-    'card_payment_enabled'
   ],
 };
 
@@ -176,6 +197,17 @@ const getSettingFileInfo = (key) => {
     'cors_allowed_origins': { file: 'دیتابیس', field: 'cors_allowed_origins' },
     'admin_bypass_otp': { file: 'دیتابیس', field: 'admin_bypass_otp' },
     'save_ai_prompt': { file: 'دیتابیس', field: 'save_ai_prompt' },
+    'bank_payment_enabled': { file: 'دیتابیس', field: 'bank_payment_enabled' },
+    'card_payment_enabled': { file: 'دیتابیس', field: 'card_payment_enabled' },
+    'payment_card_to_card_enabled': { file: 'دیتابیس', field: 'payment_card_to_card_enabled' },
+    'payment_bank_gateway_enabled': { file: 'دیتابیس', field: 'payment_bank_gateway_enabled' },
+    'payment_request_timeout_hours': { file: 'دیتابیس', field: 'payment_request_timeout_hours' },
+    'payment_request_reminder_minutes': { file: 'دیتابیس', field: 'payment_request_reminder_minutes' },
+    'payment_card_selection_mode': { file: 'دیتابیس', field: 'payment_card_selection_mode' },
+    'payment_request_max_active_per_user': { file: 'دیتابیس', field: 'payment_request_max_active_per_user' },
+    'payment_receipt_image_required': { file: 'دیتابیس', field: 'payment_receipt_image_required' },
+    'payment_admin_notify_all': { file: 'دیتابیس', field: 'payment_admin_notify_all' },
+    'payment_admin_notify_phone': { file: 'دیتابیس', field: 'payment_admin_notify_phone' },
   };
 
   return fileInfo[key] || { file: 'دیتابیس', field: key };
@@ -301,7 +333,7 @@ const Settings = () => {
       );
     }
 
-    // ===== تنظیم sms_provider (انتخاب ارائه‌دهنده) =====
+    // ===== تنظیم sms_provider =====
     if (setting.setting_key === 'sms_provider') {
       return (
         <div>
@@ -320,7 +352,7 @@ const Settings = () => {
       );
     }
 
-    // ===== تنظیم smsir_api_key (معمولی - نه کد شده) =====
+    // ===== تنظیم smsir_api_key =====
     if (setting.setting_key === 'smsir_api_key') {
       return (
         <div>
@@ -410,6 +442,29 @@ const Settings = () => {
                 <br />
               </span>
             ))}
+          </small>
+          <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
+        </div>
+      );
+    }
+
+    // ===== تنظیم payment_card_selection_mode =====
+    if (setting.setting_key === 'payment_card_selection_mode') {
+      return (
+        <div>
+          <select
+            id={setting.setting_key}
+            value={value || 'random'}
+            onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+            disabled={setting.is_editable === false}
+            className="setting-select"
+          >
+            <option value="random">🎲 انتخاب تصادفی (رندوم)</option>
+            <option value="manual">✋ انتخاب دستی توسط کاربر</option>
+            <option value="default">⭐ کارت پیش‌فرض</option>
+          </select>
+          <small className="hint">
+            💡 حالت انتخاب کارت مقصد برای پرداخت کارت به کارت را تعیین کنید.
           </small>
           <div className="file-info">📁 {fileInfo.file} → {fileInfo.field}</div>
         </div>

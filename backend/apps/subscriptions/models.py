@@ -348,15 +348,19 @@ class PaymentCard(models.Model):
     def __str__(self):
         return f"{self.card_holder} - {self.bank_name} - {self.card_number[-4:]}"
 
-    def save(self, *args, **kwargs):
-        # اگر این کارت پیش‌فرض می‌شود، بقیه را غیر پیش‌فرض کن
-        if self.is_default:
-            PaymentCard.objects.exclude(pk=self.pk).update(is_default=False)
-        # اگر این کارت غیرفعال می‌شود، پیش‌فرض هم نباشد
-        if not self.is_active:
-            self.is_default = False
-        super().save(*args, **kwargs)
+    from django.db import transaction
 
+    # ...
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if self.is_default:
+                PaymentCard.objects.exclude(pk=self.pk).update(is_default=False)
+            if not self.is_active:
+                self.is_default = False
+            super().save(*args, **kwargs)
+
+            
     @classmethod
     def get_default(cls):
         """دریافت کارت پیش‌فرض"""

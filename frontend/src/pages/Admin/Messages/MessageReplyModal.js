@@ -1,13 +1,20 @@
 // frontend/src/pages/Admin/Messages/MessageReplyModal.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import adminService from '../../../services/adminService';
 import './MessageReplyModal.css';
 
 const MessageReplyModal = ({ message, onClose, onSuccess }) => {
-  const [reply, setReply] = useState('');
+  // ✅ مقدار اولیه از reply_message قبلی
+  const [reply, setReply] = useState(message?.reply_message || '');
   const [sendSms, setSendSms] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // ✅ اگر message تغییر کرد (مثلاً مودال برای پیام دیگری باز شد)، reply را به‌روز کن
+  useEffect(() => {
+    setReply(message?.reply_message || '');
+    setError(null);
+  }, [message?.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,10 +39,18 @@ const MessageReplyModal = ({ message, onClose, onSuccess }) => {
     }
   };
 
+  // ✅ اگر پیام قبلاً پاسخ داده شده باشد، دکمه «ویرایش پاسخ» شود
+  const isEditing = !!message?.reply_message;
+  const submitButtonText = loading
+    ? 'در حال ارسال...'
+    : isEditing
+      ? '💾 ویرایش پاسخ'
+      : '📤 ارسال پاسخ';
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>✉️ پاسخ به پیام</h2>
+        <h2>✉️ {isEditing ? 'مشاهده و ویرایش پاسخ' : 'پاسخ به پیام'}</h2>
 
         <div className="message-info">
           <div className="info-row">
@@ -52,9 +67,27 @@ const MessageReplyModal = ({ message, onClose, onSuccess }) => {
           </div>
         </div>
 
+        {/* ✅ اگر پاسخ قبلی وجود دارد، آن را نمایش بده */}
+        {isEditing && message.reply_date_fa && (
+          <div className="previous-reply-info">
+            <div className="info-row">
+              <span className="label">📅 تاریخ پاسخ قبلی:</span>
+              <span className="value">{message.reply_date_fa}</span>
+            </div>
+            {message.replied_by_name && (
+              <div className="info-row">
+                <span className="label">👤 پاسخ‌دهنده:</span>
+                <span className="value">{message.replied_by_name}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>پاسخ شما *</label>
+            <label>
+              {isEditing ? 'ویرایش پاسخ *' : 'پاسخ شما *'}
+            </label>
             <textarea
               value={reply}
               onChange={(e) => setReply(e.target.value)}
@@ -79,10 +112,10 @@ const MessageReplyModal = ({ message, onClose, onSuccess }) => {
 
           <div className="modal-actions">
             <button type="button" onClick={onClose} disabled={loading}>
-              انصراف
+              بستن
             </button>
             <button type="submit" disabled={loading}>
-              {loading ? 'در حال ارسال...' : '📤 ارسال پاسخ'}
+              {submitButtonText}
             </button>
           </div>
         </form>

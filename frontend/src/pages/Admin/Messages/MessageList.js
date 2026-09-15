@@ -5,9 +5,11 @@ import DataTable from '../../../components/Admin/DataTable';
 import FilterBar from '../../../components/Admin/FilterBar';
 import StatusBadge from '../../../components/Admin/StatusBadge';
 import MessageReplyModal from './MessageReplyModal';
+import { useToast } from '../../../contexts/ToastContext';
 import './MessageList.css';
 
 const MessageList = () => {
+  const { showToast } = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -16,10 +18,31 @@ const MessageList = () => {
   const [filters, setFilters] = useState({});
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  // ============================================
+  // ✅ بارگذاری جزئیات کامل پیام از API
+  // ============================================
+  const handleOpenDetail = async (row) => {
+    setLoadingDetail(true);
+    try {
+      const response = await adminService.getMessage(row.id);
+      setSelectedMessage(response.data);
+      setShowReplyModal(true);
+    } catch (error) {
+      console.error('Error loading message detail:', error);
+      showToast('خطا در بارگذاری جزئیات پیام', 'error');
+      // ✅ fallback: از داده جدول استفاده کن
+      setSelectedMessage(row);
+      setShowReplyModal(true);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
   const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'created_at', label: 'تاریخ', render: (val) => new Date(val).toLocaleString('fa-IR') },
+    { key: 'created_at_fa', label: 'تاریخ' },
     { key: 'user_phone', label: 'کاربر' },
     { key: 'user_name', label: 'نام کاربر' },
     { key: 'subject', label: 'موضوع' },
@@ -29,32 +52,26 @@ const MessageList = () => {
       render: (val) => {
         const colorMap = {
           '✅ پاسخ داده شده': 'green',
+          '📖 خوانده شده توسط ادمین': 'blue',
           '📖 خوانده شده': 'blue',
           '🆕 جدید': 'orange'
         };
         return <StatusBadge status={colorMap[val] || 'gray'} label={val} />;
       }
     },
-    { key: 'message', label: 'متن', render: (val) => val?.length > 50 ? `${val.substring(0, 50)}...` : val },
+    {
+      key: 'message',
+      label: 'متن',
+      render: (val) => val?.length > 50 ? `${val.substring(0, 50)}...` : val
+    },
   ];
 
   const actions = [
     {
-      label: 'جزئیات',
-      icon: '👁️',
-      onClick: (row) => {
-        setSelectedMessage(row);
-        setShowReplyModal(true);
-      }
-    },
-    {
-      label: 'پاسخ',
+      label: 'جزئیات / پاسخ',
       icon: '✉️',
       className: 'success',
-      onClick: (row) => {
-        setSelectedMessage(row);
-        setShowReplyModal(true);
-      }
+      onClick: handleOpenDetail  // ✅ استفاده از تابع جدید
     },
     {
       label: 'حذف',
@@ -64,10 +81,11 @@ const MessageList = () => {
         if (window.confirm(`آیا از حذف پیام "${row.subject}" اطمینان دارید؟`)) {
           try {
             await adminService.deleteMessage(row.id);
+            showToast('✅ پیام با موفقیت حذف شد', 'success');
             loadMessages();
           } catch (error) {
             console.error('Error deleting message:', error);
-            alert('خطا در حذف پیام');
+            showToast('❌ خطا در حذف پیام', 'error');
           }
         }
       }
@@ -90,6 +108,7 @@ const MessageList = () => {
       setTotal(response.data.count || response.data.length || 0);
     } catch (error) {
       console.error('Error loading messages:', error);
+      showToast('خطا در بارگذاری پیام‌ها', 'error');
     } finally {
       setLoading(false);
     }
@@ -109,7 +128,7 @@ const MessageList = () => {
       <FilterBar
         fields={[
           { key: 'search', label: 'جستجو', type: 'text', placeholder: 'شماره تلفن، موضوع...' },
-          { key: 'is_read', label: 'خوانده شده', type: 'select', options: [
+          { key: 'is_read_by_admin', label: 'وضعیت خوانده‌شده ادمین', type: 'select', options: [
             { value: '', label: 'همه' },
             { value: 'true', label: 'خوانده شده' },
             { value: 'false', label: 'خوانده نشده' }
@@ -135,7 +154,7 @@ const MessageList = () => {
         actions={actions}
       />
 
-      {showReplyModal && (
+      {showReplyModal && selectedMessage && (
         <MessageReplyModal
           message={selectedMessage}
           onClose={() => {

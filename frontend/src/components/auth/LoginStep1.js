@@ -16,58 +16,45 @@ const LoginStep1 = ({ onCodeSent }) => {
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showBrowserWarning, setShowBrowserWarning] = useState(true);
+
+  // ✅ مقدار ثابت ۷ روز (بدون درخواست به سرور)
+  const trialDays = 7;
+
   const inputRef = useRef(null);
 
   // ============================================
-  // ✅ تشخیص دقیق مرورگر (همراه با اپرا موبایل و سامسونگ)
+  // ✅ تشخیص دقیق مرورگر
   // ============================================
   const getBrowserName = () => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     console.log('📱 User Agent:', userAgent);
 
-    // تشخیص اپرا (موبایل و دسکتاپ)
     if (userAgent.indexOf('OPR') !== -1 || userAgent.indexOf('Opera') !== -1 || window.opera) {
       return 'Opera';
     }
-
-    // تشخیص مرورگر سامسونگ
     if (userAgent.indexOf('SamsungBrowser') !== -1) {
       return 'SamsungBrowser';
     }
-
-    // تشخیص فایرفاکس
     if (userAgent.indexOf('Firefox') !== -1) {
       return 'Firefox';
     }
-
-    // تشخیص کروم (باید قبل از سافاری بیاید)
     if (userAgent.indexOf('Chrome') !== -1 && userAgent.indexOf('Edg') === -1) {
       return 'Chrome';
     }
-
-    // تشخیص اج
     if (userAgent.indexOf('Edg') !== -1) {
       return 'Edge';
     }
-
-    // تشخیص سافاری
     if (userAgent.indexOf('Safari') !== -1 && userAgent.indexOf('Chrome') === -1) {
       return 'Safari';
     }
-
-    // تشخیص UC Browser
     if (userAgent.indexOf('UCBrowser') !== -1) {
       return 'UCBrowser';
     }
-
     return 'سایر';
   };
 
   const browserName = getBrowserName();
 
-  // ============================================
-  // ✅ مرورگرهای پشتیبانی شده
-  // ============================================
   const isSupportedBrowser = () => {
     const supportedBrowsers = ['Chrome', 'Firefox', 'Edge'];
     return supportedBrowsers.includes(browserName);
@@ -157,9 +144,6 @@ const LoginStep1 = ({ onCodeSent }) => {
     setShowBrowserWarning(false);
   };
 
-  // ============================================
-  // ✅ پیام هشدار مناسب برای هر مرورگر
-  // ============================================
   const getWarningMessage = () => {
     switch(browserName) {
       case 'SamsungBrowser':
@@ -204,9 +188,9 @@ const LoginStep1 = ({ onCodeSent }) => {
 
   return (
     <AuthBackground>
-      {/* ============================================
-          ✅ هشدار مرورگر در بالای صفحه (خارج از باکس لاگین)
-          ============================================ */}
+      {/* ============================================ */}
+      {/* ✅ هشدار مرورگر در بالای صفحه */}
+      {/* ============================================ */}
       {!supported && showBrowserWarning && (
         <div className="browser-warning-bar-top">
           <button
@@ -241,7 +225,7 @@ const LoginStep1 = ({ onCodeSent }) => {
           <h1>ژورنال حرفه‌ای ترید</h1>
           <h2>🚀 ورود به حساب کاربری</h2>
         </div>
-        <br/><br/>
+        <br/>
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <p>برای ورود یا ثبت نام، شماره همراه خود را وارد کنید.</p>
@@ -263,6 +247,20 @@ const LoginStep1 = ({ onCodeSent }) => {
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? '⏳ در حال ارسال...' : '📲 ارسال کد تایید'}
           </button>
+
+          {/* ============================================ */}
+          {/* ✅ باکس تست رایگان - برای کاربران جدید */}
+          {/* ============================================ */}
+          <div className="trial-info-box">
+            <div className="trial-info-icon">🎁</div>
+            <div className="trial-info-content">
+              <strong>کاربر جدید هستید؟</strong>
+              <p>
+                با ثبت‌نام، <span className="trial-highlight">{trialDays} روز استفاده رایگان</span> از
+                تمام امکانات نرم‌افزار را دریافت می‌کنید.
+              </p>
+            </div>
+          </div>
         </form>
         <br/>
         {isMobile && (
